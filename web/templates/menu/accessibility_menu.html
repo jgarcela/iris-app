@@ -1,0 +1,23 @@
+<!-- Icono de accesibilidad -->
+<button id="accessibility-menu-button" class="accessibility-menu-button">
+    <i class="fas fa-user-gear"></i>
+</button>
+
+<!-- Modal de accesibilidad -->
+<div id="accessibility-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>{{ _('Configuración de Accesibilidad') }}</h2>
+        <label for="theme-select">{{ _('Seleccionar Tema') }}:</label>
+        <select id="theme-select">
+            <option value="light">{{ _('Claro') }}</option>
+            <option value="dark">{{ _('Oscuro') }}</option>
+        </select>
+        <label for="font-size">{{ _('Tamaño de Letra') }}:</label>
+        <select id="font-size">
+            <option value="small">{{ _('Pequeño') }}</option>
+            <option value="medium" selected>{{ _('Mediano') }}</option>
+            <option value="large">{{ _('Grande') }}</option>
+        </select>
+        <button id="close-modal" class="close-modal-button">{{ _('Cerrar') }}</button>
+    </div>
+</div>

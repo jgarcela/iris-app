@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Resultados') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="analysis-header">
+  <div class="header-left">
+    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="IRIS Logo" class="logo-small">
+    <span class="app-name">IRIS</span>
+  </div>
+  <div class="header-right">
+    <span class="model-selected">
+        {{ _('Modelo seleccionado:') }} <span class="pill">{{ model_name }}</span>
+      </span>
+    <a href="{{ url_for('analysis.end') }}" class="btn finalize">{{ _('Finalizar análisis') }}</a>
+  </div>
+</div>
+
+<div class="analysis-container">
+  <!-- COL 1: TEXTO MARCADO -->
+  <div class="col-left">
+    <h3>{{ _('Texto analizado y resaltado') }}</h3>
+    <div class="markup-area">
+        <p>{{ text | e | replace('\n\n', '</p><p>') | safe }}</p>
+    </div>
+  </div>
+  
+
+  <!-- COL 2: MÉTRICAS Y RECOMENDACIONES -->
+  <div class="col-right">
+    <!-- Inclusividad -->
+    <div class="card score-card">
+      <h3>{{ _('Puntuación de inclusividad') }}</h3>
+      <div class="score-bar">
+        <div class="fill" style="width: {{ score }}%;"></div>
+      </div>
+      <div class="score-value">{{ score }}/100</div>
+      <div class="metrics">
+        <div class="metric">
+          <span class="label">{{ _('Total palabras') }}</span>
+          <span class="value">{{ total_words }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">{{ _('Términos sesgados') }}</span>
+          <span class="value">{{ biased_terms|length }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">{{ _('Términos inclusivos') }}</span>
+          <span class="value">{{ inclusive_terms|length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Términos problemáticos -->
+    <div class="card terms-card">
+      <h3>{{ _('Términos problemáticos encontrados') }}</h3>
+      <ul>
+        {% for term in biased_terms %}
+        <li>
+          <strong>"{{ term.text }}"</strong>
+          <p class="suggestion">{{ term.suggestion }}</p>
+          <span class="category">{{ term.category }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Recomendaciones generales -->
+    <div class="card rec-card">
+      <h3>{{ _('Recomendaciones generales') }}</h3>
+      <ul>
+        {% for rec in recommendations %}
+        <li>{{ rec }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+<!-- Icono de accesibilidad -->
+<button id="translate-menu-button" class="translate-menu-button">
+    <i class="fas fa-language"></i>
+</button>
+
+<!-- Modal de accesibilidad -->
+<div id="translate-modal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Configuración de Idioma</h2>
+        <label for="theme-select-translate">Seleccionar Idioma:</label>
+        <select id="theme-select-translate">
+            <option value="es" {% if current_language == 'es' %}selected{% endif %}>🇪🇸 ES</option>
+            <option value="en" {% if current_language == 'en' %}selected{% endif %}>🇬🇧 EN</option>
+        </select>
+        <button id="close-modal-translate" class="close-modal-button">Cerrar</button>
+    </div>
+</div>

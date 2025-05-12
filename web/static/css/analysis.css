@@ -1,0 +1,163 @@
+/* HEADER */
+.analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--secondary-color);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--input-border-color);
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+  }
+  .logo-small {
+    height: 32px;
+    margin-right: 0.5rem;
+  }
+  .app-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .model-selected{
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+  .pill {
+    display: inline-block;
+    background: var(--secondary-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 12px;
+    padding: 0.2rem 0.6rem;
+    margin-left: 0.3rem;
+  }
+  .btn.finalize {
+    background: #d64545;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background var(--transition-speed);
+  }
+  .btn.finalize:hover {
+    background: #b33b3b;
+  }
+  
+  /* CONTENEDOR PRINCIPAL DIVIDIDO */
+  .analysis-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  
+  /* COLUMNA IZQUIERDA */
+  .col-left {
+    background: var(--secondary-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 600px;  /* ajusta según necesidad */
+  }
+  .markup-area {
+    line-height: 1.5;
+    color: var(--text-color);
+    text-align: justify;
+    margin-top: 1rem;
+  }
+  .markup-area .highlight {
+    background: var(--highlight-coco);
+    border-radius: 2px;
+  }
+  
+  /* COLUMNA DERECHA: TARJETAS */
+  .col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  /* CARD BASE */
+  .card {
+    background: var(--secondary-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  
+  /* SCORE CARD */
+  .score-card h3 {
+    margin-bottom: 0.5rem;
+  }
+  .score-bar {
+    width: 100%;
+    height: 10px;
+    background: #e6e6e6;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .score-bar .fill {
+    height: 100%;
+    background: #d64545;
+    transition: width 0.5s ease;
+  }
+  .score-value {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .metrics {
+    display: flex;
+    justify-content: space-between;
+  }
+  .metric .label {
+    font-size: 0.8rem;
+    color: var(--text-color);
+  }
+  .metric .value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+  
+  /* TERMS CARD */
+  .terms-card h3 {
+    margin-bottom: 0.5rem;
+  }
+  .terms-card ul {
+    list-style: none;
+  }
+  .terms-card li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--input-border-color);
+  }
+  .terms-card .suggestion {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin: 0.25rem 0;
+  }
+  .terms-card .category {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    float: right;
+  }
+  
+  /* RECOMMENDATIONS CARD */
+  .rec-card h3 {
+    margin-bottom: 0.5rem;
+  }
+  .rec-card ul {
+    list-style: disc inside;
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+  

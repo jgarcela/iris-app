@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Home') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card-principal analyzer-card">
+    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" class="logo" alt="{{ _('IRIS Logo') }}">
+    <h1>{{ _('Analizador de Sesgos de Género') }}</h1>
+    <p class="subtitle">
+      {{ _('Herramienta para identificar y corregir lenguaje sexista y sesgos de género en textos periodísticos') }}
+    </p>
+
+    <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
+      <div class="model-selector">
+        <label for="model">{{ _('Modelo') }}:</label>
+        <select id="model" name="model" class="input">
+          <option value="basico">{{ _('Básico…') }}</option>
+          <option value="avanzado">{{ _('Avanzado') }}</option>
+        </select>
+      </div>
+
+      <textarea
+        id="input-text"
+        name="text"
+        class="input textarea"
+        placeholder="{{ _('Pega aquí el texto periodístico que quieres analizar…') }}"
+        required></textarea>
+
+      <div class="actions">
+        <button type="button" class="btn secondary">{{ _('Cargar ejemplo') }}</button>
+        <button type="reset" class="btn reset">{{ _('Limpiar') }}</button>
+        <button type="submit" class="btn primary">{{ _('Analizar texto') }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
