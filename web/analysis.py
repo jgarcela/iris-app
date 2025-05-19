@@ -1,4 +1,5 @@
-# yourapp/analysis.py
+# web/analysis.py
+import re
 from flask import Blueprint, render_template, request, jsonify, session
 import requests
 from flask_babel import get_locale
@@ -29,6 +30,14 @@ ENDPOINT_ANALYSIS_ANALYZE = config['API']['ENDPOINT_ANALYSIS_ANALYZE']
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
 
+# Mapeo de categorías a clases de color
+CATEGORY_COLOR_MAP = {
+    'nombre_propio_titular': 'color-1',
+    'cita_textual_titular': 'color-2',
+    'personas_mencionadas': 'color-3',
+}
+
+
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/analyze', methods=['GET', 'POST'])
 def analyze():
@@ -48,17 +57,48 @@ def analyze():
     resp = requests.post(URL_API_ENDPOINT_ANALYSIS_ANALYZE, json=payload, headers=API_HEADERS)
     if resp.status_code == 200:
         data = resp.json()
+        print(f"Respuesta de la API: {data}")
+
+        original_text = text
+        highlighted = original_text
+        
+        # Accedemos al dict anidado
+        nested = data['resultado_contenido_general']
+
+        # Para evitar parches anidados, procesamos primero las frases más largas
+        all_phrases = []
+        for campo, frases in nested.items():
+            # solo campos que tengan mapeo de color
+            if campo in CATEGORY_COLOR_MAP:
+                all_phrases += [(campo, f) for f in frases]
+
+        # Ordenar por longitud de frase (descendente)
+        all_phrases.sort(key=lambda cf: len(cf[1]), reverse=True)
+
+        # Reemplazar cada frase en el texto
+        for campo, frase in all_phrases:
+            css = CATEGORY_COLOR_MAP[campo]
+            clases = f"{css}"
+            # re.escape para no romper la regex; sin \b para capturar espacios/puntuación
+            pattern = re.escape(frase)
+            highlighted = re.sub(
+                pattern,
+                fr'<mark class="{clases}">{frase}</mark>',
+                highlighted
+            )
+
+
+
+
+
+
         return render_template(
             'analysis.html',
             text=text,
             model_name=model,
             language=get_locale(),
-            data=data
+            data=data,
+            text_highlighted=highlighted
         )
     else:
         return jsonify({"error": "Error en la solicitud al API"}), 500
-
-@bp.route('/end', methods=['GET'])
-def end():
-    # Redirige o renderiza tu página de "fin"
-    return render_template('index.html')

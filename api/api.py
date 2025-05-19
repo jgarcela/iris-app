@@ -34,7 +34,7 @@ def healthcheck():
 
 @app.route('/analysis/analyze', methods=['POST'])
 def analysis_analyze():
-    # 1) Obtener y validar JSON
+    # Obtener y validar JSON
     print(request)
     try:
         data = request.get_json(force=True)
@@ -49,9 +49,9 @@ def analysis_analyze():
             'error': 'Faltan campos obligatorios. Se requieren "model" y "text".'
         }), 400
 
-    # 2) Ejecutar el análisis
+    # Ejecutar el análisis
     try:
-        resultado = utils.analyze_text(model, text)
+        resultado_contenido_general = utils.analyze_contenido_general(model, text)
     except ValueError as ve:
         # por si analyze_text lanza errores de validación de parámetros
         return jsonify({'error': str(ve)}), 400
@@ -60,11 +60,11 @@ def analysis_analyze():
         app.logger.exception("Error en el análisis")
         return jsonify({'error': 'Error interno en el servidor.'}), 500
 
-    # 3) Devolver resultado estructurado
+    # Devolver resultado estructurado
     return jsonify({
         'status': 'ok',
         'model': model,
-        'analysis': resultado
+        'resultado_contenido_general': resultado_contenido_general
     }), 200   
 
 

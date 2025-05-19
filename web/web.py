@@ -6,6 +6,7 @@ from flask_babel import gettext as _
 import requests
 import ast
 from analysis import bp as analysis_bp
+from report import bp as report_bp
 
 
 # ----------------- CONFIG -----------------
@@ -34,6 +35,7 @@ app.secret_key = config['DEFAULT']['SECRET_KEY']
 
 # ----------------- BLUEPRINTS ------------------
 app.register_blueprint(analysis_bp)
+app.register_blueprint(report_bp)
 # app.register_blueprint(bp_users)
 
 
@@ -57,7 +59,6 @@ babel = Babel(app, locale_selector=get_locale)
 @app.context_processor
 def inject_language():
     return {'current_language': session.get('language', app.config['BABEL_DEFAULT_LOCALE'])}
-
 
 
 

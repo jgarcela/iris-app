@@ -62,7 +62,7 @@
   .col-left {
     background: var(--secondary-color);
     border: 1px solid var(--input-border-color);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 1rem;
     min-height: 600px;  /* ajusta según necesidad */
   }
@@ -88,7 +88,7 @@
   .card {
     background: var(--secondary-color);
     border: 1px solid var(--input-border-color);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 1rem 1.5rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.04);
   }
@@ -160,4 +160,61 @@
     font-size: 0.9rem;
     color: var(--text-color);
   }
+
+   /* ACCORDION CARD */
+  .accordion-card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
   
+  .accordion-header {
+    width: 100%;
+    background-color: #f5f5f5;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .accordion-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    background-color: white;
+    padding: 0 1rem;
+  }
+  
+  .accordion-body.open {
+    padding: 1rem;
+    max-height: 500px;
+  }
+  
+/* MARK */
+/* Estilos generales para todos los highlights */
+mark.highlight {
+  padding: 0.1em 0.2em;
+  border-radius: 0.25em;
+  color: #000;
+}
+
+/* Colores */
+mark.color-1 { background-color: #FFF59D; }  /* Amarillo suave */
+mark.color-2 { background-color: #AED581; }  /* Verde suave */
+mark.color-3 { background-color: #81D4FA; }  /* Azul suave */
+mark.color-4 { background-color: #CE93D8; }  /* Morado suave */
+mark.color-5 { background-color: #90CAF9; } /* Azul claro */
+mark.color-6 { background-color: #F48FB1; } /* Rosa claro */
+mark.color-7 { background-color: #B0BEC5; } /* Gris suave */
+mark.color-8 { background-color: #FFCC80; } /* Naranja suave */
