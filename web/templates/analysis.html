@@ -98,8 +98,10 @@
         </button>
         <div class="accordion-body">
         <ul>
-            {% for entry in data.resultado_contenido_general %}
-            <li>{{ rec }}</li>
+            {% for key, value in data.analysis.analysis_contenido_general.items() %}
+            <li> 
+                <strong>{{ key }}:</strong> {{ value }}
+            </li>
             {% endfor %}
         </ul>
         </div>

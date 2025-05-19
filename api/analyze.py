@@ -10,7 +10,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 MODELS = config['API']['MODELS']
-MODELS = eval(MODELS)
+MODELS = ast.literal_eval(MODELS)
 OPENAI_MODEL = config['API']['OPENAI_MODEL']
 openai.api_key = config['API']['OPENAI_API_KEY']
 
@@ -91,9 +91,3 @@ def analyze_contenido_general(model:str, text:str):
         raise NotImplementedError(f"Modelo {model} no soportado.")
     
 
-
-def analyze_text(model: str, text: str) -> dict:
-    response_contenido_general = analyze_contenido_general(model, text)
-    return {
-        'response_contenido_general': response_contenido_general
-    }

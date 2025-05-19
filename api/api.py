@@ -1,9 +1,9 @@
 import json
 from flask import Flask, render_template, request, jsonify
-import configparser
-import utils
-
 from flask_cors import CORS, cross_origin
+import configparser
+import analyze
+import highlight
 
 
 # ----------------- CONFIG -----------------
@@ -49,9 +49,18 @@ def analysis_analyze():
             'error': 'Faltan campos obligatorios. Se requieren "model" y "text".'
         }), 400
 
-    # Ejecutar el análisis
+    # Ejecutar el análisis y highlight
     try:
-        resultado_contenido_general = utils.analyze_contenido_general(model, text)
+        # Analysis
+        analysis_contenido_general = analyze.analyze_contenido_general(model, text)
+        analysis_lenguaje = ""
+        analysis_fuentes = ""
+
+        # Highlight
+        highlight_contenido_general = highlight.highlight_contenido_general(analysis_contenido_general, text)
+        highlight_lenguaje = ""
+        highlight_fuentes = ""
+
     except ValueError as ve:
         # por si analyze_text lanza errores de validación de parámetros
         return jsonify({'error': str(ve)}), 400
@@ -64,7 +73,17 @@ def analysis_analyze():
     return jsonify({
         'status': 'ok',
         'model': model,
-        'resultado_contenido_general': resultado_contenido_general
+        'analysis': {
+            'analysis_contenido_general': analysis_contenido_general,
+            'analysis_lenguaje': analysis_lenguaje,
+            'analysis_fuentes': analysis_fuentes,
+        },
+        'highlight': {
+            'highlight_contenido_general': highlight_contenido_general,
+            'highlight_lenguaje': highlight_lenguaje,
+            'highlight_fuentes': highlight_fuentes,
+        }
+        
     }), 200   
 
 

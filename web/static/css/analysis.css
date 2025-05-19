@@ -200,6 +200,10 @@
     padding: 1rem;
     max-height: 500px;
   }
+
+  .accordion-body.open ul{
+    padding: 1rem;
+  }
   
 /* MARK */
 /* Estilos generales para todos los highlights */
