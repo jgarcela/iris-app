@@ -1,13 +1,16 @@
 /* Variables para temas y colores */
 :root {
     --background-color: #f0f4f8;
-    --text-color: #1a202c;
+    --text-black-color: #1a202c;
+    --text-white-color: #ffffff;
     --primary-color: #142637;
     --secondary-color: #ffffff;
     --accent-color: #5de0e6;
     --input-border-color: #ccd1d9;
     --button-hover-color: #003a88;
     --background-footer: #ffffff;
+    --violet-iris-color: #a02c93;
+    --blue-iris-color: #1c6080;
   
     --font-family: 'Roboto', sans-serif;
     --font-size: 14px;
@@ -19,12 +22,15 @@
   /* Tema oscuro */
   [data-theme="dark"] {
     --background-color: #1a202c;
-    --text-color: #e2e8f0;
+    --text-black-color: #e2e8f0;
+    --text-white-color: #1a202c;
     --primary-color: #5de0e6;
     --secondary-color: #2d3748;
     --input-border-color: #4a5568;
     --button-hover-color: #4fa9b2;
-    --background-footer: #2d3748;
+    --background-footer: #e2e8f0;
+    --violet-color: #a02c93;
+    --blue-iris-color: #1c6080;
 
   }
   
@@ -37,7 +43,7 @@
     font-family: var(--font-family);
     font-size: var(--font-size);
     background-color: var(--background-color);
-    color: var(--text-color);
+    color: var(--text-black-color);
     transition: background-color var(--transition-speed),
                 color var(--transition-speed);
     min-height: 100vh;
@@ -63,7 +69,7 @@
   .card-principal .logo {
     display: block;
     margin: 0 auto 1rem;
-    max-width: 120px;
+    max-width: 100px;
   }
   .card-principal h1 {
     text-align: center;
@@ -75,26 +81,46 @@
     color: var(--primary-color);
     margin-bottom: 1.5rem;
   }
+
+  /* Labels */
+  label {
+    font-size: 0.9rem;
+    color: var(--text-black-color);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
   
+  .req {
+    color: red;
+  }
+
   /* Selector de modelo */
-  .model-selector {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
-  }
-  .model-selector label {
-    margin-right: 0.5rem;
-    font-weight: bold;
-  }
-  .model-selector .input {
-    padding: 0.4rem 0.6rem;
+  .input {
+    width: 100%;
+    min-height: 25px;
+    padding: 1rem;
     border: 1px solid var(--input-border-color);
     border-radius: 4px;
-    background-color: var(--secondary-color);
-    color: var(--text-color);
+    background-color: var(--background-color);
+    color: var(--text-black-color);
+    resize: vertical;
+    transition: border-color var(--transition-speed);
+    margin-bottom: 2rem;
   }
   
   /* Área de texto */
+  .text {
+    width: 100%;
+    min-height: 25px;
+    padding: 1rem;
+    border: 1px solid var(--input-border-color);
+    border-radius: 4px;
+    background-color: var(--background-color);
+    color: var(--text-black-color);
+    resize: vertical;
+    transition: border-color var(--transition-speed);
+    margin-bottom: 2rem;
+  }
   .textarea {
     width: 100%;
     min-height: 200px;
@@ -102,77 +128,103 @@
     border: 1px solid var(--input-border-color);
     border-radius: 4px;
     background-color: var(--background-color);
-    color: var(--text-color);
+    color: var(--text-black-color);
     resize: vertical;
     transition: border-color var(--transition-speed);
+    margin-bottom: 2rem;
   }
-  .textarea:focus {
+  .textarea:focus, .text:focus {
     outline: none;
     border-color: var(--accent-color);
   }
   
-  /* Botones */
-  .actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-  }
-  .btn {
-    padding: 0.6rem 1.2rem;
-    font-family: inherit;
-    font-size: 0.9rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color var(--transition-speed),
-                transform var(--transition-speed);
-  }
-  .btn.primary {
-    background-color: var(--primary-color);
-    color: var(--secondary-color);
-  }
-  .btn.primary:hover {
-    background-color: var(--button-hover-color);
-    transform: translateY(-1px);
-  }
-  .btn.secondary {
-    background-color: var(--accent-color);
-    color: var(--text-color);
-  }
-  .btn.secondary:hover {
-    filter: brightness(0.9);
-  }
-  .btn.reset {
-    background: none;
-    color: var(--primary-color);
-  }
-  .btn.reset:hover {
-    text-decoration: underline;
-  }
+/* Contenedor principal */
+.actions {
+  display: flex;
+  justify-content: space-between; /* separa los grupos */
+  margin-top: 1.5rem;
+}
 
-  .accessibility-menu-button {
-    position: fixed;
-    bottom: 100px;
-    right: 20px;
-    padding: 15px;
-    border-radius: 50%;
-    font-size: 20px;
-  }
-  
-  .translate-menu-button {
-    position: fixed;
-    bottom: 175px;
-    right: 20px;
-    padding: 15px;
-    border-radius: 50%;
-    font-size: 20px;
-  }
-  
+/* Grupo de botones de la izquierda y la derecha */
+.actions-left,
+.actions-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Estilos comunes a todos los botones */
+.btn {
+  padding: 0.6rem 1.2rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed),
+              transform var(--transition-speed);
+}
+
+/* Botón principal (Analizar texto) */
+.btn.primary {
+  background-color: var(--primary-color);
+  color: var(--text-white-color);
+}
+.btn.primary:hover {
+  background-color: var(--button-hover-color);
+  transform: translateY(-1px);
+}
+
+/* Botón secundario (Cargar ejemplo) */
+.btn.secondary {
+  background-color: var(--blue-iris-color);
+  color: var(--text-white-color);
+}
+.btn.secondary:hover {
+  filter: brightness(0.9);
+}
+
+/* Botón terciario (Usar URL) */
+.btn.tertiary {
+  background-color: var(--violet-iris-color);
+  color: var(--text-white-color);
+}
+.btn.tertiary:hover {
+  filter: brightness(0.9);
+}
+
+/* Botón de reset (Limpiar) */
+.btn.reset {
+  background: none;
+  color: var(--primary-color);
+}
+.btn.reset:hover {
+  text-decoration: underline;
+}
+
+
+
+
 
 /* --------------------------- */
 /* Modal */
 /* --------------------------- */
+.accessibility-menu-button {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.translate-menu-button {
+  position: fixed;
+  bottom: 175px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 50%;
+  font-size: 20px;
+}
 
 .modal.hidden {
   display: none;
@@ -203,7 +255,7 @@
 .modal-content h2 {
   margin-bottom: 20px;
   font-size: 20px;
-  color: var(--text-color);
+  color: var(--text-black-color);
 }
 
 .close-modal-button {
@@ -230,12 +282,12 @@
     justify-content: center;
     align-items: center;
     gap: 2rem;
-    padding: 1rem 0;
-    margin-top: 3rem;
+    padding-top: -1.5rem;
+    padding-bottom: 1rem;
   }
   
   .site-footer img {
-    height: 80px;
+    height: 60px;
     width: auto;
     opacity: 0.8;
     transition: opacity var(--transition-speed);

@@ -31,7 +31,7 @@ document.getElementById('theme-select').addEventListener('change', (e) => {
 document.getElementById('font-size').addEventListener('change', (e) => {
     const root = document.documentElement; // Referencia al elemento raíz
     let newFontSize;
-  
+
     // Asignar tamaños fijos para cada opción
     if (e.target.value === 'small') {
         newFontSize = 12; // Tamaño fijo para "small"
@@ -40,11 +40,8 @@ document.getElementById('font-size').addEventListener('change', (e) => {
     } else if (e.target.value === 'large') {
         newFontSize = 18; // Tamaño fijo para "large"
     }
-  
-    // Log para depuración
-    console.log(`Nuevo tamaño de fuente: ${newFontSize}px`);
-  
+
     // Actualizar la variable de tamaño de fuente
     root.style.setProperty('--font-size', `${newFontSize}px`);
-  });
-  
+});
+

@@ -12,25 +12,40 @@
     </p>
 
     <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
-      <div class="model-selector">
-        <label for="model">{{ _('Modelo') }}:</label>
-        <select id="model" name="model" class="input">
-          <option value="basico">{{ _('Básico…') }}</option>
-          <option value="avanzado">{{ _('Avanzado') }}</option>
-        </select>
-      </div>
 
+      <!-- Título -->
+      <label for="title">{{ _('Título del artículo') }}</label>
+      <input type="text" id="title" name="title" class="input text" placeholder="{{ _('Escribe aquí el título del artículo…') }}">
+
+      <!-- Autores -->
+      <label for="authors">{{ _('Autores del artículo') }}</label>
+      <input type="text" id="authors" name="authors" class="input text" placeholder="{{ _('Escribe aquí los autores del artículo…') }}">
+
+      <!-- Texto -->
+      <label for="text">{{ _('Texto del artículo') }} <span class="req">*</label>
       <textarea
         id="input-text"
         name="text"
         class="input textarea"
-        placeholder="{{ _('Pega aquí el texto periodístico que quieres analizar…') }}"
+        placeholder="{{ _('Escribe aquí el texto periodístico que quieres analizar…') }}"
         required></textarea>
 
+      <!-- Model -->
+      <label for="model">{{ _('Modelo') }} <span class="req">*</label>
+      <select id="model" name="model" class="input">
+        <option value="basico">{{ _('Básico…') }}</option>
+        <option value="avanzado">{{ _('Avanzado') }}</option>
+      </select>
+
       <div class="actions">
-        <button type="button" class="btn secondary">{{ _('Cargar ejemplo') }}</button>
-        <button type="reset" class="btn reset">{{ _('Limpiar') }}</button>
-        <button type="submit" class="btn primary">{{ _('Analizar texto') }}</button>
+        <div class="actions-left">
+          <button type="button" class="btn secondary">📂 {{ _('Cargar ejemplo') }}</button>
+          <button type="button" class="btn tertiary">🔗 {{ _('Usar URL') }}</button>
+        </div>
+        <div class="actions-right">
+          <button type="reset" class="btn reset">🧹 {{ _('Limpiar') }}</button>
+          <button type="submit" class="btn primary">🔍 {{ _('Analizar texto') }}</button>
+        </div>
       </div>
     </form>
   </div>

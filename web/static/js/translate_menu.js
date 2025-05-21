@@ -4,13 +4,9 @@ const translateModal = document.getElementById('translate-modal');
 const translatecloseModalButton = document.getElementById('close-modal-translate');
 const languageSelect = document.getElementById('theme-select-translate'); // Selección del idioma
 
-console.log('translateMenuButton', translateMenuButton);
-console.log('translateModal', translateModal);
-
 // Abrir el modal de accesibilidad
 translateMenuButton.addEventListener('click', () => {
     translateModal.classList.remove('hidden');
-    console.log('Modal de traducción abierto');
 });
 
 // Cerrar el modal de accesibilidad
@@ -21,7 +17,6 @@ translatecloseModalButton.addEventListener('click', () => {
 // Cambiar el idioma cuando el usuario selecciona una opción
 languageSelect.addEventListener('change', (e) => {
     const selectedLanguage = e.target.value; // Obtener el idioma seleccionado (es, en, it)
-    console.log(selectedLanguage);
 
     // Enviar el idioma seleccionado al servidor
     fetch('/set_language', {
