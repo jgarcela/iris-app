@@ -13,34 +13,40 @@
 
     <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
 
-      <!-- Título -->
-      <label for="title">{{ _('Título del artículo') }}</label>
-      <input type="text" id="title" name="title" class="input text" placeholder="{{ _('Escribe aquí el título del artículo…') }}">
-
-      <!-- Autores -->
-      <label for="authors">{{ _('Autores del artículo') }}</label>
-      <input type="text" id="authors" name="authors" class="input text" placeholder="{{ _('Escribe aquí los autores del artículo…') }}">
-
-      <!-- Texto -->
-      <label for="text">{{ _('Texto del artículo') }} <span class="req">*</label>
-      <textarea
-        id="input-text"
-        name="text"
-        class="input textarea"
-        placeholder="{{ _('Escribe aquí el texto periodístico que quieres analizar…') }}"
-        required></textarea>
-
-      <!-- Model -->
-      <label for="model">{{ _('Modelo') }} <span class="req">*</label>
-      <select id="model" name="model" class="input">
-        <option value="basico">{{ _('Básico…') }}</option>
-        <option value="avanzado">{{ _('Avanzado') }}</option>
-      </select>
-
+      <!-- CONTENEDOR DE TEXTO -->
+      <div id="fields-text">
+        <label for="title">{{ _('Título del artículo') }}</label>
+        <input type="text" id="title" name="title" class="input text" placeholder="{{ _('Escribe aquí el título del artículo…') }}">
+    
+        <label for="authors">{{ _('Autores del artículo') }}</label>
+        <input type="text" id="authors" name="authors" class="input text" placeholder="{{ _('Escribe aquí los autores del artículo…') }}">
+    
+        <label for="text">{{ _('Texto del artículo') }} <span class="req">*</label>
+        <textarea
+          id="input-text"
+          name="text"
+          class="input textarea"
+          placeholder="{{ _('Escribe aquí el texto periodístico que quieres analizar…') }}"
+          required></textarea>
+    
+        <label for="model">{{ _('Modelo') }} <span class="req">*</label>
+        <select id="model" name="model" class="input">
+          <option value="basico">{{ _('Básico…') }}</option>
+          <option value="avanzado">{{ _('Avanzado') }}</option>
+        </select>
+      </div>
+    
+      <!-- CONTENEDOR DE URL (oculto) -->
+      <div id="fields-url" style="display: none;">
+        <label for="url">{{ _('URL del artículo') }} <span class="req">*</label>
+        <input type="url" id="url" name="url" class="input text" placeholder="{{ _('Escribe aquí la URL del artículo…') }}" required>
+        <button type="button" class="btn secondary" id="back-to-text">{{ _('Volver a texto') }}</button>
+      </div>
+    
       <div class="actions">
         <div class="actions-left">
-          <button type="button" class="btn secondary">📂 {{ _('Cargar ejemplo') }}</button>
-          <button type="button" class="btn tertiary">🔗 {{ _('Usar URL') }}</button>
+          <button type="button" class="btn secondary" id="load-example">📂 {{ _('Cargar ejemplo') }}</button>
+          <button type="button" class="btn tertiary" id="use-url">🔗 {{ _('Usar URL') }}</button>
         </div>
         <div class="actions-right">
           <button type="reset" class="btn reset">🧹 {{ _('Limpiar') }}</button>
@@ -48,6 +54,10 @@
         </div>
       </div>
     </form>
+    
   </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/index_windows.js') }}"></script>
+  
 {% endblock %}
