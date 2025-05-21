@@ -14,6 +14,7 @@ MODELS = ast.literal_eval(MODELS)
 OPENAI_MODEL = config['API']['OPENAI_MODEL']
 openai.api_key = config['API']['OPENAI_API_KEY']
 
+# ----------------- CONTENIDO GENERAL -----------------
 genero_nombre_propio_titular = ast.literal_eval(config['VARIABLES']['genero_nombre_propio_titular'])
 genero_personas_mencionadas = ast.literal_eval(config['VARIABLES']['genero_personas_mencionadas'])
 genero_periodista = ast.literal_eval(config['VARIABLES']['genero_periodista'])
@@ -25,7 +26,7 @@ genero_personas_mencionadas_values = tuple(int(k) for k in genero_personas_menci
 genero_periodista_values = tuple(int(k) for k in genero_periodista.keys())
 tema_values = tuple(int(k) for k in tema.keys())
 
-class AnalysisResponse(BaseModel):
+class ContenidoGeneralResponse(BaseModel):
     nombre_propio_titular: list[str]
     genero_nombre_propio_titular: list[Literal[ *genero_nombre_propio_titular_values ]]
     cita_textual_titular: list[str]
@@ -35,9 +36,69 @@ class AnalysisResponse(BaseModel):
     genero_periodista: Literal[ *genero_periodista_values ]
 
 
-# CONTENIDO GENERAL
-def analyze_contenido_general(model:str, text:str):
+# ----------------- LENGUAJE -----------------
+lenguaje_sexista = ast.literal_eval(config['VARIABLES']['lenguaje_sexista'])
+lenguaje_vars = ast.literal_eval(config['VARIABLES']['lenguaje_vars'])
 
+# Extraemos las claves y las convertimos a int
+lenguaje_sexista_values = tuple(int(k) for k in lenguaje_sexista.keys())
+lenguaje_vars_values = tuple(int(k) for k in lenguaje_vars.keys())
+
+
+class LenguajeSexista(BaseModel):
+    etiqueta: list[Literal[ *lenguaje_sexista_values ]]
+    ejemplos_articulo: list[str]
+
+class LenguajeVars(BaseModel):
+    etiqueta: list[Literal[ *lenguaje_vars_values ]]
+    ejemplos_articulo: list[str]
+
+
+class LenguajeResponse(BaseModel):
+    lenguaje_sexista: LenguajeSexista
+    masculino_generico: LenguajeVars
+    hombre_humanidad: LenguajeVars
+    dual_aparente: LenguajeVars
+    cargos_mujeres: LenguajeVars
+    sexismo_social: LenguajeVars
+    androcentrismo: LenguajeVars
+    asimetria: LenguajeVars
+    infantilizacion: LenguajeVars
+    denominacion_sexualizada: LenguajeVars
+    denominacion_redundante: LenguajeVars
+    denominacion_dependiente: LenguajeVars
+    excepcion_noticiabilidad: LenguajeVars
+    comparacion_mujeres_hombres: LenguajeVars
+
+
+# ----------------- FUENTES -----------------
+class FuentesResponse(BaseModel):
+    nombre_propio_titular: list[str]
+    genero_nombre_propio_titular: list[Literal[ *genero_nombre_propio_titular_values ]]
+    cita_textual_titular: list[str]
+    personas_mencionadas: list[str]
+    genero_personas_mencionadas: list[Literal[ *genero_personas_mencionadas_values ]]
+    tema: Literal[ *tema_values ]
+    genero_periodista: Literal[ *genero_periodista_values ]
+
+# ----------------- FUNCIONES -----------------
+def analyze_text(model:str, text:str, task:str):
+
+    print(f"[/ANALYSIS/ANALYZE] {task} Analysis...")
+
+    # Response format
+    if task == "contenido_general":
+        response_format = ContenidoGeneralResponse
+    if task == "lenguaje":
+        response_format = LenguajeResponse
+    if task == "fuentes":
+        response_format = FuentesResponse
+    
+    # Prompt
+    with open(f'api/prompts/{task}.txt', 'r', encoding='utf-8') as f:
+        prompt = f.read()
+
+    # Predicción
     if MODELS[model] == OPENAI_MODEL:
         try:
             # Llamada al modelo
@@ -46,31 +107,14 @@ def analyze_contenido_general(model:str, text:str):
                 messages=[
                     {
                         "role": "system", 
-                        "content": f"""
-                                        Eres un analizador de noticias deportivas. Tu tarea es extraer de cada noticia los siguientes campos y devolver **únicamente** un JSON que cumpla con este esquema de Pydantic (ResponseFormat):
-
-                                        Requerimientos por campo:
-                                        1. nombre_propio_titular: lista de nombres propios en el titular (personas).
-                                        2. genero_nombre_propio_titular: lista del género de los nombres de las personas que aparecen en el titular. Tiene que tener corresponencia con la lista anterior de "nombre_propio_titular". Usa {genero_nombre_propio_titular} para las etiquetas.
-                                        3. cita_textual_titular: lista de citas literales que aparezcan en el titular (entre comillas).
-                                        4. personas_mencionadas: lista de nombres de personas que aparecen en el cuerpo del texto.
-                                        5. genero_personas_mencionadas: lista del género de los nombres de las personas que aparecen en el cuerpo del texto. Tiene que tener corresponencia con la lista anterior de "personas_mencionadas". Usa {genero_personas_mencionadas} para las etiquetas.
-                                        6. tema: identifica el deporte principal de la noticia con el número correspondiente: {tema}.
-                                        7. genero_periodista: a partir del nombre del periodista, asigna: {genero_periodista}.
-
-                                        **IMPORTANTE**:
-                                        - Devuelve **solo** el JSON (sin explicaciones, sin ningún texto adicional).
-                                        - Asegúrate de respetar tipos: listas, enteros, cadenas.
-                                    """ 
+                        "content": prompt
                     },
                     {
                         "role": "user", 
-                        "content": f"""
-                                    Articulo: {text}
-                                    """
-                                                    }
+                        "content": f"Articulo: {text}"
+                    }
                 ],
-                response_format=AnalysisResponse
+                response_format=response_format
             )
             
             # Extraer la respuesta
@@ -89,5 +133,3 @@ def analyze_contenido_general(model:str, text:str):
         # Si el modelo no es OpenAI, se puede implementar otro tipo de análisis
         # Aquí puedes agregar tu lógica para otros modelos
         raise NotImplementedError(f"Modelo {model} no soportado.")
-    
-

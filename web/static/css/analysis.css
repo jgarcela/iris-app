@@ -66,7 +66,12 @@
     padding: 1rem;
     min-height: 600px;  /* ajusta según necesidad */
   }
-  .markup-area {
+
+/* Por defecto solo .plain-text está visible */
+.highlight-text { display: none; }
+
+
+  .markup-area, .highlight-text, .plain-text {
     line-height: 1.5;
     color: var(--text-color);
     text-align: justify;
@@ -214,11 +219,19 @@ mark.highlight {
 }
 
 /* Colores */
-mark.color-1 { background-color: #FFF59D; }  /* Amarillo suave */
-mark.color-2 { background-color: #AED581; }  /* Verde suave */
-mark.color-3 { background-color: #81D4FA; }  /* Azul suave */
-mark.color-4 { background-color: #CE93D8; }  /* Morado suave */
-mark.color-5 { background-color: #90CAF9; } /* Azul claro */
-mark.color-6 { background-color: #F48FB1; } /* Rosa claro */
-mark.color-7 { background-color: #B0BEC5; } /* Gris suave */
-mark.color-8 { background-color: #FFCC80; } /* Naranja suave */
+mark.color-1  { background-color: #FFF59D; }  /* Amarillo suave */
+mark.color-2  { background-color: #AED581; }  /* Verde suave */
+mark.color-3  { background-color: #81D4FA; }  /* Azul suave */
+mark.color-4  { background-color: #CE93D8; }  /* Morado suave */
+mark.color-5  { background-color: #90CAF9; }  /* Azul claro */
+mark.color-6  { background-color: #F48FB1; }  /* Rosa claro */
+mark.color-7  { background-color: #B0BEC5; }  /* Gris suave */
+mark.color-8  { background-color: #FFCC80; }  /* Naranja suave */
+mark.color-9  { background-color: #A5D6A7; }  /* Verde menta */
+mark.color-10 { background-color: #FFE082; }  /* Amarillo pastel */
+mark.color-11 { background-color: #B39DDB; }  /* Lila suave */
+mark.color-12 { background-color: #80CBC4; }  /* Turquesa claro */
+mark.color-13 { background-color: #F48FB1; }  /* Rosa pastel */
+mark.color-14 { background-color: #90A4AE; }  /* Azul grisáceo */
+mark.color-15 { background-color: #FFAB91; }  /* Salmón claro */
+

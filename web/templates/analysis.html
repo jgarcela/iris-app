@@ -17,17 +17,27 @@
 </div>
 
 <div class="analysis-container">
-  <!-- COL 1: TEXTO MARCADO -->
-  <div class="col-left">
+    <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
+    <div class="col-left">
     <h3>{{ _('Texto analizado y resaltado') }}</h3>
-    <div class="markup-area">
-        <p>{{ text_highlighted | replace('\n\n', '</p><p>') | safe }}</p>
+
+    <!-- 1. Texto plain: siempre visible -->
+    <div class="plain-text">
+        <p>{{ text | replace('\n\n', '</p><p>') | safe }}</p>
     </div>
-  </div>
-  
+
+    <!-- 2. Texto highlighted: oculto hasta abrir -->
+    <div class="highlight-text" style="display: none;">
+        <div class="markup-area">
+            <p>{{ text | replace('\n\n', '</p><p>') | safe }}</p>
+        </div>
+    </div>
+</div>
+
 
   <!-- COL 2: MÉTRICAS Y RECOMENDACIONES -->
   <div class="col-right">
+    <p>{{ _('Selecciona cada apartado individualmente para ver el texto resaltado correspondiente') }}</p>
     <!-- Acordeón: Inclusividad -->
     <div class="accordion-card">
         <button class="accordion-header">
@@ -53,6 +63,55 @@
             <span class="value">{{ inclusive_terms|length }}</span>
             </div>
         </div>
+        </div>
+    </div>
+
+    <!-- Acordeón: Bloque II Variables (Contenido General) -->
+    <div class="accordion-card">
+        <button class="accordion-header" id="accordion_contenido_general">
+        {{ _('Bloque II Variables') }}
+        {{ _('Contenido General') }}
+        <span class="accordion-icon" id="icon_contenido_general">+</span>
+        </button>
+        <div class="accordion-body" id="body_contenido_general">
+            <ul>
+                {% for key, value in data.analysis.analysis_contenido_general.items() %}
+                <li> 
+                    <strong>{{ key }}:</strong> {{ value }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Acordeón: Bloque III Variables (Lenguaje y Análisis del discurso) -->
+    <div class="accordion-card">
+        <button class="accordion-header" id="accordion_lenguaje">
+        {{ _('Bloque III Variables') }}
+        {{ _('Lenguaje y Análisis del discurso') }}
+        <span class="accordion-icon" id="icon_lenguaje">+</span>
+        </button>
+        <div class="accordion-body" id="body_lenguaje">
+            <ul>
+                {% for key, value in data.analysis.analysis_lenguaje.items() %}
+                <li> 
+                    <strong>{{ key }}:</strong> {{ value }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Acordeón: Bloque V Variables (Fuentes de información) -->
+    <div class="accordion-card">
+        <button class="accordion-header" id="accordion_fuentes">
+        {{ _('Bloque V Variables') }}
+        {{ _('Fuentes de información') }}
+        <span class="accordion-icon" id="icon_fuentes">+</span>
+        </button>
+        <div class="accordion-body" id="body_fuentes">
+        <ul>
+        </ul>
         </div>
     </div>
 
@@ -90,29 +149,13 @@
         </div>
     </div>
 
-    <!-- Acordeón: Bloque II Variables (Contenido General) -->
-    <div class="accordion-card">
-        <button class="accordion-header">
-        {{ _('Contenido General') }}
-        <span class="accordion-icon">+</span>
-        </button>
-        <div class="accordion-body">
-        <ul>
-            {% for key, value in data.analysis.analysis_contenido_general.items() %}
-            <li> 
-                <strong>{{ key }}:</strong> {{ value }}
-            </li>
-            {% endfor %}
-        </ul>
-        </div>
-    </div>
-
-
-
-
   </div>
 </div>
 
+<script>
+  window.data = {{ data | tojson | safe }};
+</script>
 <script src="{{ url_for('static', filename='js/accordion.js') }}"></script>
+<script src="{{ url_for('static', filename='js/highlight_text.js') }}"></script>
 
 {% endblock %}

@@ -8,9 +8,9 @@ import ast
 
 # ----------------- BLUEPRINT -----------------
 bp = Blueprint(
-    'analysis',               # nombre interno del blueprint
-    __name__,                 # paquete actual
-    url_prefix='/analysis'    # prefijo para todas las rutas
+    'analysis',
+    __name__,
+    url_prefix='/analysis'
 )
 
 # ----------------- CONFIG -----------------
@@ -38,14 +38,12 @@ def analyze():
     model = request.form.get('model', '')
 
     app = bp.get_app() if hasattr(bp, 'get_app') else None
-    # debug
-    print(f"Texto recibido: {text}")
-    print(f"Modelo recibido: {model}")
 
     # Preparar JSON
     payload = {'text': text, 'model': model}
 
     # Llamada a la API
+    print(f"[/ANALYZE] Sending request to API ({URL_API_ENDPOINT_ANALYSIS_ANALYZE})...")
     resp = requests.post(URL_API_ENDPOINT_ANALYSIS_ANALYZE, json=payload, headers=API_HEADERS)
     if resp.status_code == 200:
         data = resp.json()
@@ -56,8 +54,7 @@ def analyze():
             text=text,
             model_name=model,
             language=get_locale(),
-            data=data,
-            text_highlighted=data["highlight"]["highlight_contenido_general"]
+            data=data
         )
     else:
         return jsonify({"error": "Error en la solicitud al API"}), 500

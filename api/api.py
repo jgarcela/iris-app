@@ -35,7 +35,7 @@ def healthcheck():
 @app.route('/analysis/analyze', methods=['POST'])
 def analysis_analyze():
     # Obtener y validar JSON
-    print(request)
+    print("[/ANALYSIS/ANALYZE] Receiving data from web...")
     try:
         data = request.get_json(force=True)
     except Exception:
@@ -52,13 +52,15 @@ def analysis_analyze():
     # Ejecutar el análisis y highlight
     try:
         # Analysis
-        analysis_contenido_general = analyze.analyze_contenido_general(model, text)
-        analysis_lenguaje = ""
+        print("[/ANALYSIS/ANALYZE] Initializing analysis...")
+        analysis_contenido_general = analyze.analyze_text(model, text, task="contenido_general")
+        analysis_lenguaje = analyze.analyze_text(model, text, task="lenguaje")
         analysis_fuentes = ""
 
         # Highlight
-        highlight_contenido_general = highlight.highlight_contenido_general(analysis_contenido_general, text)
-        highlight_lenguaje = ""
+        print("[/ANALYSIS/ANALYZE] Initializing highlight...")
+        highlight_contenido_general = highlight.highlight_text(analysis_contenido_general, text, task="contenido_general")
+        highlight_lenguaje = highlight.highlight_text(analysis_lenguaje, text, task="lenguaje")
         highlight_fuentes = ""
 
     except ValueError as ve:
