@@ -2,21 +2,17 @@
 
 {% block title %}{{ _('Resultados') }} - IRIS{% endblock %}
 
-{% block content %}
-<div class="analysis-header">
-  <div class="header-left">
-    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="IRIS Logo" class="logo-small">
-    <span class="app-name">IRIS</span>
-  </div>
-  <div class="header-right">
+
+
+{% block analysis %}
     <span class="model-selected">
         {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
-      </span>
+    </span>
     <a href="/" class="btn generate">{{ _('Generar informe') }}</a>
     <a href="/" class="btn finalize">{{ _('Finalizar análisis') }}</a>
-  </div>
-</div>
+{% endblock %}
 
+{% block content %}
 <div class="analysis-container">
     <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
     <div class="col-left">

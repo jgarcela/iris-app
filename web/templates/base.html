@@ -14,19 +14,35 @@
         {% endif %}
     </head>
     <body>
+    <!-- Header -->
+    {% block header %}
+    <div class="header">
+        <div class="header-left">
+            <a href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="IRIS Logo" class="logo-small">
+            </a>
+            <span class="app-name">IRIS</span>
+        </div>
+        <div class="header-right">
+            {% block analysis %}{% endblock %}
+        </div>
+    </div>
+    {% endblock %}
+
+
     <!-- Contenido principal -->
     {% block content %}
     {% endblock %}
 
     <!-- Modals -->
     {% block modals %}
-    {% include 'menu/translate_menu.html' %}
-    {% include 'menu/accessibility_menu.html' %}
+        {% include 'menu/translate_menu.html' %}
+        {% include 'menu/accessibility_menu.html' %}
     {% endblock %}
 
     <!-- Footer -->
     {% block footer %}
-    {% include 'footer.html' %}
+        {% include 'footer.html' %}
     {% endblock %}
     </body>
     <script>
