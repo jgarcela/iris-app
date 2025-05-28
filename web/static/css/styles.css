@@ -376,3 +376,44 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+/* --------------------------- */
+/* Header */
+/* --------------------------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--secondary-color);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--input-border-color);
+}
+.header-left {
+  display: flex;
+  align-items: center;
+}
+.logo-small {
+  height: 32px;
+  margin-right: 0.5rem;
+}
+.app-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* --------------------------- */
+/* Dashboard */
+/* --------------------------- */
+.dashboard-container iframe {
+  width: 100%;
+  height: 85vh;
+  border: none;
+}
