@@ -10,8 +10,9 @@
   </div>
   <div class="header-right">
     <span class="model-selected">
-        {{ _('Modelo seleccionado:') }} <span class="pill">{{ model_name }}</span>
+        {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
       </span>
+    <a href="/" class="btn generate">{{ _('Generar informe') }}</a>
     <a href="/" class="btn finalize">{{ _('Finalizar análisis') }}</a>
   </div>
 </div>
@@ -19,143 +20,170 @@
 <div class="analysis-container">
     <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
     <div class="col-left">
-    <h3>{{ _('Texto analizado y resaltado') }}</h3>
+        <!-- Si hay título o autores, los mostramos antes del texto -->
+        {% if data.title or data.authors or data.url %}
+        <div class="article-meta">
+            {% if data.title %}
+                <h2>{{ data.title }}</h2>
+            {% endif %}
 
-    <!-- 1. Texto plain: siempre visible -->
-    <div class="plain-text">
-        <p>{{ text | replace('\n\n', '</p><p>') | safe }}</p>
+            {% if data.authors %}
+                <p><strong>Autores:</strong>
+                    {{ data.authors if data.authors is string else data.authors | join(', ') }}
+                </p>
+            {% endif %}
+
+
+            {% if data.url %}
+                <p><strong>Fuente:</strong> <a href="{{ data.url }}" target="_blank">{{ data.url }}</a></p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- 1. Texto plain: siempre visible -->
+        <div class="plain-text">
+            <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
+        </div>
+
+        <!-- 2. Texto highlighted: oculto hasta abrir -->
+        <div class="highlight-text" style="display: none;">
+            <div class="markup-area">
+                <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
+            </div>
+        </div>
+        <!-- Tooltip predicciones -->
+        <div id="tooltip" class="custom-tooltip">
+            <i class="fas fa-check" title="Aceptar"></i>
+            <i class="fas fa-times" title="Rechazar"></i>
+            <i class="fas fa-pen" title="Editar"></i>
+        </div> 
+        <!-- Tooltip new -->
+        <div id="variable-tooltip" class="custom-tooltip" style="display: none;">
+            <button data-variable="gender">Género</button>
+            <button data-variable="profession">Profesión</button>
+            <button data-variable="other">Otro</button>
+          </div>
+                 
     </div>
 
-    <!-- 2. Texto highlighted: oculto hasta abrir -->
-    <div class="highlight-text" style="display: none;">
-        <div class="markup-area">
-            <p>{{ text | replace('\n\n', '</p><p>') | safe }}</p>
+
+    <!-- COL 2: MÉTRICAS Y RECOMENDACIONES -->
+    <div class="col-right">
+        <p>{{ _('Selecciona cada apartado individualmente para ver el texto resaltado correspondiente') }}</p>
+        <!-- Acordeón: Inclusividad -->
+        <div class="accordion-card">
+            <button class="accordion-header">
+            {{ _('Puntuación de inclusividad') }}
+            <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-body">
+            <div class="score-bar">
+                <div class="fill" style="width: {{ score }}%;"></div>
+            </div>
+            <div class="score-value">{{ score }}/100</div>
+            <div class="metrics">
+                <div class="metric">
+                <span class="label">{{ _('Total palabras') }}</span>
+                <span class="value">{{ total_words }}</span>
+                </div>
+                <div class="metric">
+                <span class="label">{{ _('Términos sesgados') }}</span>
+                <span class="value">{{ biased_terms|length }}</span>
+                </div>
+                <div class="metric">
+                <span class="label">{{ _('Términos inclusivos') }}</span>
+                <span class="value">{{ inclusive_terms|length }}</span>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Acordeón: Bloque II Variables (Contenido General) -->
+        <div class="accordion-card">
+            <button class="accordion-header" id="accordion_contenido_general">
+            {{ _('Bloque II Variables') }}
+            {{ _('Contenido General') }}
+            <span class="accordion-icon" id="icon_contenido_general">+</span>
+            </button>
+            <div class="accordion-body" id="body_contenido_general">
+                <ul>
+                    {% for key, value in data.analysis.analysis_contenido_general.items() %}
+                    {# sacamos el color o uno por defecto si no existe #}
+                    {% set color = highlight_map.get(key, "#ffffff") %} 
+                    <li> 
+                        <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Acordeón: Bloque III Variables (Lenguaje y Análisis del discurso) -->
+        <div class="accordion-card">
+            <button class="accordion-header" id="accordion_lenguaje">
+            {{ _('Bloque III Variables') }}
+            {{ _('Lenguaje y Análisis del discurso') }}
+            <span class="accordion-icon" id="icon_lenguaje">+</span>
+            </button>
+            <div class="accordion-body" id="body_lenguaje">
+                <ul>
+                    {% for key, value in data.analysis.analysis_lenguaje.items() %}
+                        {# sacamos el color o uno por defecto si no existe #}
+                        {% set color = highlight_map.get(key, "#ffffff") %}
+                        <li>
+                            <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
+                        </li>
+                    {% endfor %}
+                </ul>                
+            </div>
+        </div>
+
+        <!-- Acordeón: Bloque V Variables (Fuentes de información) -->
+        <div class="accordion-card">
+            <button class="accordion-header" id="accordion_fuentes">
+            {{ _('Bloque V Variables') }}
+            {{ _('Fuentes de información') }}
+            <span class="accordion-icon" id="icon_fuentes">+</span>
+            </button>
+            <div class="accordion-body" id="body_fuentes">
+                <ul>
+                    {% for fuente in data.analysis.analysis_fuentes.fuentes %}
+                        {% for key, value in fuente.items() %}
+                            {% set color = highlight_map.get(key, "#ffffff") %}
+                            <li>
+                                <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
+                            </li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>                
+            </div>
+        </div>
+
+        <!-- Acordeón: Recomendaciones -->
+        <div class="accordion-card">
+            <button class="accordion-header">
+            {{ _('Recomendaciones generales') }}
+            <span class="accordion-icon">+</span>
+            </button>
+            <div class="accordion-body">
+            <ul>
+                {% for rec in recommendations %}
+                <li>{{ rec }}</li>
+                {% endfor %}
+            </ul>
+            </div>
         </div>
     </div>
 </div>
 
-
-  <!-- COL 2: MÉTRICAS Y RECOMENDACIONES -->
-  <div class="col-right">
-    <p>{{ _('Selecciona cada apartado individualmente para ver el texto resaltado correspondiente') }}</p>
-    <!-- Acordeón: Inclusividad -->
-    <div class="accordion-card">
-        <button class="accordion-header">
-        {{ _('Puntuación de inclusividad') }}
-        <span class="accordion-icon">+</span>
-        </button>
-        <div class="accordion-body">
-        <div class="score-bar">
-            <div class="fill" style="width: {{ score }}%;"></div>
-        </div>
-        <div class="score-value">{{ score }}/100</div>
-        <div class="metrics">
-            <div class="metric">
-            <span class="label">{{ _('Total palabras') }}</span>
-            <span class="value">{{ total_words }}</span>
-            </div>
-            <div class="metric">
-            <span class="label">{{ _('Términos sesgados') }}</span>
-            <span class="value">{{ biased_terms|length }}</span>
-            </div>
-            <div class="metric">
-            <span class="label">{{ _('Términos inclusivos') }}</span>
-            <span class="value">{{ inclusive_terms|length }}</span>
-            </div>
-        </div>
-        </div>
-    </div>
-
-    <!-- Acordeón: Bloque II Variables (Contenido General) -->
-    <div class="accordion-card">
-        <button class="accordion-header" id="accordion_contenido_general">
-        {{ _('Bloque II Variables') }}
-        {{ _('Contenido General') }}
-        <span class="accordion-icon" id="icon_contenido_general">+</span>
-        </button>
-        <div class="accordion-body" id="body_contenido_general">
-            <ul>
-                {% for key, value in data.analysis.analysis_contenido_general.items() %}
-                <li> 
-                    <strong>{{ key }}:</strong> {{ value }}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <!-- Acordeón: Bloque III Variables (Lenguaje y Análisis del discurso) -->
-    <div class="accordion-card">
-        <button class="accordion-header" id="accordion_lenguaje">
-        {{ _('Bloque III Variables') }}
-        {{ _('Lenguaje y Análisis del discurso') }}
-        <span class="accordion-icon" id="icon_lenguaje">+</span>
-        </button>
-        <div class="accordion-body" id="body_lenguaje">
-            <ul>
-                {% for key, value in data.analysis.analysis_lenguaje.items() %}
-                <li> 
-                    <strong>{{ key }}:</strong> {{ value }}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <!-- Acordeón: Bloque V Variables (Fuentes de información) -->
-    <div class="accordion-card">
-        <button class="accordion-header" id="accordion_fuentes">
-        {{ _('Bloque V Variables') }}
-        {{ _('Fuentes de información') }}
-        <span class="accordion-icon" id="icon_fuentes">+</span>
-        </button>
-        <div class="accordion-body" id="body_fuentes">
-        <ul>
-        </ul>
-        </div>
-    </div>
-
-    <!-- Acordeón: Términos problemáticos -->
-    <div class="accordion-card">
-        <button class="accordion-header">
-        {{ _('Términos problemáticos encontrados') }}
-        <span class="accordion-icon">+</span>
-        </button>
-        <div class="accordion-body">
-        <ul>
-            {% for term in biased_terms %}
-            <li>
-            <strong>"{{ term.text }}"</strong>
-            <p class="suggestion">{{ term.suggestion }}</p>
-            <span class="category">{{ term.category }}</span>
-            </li>
-            {% endfor %}
-        </ul>
-        </div>
-    </div>
-
-    <!-- Acordeón: Recomendaciones -->
-    <div class="accordion-card">
-        <button class="accordion-header">
-        {{ _('Recomendaciones generales') }}
-        <span class="accordion-icon">+</span>
-        </button>
-        <div class="accordion-body">
-        <ul>
-            {% for rec in recommendations %}
-            <li>{{ rec }}</li>
-            {% endfor %}
-        </ul>
-        </div>
-    </div>
-
-  </div>
-</div>
 
 <script>
-  window.data = {{ data | tojson | safe }};
+    window.data = {{ data | tojson | safe }};
 </script>
-<script src="{{ url_for('static', filename='js/accordion.js') }}"></script>
-<script src="{{ url_for('static', filename='js/highlight_text.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/accordion.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/highlight_text.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/highlight_tooltip.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/highlight_newtext.js') }}"></script>
+
 
 {% endblock %}

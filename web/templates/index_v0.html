@@ -11,7 +11,7 @@
       {{ _('Herramienta para identificar y corregir lenguaje sexista y sesgos de género en textos periodísticos') }}
     </p>
 
-    <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
+    <form id="analyzer-form" action="{{ url_for('analysis.analyze_v0') }}" method="POST">
 
       <!-- SELECCIÓN DE MODELO-->
       <label for="model">{{ _('Modelo') }} <span class="req">*</span></label>

@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     const btnUrl    = document.getElementById('use-url');
-    const fieldsTxt = document.getElementById('fields-text');
+    const fieldsTxt = document.getElementById('input-text');
+    const labelTxt = document.getElementById('label-text');
     const fieldsUrl = document.getElementById('fields-url');
   
     btnUrl.addEventListener('click', () => {
       // Ocultar campos de texto
       fieldsTxt.style.display = 'none';
+      labelTxt.style.display = 'none';
       // Mostrar campo de URL
       fieldsUrl.style.display = 'block';
   

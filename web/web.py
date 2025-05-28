@@ -6,6 +6,7 @@ from flask_babel import gettext as _
 import requests
 import ast
 from analysis import bp as analysis_bp
+from dashboard import bp as dashboard_bp
 from report import bp as report_bp
 
 
@@ -35,6 +36,7 @@ app.secret_key = config['DEFAULT']['SECRET_KEY']
 
 # ----------------- BLUEPRINTS ------------------
 app.register_blueprint(analysis_bp)
+app.register_blueprint(dashboard_bp)
 app.register_blueprint(report_bp)
 # app.register_blueprint(bp_users)
 
@@ -85,6 +87,11 @@ def set_language():
 def home():
     print(f"Idioma actual: {get_locale()}")
     return render_template('index.html')
+
+@app.route('/v0', methods=['GET'])
+def home_v0():
+    print(f"Idioma actual: {get_locale()}")
+    return render_template('index_v0.html')
 
 
 

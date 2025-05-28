@@ -1,0 +1,15 @@
+<div id="loading-modal" style="display: none;">
+  <div class="modal-content">
+    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="IRIS logo">
+    <h2>Analizando texto...</h2>
+    <ul class="loading-steps">
+      <li id="step-1" class="active">Contenido General</li>
+      <li id="step-2">Fuentes de información</li>
+      <li id="step-3" class="step">
+        Lenguaje y Análisis del discurso
+        <small style="display:block; font-weight: normal; color: #888;">{{ _('Este paso puede tardar unos segundos…') }}</small>
+      </li>
+    </ul>
+    <div class="spinner"></div>
+  </div>
+</div>

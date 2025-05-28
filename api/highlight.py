@@ -44,7 +44,7 @@ def highlight_text(analysis, text, task):
             for etiqueta, frases in details.items():
                 # solo campos que tengan mapeo de color
                 if campo in HIGHLIGHT_COLOR_MAP:
-                    all_phrases += [(campo, f) for f in frases]
+                    all_phrases += [(campo, f) for f in frases if isinstance(f, str)]
 
         # Ordenar por longitud de frase (descendente)
         all_phrases.sort(key=lambda cf: len(cf[1]), reverse=True)
@@ -60,7 +60,40 @@ def highlight_text(analysis, text, task):
                 fr'<mark class="{clases}">{frase}</mark>',
                 highlighted
             )
+    if task == "fuentes":
+        print(f"{data=}")
+        all_phrases = []
 
-    
+        # Convertimos dict_items a dict
+        data_dict = dict(data)
+
+        for campo, details in data_dict.items():
+            print(f"{campo=}")
+            print(f"{details=}")
+
+            # Nos interesa solo si el campo es 'fuentes'
+            if campo == "fuentes":
+                for fuente in details:
+                    for subcampo, valor in fuente.items():
+                        # Solo marcamos campos que estén en HIGHLIGHT_COLOR_MAP y cuyo valor sea str
+                        if subcampo in HIGHLIGHT_COLOR_MAP and isinstance(valor, str):
+                            all_phrases.append((subcampo, valor))
+
+        # Ordenamos por longitud de frase descendente
+        all_phrases.sort(key=lambda cf: len(cf[1]), reverse=True)
+
+        print(f"{all_phrases=}")
+
+        # Aplicamos el marcado en el texto
+        for campo, frase in all_phrases:
+            css = HIGHLIGHT_COLOR_MAP[campo]
+            clases = f"{css}"
+            pattern = re.escape(frase)
+            highlighted = re.sub(
+                pattern,
+                fr'<mark class="{clases}">{frase}</mark>',
+                highlighted
+            )
+
     
     return highlighted

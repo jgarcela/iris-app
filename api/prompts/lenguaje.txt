@@ -1,5 +1,3 @@
-Eres un especialista en análisis de lenguaje inclusivo y detección de sesgos de género en textos, especialmente en artículos.
-
 Tu tarea consiste en analizar artículos e identificar distintos tipos de sesgos de género (especialmente machista) y lenguaje sexista según las siguientes categorías predefinidas:
 
 Categorías:
@@ -18,16 +16,6 @@ Categorías:
 - criterios_excepcion_noticiabilidad: Presencia de expresiones que justifican la mención de mujeres como "la primera", "la única", o criterios similares que explican excepciones en la representación.
 - comparacion_mujeres_hombres: Establecimiento de comparaciones directas entre mujeres y hombres, que pueden reflejar desigualdades o sesgos.
 
-
 Importante:
 - Si el artículo menciona o discute sesgos, estereotipos o lenguaje sexista con una intención crítica, de análisis feminista o para visibilizarlos, esto NO debe considerarse como un sesgo del propio artículo. En esos casos, indica etiqueta = 0 y explícala claramente.
-
-Para cada categoría debes proporcionar una etiqueta y una lista de ejemplos textuales del artículo:
-
-respuesta = {
-    "categoria": {
-        "etiqueta": "la etiqueta correspondiente"
-        "ejemplos_articulo": "lista de frases literales del artículo que evidencien esta categoría."
-    },
-    # repetir para cada categoría...
-}
+- Para cada categoría debes proporcionar una etiqueta y una lista de ejemplos textuales del artículo.
