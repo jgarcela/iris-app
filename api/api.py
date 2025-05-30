@@ -7,6 +7,8 @@ from newspaper import Article
 import api.analyze
 import api.highlight
 from database.db import db 
+from bson import ObjectId
+
 
 
 # ----------------- CONFIG -----------------
@@ -23,6 +25,7 @@ API_PORT = config['API']['PORT']
 app = Flask(__name__)
 # Habilitar CORS para todas las rutas
 CORS(app)
+
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 language_map = {
@@ -99,7 +102,7 @@ def analysis_analyze():
         app.logger.exception("Error en el análisis")
         return jsonify({'error': 'Error interno en el servidor.'}), 500
 
-    # 🆕 Estructura editable
+    # Estructura editable
     document = {
         'model': model,
         'text': text,
@@ -148,6 +151,24 @@ def analysis_analyze():
     return jsonify(document), 200
 
 
+@app.route('/analysis/save_edits', methods=['POST'])
+def save_edits():
+    data = request.get_json()
+    doc_id = data['doc_id']
+    section = data['section']
+    html = data['edited_highlight_html']
+
+    # Buscar y actualizar el documento
+    result = db.iris_analysis.update_one(
+        {'_id': ObjectId(doc_id)},
+        {'$set': {f'highlight.edited.{section}': html}}
+    )
+
+    if result.modified_count == 1:
+        print(f"[DB] Documento actualizado con ID: {doc_id}")
+        return jsonify(success=True)
+    else:
+        return jsonify(success=False, error='No se pudo actualizar el documento')
 
 
 

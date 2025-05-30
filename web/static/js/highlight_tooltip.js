@@ -18,14 +18,25 @@ export function initHighlightTooltip() {
     return;
   }
 
-  document.querySelectorAll('.highlight-text .markup-area mark')
-    .forEach(mark => attachTooltipHandlers(mark));
+  const marks = document.querySelectorAll('.highlight-text .markup-area mark');
+  marks.forEach(mark => attachTooltipHandlers(mark));
 
-  tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-  tooltip.addEventListener('mouseleave', () => scheduleHide());
-
+  tooltip.addEventListener('mouseenter', cancelHide);
+  tooltip.addEventListener('mouseleave', scheduleHide);
   tooltip.querySelector('.fa-check')?.addEventListener('click', acceptHighlight);
   tooltip.querySelector('.fa-times')?.addEventListener('click', rejectHighlight);
+
+  return () => {
+    marks.forEach(mark => {
+      mark.removeEventListener('mouseenter', showTooltip);
+      mark.removeEventListener('mouseleave', scheduleHide);
+    });
+    tooltip.removeEventListener('mouseenter', cancelHide);
+    tooltip.removeEventListener('mouseleave', scheduleHide);
+    tooltip.querySelector('.fa-check')?.removeEventListener('click', acceptHighlight);
+    tooltip.querySelector('.fa-times')?.removeEventListener('click', rejectHighlight);
+    tooltip.style.display = 'none';
+  };
 }
 
 function showTooltip(mark, event) {
@@ -37,7 +48,6 @@ function showTooltip(mark, event) {
 
   tooltip.style.display = 'block';
 
-  // Evita que el tooltip se salga de la pantalla por la derecha
   const tooltipRect = tooltip.getBoundingClientRect();
   const maxLeft = document.body.clientWidth - tooltipRect.width - 10;
 
@@ -45,40 +55,39 @@ function showTooltip(mark, event) {
   tooltip.style.left = `${Math.min(mouseX, maxLeft)}px`;
 }
 
+function cancelHide() {
+  clearTimeout(hideTimer);
+}
+
 function scheduleHide() {
   clearTimeout(hideTimer);
   hideTimer = setTimeout(() => {
     tooltip.style.display = 'none';
-  }, 150); // tiempo para mover el ratón
+  }, 800);
 }
 
 function acceptHighlight() {
   if (currentMark && !currentMark.classList.contains('accepted')) {
     currentMark.classList.add('accepted');
 
-    if (!currentMark.querySelector('.tick-icon')) {
+    if (!currentMark.nextElementSibling?.classList.contains('tick-icon')) {
       const tick = document.createElement('i');
       tick.className = 'fa fa-check tick-icon';
-      tick.title = 'Este fragmento ha sido aceptado'; // ✅ Tooltip textual
+      tick.title = 'Este fragmento ha sido aceptado';
       currentMark.insertAdjacentElement('afterend', tick);
     }
   }
+
   tooltip.style.display = 'none';
 }
-
 
 function rejectHighlight() {
   if (currentMark) {
     const span = document.createElement('span');
-
-    // Extrae solo el texto (sin tick)
     const textNode = currentMark.firstChild;
     span.textContent = textNode ? textNode.textContent : currentMark.textContent;
-
-    // Reemplaza el <mark> con un <span>
     currentMark.replaceWith(span);
 
-    // ✅ Borra el tick justo después si existe
     const maybeTick = span.nextSibling;
     if (
       maybeTick &&
@@ -91,4 +100,3 @@ function rejectHighlight() {
 
   tooltip.style.display = 'none';
 }
-

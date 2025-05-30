@@ -4,7 +4,7 @@ export function initSelectionTooltip() {
   const variableTooltip = document.getElementById("variable-tooltip");
   const markupArea = document.querySelector(".markup-area");
 
-  document.addEventListener("mouseup", () => {
+  function handleMouseUp(e) {
     const selection = window.getSelection();
 
     if (
@@ -13,7 +13,6 @@ export function initSelectionTooltip() {
       markupArea.contains(selection.anchorNode)
     ) {
       const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
 
       variableTooltip.dataset.range = JSON.stringify({
         startContainerPath: getNodePath(range.startContainer),
@@ -22,13 +21,15 @@ export function initSelectionTooltip() {
         endOffset: range.endOffset,
       });
 
-      variableTooltip.style.top = `${window.scrollY + rect.top - variableTooltip.offsetHeight - 10}px`;
-      variableTooltip.style.left = `${window.scrollX + rect.left + rect.width / 2 - variableTooltip.offsetWidth / 2}px`;
+      variableTooltip.style.top = `${e.pageY + 10}px`;
+      variableTooltip.style.left = `${e.pageX}px`;
       variableTooltip.style.display = "block";
     } else {
       variableTooltip.style.display = "none";
     }
-  });
+  }
+
+  document.addEventListener("mouseup", handleMouseUp);
 
   variableTooltip.querySelectorAll("button").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -46,19 +47,15 @@ export function initSelectionTooltip() {
       }
 
       mark.textContent = selectedText;
-
-      // ✅ Autoaceptar el highlight
       mark.classList.add('accepted');
 
-      if (!mark.querySelector('.tick-icon')) {
-        const tick = document.createElement('span');
-        tick.className = 'tick-icon';
-        tick.textContent = ' ✓';
-        mark.appendChild(tick);
-      }
+      const tick = document.createElement('i');
+      tick.className = 'fa fa-check tick-icon';
+      tick.title = 'Este fragmento ha sido aceptado';
 
       range.deleteContents();
       range.insertNode(mark);
+      mark.insertAdjacentElement('afterend', tick);
 
       attachTooltipHandlers(mark);
 
@@ -66,6 +63,11 @@ export function initSelectionTooltip() {
       window.getSelection().removeAllRanges();
     });
   });
+
+  return () => {
+    document.removeEventListener("mouseup", handleMouseUp);
+    variableTooltip.style.display = "none";
+  };
 
   function getNodePath(node) {
     const path = [];
@@ -89,8 +91,14 @@ export function initSelectionTooltip() {
     const range = document.createRange();
     const start = getNodeFromPath(info.startContainerPath);
     const end = getNodeFromPath(info.endContainerPath);
-    range.setStart(start, info.startOffset);
-    range.setEnd(end, info.endOffset);
+  
+    const safeStartOffset = Math.min(info.startOffset, start.textContent?.length || 0);
+    const safeEndOffset = Math.min(info.endOffset, end.textContent?.length || 0);
+  
+    range.setStart(start, safeStartOffset);
+    range.setEnd(end, safeEndOffset);
+  
     return range;
   }
+  
 }

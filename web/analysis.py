@@ -27,6 +27,7 @@ API_HEADERS_str = config['API']['HEADERS']
 API_HEADERS = ast.literal_eval(API_HEADERS_str)
 ENDPOINT_ANALYSIS = config['API']['ENDPOINT_ANALYSIS']
 ENDPOINT_ANALYSIS_ANALYZE = config['API']['ENDPOINT_ANALYSIS_ANALYZE']
+ENDPOINT_ANALYSIS_EDITS = config['API']['ENDPOINT_ANALYSIS_EDITS']
 
 # ----------------- VARIABLES -----------------
 HIGHLIGHT_COLOR_MAP = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'])
@@ -34,6 +35,7 @@ LENGUAJE_VARIABLES = ast.literal_eval(config['LENGUAJE']['VARIABLES'])
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
+URL_API_ENDPOINT_ANALYSIS_EDITS = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_EDITS}"
 
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/analyze', methods=['GET', 'POST'])
@@ -66,7 +68,8 @@ def analyze():
             language=get_locale(),
             data=data,
             highlight_map=HIGHLIGHT_COLOR_MAP,
-            lenguaje_variables=LENGUAJE_VARIABLES
+            lenguaje_variables=LENGUAJE_VARIABLES,
+            api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS
         )
     else:
         return jsonify({"error": "Error en la solicitud al API"}), 500
@@ -92,5 +95,6 @@ def analyze_v0():
         language=get_locale(),
         data=data,
         highlight_map=HIGHLIGHT_COLOR_MAP,
-        lenguaje_variables=LENGUAJE_VARIABLES
+        lenguaje_variables=LENGUAJE_VARIABLES,
+        api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS
     )

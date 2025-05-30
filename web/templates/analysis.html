@@ -43,6 +43,16 @@
 
         <!-- 2. Texto highlighted: oculto hasta abrir -->
         <div class="highlight-text" style="display: none;">
+            <div class="highlight-controls" style="margin-bottom: 10px;">
+                <button id="edit-mode-toggle" class="edit-button">
+                  <i class="fa fa-pen"></i> Editar
+                </button>  
+              
+                <button id="save-changes" class="save-button" style="display: none;">
+                  <i class="fa fa-save"></i> Guardar cambios
+                </button>
+              </div>
+              
             <div class="markup-area">
                 <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
             </div>
@@ -174,6 +184,7 @@
 <script>
     window.data = {{ data | tojson | safe }};
     window.highlight_color_map = {{ highlight_map | safe }};
+    window.api_url_edit = {{ api_url_edit | tojson | safe }};
 </script>
 <script type="module" src="{{ url_for('static', filename='js/accordion.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_prediction.js') }}"></script>
