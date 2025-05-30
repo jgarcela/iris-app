@@ -56,26 +56,39 @@ function acceptHighlight() {
   if (currentMark && !currentMark.classList.contains('accepted')) {
     currentMark.classList.add('accepted');
 
-    // Añadir tick si no existe ya
     if (!currentMark.querySelector('.tick-icon')) {
-      const tick = document.createElement('span');
-      tick.className = 'tick-icon';
-      tick.textContent = ' ✓';
-      currentMark.appendChild(tick);
+      const tick = document.createElement('i');
+      tick.className = 'fa fa-check tick-icon';
+      tick.title = 'Este fragmento ha sido aceptado'; // ✅ Tooltip textual
+      currentMark.insertAdjacentElement('afterend', tick);
     }
   }
   tooltip.style.display = 'none';
 }
 
+
 function rejectHighlight() {
   if (currentMark) {
     const span = document.createElement('span');
 
-    // Solo texto visible, sin el tick
+    // Extrae solo el texto (sin tick)
     const textNode = currentMark.firstChild;
     span.textContent = textNode ? textNode.textContent : currentMark.textContent;
 
+    // Reemplaza el <mark> con un <span>
     currentMark.replaceWith(span);
+
+    // ✅ Borra el tick justo después si existe
+    const maybeTick = span.nextSibling;
+    if (
+      maybeTick &&
+      maybeTick.nodeType === Node.ELEMENT_NODE &&
+      maybeTick.classList.contains('tick-icon')
+    ) {
+      maybeTick.remove();
+    }
   }
+
   tooltip.style.display = 'none';
 }
+

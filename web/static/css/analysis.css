@@ -296,8 +296,11 @@ mark.color-15 { background-color: #FFAB91; }  /* Salmón claro */
 
 .tick-icon {
   color: green;
-  font-weight: bold;
   margin-left: 4px;
-  font-size: 0.9em;
+  font-size: 0.85em;
+  vertical-align: middle;
+  cursor: default;
 }
+
+
 
