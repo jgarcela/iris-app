@@ -5,9 +5,9 @@ from flask_babel import Babel
 from flask_babel import gettext as _
 import requests
 import ast
-from analysis import bp as analysis_bp
-from dashboard import bp as dashboard_bp
-from report import bp as report_bp
+from web.analysis import bp as analysis_bp
+from web.dashboard import bp as dashboard_bp
+from web.report import bp as report_bp
 
 
 # ----------------- CONFIG -----------------

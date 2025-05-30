@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  web:
+    build:
+      context: ./web
+    container_name: flask_web
+    environment:
+      - FLASK_APP=web.py
+      - FLASK_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mongo
+
+  api:
+    build:
+      context: ./api
+    container_name: flask_api
+    environment:
+      - FLASK_APP=api.py
+      - FLASK_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
