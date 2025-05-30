@@ -101,7 +101,7 @@
             </button>
             <div class="accordion-body" id="body_contenido_general">
                 <ul>
-                    {% for key, value in data.analysis.analysis_contenido_general.items() %}
+                    {% for key, value in data.analysis.original.contenido_general.items() %}
                     {# sacamos el color o uno por defecto si no existe #}
                     {% set color = highlight_map.get(key, "#ffffff") %} 
                     <li> 
@@ -121,7 +121,7 @@
             </button>
             <div class="accordion-body" id="body_lenguaje">
                 <ul>
-                    {% for key, value in data.analysis.analysis_lenguaje.items() %}
+                    {% for key, value in data.analysis.original.lenguaje.items() %}
                         {# sacamos el color o uno por defecto si no existe #}
                         {% set color = highlight_map.get(key, "#ffffff") %}
                         <li>
@@ -141,7 +141,7 @@
             </button>
             <div class="accordion-body" id="body_fuentes">
                 <ul>
-                    {% for fuente in data.analysis.analysis_fuentes.fuentes %}
+                    {% for fuente in data.analysis.original.fuentes.fuentes %}
                         {% for key, value in fuente.items() %}
                             {% set color = highlight_map.get(key, "#ffffff") %}
                             <li>

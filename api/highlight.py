@@ -61,16 +61,12 @@ def highlight_text(analysis, text, task):
                 highlighted
             )
     if task == "fuentes":
-        print(f"{data=}")
         all_phrases = []
 
         # Convertimos dict_items a dict
         data_dict = dict(data)
 
         for campo, details in data_dict.items():
-            print(f"{campo=}")
-            print(f"{details=}")
-
             # Nos interesa solo si el campo es 'fuentes'
             if campo == "fuentes":
                 for fuente in details:
@@ -81,8 +77,6 @@ def highlight_text(analysis, text, task):
 
         # Ordenamos por longitud de frase descendente
         all_phrases.sort(key=lambda cf: len(cf[1]), reverse=True)
-
-        print(f"{all_phrases=}")
 
         # Aplicamos el marcado en el texto
         for campo, frase in all_phrases:

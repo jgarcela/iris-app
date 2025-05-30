@@ -24,8 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
           highlight.style.display = isOpen ? 'block' : 'none';
 
           if (isOpen && window.data && window.data.highlight) {
-            const key  = `highlight_${suffix}`;
-            const html = window.data.highlight[key];
+            const key  = `${suffix}`;
+            const html = window.data.highlight.original[key];
+
+            console.log(`${key}...`);
+            console.log(html);
 
             // Inyectar HTML de los <mark>
             highlight.querySelector('.markup-area').innerHTML = html;
