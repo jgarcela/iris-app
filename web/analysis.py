@@ -30,6 +30,7 @@ ENDPOINT_ANALYSIS_ANALYZE = config['API']['ENDPOINT_ANALYSIS_ANALYZE']
 
 # ----------------- VARIABLES -----------------
 HIGHLIGHT_COLOR_MAP = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'])
+LENGUAJE_VARIABLES = ast.literal_eval(config['LENGUAJE']['VARIABLES'])
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
@@ -64,7 +65,8 @@ def analyze():
             'analysis.html',
             language=get_locale(),
             data=data,
-            highlight_map=HIGHLIGHT_COLOR_MAP
+            highlight_map=HIGHLIGHT_COLOR_MAP,
+            lenguaje_variables=LENGUAJE_VARIABLES
         )
     else:
         return jsonify({"error": "Error en la solicitud al API"}), 500
@@ -87,9 +89,8 @@ def analyze_v0():
     print(f"Respuesta: {data}")
     return render_template(
         'analysis.html',
-        text=text,
-        model_name=model,
         language=get_locale(),
         data=data,
-        highlight_map=HIGHLIGHT_COLOR_MAP
+        highlight_map=HIGHLIGHT_COLOR_MAP,
+        lenguaje_variables=LENGUAJE_VARIABLES
     )

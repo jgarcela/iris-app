@@ -1,12 +1,12 @@
 import { initHighlightTooltip } from './highlight_tooltip.js';
-import { initSelectionTooltip } from './highlight_newtext.js';
+import { initSelectionTooltip } from './highlight_human.js';
 
-document.addEventListener('DOMContentLoaded', () => { 
+document.addEventListener('DOMContentLoaded', () => {
   document
     .querySelectorAll('.accordion-header[id^="accordion_"]')
     .forEach(header => {
-      const id     = header.id;                     
-      const suffix = id.replace(/^accordion_/, ''); 
+      const id     = header.id;
+      const suffix = id.replace(/^accordion_/, '');
 
       const body      = document.getElementById(`body_${suffix}`);
       const icon      = document.getElementById(`icon_${suffix}`) || header.querySelector('.accordion-icon');
@@ -19,17 +19,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (body)      body.style.display    = isOpen ? 'block' : 'none';
         if (icon)      icon.textContent      = isOpen ? '–'    : '+';
         if (plain)     plain.style.display   = isOpen ? 'none' : 'block';
+
         if (highlight) {
           highlight.style.display = isOpen ? 'block' : 'none';
 
           if (isOpen && window.data && window.data.highlight) {
             const key  = `highlight_${suffix}`;
             const html = window.data.highlight[key];
+
+            // Inyectar HTML de los <mark>
             highlight.querySelector('.markup-area').innerHTML = html;
-            
-            // ← Aquí, justo al inyectar los <mark>, inicializas el tooltip:
+
+            // Inicializar tooltips y selección sobre los nuevos <mark>
             initHighlightTooltip();
-            initSelectionTooltip()
+            initSelectionTooltip();
           }
         }
       });

@@ -15,10 +15,10 @@ OPENAI_MODEL = config['API']['OPENAI_MODEL']
 openai.api_key = config['API']['OPENAI_API_KEY']
 
 # ----------------- CONTENIDO GENERAL -----------------
-genero_nombre_propio_titular = ast.literal_eval(config['VARIABLES']['GENERO_NOMBRE_PROPIO_TITULAR'])
-genero_personas_mencionadas = ast.literal_eval(config['VARIABLES']['GENERO_PERSONAS_MENCIONADAS'])
-genero_periodista = ast.literal_eval(config['VARIABLES']['GENERO_PERIODISTA'])
-tema = ast.literal_eval(config['VARIABLES']['TEMA'])
+genero_nombre_propio_titular = ast.literal_eval(config['CONTENIDO_GENERAL']['GENERO_NOMBRE_PROPIO_TITULAR'])
+genero_personas_mencionadas = ast.literal_eval(config['CONTENIDO_GENERAL']['GENERO_PERSONAS_MENCIONADAS'])
+genero_periodista = ast.literal_eval(config['CONTENIDO_GENERAL']['GENERO_PERIODISTA'])
+tema = ast.literal_eval(config['CONTENIDO_GENERAL']['TEMA'])
 
 # Extraemos las claves y las convertimos a int
 genero_nombre_propio_titular_values = tuple(int(k) for k in genero_nombre_propio_titular.keys())
@@ -43,8 +43,8 @@ class ContenidoGeneralResponse_NoTitular(BaseModel):
 
 
 # ----------------- LENGUAJE -----------------
-lenguaje_sexista = ast.literal_eval(config['VARIABLES']['LENGUAJE_SEXISTA'])
-lenguaje_vars = ast.literal_eval(config['VARIABLES']['LENGUAJE_VARS'])
+lenguaje_sexista = ast.literal_eval(config['LENGUAJE']['LENGUAJE_SEXISTA'])
+lenguaje_vars = ast.literal_eval(config['LENGUAJE']['LENGUAJE_VARS'])
 
 # Extraemos las claves y las convertimos a int
 lenguaje_sexista_values = tuple(int(k) for k in lenguaje_sexista.keys())
@@ -78,7 +78,7 @@ class LenguajeResponse(BaseModel):
 
 
 # ----------------- FUENTES -----------------
-tipo_fuente = ast.literal_eval(config['VARIABLES']['TIPO_FUENTE'])
+tipo_fuente = ast.literal_eval(config['FUENTES']['TIPO_FUENTE'])
 # Extraemos las claves y las convertimos a int
 tipo_fuente_values = tuple(int(k) for k in tipo_fuente.keys())
 

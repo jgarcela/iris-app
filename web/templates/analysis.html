@@ -51,15 +51,13 @@
         <div id="tooltip" class="custom-tooltip">
             <i class="fas fa-check" title="Aceptar"></i>
             <i class="fas fa-times" title="Rechazar"></i>
-            <i class="fas fa-pen" title="Editar"></i>
         </div> 
         <!-- Tooltip new -->
         <div id="variable-tooltip" class="custom-tooltip" style="display: none;">
-            <button data-variable="gender">Género</button>
-            <button data-variable="profession">Profesión</button>
-            <button data-variable="other">Otro</button>
-          </div>
-                 
+            {% for var in lenguaje_variables %}
+                <button data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
+            {% endfor %}
+        </div>               
     </div>
 
 
@@ -175,11 +173,12 @@
 
 <script>
     window.data = {{ data | tojson | safe }};
+    window.highlight_color_map = {{ highlight_map | safe }};
 </script>
 <script type="module" src="{{ url_for('static', filename='js/accordion.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/highlight_text.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/highlight_prediction.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_tooltip.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/highlight_newtext.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/highlight_human.js') }}"></script>
 
 
 {% endblock %}
