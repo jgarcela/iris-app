@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .forEach(header => {
       const id = header.id;
       const suffix = id.replace(/^accordion_/, '');
-
       const body = document.getElementById(`body_${suffix}`);
       const icon = document.getElementById(`icon_${suffix}`) || header.querySelector('.accordion-icon');
       const plain = document.querySelector('.plain-text');
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (editMode) {
         editButton.classList.add('active');
-        editButton.innerHTML = '<i class="fa fa-pen"></i> Editando...';
+        editButton.innerHTML = '<i class="fa fa-pen"></i> Salir del modo edición...';
 
         initSelectionTooltip();
 

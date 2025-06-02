@@ -31,7 +31,9 @@ ENDPOINT_ANALYSIS_EDITS = config['API']['ENDPOINT_ANALYSIS_EDITS']
 
 # ----------------- VARIABLES -----------------
 HIGHLIGHT_COLOR_MAP = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'])
+CONTENIDO_GENERAL_VARIABLES = ast.literal_eval(config['CONTENIDO_GENERAL']['VARIABLES'])
 LENGUAJE_VARIABLES = ast.literal_eval(config['LENGUAJE']['VARIABLES'])
+FUENTES_VARIABLES = ast.literal_eval(config['FUENTES']['VARIABLES'])
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
@@ -68,7 +70,9 @@ def analyze():
             language=get_locale(),
             data=data,
             highlight_map=HIGHLIGHT_COLOR_MAP,
+            contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
             lenguaje_variables=LENGUAJE_VARIABLES,
+            fuentes_variables=FUENTES_VARIABLES,
             api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS
         )
     else:
@@ -95,6 +99,8 @@ def analyze_v0():
         language=get_locale(),
         data=data,
         highlight_map=HIGHLIGHT_COLOR_MAP,
+        contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
         lenguaje_variables=LENGUAJE_VARIABLES,
+        fuentes_variables=FUENTES_VARIABLES,
         api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS
     )

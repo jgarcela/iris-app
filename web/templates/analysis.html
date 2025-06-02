@@ -64,10 +64,17 @@
         </div> 
         <!-- Tooltip new -->
         <div id="variable-tooltip" class="custom-tooltip" style="display: none;">
-            {% for var in lenguaje_variables %}
-                <button data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
+            {% for var in contenido_general_variables %}
+                <button class="var-btn" data-block="contenido" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
             {% endfor %}
-        </div>               
+            {% for var in lenguaje_variables %}
+                <button class="var-btn" data-block="lenguaje" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
+            {% endfor %}
+            {% for var in fuentes_variables %}
+                <button class="var-btn" data-block="fuentes" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
+            {% endfor %}
+        </div>
+                  
     </div>
 
 

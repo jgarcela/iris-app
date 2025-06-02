@@ -6,21 +6,35 @@ export function initSelectionTooltip() {
 
   function handleMouseUp(e) {
     const selection = window.getSelection();
-
+  
     if (
       selection.rangeCount > 0 &&
       !selection.isCollapsed &&
       markupArea.contains(selection.anchorNode)
     ) {
       const range = selection.getRangeAt(0);
-
+  
       variableTooltip.dataset.range = JSON.stringify({
         startContainerPath: getNodePath(range.startContainer),
         startOffset: range.startOffset,
         endContainerPath: getNodePath(range.endContainer),
         endOffset: range.endOffset,
       });
+  
+      const currentKey = getCurrentKey(); // ⚠️ función definida abajo
+      const block = {
+        'contenido_general': 'contenido',
+        'lenguaje': 'lenguaje',
+        'fuentes': 'fuentes'
+      }[currentKey];
 
+      console.log("Block:", block);
+  
+      // 👇 Oculta/muestra los botones según el acordeón abierto
+      variableTooltip.querySelectorAll("button.var-btn").forEach(btn => {
+        btn.style.display = (btn.dataset.block === block) ? 'inline-block' : 'none';
+      });
+  
       variableTooltip.style.top = `${e.pageY + 10}px`;
       variableTooltip.style.left = `${e.pageX}px`;
       variableTooltip.style.display = "block";
@@ -28,6 +42,7 @@ export function initSelectionTooltip() {
       variableTooltip.style.display = "none";
     }
   }
+  
 
   document.addEventListener("mouseup", handleMouseUp);
 
@@ -100,5 +115,12 @@ export function initSelectionTooltip() {
   
     return range;
   }
+
+  function getCurrentKey() {
+    const openHeader = document.querySelector('.accordion-header.open');
+    if (!openHeader) return null;
+    return openHeader.id.replace(/^accordion_/, '');
+  }
+  
   
 }
