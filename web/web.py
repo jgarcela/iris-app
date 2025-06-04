@@ -84,6 +84,8 @@ def set_language():
 
 
 @app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+@app.route('/home', methods=['GET'])
 def home():
     print(f"Idioma actual: {get_locale()}")
     return render_template('index.html')

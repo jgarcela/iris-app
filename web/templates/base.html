@@ -22,12 +22,21 @@
                 <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="IRIS Logo" class="logo-small">
             </a>
             <span class="app-name">IRIS</span>
+
+            <!-- Pestañas de navegación -->
+            <nav class="nav-tabs">
+                <a href="{{ url_for('home') }}">{{ _('Inicio') }}</a>
+                <a href="{{ url_for('dashboard.dashboard_iris') }}">{{ _('Visualización de datos') }}</a>
+                <a href="{{ url_for('home') }}">{{ _('Contacto') }}</a>
+            </nav>
         </div>
+
         <div class="header-right">
             {% block analysis %}{% endblock %}
         </div>
     </div>
     {% endblock %}
+
 
 
     <!-- Contenido principal -->

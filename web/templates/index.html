@@ -27,12 +27,14 @@
         <label for="authors">{{ _('Autores del artículo') }}</label>
         <input type="text" id="authors" name="authors" class="input text" placeholder="{{ _('Escribe aquí los autores del artículo…') }}">
     
-        <label for="text" id="label-text">{{ _('Texto del artículo') }} <span class="req">*</label>
+        <label for="text" id="label-text">
+          {{ _('Texto del artículo') }} <span class="req">*</span>
+        </label>
         <textarea
           id="input-text"
           name="text"
           class="input textarea"
-          placeholder="{{ _('Escribe aquí el texto periodístico que quieres analizar…') }}"
+          placeholder="{{ _('Escribe aquí el texto que quieres analizar…') }}"
           required>
         </textarea>
       </div>
