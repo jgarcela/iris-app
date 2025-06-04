@@ -4,11 +4,11 @@ from flask_cors import CORS, cross_origin
 import configparser
 from datetime import datetime, timezone
 from newspaper import Article
+from bson import ObjectId
 import api.analyze
 import api.highlight
 from database.db import db 
-from bson import ObjectId
-
+from api.logger import logger
 
 
 # ----------------- CONFIG -----------------

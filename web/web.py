@@ -8,6 +8,7 @@ import ast
 from web.analysis import bp as analysis_bp
 from web.dashboard import bp as dashboard_bp
 from web.report import bp as report_bp
+from web.logger import logger
 
 
 # ----------------- CONFIG -----------------
@@ -53,7 +54,7 @@ app.config['BABEL_DEFAULT_TIMEZONE'] = 'UTC'
 # Inicializar Babel con selector de idioma
 def get_locale():
     lang = session.get('language', app.config['BABEL_DEFAULT_LOCALE'])
-    print(f"Idioma detectado desde la sesión: {lang}")  # Depuración
+    logger.info(f"Language detected: {lang}")
     return lang
 
 babel = Babel(app, locale_selector=get_locale)
@@ -67,16 +68,19 @@ def inject_language():
 # ----------------- ENDPOINTS -----------------
 @app.route('/healthcheck', methods=['GET'])
 def healthcheck():
+    logger.info("[/HEALTHCHECK] Request to healthcheck from {request.remote_addr} with method {request.method}")
     return jsonify({"status": "ok"})
 
 @app.route('/set_language', methods=['POST'])
 def set_language():
+    logger.info(f"[/SET_LANGUAGE] Request to set preferred language from {request.remote_addr} with method {request.method}")
+
     data = request.get_json()
     language = data.get('language')
 
     if language in ['es', 'en', 'it']:  # Idiomas soportados
         session['language'] = language  # Actualizar idioma en la sesión
-        print(f"Idioma actualizado en la sesión: {language}")  # Depuración
+        logger.info(f"[/SET_LANGUAGE] Language updated in session: {language}")
         return jsonify(success=True)
     else:
         print("Idioma no válido.")
@@ -87,15 +91,20 @@ def set_language():
 @app.route('/index', methods=['GET'])
 @app.route('/home', methods=['GET'])
 def home():
-    print(f"Idioma actual: {get_locale()}")
+    logger.debug(f"[/HOME] Language: {get_locale()}")
+    logger.info("[/HOME] Rendering home template...")
     return render_template('index.html')
 
 @app.route('/v0', methods=['GET'])
 def home_v0():
-    print(f"Idioma actual: {get_locale()}")
+    logger.debug(f"[/V0] Language: {get_locale()}")
+    logger.info("[/V0] Rendering home v0 template...")
     return render_template('index_v0.html')
 
-
+@app.route('/test', methods=['GET'])
+def test():
+    logger.info("[/TEST] Rendering test template...")
+    return render_template('test.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host=WEB_HOST, port=WEB_PORT)

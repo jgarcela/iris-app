@@ -6,6 +6,8 @@ import requests
 from flask_babel import get_locale
 import configparser
 import ast
+from web.logger import logger
+
 
 # ----------------- BLUEPRINT -----------------
 bp = Blueprint(
@@ -31,5 +33,6 @@ URL_DASHBOARD_IRIS = config['VARIABLES']['URL_DASHBOARD_IRIS']
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/iris', methods=['GET', 'POST'])
 def dashboard_iris():
-
+    logger.info(f"[/DASHBOARD/IRIS] Request to dashboard/iris from {request.remote_addr} with method {request.method}")
+    logger.info("[/DASHBOARD/IRIS] Rendering dashboard iris template...")
     return render_template("dashboard_iris.html", url=URL_DASHBOARD_IRIS)
