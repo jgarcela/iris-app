@@ -1,0 +1,153 @@
+{# templates/noticias.html #}
+{% extends "base.html" %}
+
+{% block title %}{{ _('Dashboard de Noticias') }}{% endblock %}
+
+{% block head_extra %}
+
+  <!-- ====== 1) Bootstrap Table CSS ====== -->
+  <link
+    href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- ====== 2) Bootstrap Table Filter Control CSS ====== -->
+  <link
+    href="https://unpkg.com/bootstrap-table@1.21.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- ====== 3) SheetJS (xlsx) para exportar a Excel ====== -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+    rel="stylesheet"
+  />
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid p-3">
+    <h2 class="mb-4">{{ _('Listado completo de Noticias') }}</h2>
+
+    <!-- ====== BOTONES CUSTOM DE EXPORTACIÓN ====== -->
+    <div class="d-flex mb-2">
+      <button id="exportar-csv" class="btn btn-outline-primary btn-sm me-2">
+        {{ _('Exportar CSV') }}
+      </button>
+      <button id="exportar-excel" class="btn btn-outline-success btn-sm me-2">
+        {{ _('Exportar Excel') }}
+      </button>
+      <button id="exportar-json" class="btn btn-outline-secondary btn-sm me-2">
+        {{ _('Exportar JSON') }}
+      </button>
+      <button id="exportar-pdf" class="btn btn-outline-danger btn-sm">
+        {{ _('Exportar PDF') }}
+      </button>
+    </div>
+
+    <!-- ====== TABLA ====== -->
+    <div class="table-responsive">
+      <table
+        id="tabla-noticias"
+        class="table table-striped"
+        data-toggle="table"
+        data-search="true"
+        data-show-columns="true"
+        data-show-export="false"
+        data-pagination="true"
+        data-page-size="10"
+        data-page-list="[5, 10, 25, 50, 100]"
+        data-locale="es-ES"
+        data-filter-control="true"
+        data-filter-show-clear="true"
+        data-click-to-select="true"
+        data-sort-name="IdNoticia"
+        data-sort-order="asc"
+      >
+        <thead class="table-light">
+          <tr>
+            <!-- Columna para checkbox -->
+            <th data-field="state" data-checkbox="true"></th>
+
+            {% if noticias and noticias|length > 0 %}
+              {% set primera = noticias[0] %}
+
+              {# 1) Columnas fijas en order_cols, en el orden dado #}
+              {% for key in order_cols %}
+                {% if key in primera.keys() and key not in exclude_cols %}
+                  <th
+                    data-field="{{ key }}"
+                    data-sortable="true"
+                    data-filter-control="{% if key in input_filter_cols %}input{% else %}select{% endif %}"
+                  >
+                    {{ key.replace('_',' ') | title }}
+                  </th>
+                {% endif %}
+              {% endfor %}
+
+              {# 2) Resto de claves dinámicas, excluyendo las de order_cols y exclude_cols #}
+              {% for key in primera.keys() %}
+                {% if key not in order_cols and key not in exclude_cols %}
+                  <th
+                    data-field="{{ key }}"
+                    data-sortable="true"
+                    data-filter-control="{% if key in input_filter_cols %}input{% else %}select{% endif %}"
+                  >
+                    {{ key.replace('_',' ') | title }}
+                  </th>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in noticias %}
+            <tr>
+              <td></td> {# checkbox automático #}
+
+              {# 1) Valores de order_cols #}
+              {% for key in order_cols %}
+                {% if key in primera.keys() and key not in exclude_cols %}
+                  <td>{{ n[key] }}</td>
+                {% endif %}
+              {% endfor %}
+
+              {# 2) Valores restantes #}
+              {% for key in primera.keys() %}
+                {% if key not in order_cols and key not in exclude_cols %}
+                  <td>{{ n[key] }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts_extra %}
+  <!-- ====== 1) jQuery ====== -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- ====== 2) Bootstrap 5 JS ====== -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- ====== 3) Bootstrap Table core ====== -->
+  <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+
+  <!-- ====== 4) Filter Control extension ====== -->
+  <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+
+  <!-- ====== 5) Localización español para Bootstrap Table (opcional) ====== -->
+  <script src="https://unpkg.com/bootstrap-table@1.21.2/dist/locale/bootstrap-table-es-ES.min.js"></script>
+
+  <!-- ====== 6) jsPDF + jsPDF-AutoTable (para exportar a PDF) ====== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- ====== 7) SheetJS (xlsx) para exportar a Excel ====== -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- ====== 8) Tu script de inicialización y exportación ====== -->
+  <script src="/static/js/table_noticias.js"></script>
+{% endblock %}
