@@ -6,11 +6,13 @@
 from collections import Counter
 from flask import Blueprint, abort, request, jsonify
 
-from database.db import db
+import database.db as db
 from api.utils.logger import logger
 
 import api
 import api.utils.dashboard
+
+from api.utils.decorators import role_required, permission_required
 
 # ==================================
 #  BLUEPRINT 
@@ -22,6 +24,7 @@ bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 #  ENDPOINTS 
 # ==================================
 @bp.route("/data", methods=["POST"])
+@role_required('admin')
 def dashboard_data():
     """
     Espera un JSON con:

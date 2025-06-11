@@ -1,0 +1,38 @@
+{% extends 'admin_base.html' %}
+{% block title %}Admin · {{ _('Dashboard') }}{% endblock %}
+
+{% block admin_content %}
+<h1 class="h2 mt-4">{{ _('Panel de control') }}</h1>
+<div class="row my-4">
+  <div class="col-md-4">
+    <div class="card text-white bg-primary mb-3">
+      <div class="card-header">{{ _('Usuarios') }}</div>
+      <div class="card-body">
+        <h5 class="card-title">{{ total_users }}</h5>
+        <p class="card-text">{{ _('Registrados') }}</p>
+        <a href="{{ url_for('admin.list_users') }}" class="btn btn-light">{{ _('Ver lista') }}</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-white bg-success mb-3">
+      <div class="card-header">{{ _('Roles') }}</div>
+      <div class="card-body">
+        <h5 class="card-title">{{ total_roles }}</h5>
+        <p class="card-text">{{ _('Definidos') }}</p>
+        <a href="{{ url_for('admin.list_roles') }}" class="btn btn-light">{{ _('Ver lista') }}</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-white bg-warning mb-3">
+      <div class="card-header">{{ _('Permisos') }}</div>
+      <div class="card-body">
+        <h5 class="card-title">{{ total_permissions }}</h5>
+        <p class="card-text">{{ _('Disponibles') }}</p>
+        <a href="{{ url_for('admin.list_permissions') }}" class="btn btn-light">{{ _('Ver lista') }}</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

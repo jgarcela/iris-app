@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block head_extra %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block header %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar de administración -->
+    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <div class="sidebar-sticky pt-3">
+        <h6 class="sidebar-heading px-3 mb-1 text-muted">
+          {{ _('Administración') }}
+        </h6>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.list_users') }}">
+              <i class="fas fa-users me-1"></i> {{ _('Usuarios') }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.list_roles') }}">
+              <i class="fas fa-user-tag me-1"></i> {{ _('Roles') }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.list_permissions') }}">
+              <i class="fas fa-key me-1"></i> {{ _('Permisos') }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Contenido principal del admin -->
+    <main role="main" class="col-md-9 ms-sm-auto col-lg-10 px-4">
+      {% block admin_content %}
+      <!-- Aquí irá el contenido de cada página del admin -->
+      {% endblock %}
+    </main>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

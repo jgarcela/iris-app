@@ -92,6 +92,7 @@ def inject_user():
         resp = requests.get(URL_API_ENDPOINT_AUTH_ME, headers=headers, timeout=2)
         if resp.ok:
             user = resp.json().get('user')
+            print(f"{user=}")
             return dict(current_user=user)
     except Exception:
         pass
@@ -114,6 +115,7 @@ from web.routes.report import bp as report_bp
 from web.routes.table import bp as table_bp
 from web.routes.auth import bp as auth_bp
 from web.routes.contact import bp as contact_bp
+from web.routes.admin import bp as admin_bp
 
 app.register_blueprint(analysis_bp)
 app.register_blueprint(dashboard_bp)
@@ -121,6 +123,7 @@ app.register_blueprint(report_bp)
 app.register_blueprint(table_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(contact_bp)
+app.register_blueprint(admin_bp)
 
 
 # ==================================

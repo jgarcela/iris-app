@@ -1,22 +1,8 @@
-# web/decorators.py
 from functools import wraps
-from flask import abort, request, redirect, url_for, current_app
-import requests
+from flask import abort
 from flask_jwt_extended import get_jwt_identity
 from bson import ObjectId
 from database.db import DB_USERS, DB_ROLES
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.cookies.get('access_token_cookie')
-        if not token:
-            return redirect(url_for('auth.login'))
-        # opcional: validar token con /api/me
-        return f(*args, **kwargs)
-    return decorated
-
 
 def role_required(*required_roles):
     def wrapper(fn):
@@ -51,4 +37,3 @@ def permission_required(*required_perms):
             return fn(*args, **kwargs)
         return decorated
     return wrapper
-

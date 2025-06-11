@@ -11,8 +11,10 @@ from flask_jwt_extended import (
 )
 from bson import ObjectId
 
-from database.db import db
+import database.db as db
 from api.utils.logger import logger
+
+from api.utils.decorators import role_required, permission_required
 
 import api
 
@@ -21,11 +23,11 @@ import api
 # ==================================
 bp = Blueprint('data', __name__, url_prefix='/data')
 
-
 # ==================================
 #  ENDPOINTS 
 # ==================================
 @bp.route('/get_document/<doc_id>', methods=['GET'])
+@role_required('admin')
 def get_document(doc_id):
     # 1) validar ObjectId
     try:
@@ -34,7 +36,7 @@ def get_document(doc_id):
         return jsonify({'error': 'ID inválido'}), 400
 
     # 2) recuperar de Mongo
-    doc = db.iris_analysis.find_one({'_id': oid})
+    doc = db.DB_ANALYSIS.find_one({'_id': oid})
     if not doc:
         return jsonify({'error': 'Documento no encontrado'}), 404
 
@@ -44,10 +46,11 @@ def get_document(doc_id):
 
 
 @bp.route("/get_contexto", methods=["GET"])
+@role_required('admin')
 def get_contexto():
     try:
         # 1. Seleccionamos la colección específica
-        collection = db[api.COLLECTION_DATA]
+        collection = db.DB_DATA
 
         # 2. Devuelve una lista de strings con los valores únicos.
         contextos_unicos = collection.distinct(api.CONTEXTO_DATA)
@@ -76,6 +79,7 @@ def serialize_doc(doc: dict) -> dict:
     return salida
 
 @bp.route("/<collection_name>", methods=["GET"]) # Aquí añadimos el parámetro <collection_name>
+@role_required('admin')
 def get_data_from_collection(collection_name): # El nombre de la colección se pasa como argumento
     """
     Este endpoint devuelve una lista con todos los documentos de la colección especificada por 'collection_name'.
@@ -83,8 +87,8 @@ def get_data_from_collection(collection_name): # El nombre de la colección se p
     """
     try:
         # 3.1. Obtenemos la colección dinámicamente
-        # Usamos db[collection_name] para seleccionar la colección
-        cursor = db[collection_name].find({})
+        cursor = db.db[collection_name].find({})
+
     except Exception as e:
         # Si ocurre un error en la consulta a Mongo, devolvemos un 500
         abort(500, description=f"Error al consultar la base de datos o colección '{collection_name}': {e}")

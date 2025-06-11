@@ -18,58 +18,66 @@
     <body>
     <!-- Header -->
     {% block header %}
-<div class="header d-flex justify-content-between align-items-center">
-  <div class="header-left d-flex align-items-center">
-    <a href="{{ url_for('home') }}">
-      <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}"
-           alt="IRIS Logo" class="logo-small">
-    </a>
-    <span class="app-name ms-2">IRIS</span>
-
-    <!-- Pestañas de navegación -->
-    <nav class="nav-tabs ms-4">
+    <div class="header d-flex justify-content-between align-items-center">
+      <div class="header-left d-flex align-items-center">
         <a href="{{ url_for('home') }}">
-        <i class="fas fa-home me-1"></i> {{ _('Inicio') }}
+          <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}"
+               alt="IRIS Logo" class="logo-small">
         </a>
+        <span class="app-name ms-2">IRIS</span>
     
+        <!-- Pestañas de navegación -->
+        <nav class="nav-tabs ms-4">
+          <a href="{{ url_for('home') }}">
+            <i class="fas fa-home me-1"></i> {{ _('Inicio') }}
+          </a>
+    
+          {% if current_user %}
+            <a href="{{ url_for('table.table_iris') }}">
+              <i class="fas fa-history me-1"></i> {{ _('Histórico de datos') }}
+            </a>
+            <a href="{{ url_for('dashboard.dashboard_iris') }}">
+              <i class="fas fa-chart-bar me-1"></i> {{ _('Visualización de datos') }}
+            </a>
+    
+            {% if 'admin' in current_user.roles %}
+              <a href="{{ url_for('admin.admin_dashboard') }}">
+                <i class="fas fa-cog me-1"></i> {{ _('Admin') }}
+              </a>
+            {% endif %}
+          {% endif %}
+    
+          <a href="{{ url_for('contact.contact_iris') }}">
+            <i class="fas fa-envelope me-1"></i> {{ _('Contacto') }}
+          </a>
+        </nav>
+      </div>
+    
+      <div class="header-right d-flex align-items-center">
         {% if current_user %}
-        <a href="{{ url_for('table.table_iris') }}">
-            <i class="fas fa-history me-1"></i> {{ _('Histórico de datos') }}
-        </a>
-        <a href="{{ url_for('dashboard.dashboard_iris') }}">
-            <i class="fas fa-chart-bar me-1"></i> {{ _('Visualización de datos') }}
-        </a>
+          <span class="me-3 d-flex align-items-center welcome-text">
+            <i class="fas fa-user-circle me-1"></i>
+            {{ _('Hola') }}, <strong>{{ current_user.first_name }}</strong>!
+          </span>
+          <a href="{{ url_for('auth.logout') }}"
+             class="btn btn-outline-danger d-flex align-items-center">
+            <i class="fas fa-sign-out-alt me-1"></i> {{ _('Logout') }}
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" 
+             class="btn btn-outline-primary me-2">
+            <i class="fas fa-sign-in-alt me-1"></i> {{ _('Login') }}
+          </a>
+          <a href="{{ url_for('auth.register') }}" 
+             class="btn btn-primary d-flex align-items-center">
+            <i class="fas fa-user-plus me-1"></i> {{ _('Registro') }}
+          </a>
         {% endif %}
+        {% block analysis %}{% endblock %}
+      </div>
+    </div>
+    {% endblock %}
     
-        <a href="{{ url_for('contact.contact_iris') }}">
-        <i class="fas fa-envelope me-1"></i> {{ _('Contacto') }}
-        </a>
-    </nav>
-  </div>
-
-  <div class="header-right d-flex align-items-center">
-    {% if current_user %}
-    <span class="me-3 d-flex align-items-center welcome-text">
-        <i class="fas fa-user-circle me-1"></i>
-        {{ _('Hola') }}, <strong>{{ current_user.first_name }}</strong>!
-    </span>
-    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger d-flex align-items-center">
-        <i class="fas fa-sign-out-alt me-1"></i> {{ _('Logout') }}
-    </a>
-    {% else %}
-      <a href="{{ url_for('auth.login') }}" 
-         class="btn btn-outline-primary me-2">
-        <i class="fas fa-sign-in-alt"></i> {{ _('Login') }}
-      </a>
-      <a href="{{ url_for('auth.register') }}" 
-         class="btn btn-primary">
-        <i class="fas fa-user-plus"></i> {{ _('Registro') }}
-      </a>
-    {% endif %}
-    {% block analysis %}{% endblock %}
-  </div>
-</div>
-{% endblock %}
 
 
     <!-- Contenido principal -->
