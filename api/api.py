@@ -72,6 +72,25 @@ def healthcheck():
 # ===========
 # DATA
 # ===========
+
+@app.route('/data/get_document/<doc_id>', methods=['GET'])
+def get_document(doc_id):
+    # 1) validar ObjectId
+    try:
+        oid = ObjectId(doc_id)
+    except Exception:
+        return jsonify({'error': 'ID inválido'}), 400
+
+    # 2) recuperar de Mongo
+    doc = db.iris_analysis.find_one({'_id': oid})
+    if not doc:
+        return jsonify({'error': 'Documento no encontrado'}), 404
+
+    # 3) serializar _id para JSON
+    doc['_id'] = str(doc['_id'])
+    return jsonify(doc), 200
+
+
 @app.route("/data/get_contexto", methods=["GET"])
 def get_contexto():
     try:

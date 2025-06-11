@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <style>
+    /* Incluye aquí tu CSS de highlights, por ejemplo: */
+    {% for key, cls in highlight_map.items() %}
+    .{{ cls }} { background-color: {{ cls }} !important; }
+    {% endfor %}
+    body { font-family: sans-serif; line-height: 1.4; padding: 1rem; }
+    h2 { margin-bottom: .5rem; }
+    .section { margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>Informe de análisis</h1>
+  {% if data.title %}
+    <h2>{{ data.title }}</h2>
+  {% endif %}
+  {% if data.authors %}
+    <p><strong>Autores:</strong> {{ data.authors|join(', ') if data.authors is iterable else data.authors }}</p>
+  {% endif %}
+  {% if data.url %}
+    <p><strong>Fuente:</strong> <a href="{{ data.url }}">{{ data.url }}</a></p>
+  {% endif %}
+
+  {% for section, html in data.highlight.original.items() %}
+    <div class="section">
+      <h3>{{ section.replace('_',' ').capitalize() }}</h3>
+      <div class="markup-area">
+        {{ html|safe }}
+      </div>
+    </div>
+  {% endfor %}
+</body>
+</html>

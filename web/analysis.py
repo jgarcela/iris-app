@@ -1,12 +1,17 @@
 # web/analysis.py
 import json
 import re
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, render_template, request, jsonify, session, abort
 import requests
 from flask_babel import get_locale
 import configparser
 import ast
+
 from web.logger import logger
+
+from flask import render_template, make_response, current_app, request
+# Elige la librería; aquí con WeasyPrint
+from weasyprint import HTML
 
 # ----------------- BLUEPRINT -----------------
 bp = Blueprint(
@@ -26,9 +31,13 @@ API_HOST = config['API']['HOST']
 API_PORT = config['API']['PORT']
 API_HEADERS_str = config['API']['HEADERS']
 API_HEADERS = ast.literal_eval(API_HEADERS_str)
+
 ENDPOINT_ANALYSIS = config['API']['ENDPOINT_ANALYSIS']
 ENDPOINT_ANALYSIS_ANALYZE = config['API']['ENDPOINT_ANALYSIS_ANALYZE']
 ENDPOINT_ANALYSIS_EDITS = config['API']['ENDPOINT_ANALYSIS_EDITS']
+
+ENDPOINT_DATA = config['API']['ENDPOINT_DATA']
+ENDPOINT_DATA_GET_DOCUMENT = config['API']['ENDPOINT_DATA_GET_DOCUMENT']
 
 # ----------------- VARIABLES -----------------
 HIGHLIGHT_COLOR_MAP = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'])
@@ -40,7 +49,46 @@ FUENTES_VARIABLES = ast.literal_eval(config['FUENTES']['VARIABLES'])
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
 URL_API_ENDPOINT_ANALYSIS_EDITS = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_EDITS}"
 
+URL_API_ENDPOINT_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}"
+URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GET_DOCUMENT}"
+
 #  ----------------- ENDPOINTS -----------------
+@bp.route('/generate_report/<doc_id>', methods=['GET'])
+def generate_report(doc_id):
+    # 1) Llamada al endpoint API para obtener el documento
+
+    
+    url = f"{URL_API_ENDPOINT_DATA_GET_DOCUMENT}/{doc_id}"
+    print(f"{url=}")
+    resp = requests.get(url)
+
+    if resp.status_code == 404:
+        abort(404, description="Documento no encontrado")
+    if resp.status_code != 200:
+        abort(resp.status_code, description="Error al obtener el documento")
+
+    data = resp.json()
+
+    # 2) Renderizar HTML puro con highlights
+    html = render_template(
+        'report.html',
+        data=data,
+        highlight_map=HIGHLIGHT_COLOR_MAP
+    )
+
+    # 3) Generar PDF con WeasyPrint
+    base_url = request.url_root
+    pdf = HTML(string=html, base_url=base_url).write_pdf()
+
+    # 4) Devolver PDF como descarga
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = (
+        f'attachment; filename=Informe_{doc_id}.pdf'
+    )
+    return response
+
+
 @bp.route('/analyze', methods=['GET', 'POST'])
 def analyze():
     logger.info(f"[/ANALYSIS/ANALYZE] Request to analysis/analyze from {request.remote_addr} with method {request.method}")
