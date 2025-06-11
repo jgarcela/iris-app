@@ -10,7 +10,6 @@ import ast
 from web.logger import logger
 
 from flask import render_template, make_response, current_app, request
-# Elige la librería; aquí con WeasyPrint
 from weasyprint import HTML
 
 # ----------------- BLUEPRINT -----------------
@@ -56,10 +55,8 @@ URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GE
 @bp.route('/generate_report/<doc_id>', methods=['GET'])
 def generate_report(doc_id):
     # 1) Llamada al endpoint API para obtener el documento
-
-    
     url = f"{URL_API_ENDPOINT_DATA_GET_DOCUMENT}/{doc_id}"
-    print(f"{url=}")
+
     resp = requests.get(url)
 
     if resp.status_code == 404:
