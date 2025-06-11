@@ -425,6 +425,13 @@
   gap: 1.5rem;
 }
 
+/* Estilo para el texto de bienvenida */
+.welcome-text {
+  color: var(--blue-iris-color);
+  font-weight: 500;        /* Seminégrita */
+  font-style: italic;      /* Cursiva ligera */
+}
+
 /* --------------------------- */
 /* Dashboard */
 /* --------------------------- */

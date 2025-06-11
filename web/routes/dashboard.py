@@ -9,8 +9,8 @@ import ast
 from collections import Counter
 from datetime import datetime
 
-from web.logger import logger
-
+from web.utils.logger import logger
+from web.utils.decorators import login_required
 
 # ----------------- BLUEPRINT -----------------
 bp = Blueprint(
@@ -47,6 +47,7 @@ URL_API_ENDPOINT_DASHBOARD_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DASHB
 
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/iris/old', methods=['GET', 'POST'])
+@login_required
 def dashboard_iris_old():
     logger.info(f"[/DASHBOARD/IRIS/OLD] Request to dashboard/iris from {request.remote_addr} with method {request.method}")
     logger.info("[/DASHBOARD/IRIS/OLD] Rendering dashboard iris template...")
@@ -54,6 +55,7 @@ def dashboard_iris_old():
 
 
 @bp.route('/iris', methods=['GET', 'POST'])
+@login_required
 def dashboard_iris():
     logger.info(f"[/DASHBOARD/IRIS] Request from {request.remote_addr} [{request.method}]")
 

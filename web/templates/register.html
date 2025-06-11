@@ -1,0 +1,102 @@
+{# templates/register.html #}
+{% extends 'base.html' %}
+{% block title %}Registro de usuario{% endblock %}
+
+{% block content %}
+<div class="container card-principal mt-5">
+  <h2 class="mb-4">Registro de usuario</h2>
+
+  <form id="register-form" class="form">
+    <div class="mb-3">
+      <label for="first_name" class="form-label">Nombre</label>
+      <input type="text" id="first_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="last_name" class="form-label">Apellido</label>
+      <input type="text" id="last_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Correo electrónico</label>
+      <input type="email" id="email" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="username" class="form-label">Usuario</label>
+      <div class="input-group">
+        <span class="input-group-text">@</span>
+        <input type="text" id="username" class="form-control" placeholder="usuario" required>
+      </div>
+      <div class="form-text">Tu nombre de usuario empezará siempre por “@”.</div>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Contraseña</label>
+      <input type="password" id="password" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="confirm" class="form-label">Confirmar contraseña</label>
+      <input type="password" id="confirm" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">Registrarse</button>
+  </form>
+
+  <p class="mt-3">
+    ¿Ya tienes cuenta?
+    <a href="{{ url_for('auth.login') }}">Inicia sesión aquí</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    window.api_url_register = {{ api_url_register | tojson | safe }};
+</script>
+
+<script>
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const first_name = this.first_name.value.trim();
+  const last_name  = this.last_name.value.trim();
+  const email      = this.email.value.trim();
+  let username     = this.username.value.trim();
+  const password   = this.password.value;
+  const confirm    = this.confirm.value;
+
+  if (password !== confirm) {
+    alert('Las contraseñas no coinciden.');
+    return;
+  }
+  if (!username) {
+    alert('El usuario es obligatorio.');
+    return;
+  }
+
+  // Aseguramos que el valor enviado no lleve '@' duplicado
+  if (username.startsWith('@')) {
+    username = username.slice(1);
+  }
+
+  try {
+    const res = await fetch(`${window.api_url_register}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name, last_name, email,
+        username: '@' + username,
+        password
+      })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.msg || 'Error al registrar');
+      return;
+    }
+
+    alert('Registro exitoso. Por favor, inicia sesión.');
+    window.location.href = "{{ url_for('auth.login') }}";
+  } catch (err) {
+    console.error(err);
+    alert('Error de red, inténtalo de nuevo.');
+  }
+});
+</script>
+{% endblock %}

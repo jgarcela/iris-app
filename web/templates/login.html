@@ -1,0 +1,62 @@
+{# templates/login.html #}
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<div class="container card-principal mt-5">
+  <h2 class="mb-4">Iniciar sesión</h2>
+
+  <form id="login-form" class="form">
+    <div class="mb-3">
+      <label for="email" class="form-label">Correo electrónico</label>
+      <input type="email" id="email" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Contraseña</label>
+      <input type="password" id="password" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Entrar</button>
+  </form>
+
+  <p class="mt-3">
+    ¿No tienes cuenta?
+    <a href="{{ url_for('auth.register') }}">Regístrate aquí</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+    // La ruta de login de la API se inyecta desde tu view
+    window.api_url_login = {{ api_url_login | tojson | safe }};
+</script>
+<script>
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const email    = this.email.value.trim();
+  const password = this.password.value;
+
+  try {
+    const res = await fetch(window.api_url_login, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.msg || 'Correo o contraseña incorrectos');
+      return;
+    }
+
+    // Guardar el JWT en cookie y redirigir
+    document.cookie = `access_token_cookie=${data.access_token}; Path=/; Max-Age=3600; Secure; SameSite=Lax`;
+    window.location.href = "{{ url_for('home') }}";
+  } catch (err) {
+    console.error(err);
+    alert('Error de red, inténtalo de nuevo.');
+  }
+});
+</script>
+{% endblock %}

@@ -4,7 +4,7 @@ import requests
 from flask_babel import get_locale
 import configparser
 import ast
-from web.logger import logger
+from web.utils.logger import logger
 
 
 # ----------------- BLUEPRINT -----------------

@@ -3,16 +3,137 @@
 <head>
   <meta charset="utf-8">
   <style>
-    /* Incluye aquí tu CSS de highlights, por ejemplo: */
+    /* Definir elemento de encabezado con posición running */
+    header {
+      position: running(header);
+      display: block;
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+
+    /* Contador de páginas con encabezado en cada página */
+    @page {
+      @top-center {
+        content: element(header);
+      }
+      @bottom-center {
+        content: "Página " counter(page) " de " counter(pages);
+        font-size: 10px;
+        color: #666;
+      }
+    }
+
+    body {
+      counter-reset: page;
+      font-family: sans-serif;
+      line-height: 1.4;
+      padding: 1rem;
+      font-size: 12px;
+      text-align: justify;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-small {
+      height: 24px;
+      margin-right: 8px;
+    }
+
+    .iris-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .meta {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    /* Índice */
+    .toc {
+      page-break-after: always;
+    }
+
+    .toc h2 {
+      text-align: center;
+    }
+
+    .toc ol {
+      margin-left: 1rem;
+    }
+
+    .toc li {
+      margin: 0.25rem 0;
+    }
+
+    .pagenum::after {
+      content: leader('.') target-counter(attr(href), page);
+    }
+
+    /* Highlights */
     {% for key, cls in highlight_map.items() %}
     .{{ cls }} { background-color: {{ cls }} !important; }
     {% endfor %}
-    body { font-family: sans-serif; line-height: 1.4; padding: 1rem; }
-    h2 { margin-bottom: .5rem; }
-    .section { margin-bottom: 2rem; }
+
+    /* Sección: cada una empieza en nueva página */
+    .section {
+      page-break-before: always;
+    }
   </style>
 </head>
 <body>
+  <!-- Encabezado visible y para running(header) -->
+  <header>
+    <div class="header-content">
+      <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="IRIS Logo" class="logo-small">
+      <span class="iris-title">IRIS</span>
+    </div>
+  </header>
+
+  <!-- Metadatos y fecha -->
+  <div class="meta">
+    <strong>Fecha de generación:</strong>
+    {{ generation_date.strftime('%d/%m/%Y %H:%M') }}
+  </div>
+
+  <h1>Índice</h1>
+  <div class="toc">
+    <ol>
+      {% for section in sections %}
+        <li>
+          <a href="#sec-{{ loop.index }}">{{ section.replace('_',' ').capitalize() }}</a>
+          <span class="pagenum" href="#sec-{{ loop.index }}"></span>
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <!-- Título y meta artículo -->
   <h1>Informe de análisis</h1>
   {% if data.title %}
     <h2>{{ data.title }}</h2>
@@ -24,8 +145,9 @@
     <p><strong>Fuente:</strong> <a href="{{ data.url }}">{{ data.url }}</a></p>
   {% endif %}
 
+  <!-- Secciones destacadas -->
   {% for section, html in data.highlight.original.items() %}
-    <div class="section">
+    <div class="section" id="sec-{{ loop.index }}">
       <h3>{{ section.replace('_',' ').capitalize() }}</h3>
       <div class="markup-area">
         {{ html|safe }}

@@ -1,4 +1,4 @@
-# web/dashboard.py
+# web/table.py
 import json
 import re
 from flask import Blueprint, render_template, request, jsonify, session, abort
@@ -8,8 +8,9 @@ import configparser
 import ast
 from datetime import datetime
 
-from web.logger import logger
+from web.utils.logger import logger
 
+from web.utils.decorators import login_required
 
 # ----------------- BLUEPRINT -----------------
 bp = Blueprint(
@@ -44,6 +45,7 @@ URL_API_ENDPOINT_DATA_GET_CONTEXTO = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GE
 
 #  ----------------- ENDPOINTS -----------------
 @bp.route("/iris")
+@login_required
 def table_iris():
 
     logger.info(f"[/TABLE/IRIS] Request from {request.remote_addr} [{request.method}]")

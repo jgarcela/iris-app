@@ -6,8 +6,10 @@ import requests
 from flask_babel import get_locale
 import configparser
 import ast
+from datetime import datetime
 
-from web.logger import logger
+from web.utils.logger import logger
+from web.utils.decorators import login_required
 
 from flask import render_template, make_response, current_app, request
 from weasyprint import HTML
@@ -53,40 +55,41 @@ URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GE
 
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/generate_report/<doc_id>', methods=['GET'])
+@login_required
 def generate_report(doc_id):
-    # 1) Llamada al endpoint API para obtener el documento
+    # 1) Llamada al API para obtener el documento
     url = f"{URL_API_ENDPOINT_DATA_GET_DOCUMENT}/{doc_id}"
-
     resp = requests.get(url)
-
     if resp.status_code == 404:
         abort(404, description="Documento no encontrado")
     if resp.status_code != 200:
         abort(resp.status_code, description="Error al obtener el documento")
-
     data = resp.json()
 
-    # 2) Renderizar HTML puro con highlights
+    # 2) Listado de secciones para el índice
+    sections = list(data.get('highlight', {}).get('original', {}).keys())
+
+    # 3) Renderizar HTML con fecha y secciones
     html = render_template(
         'report.html',
         data=data,
-        highlight_map=HIGHLIGHT_COLOR_MAP
+        highlight_map=HIGHLIGHT_COLOR_MAP,
+        generation_date=datetime.now(),
+        sections=sections
     )
 
-    # 3) Generar PDF con WeasyPrint
-    base_url = request.url_root
-    pdf = HTML(string=html, base_url=base_url).write_pdf()
+    # 4) Generar PDF
+    pdf = HTML(string=html, base_url=request.url_root).write_pdf()
 
-    # 4) Devolver PDF como descarga
+    # 5) Devolver PDF
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = (
-        f'attachment; filename=Informe_{doc_id}.pdf'
-    )
+    response.headers['Content-Disposition'] = f'attachment; filename=Informe_{doc_id}.pdf'
     return response
 
 
 @bp.route('/analyze', methods=['GET', 'POST'])
+@login_required
 def analyze():
     logger.info(f"[/ANALYSIS/ANALYZE] Request to analysis/analyze from {request.remote_addr} with method {request.method}")
 
@@ -129,6 +132,7 @@ def analyze():
 
 
 @bp.route('/analyze/v0', methods=['GET', 'POST'])
+@login_required
 def analyze_v0():
 
     logger.info(f"[/ANALYSIS/ANALYZE/V0] Request to analysis/analyze/v0 from {request.remote_addr} with method {request.method}")
