@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Contacto') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">{{ _('Contacto') }}</h1>
+
+  <p>
+    {{ _('Este proyecto es una iniciativa conjunta de la Universidad Carlos III de Madrid (UC3M) y del Instituto de Estudios de Género de la UC3M, y cuenta con el apoyo y financiación de la Comunidad de Madrid.') }}
+  </p>
+
+  <h2 class="mt-5">{{ _('Correos de contacto') }}</h2>
+  <ul class="list-unstyled">
+    <li><a href="mailto:iris@uc3m.es">iris@uc3m.es</a></li>
+    <li><a href="mailto:genero@uc3m.es">genero@uc3m.es</a></li>
+  </ul>
+</div>
+{% endblock %}

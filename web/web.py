@@ -111,6 +111,11 @@ def home():
     logger.info("[/HOME] Rendering home template...")
     return render_template('index.html')
 
+@app.route('/contacto', methods=['GET'])
+def contacto():
+    logger.info("[/CONTACTO] Rendering contacto template...")
+    return render_template('contacto.html')
+
 @app.route('/v0', methods=['GET'])
 def home_v0():
     logger.debug(f"[/V0] Language: {get_locale()}")
