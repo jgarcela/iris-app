@@ -1,4 +1,8 @@
 # api/__init__.py
+
+# ==================================
+#  LIBRARIES 
+# ==================================
 import configparser
 import ast
 from flask import Flask, jsonify
@@ -58,7 +62,7 @@ CORS(app,
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-# Mapeo de idiomas (si lo necesitas en la app)
+# Mapeo de idiomas
 language_map = {
     "es": "español",
     "en": "inglés",
@@ -95,7 +99,7 @@ def healthcheck():
 
 
 # ==================================
-#  ENDPOINTS 
+#  ENDPOINTS REGISTRADOS
 # ==================================
 print("\n=== Rutas registradas ===")
 for rule in app.url_map.iter_rules():
