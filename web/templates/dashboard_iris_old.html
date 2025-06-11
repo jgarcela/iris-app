@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Dashboard') }} - IRIS{% endblock %}
+
+{% block content %}
+  <div class="dashboard-container">
+    <iframe title="Noticias_2025"
+            src="{{ url }}" 
+            frameborder="0" allowFullScreen="true"></iframe>
+  </div>
+{% endblock %}

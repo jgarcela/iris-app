@@ -1,11 +1,158 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Dashboard') }} - IRIS{% endblock %}
+{% block title %}{{ _('Dashboard') }} – IRIS{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
-  <div class="dashboard-container">
-    <iframe title="Noticias_2025"
-            src="{{ url }}" 
-            frameborder="0" allowFullScreen="true"></iframe>
+<div class="dashboard-filters">
+  <h1>
+    {{ _('Listado completo de Noticias') }}
+    {% if selected_context %}
+      – <em>{{ selected_context }}</em>
+    {% else %}
+      – {{ _('Todos los datos') }}
+    {% endif %}
+    {% set fd = request.args.get('fecha_desde') %}
+    {% set fh = request.args.get('fecha_hasta') %}
+    {% if fd or fh %}
+      – <span class="periodo">
+        {{ _('Periodo') }}:
+        {{ fd if fd else _('inicio') }}
+        {{ _('a') }}
+        {{ fh if fh else _('hoy') }}
+      </span>
+    {% endif %}
+  </h1>
+  <form method="get" action="{{ url_for('dashboard.dashboard_iris') }}">
+    <!-- Primera fila: Contexto + Botón -->
+    <div class="filter-db">
+      <label for="context"><i class="fas fa-layer-group"></i> {{ _('Contexto') }}</label>
+      <select id="context" name="context">
+        <option value="">{{ _('Todos') }}</option>
+        {% for ctx in contextos %}
+          <option value="{{ ctx }}" {% if ctx == selected_context %}selected{% endif %}>
+            {{ ctx }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-submit">
+      <button type="submit"><i class="fas fa-filter"></i> {{ _('Filtrar') }}</button>
+    </div>
+
+    <!-- Segunda fila: Fechas Desde / Hasta -->
+    <div class="filter-date">
+      <label for="fecha_desde"><i class="fas fa-calendar-alt"></i> {{ _('Desde') }}</label>
+      <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fd }}">
+    </div>
+    <div class="filter-date">
+      <label for="fecha_hasta"><i class="fas fa-calendar-alt"></i> {{ _('Hasta') }}</label>
+      <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fh }}">
+    </div>
+  </form>
+</div>
+
+<div class="dashboard-container">
+  <!-- ==================== FILA SUPERIOR ==================== -->
+  <div class="dashboard-top">
+    <!-- 1) Total Noticias Analizadas -->
+    <div class="card">
+      <div class="card-header">{{ _('Total Noticias Analizadas') }}</div>
+      <div class="card-body" style="font-size: 3rem; color: #5e2a84;">
+        {{ total_count }}
+      </div>
+    </div>
+
+    <!-- 2) Nombre propio Titular -->
+    <div class="card">
+      <div class="card-header">{{ _('Nombre propio Titular') }}</div>
+      <div class="card-body">
+        <canvas id="nombreTitularChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 3) Cita en el titular -->
+    <div class="card">
+      <div class="card-header">{{ _('Cita en el titular') }}</div>
+      <div class="card-body">
+        <canvas id="citaTitularChart"></canvas>
+      </div>
+    </div>
   </div>
+
+  <hr class="separator" />
+
+  <!-- ==================== SECCIÓN INFERIOR ==================== -->
+  <div class="dashboard-bottom">
+    <!-- COLUMNA IZQUIERDA: 3 doughnuts apilados -->
+    <div class="stacked-charts">
+      <!-- 4) Menciona IA -->
+      <div class="card">
+        <div class="card-header">{{ _('Menciona IA') }}</div>
+        <div class="card-body">
+          <canvas id="mencionaIAChart"></canvas>
+        </div>
+      </div>
+      <!-- 5) IA Tema principal -->
+      <div class="card">
+        <div class="card-header">{{ _('IA Tema principal') }}</div>
+        <div class="card-body">
+          <canvas id="iaTemaPrincipalChart"></canvas>
+        </div>
+      </div>
+      <!-- 6) Explicación Significado IA -->
+      <div class="card">
+        <div class="card-header">{{ _('Explicación Significado IA') }}</div>
+        <div class="card-body">
+          <canvas id="significadoIAChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA CENTRAL: Temática de las Noticias y Autores -->
+    <div class="center-column">
+      <div class="card">
+        <div class="card-header">{{ _('Temática de las Noticias') }}</div>
+        <div class="card-body">
+          <canvas id="tematicaChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">{{ _('Autores de la Noticia') }}</div>
+        <div class="card-body">
+          <canvas id="generoPeriodistaChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: dos doughnuts apilados -->
+    <div class="stacked-charts">
+      <!-- 7) Género de las personas que aparecen en las Noticias -->
+      <div class="card">
+        <div class="card-header">{{ _('Género de las personas que aparecen en las Noticias') }}</div>
+        <div class="card-body">
+          <canvas id="generoPersonasChart"></canvas>
+        </div>
+      </div>
+      <!-- 8) Extensión de la noticia -->
+      <div class="card">
+        <div class="card-header">{{ _('Extensión de la noticia') }}</div>
+        <div class="card-body">
+          <canvas id="extensionNoticiaChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+  <script>
+    window.CHART_DATA = {{ chart_data | tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/dashboard_charts.js') }}"></script>
 {% endblock %}
