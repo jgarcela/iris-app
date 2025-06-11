@@ -30,8 +30,19 @@ API_HEADERS_str = config['API']['HEADERS']
 API_HEADERS = ast.literal_eval(API_HEADERS_str)
 ENDPOINT_ANALYSIS = config['API']['ENDPOINT_ANALYSIS']
 ENDPOINT_ANALYSIS_ANALYZE = config['API']['ENDPOINT_ANALYSIS_ANALYZE']
+ENDPOINT_AUTH = config['API']['ENDPOINT_AUTH']
+ENDPOINT_AUTH_REGISTER = config['API']['ENDPOINT_AUTH_REGISTER']
+ENDPOINT_AUTH_LOGIN = config['API']['ENDPOINT_AUTH_LOGIN']
+ENDPOINT_AUTH_ME = config['API']['ENDPOINT_AUTH_ME']
+ENDPOINT_AUTH_REFRESH = config['API']['ENDPOINT_AUTH_REFRESH']
 
-# ----------------- ENDPOINTS -----------------
+
+# ----------------- URLs -----------------
+URL_API_ENDPOINT_AUTH = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_AUTH}"
+URL_API_ENDPOINT_AUTH_REGISTER = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_REGISTER}"
+URL_API_ENDPOINT_AUTH_LOGIN = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_LOGIN}"
+URL_API_ENDPOINT_AUTH_ME = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_ME}"
+URL_API_ENDPOINT_AUTH_REFRESH = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_REFRESH}"
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
 
 
@@ -77,10 +88,8 @@ def inject_user():
         return dict(current_user=None)
 
     try:
-        # URL “hardcodeada” de tu endpoint /me
-        api_me = 'http://localhost:8000/auth/me'
         headers = {'Authorization': f'Bearer {token}'}
-        resp = requests.get(api_me, headers=headers, timeout=2)
+        resp = requests.get(URL_API_ENDPOINT_AUTH_ME, headers=headers, timeout=2)
         if resp.ok:
             user = resp.json().get('user')
             return dict(current_user=user)
