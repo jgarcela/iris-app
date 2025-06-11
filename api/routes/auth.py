@@ -10,6 +10,7 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 from bson import ObjectId
+import re
 
 from database.db import db
 from api.utils.logger import logger
@@ -32,19 +33,17 @@ def register():
     first_name = data.get('first_name', '').strip()
     last_name  = data.get('last_name', '').strip()
     email      = data.get('email', '').strip().lower()
-    username   = data.get('username', '').strip()
     password   = data.get('password', '')
 
     # Validaciones
-    if not all([first_name, last_name, email, username, password]):
+    if not all([first_name, last_name, email, password]):
         return jsonify(msg="Todos los campos son obligatorios"), 400
-    # opcional: validar formato de email con regex
-    if not username.startswith('@'):
-        return jsonify(msg="El usuario debe empezar por @"), 400
+
+    # Validación de formato de email con regex:
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return jsonify(msg="Formato de correo inválido"), 400
 
     users = db[api.COLLECTION_USERS]
-    if users.find_one({'username': username}):
-        return jsonify(msg="El usuario ya existe"), 409
     if users.find_one({'email': email}):
         return jsonify(msg="El correo ya está en uso"), 409
 
@@ -53,10 +52,10 @@ def register():
         'first_name': first_name,
         'last_name': last_name,
         'email': email,
-        'username': username,
         'password': pw_hash
     })
     return jsonify(msg="Registro correcto"), 201
+
 
 
 @bp.route('/login', methods=['POST'])
@@ -88,7 +87,6 @@ def me():
         'first_name': user.get('first_name'),
         'last_name':  user.get('last_name'),
         'email':      user.get('email'),
-        'username':   user.get('username')
     }), 200
 
 

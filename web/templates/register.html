@@ -20,14 +20,6 @@
       <input type="email" id="email" class="form-control" required>
     </div>
     <div class="mb-3">
-      <label for="username" class="form-label">Usuario</label>
-      <div class="input-group">
-        <span class="input-group-text">@</span>
-        <input type="text" id="username" class="form-control" placeholder="usuario" required>
-      </div>
-      <div class="form-text">Tu nombre de usuario empezará siempre por “@”.</div>
-    </div>
-    <div class="mb-3">
       <label for="password" class="form-label">Contraseña</label>
       <input type="password" id="password" class="form-control" required>
     </div>
@@ -47,6 +39,7 @@
 
 {% block scripts_extra %}
 <script>
+    // Se inyecta desde tu view la URL de registro de la API
     window.api_url_register = {{ api_url_register | tojson | safe }};
 </script>
 
@@ -55,8 +48,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
   e.preventDefault();
   const first_name = this.first_name.value.trim();
   const last_name  = this.last_name.value.trim();
-  const email      = this.email.value.trim();
-  let username     = this.username.value.trim();
+  const email      = this.email.value.trim().toLowerCase();
   const password   = this.password.value;
   const confirm    = this.confirm.value;
 
@@ -64,23 +56,15 @@ document.getElementById('register-form').addEventListener('submit', async functi
     alert('Las contraseñas no coinciden.');
     return;
   }
-  if (!username) {
-    alert('El usuario es obligatorio.');
-    return;
-  }
-
-  // Aseguramos que el valor enviado no lleve '@' duplicado
-  if (username.startsWith('@')) {
-    username = username.slice(1);
-  }
 
   try {
-    const res = await fetch(`${window.api_url_register}`, {
+    const res = await fetch(window.api_url_register, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        first_name, last_name, email,
-        username: '@' + username,
+        first_name,
+        last_name,
+        email,
         password
       })
     });
