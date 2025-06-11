@@ -433,3 +433,58 @@
   height: 85vh;
   border: none;
 }
+
+
+
+/* --------------------------- */
+/* Tablas */
+/* --------------------------- */
+/* static/css/tablas.css */
+
+/* Contenedor general de la tabla */
+.tabla-contenedor {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #e3e6f0;
+  border-radius: 0.375rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Encabezado principal */
+.tabla-contenedor h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4e73df;
+  margin-bottom: 1rem;
+}
+
+/* Sombra / resaltado al pasar el ratón por la fila */
+#tabla-noticias tbody tr:hover {
+  background-color: #f8f9fc;
+  cursor: pointer;
+}
+
+/* Clases para badges personalizados */
+.badge-activo {
+  background-color: #1cc88a !important;
+  color: #ffffff !important;
+}
+.badge-inactivo {
+  background-color: #858796 !important;
+  color: #ffffff !important;
+}
+
+/* Scroll interno vertical si hay muchas filas */
+.tabla-scroll {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Pequeños ajustes a los inputs del filter-control (opcional) */
+.filter-control input,
+.filter-control select {
+  height: 1.8rem;
+  font-size: 0.85rem;
+  padding: 0 0.25rem;
+}

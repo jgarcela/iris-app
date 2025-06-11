@@ -2,3 +2,5 @@
 *.ini
 __pycache__
 *.pyc
+logs
+*.ipynb

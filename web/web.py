@@ -8,6 +8,7 @@ import ast
 from web.analysis import bp as analysis_bp
 from web.dashboard import bp as dashboard_bp
 from web.report import bp as report_bp
+from web.table import bp as table_bp
 from web.logger import logger
 
 
@@ -39,6 +40,7 @@ app.secret_key = config['DEFAULT']['SECRET_KEY']
 app.register_blueprint(analysis_bp)
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(report_bp)
+app.register_blueprint(table_bp)
 # app.register_blueprint(bp_users)
 
 
@@ -87,6 +89,20 @@ def set_language():
         return jsonify(success=False), 400
 
 
+# Manejadores de error personalizados
+@app.errorhandler(502)
+def error_mala_conexion_api(error):
+    return f"<h1>502 Bad Gateway</h1><p>{error.description}</p>", 502
+
+@app.errorhandler(404)
+def error_no_encontrado(error):
+    return f"<h1>404 Not Found</h1><p>{error.description}</p>", 404
+
+@app.errorhandler(500)
+def error_server_interno(error):
+    return f"<h1>500 Internal Server Error</h1><p>{error.description}</p>", 500
+
+# Rutas
 @app.route('/', methods=['GET'])
 @app.route('/index', methods=['GET'])
 @app.route('/home', methods=['GET'])
