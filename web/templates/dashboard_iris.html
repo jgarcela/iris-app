@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Dashboard') }} – IRIS{% endblock %}
+{% block title %}{{ _('Dashboard de Noticias') }} – IRIS{% endblock %}
 
 {% block head_extra %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
@@ -10,7 +10,7 @@
 {% block content %}
 <div class="dashboard-filters">
   <h1>
-    {{ _('Listado completo de Noticias') }}
+    {{ _('Dashboard completo de Noticias') }}
     {% if selected_context %}
       – <em>{{ selected_context }}</em>
     {% else %}
@@ -62,7 +62,7 @@
     <!-- 1) Total Noticias Analizadas -->
     <div class="card">
       <div class="card-header">{{ _('Total Noticias Analizadas') }}</div>
-      <div class="card-body" style="font-size: 3rem; color: #5e2a84;">
+      <div class="card-body" style="font-size: 3rem;">
         {{ total_count }}
       </div>
     </div>

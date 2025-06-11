@@ -6,6 +6,8 @@ import requests
 from flask_babel import get_locale
 import configparser
 import ast
+from datetime import datetime
+
 from web.logger import logger
 
 
@@ -43,30 +45,51 @@ URL_API_ENDPOINT_DATA_GET_CONTEXTO = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GE
 #  ----------------- ENDPOINTS -----------------
 @bp.route("/iris")
 def table_iris():
-    """
-    1) Hace petición GET a URL_API_ENDPOINT_DATA_NOTICIAS
-    2) Comprueba si el status_code es 200. Si no, aborta con error.
-    3) Asume que la respuesta es un JSON con un array de objetos.
-    4) Toma la lista y la pasa al template como 'noticias'.
-    """
 
+    logger.info(f"[/TABLE/IRIS] Request from {request.remote_addr} [{request.method}]")
+
+    # 1) Obtén los datos base (sin filtrar)
     try:
-        respuesta = requests.get(URL_API_ENDPOINT_DATA_COLLECTION, timeout=5)
-    except requests.RequestException as e:
-        # Si falla la conexión, devolvemos error 502 Bad Gateway (la API no responde)
-        abort(502, description=f"No se pudo conectar a la API: {e}")
+        res_data = requests.get(URL_API_ENDPOINT_DATA_COLLECTION, timeout=5)
+        res_data.raise_for_status()
+        raw_data = res_data.json()
+    except Exception as e:
+        abort(502, description=f"No se pudo conectar a la API de noticias: {e}")
 
-    if respuesta.status_code != 200:
-        # Si la API devuelve un error, por ejemplo 404 o 500, rebotamos ese código
-        abort(respuesta.status_code, description="Error al obtener datos desde la API")
-
-    # Asumimos que JSON es una lista de documentos (diccionarios):
+    # 2) Obtén los contextos únicos
     try:
-        lista_noticias = respuesta.json()
-    except ValueError:
-        # Si la API no devuelve un JSON válido, devolvemos un 500 Interno
-        abort(500, description="Respuesta de la API no es un JSON válido")
+        res_contexto = requests.get(URL_API_ENDPOINT_DATA_GET_CONTEXTO, timeout=5)
+        res_contexto.raise_for_status()
+        contexto_payload = res_contexto.json()  # {"contextos": [...]}
+        contextos = contexto_payload.get('contextos', [])
+    except Exception as e:
+        abort(502, description=f"No se pudo obtener contextos: {e}")
 
+    # 3) Lee el filtro de contexto y fecha desde args
+    selected_context = request.args.get('context', '').strip()
+    fd = request.args.get('fecha_desde')  # formato 'YYYY-MM-DD'
+    fh = request.args.get('fecha_hasta')  # formato 'YYYY-MM-DD'
+
+    # 4) Filtra por contexto si se ha seleccionado uno
+    if selected_context:
+        data = [item for item in raw_data if item.get('contexto') == selected_context]
+    else:
+        data = raw_data
+    
+    def parse_fecha_str(s):
+        # Asume que en data['Fecha'] está en 'DD/MM/YYYY'
+        return datetime.strptime(s, '%d/%m/%Y').date()
+
+    # 5) Filtrar por fechas si se proporcionan
+    if fd:
+        dt_desde = datetime.strptime(fd, '%Y-%m-%d').date()
+        data = [d for d in data if parse_fecha_str(d['Fecha']) >= dt_desde]
+    if fh:
+        dt_hasta = datetime.strptime(fh, '%Y-%m-%d').date()
+        data = [d for d in data if parse_fecha_str(d['Fecha']) <= dt_hasta]
+
+
+    # 6) Modificar formato de las columnas a mostrar o ocultar y el orden
     exclude_cols = [
                'textonoticia',
                'nombre_periodista',
@@ -79,6 +102,7 @@ def table_iris():
             ]
     
     order_cols = [
+              'contexto',
               'IdNoticia',
               'MES',
               'Fecha',
@@ -102,9 +126,11 @@ def table_iris():
         'numero_caracteres'
     ]
     
-    # Finalmente renderizamos el template pasando la lista de noticias
+    # 7) Finalmente renderizamos el template pasando la lista de noticias
     return render_template("table_iris.html", 
-                           noticias=lista_noticias, 
-                           exclude_cols=exclude_cols, 
-                           order_cols=order_cols,
-                           input_filter_cols=input_filter_cols)
+                            data=data, 
+                            exclude_cols=exclude_cols, 
+                            order_cols=order_cols,
+                            input_filter_cols=input_filter_cols,
+                            contextos=contextos,
+                            selected_context=selected_context)
