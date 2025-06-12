@@ -88,6 +88,19 @@ def generate_report(doc_id):
     return response
 
 
+@bp.route('/create_analysis', methods=['GET', 'POST'])
+@login_required
+def create_analysis():
+    logger.debug(f"[/HOME] Language: {get_locale()}")
+    logger.info("[/HOME] Rendering create analysis template...")
+    return render_template('analysis/create_analysis.html')
+
+@bp.route('/create_analysis/v0', methods=['GET'])
+def create_analysis_v0():
+    logger.debug(f"[/V0] Language: {get_locale()}")
+    logger.info("[/V0] Rendering create analysis v0 template...")
+    return render_template('analysis/create_analysis_v0.html')
+
 @bp.route('/analyze', methods=['GET', 'POST'])
 @login_required
 def analyze():

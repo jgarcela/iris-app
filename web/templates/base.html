@@ -89,6 +89,11 @@
                   <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('analysis.create_analysis') }}">
+                  <i class="fas fa-chart-bar me-1"></i> {{ _('Análisis') }}
+                </a>
+              </li>
               {% if 'admin' in current_user.roles %}
                 <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">

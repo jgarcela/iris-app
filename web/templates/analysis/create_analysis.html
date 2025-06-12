@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Home') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card-principal analyzer-card">
+    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" class="logo" alt="{{ _('IRIS Logo') }}">
+    <h1>{{ _('Analizador de Sesgos de Género') }}</h1>
+    <p class="subtitle">
+      {{ _('Herramienta para identificar y corregir lenguaje sexista y sesgos de género en textos periodísticos') }}
+    </p>
+
+    <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
+
+      <!-- SELECCIÓN DE MODELO-->
+      <label for="model">{{ _('Modelo') }} <span class="req">*</span></label>
+      <select id="model" name="model" class="input">
+          <option value="basico">{{ _('Básico…') }}</option>
+          <option value="avanzado"selected>{{ _('Avanzado') }}</option>
+      </select>
+      <!-- CONTENEDOR DE TEXTO -->
+      <div id="fields-text">
+        <label for="title">{{ _('Título del artículo') }}</label>
+        <input type="text" id="title" name="title" class="input text" placeholder="{{ _('Escribe aquí el título del artículo…') }}">
+    
+        <label for="authors">{{ _('Autores del artículo') }}</label>
+        <input type="text" id="authors" name="authors" class="input text" placeholder="{{ _('Escribe aquí los autores del artículo…') }}">
+    
+        <label for="text" id="label-text">
+          {{ _('Texto del artículo') }} <span class="req">*</span>
+        </label>
+        <textarea
+          id="input-text"
+          name="text"
+          class="input textarea"
+          placeholder="{{ _('Escribe aquí el texto que quieres analizar…') }}"
+          required>
+        </textarea>
+      </div>
+    
+      <!-- CONTENEDOR DE URL (oculto) -->
+      <div id="fields-url" style="display: none;">
+        <label for="url">{{ _('URL del artículo') }} <span class="req">*</label>
+        <input type="url" id="url" name="url" class="input text" placeholder="{{ _('Escribe aquí la URL del artículo…') }}">
+        <button type="button" class="btn secondary" id="back-to-text">{{ _('Volver a texto') }}</button>
+      </div>
+    
+      <div class="actions">
+        <div class="actions-left">
+          <button type="button" class="btn secondary" id="load-example">📂 {{ _('Cargar ejemplo') }}</button>
+          <button type="button" class="btn tertiary" id="use-url">🔗 {{ _('Usar URL') }}</button>
+        </div>
+        <div class="actions-right">
+          <button type="reset" class="btn reset">🧹 {{ _('Limpiar') }}</button>
+          <button type="submit" class="btn primary">🔍 {{ _('Analizar texto') }}</button>
+        </div>
+      </div>
+    </form>
+    
+  </div>
+</div>
+
+<!-- Modal de carga -->
+{% include "loading_modal.html" %}
+
+<script src="{{ url_for('static', filename='js/index_windows.js') }}"></script>
+<script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+
+{% endblock %}

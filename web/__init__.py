@@ -149,12 +149,6 @@ def home():
     return render_template('index.html')
 
 
-@app.route('/v0', methods=['GET'])
-def home_v0():
-    logger.debug(f"[/V0] Language: {get_locale()}")
-    logger.info("[/V0] Rendering home v0 template...")
-    return render_template('index_v0.html')
-
 
 @app.route('/test', methods=['GET'])
 @login_required
