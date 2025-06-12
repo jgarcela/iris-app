@@ -1,0 +1,53 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}
+  {% if action=='create' %}
+    Admin · {{ _('Crear rol') }}
+  {% else %}
+    Admin · {{ _('Editar rol') }}
+  {% endif %}
+{% endblock %}
+
+{% block admin_content %}
+<h1 class="h2 mt-4">
+  {% if action=='create' %}{{ _('Crear rol') }}{% else %}{{ _('Editar rol') }}{% endif %}
+</h1>
+
+<form method="post" class="row g-3">
+  <div class="col-md-4">
+    <label for="name" class="form-label">{{ _('Nombre del rol') }}</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="form-control"
+      required
+      value="{{ role.name if role else '' }}"
+      {% if action=='edit' %}readonly{% endif %}
+    >
+  </div>
+  <div class="col-12">
+    <label class="form-label">{{ _('Permisos') }}</label>
+    <div class="d-flex flex-wrap">
+      {% for p in all_permissions %}
+      <div class="form-check me-3">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="perm-{{ p }}"
+          name="permissions"
+          value="{{ p }}"
+          {% if role and p in role.permissions %}checked{% endif %}
+        >
+        <label class="form-check-label" for="perm-{{ p }}">{{ p }}</label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-success">
+      {% if action=='create' %}{{ _('Crear') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
+    </button>
+    <a href="{{ url_for('admin.list_roles') }}" class="btn btn-secondary">{{ _('Cancelar') }}</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Admin · {{ _('Usuarios') }}{% endblock %}
+{% block admin_content %}
+<h1 class="h2 mt-4 d-flex justify-content-between">
+  {{ _('Usuarios') }}
+  <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">
+    <i class="fas fa-plus me-1"></i> {{ _('Crear usuario') }}
+  </a>
+</h1>
+
+<div class="table-responsive">
+  <table
+    id="users-table"
+    class="table"
+    data-toggle="table"
+    data-search="true"
+    data-filter-control="true"
+    data-pagination="true"
+    data-page-size="10"
+    data-show-columns="true"
+  >
+    <thead class="table-light">
+      <tr>
+        <th data-field="_id"            data-filter-control="input">{{ _('ID') }}</th>
+        <th data-field="first_name"     data-filter-control="input">{{ _('Nombre') }}</th>
+        <th data-field="last_name"      data-filter-control="input">{{ _('Apellido') }}</th>
+        <th data-field="email"          data-filter-control="input">{{ _('Email') }}</th>
+        <th data-field="roles"                          data-filter-control="select">{{ _('Roles') }}</th>
+        <th data-field="actions">{{ _('Acciones') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u._id }}</td>
+        <td>{{ u.first_name or '-' }}</td>
+        <td>{{ u.last_name or '-' }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.roles | join(', ') }}</td>
+        <td>
+          <a
+            href="{{ url_for('admin.edit_user', user_id=u._id) }}"
+            class="btn btn-sm btn-primary me-1"
+          ><i class="fas fa-edit"></i></a>
+          <form
+            action="{{ url_for('admin.delete_user', user_id=u._id) }}"
+            method="post"
+            style="display:inline"
+            onsubmit="return confirm('{{ _('¿Borrar usuario?') }}');"
+          >
+            <button type="submit" class="btn btn-sm btn-danger">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

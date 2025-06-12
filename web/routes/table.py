@@ -129,7 +129,7 @@ def table_iris():
     ]
     
     # 7) Finalmente renderizamos el template pasando la lista de noticias
-    return render_template("table_iris.html", 
+    return render_template("table/table_iris.html", 
                             data=data, 
                             exclude_cols=exclude_cols, 
                             order_cols=order_cols,

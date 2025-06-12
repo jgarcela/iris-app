@@ -1,0 +1,64 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Admin · {{ _('Permisos') }}{% endblock %}
+
+{% block admin_content %}
+<h1 class="h2 mt-4 d-flex justify-content-between align-items-center">
+  {{ _('Permisos') }}
+  <a href="{{ url_for('admin.create_permission') }}" class="btn btn-success">
+    <i class="fas fa-plus me-1"></i> {{ _('Crear permiso') }}
+  </a>
+</h1>
+
+<div class="table-responsive">
+  <table
+    id="permissions-table"
+    class="table"
+    data-toggle="table"
+    data-search="true"
+    data-filter-control="true"
+    data-pagination="true"
+    data-page-size="10"
+    data-show-columns="true"
+  >
+    <thead class="table-light">
+      <tr>
+        <th
+          data-field="name"
+          data-sortable="true"
+          data-filter-control="select"
+        >{{ _('Permiso') }}</th>
+        <th
+          data-field="description"
+          data-sortable="true"
+          data-filter-control="input"
+        >{{ _('Descripción') }}</th>
+        <th data-field="actions">{{ _('Acciones') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in permissions %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.description }}</td>
+        <td>
+          <a
+            href="{{ url_for('admin.edit_permission', perm_name=p.name) }}"
+            class="btn btn-sm btn-primary me-1"
+          ><i class="fas fa-edit"></i></a>
+          <form
+            action="{{ url_for('admin.delete_permission', perm_name=p.name) }}"
+            method="post"
+            style="display:inline"
+            onsubmit="return confirm('{{ _('¿Eliminar permiso?') }}');"
+          >
+            <button type="submit" class="btn btn-sm btn-danger">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

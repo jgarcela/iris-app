@@ -71,7 +71,7 @@ def generate_report(doc_id):
 
     # 3) Renderizar HTML con fecha y secciones
     html = render_template(
-        'report.html',
+        'analysis/report.html',
         data=data,
         highlight_map=HIGHLIGHT_COLOR_MAP,
         generation_date=datetime.now(),
@@ -117,7 +117,7 @@ def analyze():
         logger.info(f"[/ANALYSIS/ANALYZE] Received response from API: {data}")
         logger.info("[/ANALYSIS/ANALYZE] Rendering analysis template...")
         return render_template(
-            'analysis.html',
+            'analysis/analysis.html',
             language=get_locale(),
             data=data,
             highlight_map=HIGHLIGHT_COLOR_MAP,
@@ -152,7 +152,7 @@ def analyze_v0():
 
     logger.info("[/ANALYSIS/ANALYZE/V0] Rendering analysis template...")
     return render_template(
-        'analysis.html',
+        'analysis/analysis.html',
         language=get_locale(),
         data=data,
         highlight_map=HIGHLIGHT_COLOR_MAP,

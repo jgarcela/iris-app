@@ -1,0 +1,47 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}
+  {% if action=='create' %}
+    Admin · {{ _('Crear permiso') }}
+  {% else %}
+    Admin · {{ _('Editar permiso') }}
+  {% endif %}
+{% endblock %}
+
+{% block admin_content %}
+<h1 class="h2 mt-4">
+  {% if action=='create' %}{{ _('Crear permiso') }}{% else %}{{ _('Editar permiso') }}{% endif %}
+</h1>
+
+<form method="post" class="row g-3">
+  <div class="col-md-4">
+    <label for="name" class="form-label">{{ _('Nombre del permiso') }}</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="form-control"
+      required
+      value="{{ permission.name if permission else '' }}"
+      {% if action=='edit' %}readonly{% endif %}
+    >
+  </div>
+  <div class="col-md-6">
+    <label for="description" class="form-label">{{ _('Descripción') }}</label>
+    <input
+      type="text"
+      id="description"
+      name="description"
+      class="form-control"
+      value="{{ permission.description if permission else '' }}"
+    >
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-success">
+      {% if action=='create' %}{{ _('Crear') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
+    </button>
+    <a href="{{ url_for('admin.list_permissions') }}" class="btn btn-secondary">
+      {{ _('Cancelar') }}
+    </a>
+  </div>
+</form>
+{% endblock %}

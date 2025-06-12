@@ -14,4 +14,4 @@ bp = Blueprint('contact', __name__, url_prefix='/contact')
 @bp.route('/', methods=['GET'])
 def contact_iris():
     logger.info("[/CONTACT] Rendering contacto template...")
-    return render_template('contact.html')
+    return render_template('contact/contact.html')

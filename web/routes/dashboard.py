@@ -51,7 +51,7 @@ URL_API_ENDPOINT_DASHBOARD_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DASHB
 def dashboard_iris_old():
     logger.info(f"[/DASHBOARD/IRIS/OLD] Request to dashboard/iris from {request.remote_addr} with method {request.method}")
     logger.info("[/DASHBOARD/IRIS/OLD] Rendering dashboard iris template...")
-    return render_template("dashboard_iris_old.html", url=URL_DASHBOARD_IRIS)
+    return render_template("dashboard/dashboard_iris_old.html", url=URL_DASHBOARD_IRIS)
 
 
 @bp.route('/iris', methods=['GET', 'POST'])
@@ -117,7 +117,7 @@ def dashboard_iris():
     chart_data = payload.get('chart_data', {})
 
     return render_template(
-        'dashboard_iris.html',
+        'dashboard/dashboard_iris.html',
         total_count=total_count,
         chart_data=chart_data,
         contextos=contextos,

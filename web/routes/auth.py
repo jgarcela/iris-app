@@ -48,7 +48,7 @@ def login():
     # Si ya tienes token en cookie, opcionalmente rediriges a home
     if request.cookies.get('access_token_cookie'):
         return redirect(url_for('home'))
-    return render_template('login.html', 
+    return render_template('auth/login.html', 
                             api_url_login=URL_API_ENDPOINT_AUTH_LOGIN)
 
 
@@ -56,7 +56,7 @@ def login():
 def register():
     if request.cookies.get('access_token_cookie'):
         return redirect(url_for('home'))
-    return render_template('register.html',
+    return render_template('auth/register.html',
                            api_url_register=URL_API_ENDPOINT_AUTH_REGISTER)
 
 
