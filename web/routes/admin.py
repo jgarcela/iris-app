@@ -9,7 +9,7 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash
 
-from web.utils.decorators import login_required, role_required
+from web.utils.decorators import login_required #, role_required
 import database.db as db
 
 # ----------------- BLUEPRINT -----------------
@@ -294,7 +294,7 @@ def edit_permission(perm_name):
 # Borrar permissions
 @bp.route('/permissions/<perm_name>/delete', methods=['POST'])
 @login_required
-@role_required('admin')
+# @role_required('admin')
 def delete_permission(perm_name):
     result = db.DB_PERMISSIONS.delete_one({'name': perm_name})
     if result.deleted_count:

@@ -14,7 +14,7 @@ from bson import ObjectId
 import database.db as db
 from api.utils.logger import logger
 
-from api.utils.decorators import role_required, permission_required
+# from api.utils.decorators import role_required, permission_required
 
 import api
 
@@ -27,7 +27,7 @@ bp = Blueprint('data', __name__, url_prefix='/data')
 #  ENDPOINTS 
 # ==================================
 @bp.route('/get_document/<doc_id>', methods=['GET'])
-@role_required('admin')
+# @role_required('admin')
 def get_document(doc_id):
     # 1) validar ObjectId
     try:
@@ -46,7 +46,7 @@ def get_document(doc_id):
 
 
 @bp.route("/get_contexto", methods=["GET"])
-@role_required('admin')
+# @role_required('admin')
 def get_contexto():
     try:
         # 1. Seleccionamos la colección específica
@@ -79,7 +79,7 @@ def serialize_doc(doc: dict) -> dict:
     return salida
 
 @bp.route("/<collection_name>", methods=["GET"]) # Aquí añadimos el parámetro <collection_name>
-@role_required('admin')
+# @role_required('admin')
 def get_data_from_collection(collection_name): # El nombre de la colección se pasa como argumento
     """
     Este endpoint devuelve una lista con todos los documentos de la colección especificada por 'collection_name'.

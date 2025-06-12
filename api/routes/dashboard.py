@@ -12,7 +12,7 @@ from api.utils.logger import logger
 import api
 import api.utils.dashboard
 
-from api.utils.decorators import role_required, permission_required
+# from api.utils.decorators import role_required, permission_required
 
 # ==================================
 #  BLUEPRINT 
@@ -24,7 +24,7 @@ bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 #  ENDPOINTS 
 # ==================================
 @bp.route("/data", methods=["POST"])
-@role_required('admin')
+# @role_required('admin')
 def dashboard_data():
     """
     Espera un JSON con:

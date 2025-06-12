@@ -12,6 +12,7 @@
     --violet-iris-color: #a02c93;
     --blue-iris-color: #1c6080;
     --red-color: #d64545;
+    --navbar-text: #6c757d;
   
     --font-family: 'Roboto', sans-serif;
     --font-size: 14px;
@@ -49,14 +50,44 @@
                 color var(--transition-speed);
     min-height: 100vh;
   }
-  
+
+
+
+
+/* --------------------------- */
+/* Navbar */
+/* --------------------------- */
+.navbar {
+  font-weight: 500;
+}
+
+.navbar .nav-link {
+  color: var(--navbar-text);
+  transition: color .2s;
+}
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+  color: var(--blue-iris-color);
+}
+
+
+
+
+
+/* --------------------------- */
+/* Container */
+/* --------------------------- */
   /* Contenedor principal */
   .container {
-    max-width: 960px;
     margin: 0 auto;
     padding: 2rem 1rem;
   }
   
+
+/* --------------------------- */
+/* Cards */
+/* --------------------------- */
+
   /* Tarjeta principal */
   .card-principal {
     background-color: var(--secondary-color);
@@ -81,6 +112,18 @@
     text-align: center;
     color: var(--primary-color);
     margin-bottom: 1.5rem;
+  }
+
+
+  /* Card base */
+  .card {
+    border: none;
+    border-radius: .75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform .2s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
   }
 
   /* Labels */
@@ -152,6 +195,11 @@
   display: flex;
   gap: 0.5rem;
 }
+
+
+/* --------------------------- */
+/* Buttons */
+/* --------------------------- */
 
 /* Estilos comunes a todos los botones */
 .btn {

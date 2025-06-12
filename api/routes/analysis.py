@@ -15,7 +15,7 @@ import api
 import api.utils.analysis
 import api.utils.highlight
 
-from api.utils.decorators import role_required, permission_required
+# from api.utils.decorators import role_required, permission_required
 
 # ==================================
 #  BLUEPRINT 
@@ -27,7 +27,7 @@ bp = Blueprint('analysis', __name__, url_prefix='/analysis')
 #  ENDPOINTS 
 # ==================================
 @bp.route('/analyze', methods=['POST'])
-@role_required('user','admin')
+# @role_required('user','admin')
 def analysis_analyze():
     print("[/ANALYSIS/ANALYZE] Receiving data from web...")
     try:
@@ -141,7 +141,7 @@ def analysis_analyze():
 
 
 @bp.route('/save_edits', methods=['POST'])
-@role_required('user','admin')
+# @role_required('user','admin')
 def save_edits():
     data = request.get_json()
     doc_id = data['doc_id']

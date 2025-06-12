@@ -1,107 +1,168 @@
 <!DOCTYPE html>
 <html lang="{{ current_language }}">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}IRIS{% endblock %}</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-        <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/favicon.png') }}">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-        {% if request.endpoint in ['analysis.analyze', 'analysis.analyze_v0'] %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">
-        {% endif %}
-        {% block head_extra %}{% endblock %}
-    </head>
-    <body>
-    <!-- Header -->
-    {% block header %}
-    <div class="header d-flex justify-content-between align-items-center">
-      <div class="header-left d-flex align-items-center">
-        <a href="{{ url_for('home') }}">
-          <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}"
-               alt="IRIS Logo" class="logo-small">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}IRIS{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" 
+      href="{{ url_for('static', filename='imgs/favicon.png') }}" 
+      type="image/png" />
+
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- FontAwesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Estilos custom -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+
+
+    {% if request.endpoint in ['analysis.analyze', 'analysis.analyze_v0'] %}
+      <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/analysis.css') }}"
+      />
+    {% endif %}
+
+    {% block head_extra %}{% endblock %}
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+          <img
+            src="{{ url_for('static', filename='imgs/logo_iris.png') }}"
+            alt="IRIS Logo"
+            width="32"
+            height="32"
+          />
+          <span class="ms-2 fw-bold">IRIS</span>
         </a>
-        <span class="app-name ms-2">IRIS</span>
-    
-        <!-- Pestañas de navegación -->
-        <nav class="nav-tabs ms-4">
-          <a href="{{ url_for('home') }}">
-            <i class="fas fa-home me-1"></i> {{ _('Inicio') }}
-          </a>
-    
-          {% if current_user %}
-            <a href="{{ url_for('table.table_iris') }}">
-              <i class="fas fa-history me-1"></i> {{ _('Histórico de datos') }}
-            </a>
-            <a href="{{ url_for('dashboard.dashboard_iris') }}">
-              <i class="fas fa-chart-bar me-1"></i> {{ _('Visualización de datos') }}
-            </a>
-    
-            {% if 'admin' in current_user.roles %}
-              <a href="{{ url_for('admin.admin_dashboard') }}">
-                <i class="fas fa-cog me-1"></i> {{ _('Admin') }}
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNavbar"
+          aria-controls="mainNavbar"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('home') }}">
+                <i class="fas fa-home me-1"></i> {{ _('Inicio') }}
+              </a>
+            </li>
+            {% if current_user %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('table.table_iris') }}">
+                  <i class="fas fa-history me-1"></i> {{ _('Histórico') }}
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('dashboard.dashboard_iris') }}">
+                  <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
+                </a>
+              </li>
+              {% if 'admin' in current_user.roles %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">
+                    <i class="fas fa-cog me-1"></i> {{ _('Admin') }}
+                  </a>
+                </li>
+              {% endif %}
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('contact.contact_iris') }}">
+                <i class="fas fa-envelope me-1"></i> {{ _('Contacto') }}
+              </a>
+            </li>
+          </ul>
+
+          <div class="d-flex align-items-center">
+            {% if current_user %}
+              <span class="me-3">
+                <i class="fas fa-user-circle me-1 text-secondary"></i>
+                {{ _('Hola') }}, <strong>{{ current_user.first_name }}</strong>
+              </span>
+              <a
+                href="{{ url_for('auth.logout') }}"
+                class="btn btn-outline-danger btn-sm"
+              >
+                <i class="fas fa-sign-out-alt me-1"></i> {{ _('Salir') }}
+              </a>
+            {% else %}
+              <a
+                href="{{ url_for('auth.login') }}"
+                class="btn btn-outline-primary btn-sm me-2"
+              >
+                <i class="fas fa-sign-in-alt me-1"></i> {{ _('Login') }}
+              </a>
+              <a
+                href="{{ url_for('auth.register') }}"
+                class="btn btn-primary btn-sm"
+              >
+                <i class="fas fa-user-plus me-1"></i> {{ _('Registro') }}
               </a>
             {% endif %}
-          {% endif %}
-    
-          <a href="{{ url_for('contact.contact_iris') }}">
-            <i class="fas fa-envelope me-1"></i> {{ _('Contacto') }}
-          </a>
-        </nav>
+          </div>
+        </div>
       </div>
-    
-      <div class="header-right d-flex align-items-center">
-        {% if current_user %}
-          <span class="me-3 d-flex align-items-center welcome-text">
-            <i class="fas fa-user-circle me-1"></i>
-            {{ _('Hola') }}, <strong>{{ current_user.first_name }}</strong>!
-          </span>
-          <a href="{{ url_for('auth.logout') }}"
-             class="btn btn-outline-danger d-flex align-items-center">
-            <i class="fas fa-sign-out-alt me-1"></i> {{ _('Logout') }}
-          </a>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" 
-             class="btn btn-outline-primary me-2">
-            <i class="fas fa-sign-in-alt me-1"></i> {{ _('Login') }}
-          </a>
-          <a href="{{ url_for('auth.register') }}" 
-             class="btn btn-primary d-flex align-items-center">
-            <i class="fas fa-user-plus me-1"></i> {{ _('Registro') }}
-          </a>
-        {% endif %}
-        {% block analysis %}{% endblock %}
-      </div>
-    </div>
-    {% endblock %}
-    
-
+    </nav>
 
     <!-- Contenido principal -->
-    {% block content %}{% endblock %}
+    <main class="container py-4">
+      {% block content %}{% endblock %}
+    </main>
 
-    <!-- Modals -->
+    <!-- Modals generales -->
     {% block modals %}
-        {% include 'menu/translate_menu.html' %}
-        {% include 'menu/accessibility_menu.html' %}
+      {% include 'menu/translate_menu.html' %}
+      {% include 'menu/accessibility_menu.html' %}
     {% endblock %}
 
     <!-- Footer -->
     {% block footer %}
-        {% include 'footer.html' %}
+      {% include 'footer.html' %}
     {% endblock %}
 
-    <!-- Bloque para insertar scripts específicos de cada página -->
-    {% block scripts_extra %}{% endblock %}
+    <!-- Bootstrap JS + Popper -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
+    ></script>
 
-    <script>
-      console.log("Idioma detectado en el servidor: '{{ current_language }}'");
-    </script>
+    <!-- Tus scripts -->
     <script src="{{ url_for('static', filename='js/translate_menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/accessibility_menu.js') }}"></script>
-  
-</body>
+
+    {% block scripts_extra %}{% endblock %}
+  </body>
 </html>
