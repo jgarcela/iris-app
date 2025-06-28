@@ -4,19 +4,27 @@
 
 
 
-{% block analysis %}
-    <span class="model-selected">
-        {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
-    </span>
-    <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}"
-    class="btn generate">
-    {{ _('Generar informe') }}
-    </a>
 
-    <a href="/" class="btn finalize">{{ _('Finalizar análisis') }}</a>
-{% endblock %}
 
 {% block content %}
+
+<div class="analysis-header">
+    <span class="model-selected">
+      {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
+    </span>
+  
+    <div class="actions-right">
+      <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}" class="btn generate">
+        {{ _('Generar informe') }}
+      </a>
+      <a href="/" class="btn finalize">
+        {{ _('Finalizar análisis') }}
+      </a>
+    </div>
+  </div>
+  
+
+
 <div class="analysis-container">
     <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
     <div class="col-left">

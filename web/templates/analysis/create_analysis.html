@@ -6,52 +6,56 @@
 <div class="container-fluid py-5">
   <h1 class="h2 mt-4">{{ _('Iniciar análisis') }}</h1>
   <div class="row gx-5">
-    <!-- Columna izquierda: opciones -->
-    <div class="col-md-4">
+    <div class="col-12">
       <div class="card-principal h-100 p-4">
-        <!-- Selección de modelo -->
-        <div class="mb-4">
-          <label for="model" class="form-label">{{ _('Modelo') }} <span class="req">*</span></label>
-          <select id="model" name="model" class="form-select">
-            <option value="basico">{{ _('Básico') }}</option>
-            <option value="avanzado" selected>{{ _('Avanzado') }}</option>
-          </select>
-        </div>
-        <!-- Título artículo -->
-        <div class="mb-4">
-          <label for="title" class="form-label">{{ _('Título del artículo') }}</label>
-          <input type="text" id="title" name="title" class="form-control" placeholder="{{ _('Escribe aquí el título...') }}">
-        </div>
-        <!-- Autoría -->
-        <div class="mb-4">
-          <label for="authors" class="form-label">{{ _('Autoría') }}</label>
-          <input type="text" id="authors" name="authors" class="form-control" placeholder="{{ _('Escribe aquí la autoría...') }}">
-        </div>
-        <!-- Botones contextuales -->
-        <div class="d-grid gap-2">
-          <button type="button" class="btn secondary" id="load-example">📂 {{ _('Cargar ejemplo') }}</button>
-          <button type="button" class="btn tertiary" id="use-url">🔗 {{ _('Usar URL') }}</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Columna derecha: input principal -->
-    <div class="col-md-8">
-      <div class="card-principal h-100 p-4">
+        <!-- FORMULARIO UNIFICADO -->
         <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
-          <!-- Texto -->
-          <div id="fields-text" class="mb-4">
-            <label for="input-text" class="form-label">{{ _('Texto del artículo') }} <span class="req">*</span></label>
-            <textarea id="input-text" name="text" class="form-control" rows="12" placeholder="{{ _('Escribe aquí tu texto…') }}" required></textarea>
-          </div>
-          <!-- URL oculto -->
-          <div id="fields-url" class="mb-4" style="display:none;">
-            <label for="url" class="form-label">{{ _('URL del artículo') }} <span class="req">*</span></label>
-            <div class="input-group">
-              <input type="url" id="url" name="url" class="form-control" placeholder="{{ _('https://...') }}">
-              <button type="button" class="btn btn-outline-secondary" id="back-to-text">← {{ _('Volver') }}</button>
+          <div class="row">
+            <!-- Columna izquierda: opciones -->
+            <div class="col-md-4">
+              <!-- Selección de modelo -->
+              <div class="mb-4">
+                <label for="model" class="form-label">{{ _('Modelo') }} <span class="req">*</span></label>
+                <select id="model" name="model" class="form-select">
+                  <option value="basico">{{ _('Básico') }}</option>
+                  <option value="avanzado" selected>{{ _('Avanzado') }}</option>
+                </select>
+              </div>
+              <!-- Título artículo -->
+              <div class="mb-4">
+                <label for="title" class="form-label">{{ _('Título del artículo') }}</label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="{{ _('Escribe aquí el título...') }}">
+              </div>
+              <!-- Autoría -->
+              <div class="mb-4">
+                <label for="authors" class="form-label">{{ _('Autoría') }}</label>
+                <input type="text" id="authors" name="authors" class="form-control" placeholder="{{ _('Escribe aquí la autoría...') }}">
+              </div>
+              <!-- Botones contextuales -->
+              <div class="d-grid gap-2">
+                <button type="button" class="btn secondary" id="load-example">📂 {{ _('Cargar ejemplo') }}</button>
+                <button type="button" class="btn tertiary" id="use-url">🔗 {{ _('Usar URL') }}</button>
+              </div>
+            </div>
+
+            <!-- Columna derecha: input principal -->
+            <div class="col-md-8">
+              <!-- Texto -->
+              <div id="fields-text" class="mb-4">
+                <label for="input-text" class="form-label">{{ _('Texto del artículo') }} <span class="req">*</span></label>
+                <textarea id="input-text" name="text" class="form-control" rows="12" placeholder="{{ _('Escribe aquí tu texto…') }}" required></textarea>
+              </div>
+              <!-- URL oculto -->
+              <div id="fields-url" class="mb-4" style="display:none;">
+                <label for="url" class="form-label">{{ _('URL del artículo') }} <span class="req">*</span></label>
+                <div class="input-group">
+                  <input type="url" id="url" name="url" class="form-control" placeholder="{{ _('https://...') }}">
+                  <button type="button" class="btn btn-outline-secondary" id="back-to-text">← {{ _('Volver') }}</button>
+                </div>
+              </div>
             </div>
           </div>
+
           <!-- Acciones finales -->
           <div class="d-flex justify-content-end mt-4">
             <button type="reset" class="btn reset me-2">🧹 {{ _('Limpiar') }}</button>

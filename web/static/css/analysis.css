@@ -35,13 +35,45 @@
   .btn.finalize:hover {
     background: #b33b3b;
   }
+
+  .analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--background-footer);
+    border: 1px solid var(--input-border-color);
+    border-radius: 10px;
+    padding: 1rem 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  
+  .analysis-header .model-selected {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-black-color);
+  }
+  
+  .analysis-header .pill {
+    background: var(--blue-iris-color);
+    color: white;
+    font-weight: 600;
+    padding: 0.2rem 0.7rem;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+  }
+  
+  .analysis-header .actions-right {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
   
   /* CONTENEDOR PRINCIPAL DIVIDIDO */
   .analysis-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    padding: 2rem;
   }
 
   .article-meta{

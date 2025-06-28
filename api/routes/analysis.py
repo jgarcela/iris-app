@@ -76,14 +76,14 @@ def analysis_analyze():
 
     try:
         print("[/ANALYSIS/ANALYZE] Initializing analysis...")
-        analysis_contenido_general = api.analyze.analyze_text(model, text, title, task="contenido_general")
-        analysis_fuentes = api.analyze.analyze_text(model, text, title, task="fuentes")
-        analysis_lenguaje = api.analyze.analyze_text(model, text, title, task="lenguaje")
+        analysis_contenido_general = api.utils.analysis.analyze_text(model, text, title, task="contenido_general")
+        analysis_fuentes = api.utils.analysis.analyze_text(model, text, title, task="fuentes")
+        analysis_lenguaje = api.utils.analysis.analyze_text(model, text, title, task="lenguaje")
 
         print("[/ANALYSIS/ANALYZE] Initializing highlight...")
-        highlight_contenido_general = api.highlight.highlight_text(analysis_contenido_general, text, task="contenido_general")
-        highlight_fuentes = api.highlight.highlight_text(analysis_fuentes, text, task="fuentes")
-        highlight_lenguaje = api.highlight.highlight_text(analysis_lenguaje, text, task="lenguaje")
+        highlight_contenido_general = api.utils.highlight.highlight_text(analysis_contenido_general, text, task="contenido_general")
+        highlight_fuentes = api.utils.highlight.highlight_text(analysis_fuentes, text, task="fuentes")
+        highlight_lenguaje = api.utils.highlight.highlight_text(analysis_lenguaje, text, task="lenguaje")
 
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400
