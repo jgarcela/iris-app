@@ -1,10 +1,10 @@
 {% extends 'admin/admin_base.html' %}
-{% block title %}Admin · {{ _('Usuarios') }}{% endblock %}
+{% block title %}Admin · {{ _('Cuentas') }}{% endblock %}
 {% block admin_content %}
 <h1 class="h2 mt-4 d-flex justify-content-between">
-  {{ _('Usuarios') }}
+  {{ _('Cuentas') }}
   <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">
-    <i class="fas fa-plus me-1"></i> {{ _('Crear usuario') }}
+    <i class="fas fa-plus me-1"></i> {{ _('Crear cuenta') }}
   </a>
 </h1>
 
@@ -46,7 +46,7 @@
             action="{{ url_for('admin.delete_user', user_id=u._id) }}"
             method="post"
             style="display:inline"
-            onsubmit="return confirm('{{ _('¿Borrar usuario?') }}');"
+            onsubmit="return confirm('{{ _('¿Borrar cuenta?') }}');"
           >
             <button type="submit" class="btn btn-sm btn-danger">
               <i class="fas fa-trash"></i>

@@ -20,7 +20,7 @@
 <div class="analysis-container">
     <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
     <div class="col-left">
-        <!-- Si hay título o autores, los mostramos antes del texto -->
+        <!-- Si hay título o autoría, los mostramos antes del texto -->
         {% if data.title or data.authors or data.url %}
         <div class="article-meta">
             {% if data.title %}
@@ -28,7 +28,7 @@
             {% endif %}
 
             {% if data.authors %}
-                <p><strong>Autores:</strong>
+                <p><strong>Autoría:</strong>
                     {{ data.authors if data.authors is string else data.authors | join(', ') }}
                 </p>
             {% endif %}

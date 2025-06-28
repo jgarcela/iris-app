@@ -1,15 +1,15 @@
 {% extends 'admin/admin_base.html' %}
 {% block title %}
   {% if action=='create' %}
-    Admin · {{ _('Crear usuario') }}
+    Admin · {{ _('Crear cuenta') }}
   {% else %}
-    Admin · {{ _('Editar usuario') }}
+    Admin · {{ _('Editar cuenta') }}
   {% endif %}
 {% endblock %}
 
 {% block admin_content %}
 <h1 class="h2 mt-4">
-  {% if action=='create' %}{{ _('Crear usuario') }}{% else %}{{ _('Editar usuario') }}{% endif %}
+  {% if action=='create' %}{{ _('Crear cuenta') }}{% else %}{{ _('Editar cuenta') }}{% endif %}
 </h1>
 
 <form method="post" class="row g-3">

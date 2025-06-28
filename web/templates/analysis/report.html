@@ -139,7 +139,7 @@
     <h2>{{ data.title }}</h2>
   {% endif %}
   {% if data.authors %}
-    <p><strong>Autores:</strong> {{ data.authors|join(', ') if data.authors is iterable else data.authors }}</p>
+    <p><strong>Autoría:</strong> {{ data.authors|join(', ') if data.authors is iterable else data.authors }}</p>
   {% endif %}
   {% if data.url %}
     <p><strong>Fuente:</strong> <a href="{{ data.url }}">{{ data.url }}</a></p>
