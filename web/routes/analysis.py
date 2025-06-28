@@ -7,6 +7,12 @@ from flask_babel import get_locale
 import configparser
 import ast
 from datetime import datetime
+from bs4 import BeautifulSoup
+from bs4.element import NavigableString, Tag
+from docx import Document
+from docx.shared import RGBColor
+from docx.enum.text import WD_COLOR_INDEX
+import io
 
 from web.utils.logger import logger
 from web.utils.decorators import login_required
@@ -85,6 +91,95 @@ def generate_report(doc_id):
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'attachment; filename=Informe_{doc_id}.pdf'
+    return response
+
+
+@bp.route('/generate_report_word/<doc_id>', methods=['GET'])
+@login_required
+def generate_report_word(doc_id):
+    # 1. Obtener datos
+    url = f"{URL_API_ENDPOINT_DATA_GET_DOCUMENT}/{doc_id}"
+    resp = requests.get(url)
+    if resp.status_code == 404:
+        abort(404, description="Documento no encontrado")
+    if resp.status_code != 200:
+        abort(resp.status_code, description="Error al obtener el documento")
+    data = resp.json()
+
+    # 2. Colores válidos
+    highlight_map_docx = {
+        "color-1": WD_COLOR_INDEX.YELLOW,
+        "color-2": WD_COLOR_INDEX.BRIGHT_GREEN,
+        "color-3": WD_COLOR_INDEX.TURQUOISE,
+        "color-4": WD_COLOR_INDEX.PINK,
+        "color-5": WD_COLOR_INDEX.BLUE,
+        "color-6": WD_COLOR_INDEX.RED,
+        "color-7": WD_COLOR_INDEX.GRAY_25,
+        "color-8": WD_COLOR_INDEX.DARK_YELLOW,
+        "color-9": WD_COLOR_INDEX.GREEN,
+        "color-10": WD_COLOR_INDEX.GRAY_50,
+        "color-11": WD_COLOR_INDEX.VIOLET,
+        "color-12": WD_COLOR_INDEX.TEAL,
+        "color-13": WD_COLOR_INDEX.PINK,
+        "color-14": WD_COLOR_INDEX.DARK_RED,
+        "color-15": WD_COLOR_INDEX.DARK_BLUE,
+    }
+
+    # 3. Documento
+    doc = Document()
+    doc.add_heading("Informe de análisis", 0)
+
+    if data.get("title"):
+        doc.add_heading(data["title"], level=1)
+
+    if data.get("authors"):
+        authors = data["authors"] if isinstance(data["authors"], str) else ", ".join(data["authors"])
+        doc.add_paragraph(f"Autoría: {authors}")
+
+    if data.get("url"):
+        doc.add_paragraph(f"Fuente: {data['url']}")
+
+    doc.add_paragraph(f"Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    doc.add_page_break()
+
+    # 4. Índice
+    doc.add_heading("Índice", level=1)
+    for i, section in enumerate(data.get("highlight", {}).get("original", {}).keys(), 1):
+        doc.add_paragraph(f"{i}. {section.replace('_', ' ').capitalize()}", style='List Number')
+    doc.add_page_break()
+
+    # 5. Secciones
+    for i, (section, html) in enumerate(data["highlight"]["original"].items(), 1):
+        doc.add_heading(f"{i}. {section.replace('_',' ').capitalize()}", level=2)
+        soup = BeautifulSoup(html, "html.parser")
+        paragraph = doc.add_paragraph()
+
+        for elem in soup.recursiveChildGenerator():
+            if isinstance(elem, NavigableString):
+                if isinstance(elem.parent, Tag) and elem.parent.name == "mark":
+                    continue  # ya se procesa desde el <mark>
+                if elem.strip():
+                    paragraph.add_run(str(elem))
+
+            elif isinstance(elem, Tag) and elem.name == "mark":
+                text = elem.get_text()
+                cls = elem.get("class", [])
+                highlight = highlight_map_docx.get(cls[0]) if cls else None
+                run = paragraph.add_run(text)
+                if highlight:
+                    run.font.highlight_color = highlight
+
+            elif isinstance(elem, Tag) and elem.name == "br":
+                paragraph = doc.add_paragraph()
+
+    # 6. Devolver Word
+    doc_io = io.BytesIO()
+    doc.save(doc_io)
+    doc_io.seek(0)
+
+    response = make_response(doc_io.read())
+    response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    response.headers["Content-Disposition"] = f"attachment; filename=Informe_{doc_id}.docx"
     return response
 
 

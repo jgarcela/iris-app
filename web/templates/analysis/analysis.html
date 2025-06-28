@@ -10,20 +10,20 @@
 
 <div class="analysis-header">
     <span class="model-selected">
-      {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
+        {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
     </span>
-  
     <div class="actions-right">
-      <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}" class="btn generate">
-        {{ _('Generar informe') }}
-      </a>
-      <a href="/" class="btn finalize">
-        {{ _('Finalizar análisis') }}
-      </a>
+        <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}" class="btn generate">
+            <i class="fas fa-file-pdf"></i> {{ _('Generar PDF') }}
+        </a>
+        <a href="{{ url_for('analysis.generate_report_word', doc_id=data._id) }}" class="btn generate">
+            <i class="fas fa-file-word"></i> {{ _('Generar Word') }}
+        </a>
+        <a href="/" class="btn finalize">
+            <i class="fas fa-flag-checkered"></i> {{ _('Finalizar análisis') }}
+        </a>
     </div>
-  </div>
-  
-
+</div>
 
 <div class="analysis-container">
     <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
