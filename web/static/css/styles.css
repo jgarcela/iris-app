@@ -71,6 +71,11 @@
 }
 
 
+.nav-link.active {
+  font-weight: bold;
+  color: var(--violet-iris-color)!important; /* Azul Bootstrap */
+  border-bottom: 2px solid var(--violet-iris-color);
+}
 
 
 
