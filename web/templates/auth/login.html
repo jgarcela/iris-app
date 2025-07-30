@@ -29,6 +29,7 @@
 <script>
     // La ruta de login de la API se inyecta desde tu view
     window.api_url_login = {{ api_url_login | tojson | safe }};
+    console.log(window.api_url_login);
 </script>
 <script>
 document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -44,14 +45,17 @@ document.getElementById('login-form').addEventListener('submit', async function(
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
-
+    console.log(data);
     if (!res.ok) {
       alert(data.msg || 'Correo o contraseña incorrectos');
       return;
     }
 
     // Guardar el JWT en cookie y redirigir
-    document.cookie = `access_token_cookie=${data.access_token}; Path=/; Max-Age=3600; Secure; SameSite=Lax`;
+    // document.cookie = `access_token_cookie=${data.access_token}; Path=/; Max-Age=3600; Secure; SameSite=Lax`;
+    document.cookie = `access_token_cookie=${data.access_token}; Path=/; Max-Age=3600; SameSite=Lax`;
+    
+    console.log(document.cookie);
     window.location.href = "{{ url_for('home') }}";
   } catch (err) {
     console.error(err);

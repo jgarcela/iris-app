@@ -49,7 +49,7 @@ URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANA
 # ==================================
 #  APP 
 # ==================================
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/iris/static')
 app.config['SECRET_KEY'] = config['DEFAULT']['SECRET_KEY']
 app.secret_key = config['DEFAULT']['SECRET_KEY']
 
@@ -84,12 +84,14 @@ def inject_language():
 @app.context_processor
 def inject_user():
     token = request.cookies.get('access_token_cookie')
+    logger.info(f"{token=}")
     if not token:
         return dict(current_user=None)
 
     try:
         headers = {'Authorization': f'Bearer {token}'}
         resp = requests.get(URL_API_ENDPOINT_AUTH_ME, headers=headers, timeout=2)
+        logger.info(f"{resp=}")
         if resp.ok:
             user = resp.json().get('user')
             print(f"{user=}")

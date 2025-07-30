@@ -27,6 +27,15 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 # ==================================
 #  ENDPOINTS 
 # ==================================
+print("hola")
+
+@bp.route('/test', methods=['GET'])
+def test():
+    print("llego")
+    return jsonify(msg="OKAY"), 200
+
+
+
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json(force=True)
@@ -65,6 +74,8 @@ def login():
     email    = data.get('email','').strip().lower()
     password = data.get('password','')
 
+    logger.info(f"{data=}")
+
     user = db.DB_USERS.find_one({'email': email})
     if not user or not check_password_hash(user['password'], password):
         return jsonify(msg="Credenciales inválidas"), 401
@@ -83,6 +94,7 @@ def me():
         {'_id': ObjectId(user_id)},
         {'password': 0}
     )
+    logger.info(f"{user=}")
 
     if not user:
         return jsonify(msg="Usuario no existe"), 404
