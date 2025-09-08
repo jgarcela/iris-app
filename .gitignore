@@ -6,3 +6,4 @@ logs
 *.ipynb
 database/data
 *.log
+*.gz
