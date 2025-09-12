@@ -43,6 +43,13 @@
       />
     {% endif %}
 
+    {% if request.endpoint == 'analysis.create_analysis' %}
+      <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/create_analysis.css') }}"
+      />
+    {% endif %}
+
     {% block head_extra %}{% endblock %}
   </head>
 

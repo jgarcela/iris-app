@@ -207,6 +207,7 @@ def analyze():
     title = request.form.get('title', '')
     authors = request.form.get('authors', '')
     url = request.form.get('url', '')
+    analysis_mode = request.form.get('analysis_mode', 'automatic')
 
     app = bp.get_app() if hasattr(bp, 'get_app') else None
 
@@ -215,7 +216,8 @@ def analyze():
                'model': model,
                'title': title,
                'authors': authors,
-               'url': url}
+               'url': url,
+               'analysis_mode': analysis_mode}
 
     # Llamada a la API
     logger.info(f"[/ANALYSIS/ANALYZE] Sending request to API ({URL_API_ENDPOINT_ANALYSIS_ANALYZE})...")
@@ -237,6 +239,46 @@ def analyze():
     else:
         logger.error("[/ANALYSIS/ANALYZE] Error in API request")
         return jsonify({"error": "Error en la solicitud al API"}), 500
+
+
+@bp.route('/analyze_manual', methods=['GET', 'POST'])
+@login_required
+def analyze_manual():
+    logger.info(f"[/ANALYSIS/ANALYZE_MANUAL] Request to analysis/analyze_manual from {request.remote_addr} with method {request.method}")
+
+    if request.method == 'GET':
+        # Render manual analysis page
+        return render_template('analysis/manual_analysis.html')
+    
+    # POST method - process manual analysis
+    text = request.form.get('text', '')
+    title = request.form.get('title', '')
+    authors = request.form.get('authors', '')
+    url = request.form.get('url', '')
+
+    if not text and not url:
+        return jsonify({"error": "Se requiere texto o URL para el análisis"}), 400
+
+    # For manual analysis, we'll create a basic structure
+    # and let the user manually select and annotate
+    manual_data = {
+        'text': text,
+        'title': title,
+        'authors': authors,
+        'url': url,
+        'analysis_mode': 'manual',
+        'status': 'ready_for_manual_analysis'
+    }
+
+    return render_template(
+        'analysis/manual_analysis.html',
+        data=manual_data,
+        language=get_locale(),
+        highlight_map=HIGHLIGHT_COLOR_MAP,
+        contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
+        lenguaje_variables=LENGUAJE_VARIABLES,
+        fuentes_variables=FUENTES_VARIABLES
+    )
 
 
 @bp.route('/analyze/v0', methods=['GET', 'POST'])

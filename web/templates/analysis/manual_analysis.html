@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Análisis Manual') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Header Section -->
+  <div class="text-center mb-4">
+    <h1 class="display-5 fw-bold mb-3" style="color: var(--primary-color);">
+      <i class="fas fa-user-edit me-3"></i>{{ _('Análisis Manual') }}
+    </h1>
+    <p class="lead" style="color: var(--dark-gray);">
+      {{ _('Selecciona y marca manualmente los elementos del texto para analizar') }}
+    </p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Panel: Analysis Tools -->
+    <div class="col-md-4">
+      <div class="analysis-tools-panel">
+        <h4 class="panel-title">
+          <i class="fas fa-tools me-2"></i>{{ _('Herramientas de Análisis') }}
+        </h4>
+        
+        <!-- Analysis Categories -->
+        <div class="analysis-categories">
+          <div class="category-section">
+            <h5>{{ _('Contenido General') }}</h5>
+            <div class="category-options">
+              {% for variable in contenido_general_variables %}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="cg_{{ variable }}" name="contenido_general" value="{{ variable }}">
+                  <label class="form-check-label" for="cg_{{ variable }}">
+                    {{ variable|replace('_', ' ')|title }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="category-section">
+            <h5>{{ _('Lenguaje') }}</h5>
+            <div class="category-options">
+              {% for variable in lenguaje_variables %}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="lg_{{ variable }}" name="lenguaje" value="{{ variable }}">
+                  <label class="form-check-label" for="lg_{{ variable }}">
+                    {{ variable|replace('_', ' ')|title }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="category-section">
+            <h5>{{ _('Fuentes') }}</h5>
+            <div class="category-options">
+              {% for variable in fuentes_variables %}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="fu_{{ variable }}" name="fuentes" value="{{ variable }}">
+                  <label class="form-check-label" for="fu_{{ variable }}">
+                    {{ variable|replace('_', ' ')|title }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn btn-primary w-100 mb-2" id="start-analysis">
+            <i class="fas fa-play me-2"></i>{{ _('Iniciar Análisis') }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="clear-selections">
+            <i class="fas fa-eraser me-2"></i>{{ _('Limpiar Selecciones') }}
+          </button>
+          <button type="button" class="btn btn-success w-100" id="save-analysis">
+            <i class="fas fa-save me-2"></i>{{ _('Guardar Análisis') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Text Analysis -->
+    <div class="col-md-8">
+      <div class="text-analysis-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">
+            <i class="fas fa-file-text me-2"></i>{{ _('Texto para Analizar') }}
+          </h4>
+          <div class="text-info">
+            <span class="badge bg-info" id="word-count">0 {{ _('palabras') }}</span>
+            <span class="badge bg-secondary" id="selection-count">0 {{ _('seleccionado') }}</span>
+          </div>
+        </div>
+        
+        <div class="text-container">
+          <div id="analysis-text" class="analysis-text">
+            {% if data and data.text %}
+              {{ data.text }}
+            {% else %}
+              <p class="text-muted text-center py-5">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ _('No hay texto disponible para analizar') }}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div class="analysis-results" id="analysis-results" style="display: none;">
+          <h5>{{ _('Resultados del Análisis') }}</h5>
+          <div id="results-content">
+            <!-- Results will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Analysis Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="analysisModalLabel">
+          <i class="fas fa-tag me-2"></i>{{ _('Anotar Selección') }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="selected-text mb-3">
+          <strong>{{ _('Texto seleccionado:') }}</strong>
+          <div class="selected-content p-2 bg-light rounded" id="selected-text-content"></div>
+        </div>
+        
+        <div class="annotation-form">
+          <div class="mb-3">
+            <label class="form-label">{{ _('Categoría:') }}</label>
+            <select class="form-select" id="annotation-category">
+              <option value="">{{ _('Selecciona una categoría') }}</option>
+              <option value="contenido_general">{{ _('Contenido General') }}</option>
+              <option value="lenguaje">{{ _('Lenguaje') }}</option>
+              <option value="fuentes">{{ _('Fuentes') }}</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">{{ _('Variable:') }}</label>
+            <select class="form-select" id="annotation-variable">
+              <option value="">{{ _('Selecciona una variable') }}</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">{{ _('Valor:') }}</label>
+            <select class="form-select" id="annotation-value">
+              <option value="">{{ _('Selecciona un valor') }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>{{ _('Cancelar') }}
+        </button>
+        <button type="button" class="btn btn-primary" id="save-annotation">
+          <i class="fas fa-save me-1"></i>{{ _('Guardar Anotación') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.analysis-tools-panel,
+.text-analysis-panel {
+  background: var(--secondary-color);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--medium-gray);
+  height: fit-content;
+}
+
+.panel-title {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--light-gray);
+}
+
+.analysis-categories {
+  margin-bottom: 2rem;
+}
+
+.category-section {
+  margin-bottom: 1.5rem;
+}
+
+.category-section h5 {
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0.75rem;
+}
+
+.category-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-check {
+  padding-left: 0;
+}
+
+.form-check-input {
+  margin-right: 0.5rem;
+}
+
+.form-check-label {
+  font-size: 0.9rem;
+  color: var(--dark-gray);
+  cursor: pointer;
+}
+
+.analysis-text {
+  min-height: 400px;
+  padding: 1.5rem;
+  background: var(--secondary-color);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--medium-gray);
+  line-height: 1.6;
+  font-size: 1rem;
+  color: var(--text-black-color);
+}
+
+.text-info {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.analysis-results {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--light-gray);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--medium-gray);
+}
+
+.action-buttons {
+  margin-top: 1.5rem;
+}
+
+.btn {
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-speed) ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Text selection highlighting */
+.analysis-text .highlight {
+  background-color: rgba(93, 224, 230, 0.3);
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.analysis-text .highlight:hover {
+  background-color: rgba(93, 224, 230, 0.5);
+}
+
+.analysis-text .highlight.selected {
+  background-color: rgba(160, 44, 147, 0.3);
+  border: 2px solid var(--violet-iris-color);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .analysis-tools-panel,
+  .text-analysis-panel {
+    margin-bottom: 1rem;
+  }
+  
+  .text-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/manual_analysis_enhanced.js') }}"></script>
+{% endblock %}
