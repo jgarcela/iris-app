@@ -4,14 +4,51 @@ const translateModal = document.getElementById('translate-modal');
 const translatecloseModalButton = document.getElementById('close-modal-translate');
 const languageSelect = document.getElementById('theme-select-translate'); // Selección del idioma
 
-// Abrir el modal de accesibilidad
+// Abrir el modal de idioma
 translateMenuButton.addEventListener('click', () => {
     translateModal.classList.remove('hidden');
+    translateModal.classList.add('show');
+    translateModal.setAttribute('aria-hidden', 'false');
+    
+    // Focus management
+    const firstFocusable = translateModal.querySelector('select');
+    if (firstFocusable) {
+        setTimeout(() => firstFocusable.focus(), 100);
+    }
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
 });
 
-// Cerrar el modal de accesibilidad
-translatecloseModalButton.addEventListener('click', () => {
-    translateModal.classList.add('hidden');
+// Cerrar el modal de idioma
+function closeTranslateModal() {
+    translateModal.classList.remove('show');
+    translateModal.setAttribute('aria-hidden', 'true');
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
+    
+    // Return focus to button
+    setTimeout(() => {
+        translateModal.classList.add('hidden');
+        translateMenuButton.focus();
+    }, 300);
+}
+
+translatecloseModalButton.addEventListener('click', closeTranslateModal);
+
+// Close modal when clicking outside
+translateModal.addEventListener('click', (e) => {
+    if (e.target === translateModal) {
+        closeTranslateModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && translateModal.classList.contains('show')) {
+        closeTranslateModal();
+    }
 });
 
 // Cambiar el idioma cuando el usuario selecciona una opción

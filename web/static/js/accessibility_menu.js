@@ -6,11 +6,48 @@ const closeModalButton = document.getElementById('close-modal');
 // Abrir el modal de accesibilidad
 accessibilityMenuButton.addEventListener('click', () => {
     accessibilityModal.classList.remove('hidden');
+    accessibilityModal.classList.add('show');
+    accessibilityModal.setAttribute('aria-hidden', 'false');
+    
+    // Focus management
+    const firstFocusable = accessibilityModal.querySelector('select');
+    if (firstFocusable) {
+        setTimeout(() => firstFocusable.focus(), 100);
+    }
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
 });
 
 // Cerrar el modal de accesibilidad
-closeModalButton.addEventListener('click', () => {
-    accessibilityModal.classList.add('hidden');
+function closeAccessibilityModal() {
+    accessibilityModal.classList.remove('show');
+    accessibilityModal.setAttribute('aria-hidden', 'true');
+    
+    // Restore body scroll
+    document.body.style.overflow = '';
+    
+    // Return focus to button
+    setTimeout(() => {
+        accessibilityModal.classList.add('hidden');
+        accessibilityMenuButton.focus();
+    }, 300);
+}
+
+closeModalButton.addEventListener('click', closeAccessibilityModal);
+
+// Close modal when clicking outside
+accessibilityModal.addEventListener('click', (e) => {
+    if (e.target === accessibilityModal) {
+        closeAccessibilityModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && accessibilityModal.classList.contains('show')) {
+        closeAccessibilityModal();
+    }
 });
 
 // Cambiar tema y actualizar logo
