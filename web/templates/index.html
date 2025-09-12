@@ -5,52 +5,82 @@
 {% block content %}
 
 <!-- Hero Section -->
-<section class="hero text-white text-center py-5" style="background: var(--primary-color);">
-  <div class="container">
-    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="{{ _('IRIS Logo') }}" class="logo mb-3" style="max-width:120px;">
-    <h1 class="display-4 fw-bold">{{ _('IRIS: Análisis de Medios de IA') }}</h1>
-    <p class="lead mb-4">{{ _('Estudio de la representación de mujeres y sesgos de género en la cobertura mediática de Inteligencia Artificial') }}</p>
+<section class="hero text-white text-center py-5 fade-in" style="background: var(--primary-gradient); position: relative; overflow: hidden;">
+  <div class="hero-background"></div>
+  <div class="container position-relative">
+    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="{{ _('IRIS Logo') }}" class="logo mb-4 bounce-in" style="max-width:140px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
+    <h1 class="display-4 fw-bold mb-4 slide-up" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{{ _('IRIS: Análisis de Medios de IA') }}</h1>
+    <p class="lead mb-5 slide-up" style="font-size: 1.25rem; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ _('Estudio de la representación de mujeres y sesgos de género en la cobertura mediática de Inteligencia Artificial') }}</p>
     {% if not current_user %}
-      <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-2">{{ _('Crear cuenta') }}</a>
-      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">{{ _('Entrar') }}</a>
+      <div class="hero-buttons slide-up">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-3 shadow-lg">{{ _('Crear cuenta') }}</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg shadow-lg">{{ _('Entrar') }}</a>
+      </div>
     {% endif %}
   </div>
 </section>
 
 <!-- Features Section -->
-<section class="features py-5 bg-light">
+<section class="features py-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
   <div class="container">
-    <h2 class="text-center fw-bold mb-4">{{ _('Lo que puedes hacer') }}</h2>
-    <div class="row g-4 text-center">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold mb-3" style="color: var(--primary-color); font-size: 2.5rem;">{{ _('Lo que puedes hacer') }}</h2>
+      <p class="lead" style="color: var(--dark-gray); max-width: 600px; margin: 0 auto;">{{ _('Descubre las potentes herramientas de análisis que IRIS pone a tu disposición') }}</p>
+    </div>
+    <div class="row g-4">
       <div class="col-md-4">
-        <i class="fas fa-file-alt fa-3x mb-3" style="color: var(--violet-iris-color);"></i>
-        <h5 class="fw-bold">{{ _('Analizar Texto o URL') }}</h5>
-        <p>{{ _('Carga tus textos o enlaces y recibe un análisis detallado al instante.') }}</p>
+        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-file-alt fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+          </div>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Analizar Texto o URL') }}</h5>
+          <p class="text-muted">{{ _('Carga tus textos o enlaces y recibe un análisis detallado al instante.') }}</p>
+        </div>
       </div>
       <div class="col-md-4">
-        <i class="fas fa-file-invoice fa-3x mb-3" style="color: var(--violet-iris-color);"></i>
-        <h5 class="fw-bold">{{ _('Generar Informes') }}</h5>
-        <p>{{ _('Descarga reportes personalizados en PDF con todos los hallazgos y métricas clave.') }}</p>
+        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-file-invoice fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+          </div>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Generar Informes') }}</h5>
+          <p class="text-muted">{{ _('Descarga reportes personalizados en PDF con todos los hallazgos y métricas clave.') }}</p>
+        </div>
       </div>
       <div class="col-md-4">
-        <i class="fas fa-chart-pie fa-3x mb-3" style="color: var(--violet-iris-color);"></i>
-        <h5 class="fw-bold">{{ _('Realizar Análisis') }}</h5>
-        <p>{{ _('Utiliza diferentes modelos de IA para profundizar en el significado y sesgos del texto.') }}</p>
+        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-chart-pie fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+          </div>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Realizar Análisis') }}</h5>
+          <p class="text-muted">{{ _('Utiliza diferentes modelos de IA para profundizar en el significado y sesgos del texto.') }}</p>
+        </div>
       </div>
       <div class="col-md-4">
-        <i class="fas fa-exchange-alt fa-3x mb-3" style="color: var(--violet-iris-color);"></i>
-        <h5 class="fw-bold">{{ _('Comparar con IA') }}</h5>
-        <p>{{ _('Contrasta resultados entre modelo básico y avanzado para elegir la mejor perspectiva.') }}</p>
+        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-exchange-alt fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+          </div>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Comparar con IA') }}</h5>
+          <p class="text-muted">{{ _('Contrasta resultados entre modelo básico y avanzado para elegir la mejor perspectiva.') }}</p>
+        </div>
       </div>
       <div class="col-md-4">
-        <i class="fas fa-comment-dots fa-3x mb-3" style="color: var(--violet-iris-color);"></i>
-        <h5 class="fw-bold">{{ _('Dar Feedback') }}</h5>
-        <p>{{ _('Aporta tus comentarios sobre los análisis y mejora continuamente el modelo.') }}</p>
+        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-comment-dots fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+          </div>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Dar Feedback') }}</h5>
+          <p class="text-muted">{{ _('Aporta tus comentarios sobre los análisis y mejora continuamente el modelo.') }}</p>
+        </div>
       </div>
       <div class="col-md-4">
-        <i class="fas fa-edit fa-3x mb-3" style="color: var(--violet-iris-color);"></i>
-        <h5 class="fw-bold">{{ _('Editar Resultados') }}</h5>
-        <p>{{ _('Modifica y ajusta manualmente los informes para perfeccionar tus conclusiones.') }}</p>
+        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-edit fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+          </div>
+          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Editar Resultados') }}</h5>
+          <p class="text-muted">{{ _('Modifica y ajusta manualmente los informes para perfeccionar tus conclusiones.') }}</p>
+        </div>
       </div>
     </div>
   </div>

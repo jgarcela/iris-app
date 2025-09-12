@@ -68,10 +68,192 @@
   <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
   <!-- 4) Filter Control extension -->
   <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-  <!-- 5) Inicializador global: arranca Boot-strap Table en todas las tablas con data-toggle="table" -->
+  <!-- 5) Enhanced Admin Table Functionality -->
   <script>
     $(function(){
-      $('[data-toggle="table"]').bootstrapTable();
+      // Table functionality variables
+      let allUsers = [];
+      let filteredUsers = [];
+      let currentPage = 1;
+      const usersPerPage = 10;
+
+      // Initialize table data
+      function initializeTable() {
+        allUsers = [];
+        $('#users-table tbody tr').each(function() {
+          const $row = $(this);
+          allUsers.push({
+            element: $row,
+            id: $row.find('.user-id').text(),
+            name: $row.find('.user-name').text(),
+            lastname: $row.find('.user-lastname').text(),
+            email: $row.find('.user-email').text(),
+            roles: $row.data('roles') ? $row.data('roles').split(',') : []
+          });
+        });
+        filteredUsers = [...allUsers];
+        updatePagination();
+        showCurrentPage();
+      }
+
+      // Search functionality
+      $('#user-search').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterUsers(searchTerm, $('#role-filter').val());
+      });
+
+      // Role filter functionality
+      $('#role-filter').on('change', function() {
+        const selectedRole = $(this).val();
+        filterUsers($('#user-search').val().toLowerCase(), selectedRole);
+      });
+
+      // Filter users based on search and role
+      function filterUsers(searchTerm, roleFilter) {
+        filteredUsers = allUsers.filter(user => {
+          const matchesSearch = !searchTerm || 
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.lastname.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm);
+          
+          const matchesRole = !roleFilter || user.roles.includes(roleFilter);
+          
+          return matchesSearch && matchesRole;
+        });
+
+        currentPage = 1;
+        updatePagination();
+        showCurrentPage();
+      }
+
+      // Show current page
+      function showCurrentPage() {
+        // Hide all rows
+        allUsers.forEach(user => user.element.hide());
+        
+        // Show filtered users for current page
+        const startIndex = (currentPage - 1) * usersPerPage;
+        const endIndex = startIndex + usersPerPage;
+        const usersToShow = filteredUsers.slice(startIndex, endIndex);
+        
+        usersToShow.forEach(user => user.element.show());
+        
+        // Update pagination info
+        const totalUsers = filteredUsers.length;
+        const startUser = totalUsers > 0 ? startIndex + 1 : 0;
+        const endUser = Math.min(endIndex, totalUsers);
+        $('#pagination-info').text(`Mostrando ${startUser}-${endUser} de ${totalUsers} usuarios`);
+      }
+
+      // Update pagination controls
+      function updatePagination() {
+        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+        const $pageNumbers = $('#page-numbers');
+        $pageNumbers.empty();
+
+        // Previous button
+        $('#prev-page').prop('disabled', currentPage === 1);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          const $pageBtn = $(`<span class="page-number ${i === currentPage ? 'active' : ''}">${i}</span>`);
+          $pageBtn.on('click', function() {
+            currentPage = i;
+            showCurrentPage();
+            updatePagination();
+          });
+          $pageNumbers.append($pageBtn);
+        }
+
+        // Next button
+        $('#next-page').prop('disabled', currentPage === totalPages);
+      }
+
+      // Pagination button handlers
+      $('#prev-page').on('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showCurrentPage();
+          updatePagination();
+        }
+      });
+
+      $('#next-page').on('click', function() {
+        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          showCurrentPage();
+          updatePagination();
+        }
+      });
+
+      // Enhanced refresh functionality
+      $('#refresh-table').on('click', function() {
+        location.reload();
+      });
+
+      // Export functionality
+      $('#export-users').on('click', function() {
+        const csvContent = convertToCSV(filteredUsers);
+        downloadCSV(csvContent, 'usuarios_exportados.csv');
+      });
+
+      // Helper function to convert data to CSV
+      function convertToCSV(users) {
+        if (!users || users.length === 0) return '';
+        
+        const headers = ['ID', 'Nombre', 'Apellido', 'Email', 'Roles'];
+        const csvRows = [headers.join(',')];
+        
+        users.forEach(user => {
+          const values = [
+            user.id || '',
+            user.name || '',
+            user.lastname || '',
+            user.email || '',
+            user.roles ? user.roles.join('; ') : ''
+          ];
+          csvRows.push(values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+        });
+        
+        return csvRows.join('\r\n');
+      }
+
+      // Helper function to download CSV
+      function downloadCSV(csvContent, filename) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Add loading states to action buttons
+      $('.btn-action').on('click', function() {
+        const $btn = $(this);
+        const $icon = $btn.find('i');
+        const originalClass = $icon.attr('class');
+        
+        $icon.removeClass().addClass('fas fa-spinner fa-spin');
+        
+        setTimeout(() => {
+          $icon.removeClass().addClass(originalClass);
+        }, 2000);
+      });
+
+      // Enhanced table row hover effects
+      $('#users-table tbody tr').on('mouseenter', function() {
+        $(this).addClass('table-row-hover');
+      }).on('mouseleave', function() {
+        $(this).removeClass('table-row-hover');
+      });
+
+      // Initialize table when page loads
+      initializeTable();
     });
   </script>
 {% endblock %}

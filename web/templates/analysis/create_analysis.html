@@ -4,10 +4,13 @@
 
 {% block content %}
 <div class="container-fluid py-5">
-  <h1 class="h2 mt-4">{{ _('Iniciar análisis') }}</h1>
+  <div class="text-center mb-5">
+    <h1 class="display-5 fw-bold mb-3" style="color: var(--primary-color);">{{ _('Iniciar análisis') }}</h1>
+    <p class="lead" style="color: var(--dark-gray);">{{ _('Selecciona tu modelo y proporciona el contenido para analizar') }}</p>
+  </div>
   <div class="row gx-5">
     <div class="col-12">
-      <div class="card-principal h-100 p-4">
+      <div class="card-principal h-100 p-5" style="border-radius: var(--border-radius-xl); box-shadow: var(--shadow-lg);">
         <!-- FORMULARIO UNIFICADO -->
         <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
           <div class="row">
@@ -32,9 +35,13 @@
                 <input type="text" id="authors" name="authors" class="form-control" placeholder="{{ _('Escribe aquí la autoría...') }}">
               </div>
               <!-- Botones contextuales -->
-              <div class="d-grid gap-2">
-                <button type="button" class="btn secondary" id="load-example">📂 {{ _('Cargar ejemplo') }}</button>
-                <button type="button" class="btn tertiary" id="use-url">🔗 {{ _('Usar URL') }}</button>
+              <div class="d-grid gap-3">
+                <button type="button" class="btn btn-iris" id="load-example">
+                  <i class="fas fa-folder-open me-2"></i>{{ _('Cargar ejemplo') }}
+                </button>
+                <button type="button" class="btn btn-blue" id="use-url">
+                  <i class="fas fa-link me-2"></i>{{ _('Usar URL') }}
+                </button>
               </div>
             </div>
 

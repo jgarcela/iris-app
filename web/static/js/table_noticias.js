@@ -1,8 +1,33 @@
 // File: static/js/table_noticias.js
 
 $(function () {
-  // 1) Inicializar Bootstrap Table
-  $("#tabla-noticias").bootstrapTable();
+  // 1) Inicializar Bootstrap Table con configuración mejorada
+  $("#tabla-noticias").bootstrapTable({
+    search: true,
+    showColumns: true,
+    showExport: false,
+    pagination: true,
+    pageSize: 10,
+    pageList: [5, 10, 25, 50, 100],
+    locale: 'es-ES',
+    filterControl: true,
+    filterShowClear: true,
+    clickToSelect: true,
+    sortName: 'IdNoticia',
+    sortOrder: 'asc',
+    searchText: 'Buscar en la tabla...',
+    searchPlaceholder: 'Escribe para buscar...',
+    showToggle: true,
+    showRefresh: true,
+    showFullscreen: true,
+    toolbar: '#toolbar',
+    onSearch: function (text) {
+      console.log('Búsqueda realizada:', text);
+    },
+    onRefresh: function () {
+      console.log('Tabla actualizada');
+    }
+  });
 
   // 2) Función para generar y descargar CSV de filas (selected o all)
   function exportarCSV() {
@@ -176,9 +201,34 @@ $(function () {
     document.body.removeChild(link);
   }
 
-  // 6) Vinculamos los botones de exportación a sus funciones
+  // 6) Función para limpiar filtros
+  function limpiarFiltros() {
+    $("#tabla-noticias").bootstrapTable('clearFilter');
+    $("#tabla-noticias").bootstrapTable('resetSearch');
+    console.log('Filtros limpiados');
+  }
+
+  // 7) Vinculamos los botones de exportación a sus funciones
   $("#exportar-csv").on("click", exportarCSV);
   $("#exportar-excel").on("click", exportarExcel);
   $("#exportar-json").on("click", exportarJSON);
   $("#exportar-pdf").on("click", exportarPDF);
+  $("#clear-filters").on("click", limpiarFiltros);
+
+  // 8) Mejorar la funcionalidad de búsqueda
+  $(document).on('keyup', '.fixed-table-toolbar .search', function() {
+    const searchText = $(this).val();
+    if (searchText.length >= 2 || searchText.length === 0) {
+      $("#tabla-noticias").bootstrapTable('refresh');
+    }
+  });
+
+  // 9) Añadir indicador de carga
+  $(document).on('load-success.bs.table', '#tabla-noticias', function() {
+    console.log('Tabla cargada correctamente');
+  });
+
+  $(document).on('load-error.bs.table', '#tabla-noticias', function() {
+    console.error('Error al cargar la tabla');
+  });
 });
