@@ -177,8 +177,17 @@
     ></script>
 
     <!-- Tus scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{{ url_for('static', filename='js/translate_menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/accessibility_menu.js') }}"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+          lucide.createIcons();
+        }
+      });
+    </script>
 
     {% block scripts_extra %}{% endblock %}
   </body>
