@@ -527,8 +527,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
     setupModeSelection();
     setupModelSelection();
-    setupUrlToggle();
-    setupExampleLoader();
+    // Guard optional initializers if not present to avoid breaking the rest
+    if (typeof setupUrlToggle === 'function') {
+        setupUrlToggle();
+    }
+    if (typeof setupExampleLoader === 'function') {
+        setupExampleLoader();
+    }
     updateAnalysisInfo();
     setupFormInteractions();
     setupQuickActions();
