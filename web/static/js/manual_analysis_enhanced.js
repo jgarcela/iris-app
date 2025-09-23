@@ -11,6 +11,7 @@ let selectedText = '';
 let currentSelection = null;
 let annotations = [];
 let wordCount = 0;
+let enabledVariablesByCategory = { contenido_general: [], lenguaje: [], fuentes: [] };
 
 function initializeManualAnalysis() {
     // Initialize text analysis
@@ -80,11 +81,9 @@ function setupEventListeners() {
 }
 
 function setupCategoryHandlers() {
-    // Setup checkboxes for analysis categories
-    const checkboxes = document.querySelectorAll('input[type="checkbox"][name]');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateSelectionCount);
-    });
+    // No user selection: load all variables from server-provided lists
+    updateEnabledVariables(true);
+    renderLoadedInfo();
 }
 
 function handleTextSelection() {
@@ -305,6 +304,44 @@ function getSelectedCategories() {
     });
     
     return selectedCategories;
+}
+
+function updateEnabledVariables(loadAll = false) {
+    enabledVariablesByCategory = { contenido_general: [], lenguaje: [], fuentes: [] };
+    if (loadAll && window.MANUAL_VARIABLES) {
+        enabledVariablesByCategory.contenido_general = [...(window.MANUAL_VARIABLES.contenido_general || [])];
+        enabledVariablesByCategory.lenguaje = [...(window.MANUAL_VARIABLES.lenguaje || [])];
+        enabledVariablesByCategory.fuentes = [...(window.MANUAL_VARIABLES.fuentes || [])];
+        return;
+    }
+    const checked = document.querySelectorAll('input[type="checkbox"][name]:checked');
+    checked.forEach(cb => {
+        const category = cb.name;
+        const variable = cb.value;
+        if (enabledVariablesByCategory[category] && !enabledVariablesByCategory[category].includes(variable)) {
+            enabledVariablesByCategory[category].push(variable);
+        }
+    });
+}
+
+function renderLoadedInfo() {
+    const container = document.getElementById('loaded-info');
+    if (!container) return;
+
+    const sections = Object.entries(enabledVariablesByCategory)
+        .filter(([, vars]) => vars.length > 0)
+        .map(([category, vars]) => {
+            const title = category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const chips = vars.map(v => `<span class="badge bg-light text-dark border me-1 mb-1">${v.replace(/_/g,' ')}</span>`).join(' ');
+            return `
+                <div class="mb-2">
+                    <div class="small text-muted mb-1">${title}</div>
+                    <div class="d-flex flex-wrap">${chips}</div>
+                </div>
+            `;
+        }).join('');
+
+    container.innerHTML = sections || `<div class="small text-muted">No hay variables seleccionadas.</div>`;
 }
 
 function showAnalysisResults(categories) {

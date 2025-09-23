@@ -17,57 +17,11 @@
   <div class="row g-4">
     <!-- Left Panel: Analysis Tools -->
     <div class="col-md-4">
-      <div class="analysis-tools-panel">
+      <!-- Panel 1: Action Buttons -->
+      <div class="analysis-tools-panel mb-3">
         <h4 class="panel-title">
           <i class="fas fa-tools me-2"></i>{{ _('Herramientas de Análisis') }}
         </h4>
-        
-        <!-- Analysis Categories -->
-        <div class="analysis-categories">
-          <div class="category-section">
-            <h5>{{ _('Contenido General') }}</h5>
-            <div class="category-options">
-              {% for variable in contenido_general_variables %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="cg_{{ variable }}" name="contenido_general" value="{{ variable }}">
-                  <label class="form-check-label" for="cg_{{ variable }}">
-                    {{ variable|replace('_', ' ')|title }}
-                  </label>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <div class="category-section">
-            <h5>{{ _('Lenguaje') }}</h5>
-            <div class="category-options">
-              {% for variable in lenguaje_variables %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="lg_{{ variable }}" name="lenguaje" value="{{ variable }}">
-                  <label class="form-check-label" for="lg_{{ variable }}">
-                    {{ variable|replace('_', ' ')|title }}
-                  </label>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <div class="category-section">
-            <h5>{{ _('Fuentes') }}</h5>
-            <div class="category-options">
-              {% for variable in fuentes_variables %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="fu_{{ variable }}" name="fuentes" value="{{ variable }}">
-                  <label class="form-check-label" for="fu_{{ variable }}">
-                    {{ variable|replace('_', ' ')|title }}
-                  </label>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
         <div class="action-buttons">
           <button type="button" class="btn btn-primary w-100 mb-2" id="start-analysis">
             <i class="fas fa-play me-2"></i>{{ _('Iniciar Análisis') }}
@@ -78,6 +32,18 @@
           <button type="button" class="btn btn-success w-100" id="save-analysis">
             <i class="fas fa-save me-2"></i>{{ _('Guardar Análisis') }}
           </button>
+        </div>
+      </div>
+
+      <!-- Panel 2: Variables Info -->
+      <div class="analysis-tools-panel">
+        <h4 class="panel-title">
+          <i class="fas fa-list me-2"></i>{{ _('Variables Cargadas') }}
+        </h4>
+        <!-- Analysis Categories (hidden: all variables are preloaded) -->
+        <div class="analysis-categories" style="display: none;"></div>
+        <div class="loaded-info" id="loaded-info">
+          <!-- Filled dynamically with selected variables per block -->
         </div>
       </div>
     </div>
@@ -237,6 +203,7 @@
   line-height: 1.6;
   font-size: 1rem;
   color: var(--text-black-color);
+  white-space: pre-wrap; /* preserve original paragraph spacing */
 }
 
 .text-info {
@@ -304,5 +271,12 @@
 }
 </style>
 
+<script>
+  window.MANUAL_VARIABLES = {
+    contenido_general: {{ contenido_general_variables | tojson }},
+    lenguaje: {{ lenguaje_variables | tojson }},
+    fuentes: {{ fuentes_variables | tojson }}
+  };
+</script>
 <script src="{{ url_for('static', filename='js/manual_analysis_enhanced.js') }}"></script>
 {% endblock %}
