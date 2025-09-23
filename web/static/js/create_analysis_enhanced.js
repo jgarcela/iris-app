@@ -165,15 +165,32 @@ function updateUIForMode(mode) {
  * Setup model selection functionality
  */
 function setupModelSelection() {
-    const modelSelect = document.getElementById('model');
-    
-    if (modelSelect) {
-        modelSelect.addEventListener('change', function() {
-            updateModelInfo(this.value);
+    const hiddenModelInput = document.getElementById('model');
+    const modelOptions = document.querySelectorAll('.model-option');
+
+    if (modelOptions && modelOptions.length) {
+        modelOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Toggle selection
+                modelOptions.forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+
+                const selectedModel = this.dataset.model;
+                if (hiddenModelInput) {
+                    hiddenModelInput.value = selectedModel;
+                }
+                updateModelInfo(selectedModel);
+                validateForm();
+            });
         });
-        
-        // Initialize model info
-        updateModelInfo(modelSelect.value);
+
+        // Initialize from preselected option
+        const preselected = document.querySelector('.model-option.selected');
+        const initialModel = preselected ? preselected.dataset.model : 'avanzado';
+        if (hiddenModelInput) {
+            hiddenModelInput.value = initialModel;
+        }
+        updateModelInfo(initialModel);
     }
 }
 

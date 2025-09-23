@@ -21,6 +21,7 @@
         <!-- FORMULARIO UNIFICADO -->
         <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
           <input type="hidden" id="analysis-mode" name="analysis_mode" value="automatic">
+          <input type="hidden" id="model" name="model" value="avanzado">
           
           <div class="row g-3">
             <!-- Left column: Mode + Model selection -->
