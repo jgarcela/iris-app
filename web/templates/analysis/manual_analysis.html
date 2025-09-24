@@ -60,8 +60,7 @@
         
         <div class="text-container">
           <div id="analysis-text" class="analysis-text">
-            {% if data and data.text %}
-              {{ data.text }}
+            {% if data and data.text %}{% if data.title %}<div class="article-title-section"><h2 class="article-title">{{ data.title }}</h2></div>{% endif %}{% if data.authors %}<div class="article-authors-section"><p class="article-authors">{{ data.authors }}</p></div>{% endif %}<div class="article-content">{{ data.text }}</div>
             {% else %}
               <p class="text-muted text-center py-5">
                 <i class="fas fa-info-circle me-2"></i>
@@ -255,6 +254,39 @@
 .analysis-text .highlight.selected {
   background-color: rgba(160, 44, 147, 0.3);
   border: 2px solid var(--violet-iris-color);
+}
+
+/* Article title and authors within text */
+.article-title-section {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.article-title {
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  line-height: 1.2;
+  margin: 0 !important;
+  text-align: center;
+}
+
+.article-authors-section {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.article-authors {
+  font-size: 1.1rem;
+  color: var(--dark-gray);
+  font-style: italic;
+  margin: 0 !important;
+  font-weight: var(--font-weight-medium);
+}
+
+.article-content {
+  margin-top: 0.5rem;
 }
 
 /* Analysis Modal enhancements */
