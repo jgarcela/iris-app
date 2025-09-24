@@ -176,29 +176,164 @@ function getVariablesForCategory(category) {
 }
 
 function getValuesForVariable(category, variable) {
-    // This would typically come from the server configuration
-    // For now, we'll provide some basic options
+    // Values from config.ini
     const valueOptions = {
+        // CONTENIDO_GENERAL variables
+        'genero_nombre_propio_titular': [
+            { key: '1', label: 'No hay' },
+            { key: '2', label: 'Sí, hombre' },
+            { key: '3', label: 'Sí, mujer' },
+            { key: '4', label: 'Sí, mujer y hombre' }
+        ],
+        'genero_personas_mencionadas': [
+            { key: '1', label: 'No hay' },
+            { key: '2', label: 'Sí, hombre' },
+            { key: '3', label: 'Sí, mujer' },
+            { key: '4', label: 'Sí, mujer y hombre' }
+        ],
         'genero_periodista': [
             { key: '1', label: 'Masculino' },
             { key: '2', label: 'Femenino' },
             { key: '3', label: 'Mixto' },
             { key: '4', label: 'Ns/Nc' },
-            { key: '5', label: 'Agencia/otros medios' }
+            { key: '5', label: 'Agencia/otros medios' },
+            { key: '6', label: 'Redacción' },
+            { key: '7', label: 'Corporativo' }
         ],
         'tema': [
             { key: '1', label: 'Científica/Investigación' },
             { key: '2', label: 'Comunicación' },
             { key: '3', label: 'De farándula o espectáculo' },
             { key: '4', label: 'Deportiva' },
-            { key: '5', label: 'Economía' },
+            { key: '5', label: 'Economía (incluido: consumo; compras; viajes…)' },
+            { key: '6', label: 'Educación/cultura' },
+            { key: '7', label: 'Empleo/Trabajo' },
+            { key: '8', label: 'Empresa' },
+            { key: '9', label: 'Judicial' },
+            { key: '10', label: 'Medioambiente' },
+            { key: '11', label: 'Policial' },
             { key: '12', label: 'Política' },
-            { key: '15', label: 'Tecnología' }
+            { key: '13', label: 'Salud' },
+            { key: '14', label: 'Social' },
+            { key: '15', label: 'Tecnología' },
+            { key: '16', label: 'Transporte' },
+            { key: '17', label: 'Otros' }
         ],
+        'cita_textual_titular': [
+            { key: '0', label: 'No' },
+            { key: '1', label: 'Sí' }
+        ],
+        'nombre_propio_titular': [
+            { key: '0', label: 'No' },
+            { key: '1', label: 'Sí' }
+        ],
+        'personas_mencionadas': [
+            { key: '0', label: 'No' },
+            { key: '1', label: 'Sí' }
+        ],
+        
+        // LENGUAJE variables
         'lenguaje_sexista': [
             { key: '1', label: 'No' },
             { key: '2', label: 'Sí' },
             { key: '3', label: 'Sí, además se observa un salto semántico' }
+        ],
+        'androcentrismo': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'asimetria': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'cargos_mujeres': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'comparacion_mujeres_hombres': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'denominacion_dependiente': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'denominacion_redundante': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'denominacion_sexualizada': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'dual_aparente': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'excepcion_noticiabilidad': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'hombre_humanidad': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'infantilizacion': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'masculino_generico': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'sexismo_social': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        
+        // FUENTES variables
+        'declaracion_fuente': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'genero_fuente': [
+            { key: '1', label: 'Masculino' },
+            { key: '2', label: 'Femenino' },
+            { key: '3', label: 'Mixto' },
+            { key: '4', label: 'Ns/Nc' }
+        ],
+        'nombre_fuente': [
+            { key: '1', label: 'No' },
+            { key: '2', label: 'Sí' }
+        ],
+        'tipo_fuente': [
+            { key: '1', label: 'Abogado/a' },
+            { key: '2', label: 'Activista' },
+            { key: '3', label: 'Actor/Actriz' },
+            { key: '4', label: 'Alto Cargo Directivo/a' },
+            { key: '5', label: 'Alumno/a' },
+            { key: '6', label: 'Analista' },
+            { key: '7', label: 'Arquitecto/a' },
+            { key: '8', label: 'Artista' },
+            { key: '9', label: 'Ciudadano/a' },
+            { key: '10', label: 'Corporativa' },
+            { key: '11', label: 'Deportista' },
+            { key: '12', label: 'Dir. Cine / guionista' },
+            { key: '13', label: 'Director/a o presidente/a' },
+            { key: '14', label: 'Economista' },
+            { key: '15', label: 'El Papa' },
+            { key: '16', label: 'Escritor/a' },
+            { key: '17', label: 'Experto/a' },
+            { key: '18', label: 'Famoso/a' },
+            { key: '19', label: 'Institucional' },
+            { key: '20', label: 'Investigador/a' },
+            { key: '21', label: 'Médico' },
+            { key: '22', label: 'Músico/a' },
+            { key: '23', label: 'Periodista' },
+            { key: '24', label: 'Personaje de Ficción' },
+            { key: '25', label: 'Político/a' },
+            { key: '26', label: 'Rey/Reina' },
+            { key: '27', label: 'Trabajador/a' }
         ]
     };
     
