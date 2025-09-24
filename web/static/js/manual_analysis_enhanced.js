@@ -72,6 +72,18 @@ function setupEventListeners() {
     if (variableSelect) {
         variableSelect.addEventListener('change', handleVariableChange);
     }
+    
+    // Close annotation panel button
+    const closeAnnotationBtn = document.getElementById('close-annotation');
+    if (closeAnnotationBtn) {
+        closeAnnotationBtn.addEventListener('click', hideAnnotationPanel);
+    }
+    
+    // Cancel annotation button
+    const cancelAnnotationBtn = document.getElementById('cancel-annotation');
+    if (cancelAnnotationBtn) {
+        cancelAnnotationBtn.addEventListener('click', hideAnnotationPanel);
+    }
 }
 
 function setupCategoryHandlers() {
@@ -90,24 +102,41 @@ function handleTextSelection() {
             range: selection.getRangeAt(0)
         };
         
-        // Show annotation modal
-        showAnnotationModal(selectedText);
+        // Show annotation panel
+        showAnnotationPanel(selectedText);
     }
 }
 
-function showAnnotationModal(text) {
-    const modal = new bootstrap.Modal(document.getElementById('analysisModal'));
-    const selectedTextContent = document.getElementById('selected-text-content');
+function showAnnotationPanel(text) {
+    const panel = document.getElementById('annotation-panel');
+    const selectedTextPreview = document.getElementById('selected-text-preview');
     
-    if (selectedTextContent) {
-        selectedTextContent.textContent = text;
+    if (selectedTextPreview) {
+        selectedTextPreview.textContent = text;
     }
     
     // Reset form
     resetAnnotationForm();
     
-    // Show modal
-    modal.show();
+    // Show panel
+    if (panel) {
+        panel.style.display = 'block';
+    }
+}
+
+function hideAnnotationPanel() {
+    const panel = document.getElementById('annotation-panel');
+    if (panel) {
+        panel.style.display = 'none';
+    }
+    
+    // Clear current selection
+    currentSelection = null;
+    
+    // Clear any text selection
+    if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+    }
 }
 
 function resetAnnotationForm() {
@@ -377,12 +406,8 @@ function saveAnnotation() {
     // Update selection count
     updateSelectionCount();
     
-    // Close modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('analysisModal'));
-    modal.hide();
-    
-    // Clear current selection
-    currentSelection = null;
+    // Hide annotation panel
+    hideAnnotationPanel();
     
     // Show success message
     showSuccess('Anotación guardada correctamente.');
