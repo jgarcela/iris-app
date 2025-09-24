@@ -84,6 +84,38 @@ function setupEventListeners() {
     if (cancelAnnotationBtn) {
         cancelAnnotationBtn.addEventListener('click', hideAnnotationPanel);
     }
+    
+    // Setup collapsible panels
+    setupCollapsiblePanels();
+}
+
+function setupCollapsiblePanels() {
+    const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+    
+    collapsibleHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const content = document.getElementById(targetId);
+            
+            if (content) {
+                toggleCollapsible(this, content);
+            }
+        });
+    });
+}
+
+function toggleCollapsible(header, content) {
+    const isCollapsed = header.classList.contains('collapsed');
+    
+    if (isCollapsed) {
+        // Expand
+        header.classList.remove('collapsed');
+        content.classList.remove('collapsed');
+    } else {
+        // Collapse
+        header.classList.add('collapsed');
+        content.classList.add('collapsed');
+    }
 }
 
 function setupCategoryHandlers() {

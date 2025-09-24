@@ -83,25 +83,31 @@
 
       <!-- Panel 2: Variables Info -->
       <div class="analysis-tools-panel mb-3">
-        <h4 class="panel-title">
+        <h4 class="panel-title collapsible-header" data-target="variables-content">
           <i class="fas fa-list me-2"></i>{{ _('Variables Cargadas') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
         </h4>
-        <!-- Analysis Categories (hidden: all variables are preloaded) -->
-        <div class="analysis-categories" style="display: none;"></div>
-        <div class="loaded-info" id="loaded-info">
-          <!-- Filled dynamically with selected variables per block -->
+        <div class="collapsible-content" id="variables-content">
+          <!-- Analysis Categories (hidden: all variables are preloaded) -->
+          <div class="analysis-categories" style="display: none;"></div>
+          <div class="loaded-info" id="loaded-info">
+            <!-- Filled dynamically with selected variables per block -->
+          </div>
         </div>
       </div>
 
       <!-- Panel 3: Annotations Summary -->
       <div class="analysis-tools-panel">
-        <h4 class="panel-title">
+        <h4 class="panel-title collapsible-header" data-target="annotations-content">
           <i class="fas fa-clipboard-list me-2"></i>{{ _('Resumen de Anotaciones') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
         </h4>
-        <div class="annotations-summary" id="annotations-summary">
-          <div class="no-annotations text-muted text-center py-3">
-            <i class="fas fa-info-circle me-2"></i>
-            {{ _('No hay anotaciones aún') }}
+        <div class="collapsible-content" id="annotations-content">
+          <div class="annotations-summary" id="annotations-summary">
+            <div class="no-annotations text-muted text-center py-3">
+              <i class="fas fa-info-circle me-2"></i>
+              {{ _('No hay anotaciones aún') }}
+            </div>
           </div>
         </div>
       </div>
@@ -452,6 +458,43 @@
 
 .no-annotations {
   font-size: 0.9rem;
+}
+
+/* Collapsible Panels */
+.collapsible-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.collapsible-header:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: var(--border-radius-md);
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+}
+
+.collapsible-header.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.collapsible-content {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* Responsive design */
