@@ -43,12 +43,6 @@ function setupTextAnalysis() {
 }
 
 function setupEventListeners() {
-    // Start analysis button
-    const startAnalysisBtn = document.getElementById('start-analysis');
-    if (startAnalysisBtn) {
-        startAnalysisBtn.addEventListener('click', startAnalysis);
-    }
-    
     // Clear selections button
     const clearSelectionsBtn = document.getElementById('clear-selections');
     if (clearSelectionsBtn) {
@@ -278,34 +272,6 @@ function highlightText(range, annotation) {
     }
 }
 
-function startAnalysis() {
-    const selectedCategories = getSelectedCategories();
-    
-    if (selectedCategories.length === 0) {
-        showError('Por favor, selecciona al menos una categoría para analizar.');
-        return;
-    }
-    
-    // Show analysis results
-    showAnalysisResults(selectedCategories);
-    
-    showSuccess('Análisis iniciado. Puedes comenzar a seleccionar y anotar texto.');
-}
-
-function getSelectedCategories() {
-    const selectedCategories = [];
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-    
-    checkboxes.forEach(checkbox => {
-        const category = checkbox.name;
-        if (!selectedCategories.includes(category)) {
-            selectedCategories.push(category);
-        }
-    });
-    
-    return selectedCategories;
-}
-
 function updateEnabledVariables(loadAll = false) {
     enabledVariablesByCategory = { contenido_general: [], lenguaje: [], fuentes: [] };
     if (loadAll && window.MANUAL_VARIABLES) {
@@ -344,45 +310,7 @@ function renderLoadedInfo() {
     container.innerHTML = sections || `<div class="small text-muted">No hay variables seleccionadas.</div>`;
 }
 
-function showAnalysisResults(categories) {
-    const resultsDiv = document.getElementById('analysis-results');
-    const contentDiv = document.getElementById('results-content');
-    
-    if (resultsDiv && contentDiv) {
-        resultsDiv.style.display = 'block';
-        
-        let html = '<div class="row">';
-        
-        categories.forEach(category => {
-            const categoryAnnotations = annotations.filter(a => a.category === category);
-            
-            html += `
-                <div class="col-md-4 mb-3">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="mb-0">${category.replace('_', ' ').toUpperCase()}</h6>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">${categoryAnnotations.length} anotaciones</p>
-                            <ul class="list-unstyled">
-                                ${categoryAnnotations.map(ann => `
-                                    <li class="mb-1">
-                                        <small class="text-muted">${ann.variable}: ${ann.value}</small>
-                                        <br>
-                                        <small>"${ann.text.substring(0, 50)}${ann.text.length > 50 ? '...' : ''}"</small>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        contentDiv.innerHTML = html;
-    }
-}
+// Removed showAnalysisResults: no longer needed without a start action
 
 function clearSelections() {
     // Remove all highlights
@@ -486,7 +414,6 @@ function showMessage(message, type) {
 
 // Export functions for potential external use
 window.ManualAnalysisEnhanced = {
-    startAnalysis,
     clearSelections,
     saveAnalysis,
     saveAnnotation,
