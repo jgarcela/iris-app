@@ -82,7 +82,7 @@
       </div>
 
       <!-- Panel 2: Variables Info -->
-      <div class="analysis-tools-panel">
+      <div class="analysis-tools-panel mb-3">
         <h4 class="panel-title">
           <i class="fas fa-list me-2"></i>{{ _('Variables Cargadas') }}
         </h4>
@@ -90,6 +90,19 @@
         <div class="analysis-categories" style="display: none;"></div>
         <div class="loaded-info" id="loaded-info">
           <!-- Filled dynamically with selected variables per block -->
+        </div>
+      </div>
+
+      <!-- Panel 3: Annotations Summary -->
+      <div class="analysis-tools-panel">
+        <h4 class="panel-title">
+          <i class="fas fa-clipboard-list me-2"></i>{{ _('Resumen de Anotaciones') }}
+        </h4>
+        <div class="annotations-summary" id="annotations-summary">
+          <div class="no-annotations text-muted text-center py-3">
+            <i class="fas fa-info-circle me-2"></i>
+            {{ _('No hay anotaciones aún') }}
+          </div>
         </div>
       </div>
     </div>
@@ -382,6 +395,63 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* Annotations Summary */
+.annotations-summary {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.annotation-item {
+  background: var(--light-gray);
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.annotation-item:last-child {
+  margin-bottom: 0;
+}
+
+.annotation-text {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.annotation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.annotation-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.annotation-detail-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--dark-gray);
+  font-size: 0.8rem;
+}
+
+.annotation-detail-value {
+  background: var(--primary-color);
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.no-annotations {
+  font-size: 0.9rem;
 }
 
 /* Responsive design */

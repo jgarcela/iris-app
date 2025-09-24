@@ -406,6 +406,9 @@ function saveAnnotation() {
     // Update selection count
     updateSelectionCount();
     
+    // Update annotations summary
+    updateAnnotationsSummary();
+    
     // Hide annotation panel
     hideAnnotationPanel();
     
@@ -487,6 +490,9 @@ function clearSelections() {
     // Update selection count
     updateSelectionCount();
     
+    // Update annotations summary
+    updateAnnotationsSummary();
+    
     // Hide results
     const resultsDiv = document.getElementById('analysis-results');
     if (resultsDiv) {
@@ -535,6 +541,71 @@ function updateSelectionCount() {
     if (selectionCountBadge) {
         selectionCountBadge.textContent = `${annotations.length} seleccionado`;
     }
+}
+
+function updateAnnotationsSummary() {
+    const summaryContainer = document.getElementById('annotations-summary');
+    if (!summaryContainer) return;
+
+    if (annotations.length === 0) {
+        summaryContainer.innerHTML = `
+            <div class="no-annotations text-muted text-center py-3">
+                <i class="fas fa-info-circle me-2"></i>
+                No hay anotaciones aún
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    annotations.forEach((annotation, index) => {
+        const categoryLabel = getCategoryLabel(annotation.category);
+        const variableLabel = getVariableLabel(annotation.variable);
+        const valueLabel = getValueLabel(annotation.variable, annotation.value);
+        
+        html += `
+            <div class="annotation-item">
+                <div class="annotation-text">
+                    "${annotation.text.length > 50 ? annotation.text.substring(0, 50) + '...' : annotation.text}"
+                </div>
+                <div class="annotation-details">
+                    <div class="annotation-detail">
+                        <span class="annotation-detail-label">Categoría:</span>
+                        <span class="annotation-detail-value">${categoryLabel}</span>
+                    </div>
+                    <div class="annotation-detail">
+                        <span class="annotation-detail-label">Variable:</span>
+                        <span class="annotation-detail-value">${variableLabel}</span>
+                    </div>
+                    <div class="annotation-detail">
+                        <span class="annotation-detail-label">Valor:</span>
+                        <span class="annotation-detail-value">${valueLabel}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    summaryContainer.innerHTML = html;
+}
+
+function getCategoryLabel(category) {
+    const labels = {
+        'contenido_general': 'Contenido General',
+        'lenguaje': 'Lenguaje',
+        'fuentes': 'Fuentes'
+    };
+    return labels[category] || category;
+}
+
+function getVariableLabel(variable) {
+    return variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function getValueLabel(variable, value) {
+    const valueOptions = getValuesForVariable('', variable);
+    const option = valueOptions.find(opt => opt.key === value);
+    return option ? option.label : value;
 }
 
 function showError(message) {
