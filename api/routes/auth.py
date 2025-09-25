@@ -61,7 +61,7 @@ def register():
         'first_name': first_name,
         'last_name': last_name,
         'email': email,
-        'password': pw_hash,
+        'password_hash': pw_hash,
         'roles': ['user']      # rol base
     })
     return jsonify(msg="Registro correcto"), 201
@@ -77,7 +77,7 @@ def login():
     logger.info(f"{data=}")
 
     user = db.DB_USERS.find_one({'email': email})
-    if not user or not check_password_hash(user['password'], password):
+    if not user or not check_password_hash(user['password_hash'], password):
         return jsonify(msg="Credenciales inválidas"), 401
 
     access_token = create_access_token(identity=str(user['_id']))

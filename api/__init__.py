@@ -54,9 +54,10 @@ app.config.update({
 
 # Habilitar CORS para todas las rutas
 CORS(app, 
+     origins=[f"http://{WEB_HOST}:{WEB_PORT}", "http://localhost:8001"],
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "OPTIONS"])
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 
