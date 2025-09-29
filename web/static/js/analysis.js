@@ -519,12 +519,18 @@ let annotations = [];
 function editAnalysis() {
     annotationMode = !annotationMode;
     const editButton = document.querySelector('button[onclick="editAnalysis()"]');
+    const saveButton = document.getElementById('save-analysis-btn');
     
     if (annotationMode) {
         // Enter annotation mode
         editButton.innerHTML = '<i class="fas fa-times me-1"></i> Salir de Anotación';
-        editButton.classList.remove('btn-warning');
+        editButton.classList.remove('btn-edit-mode');
         editButton.classList.add('btn-danger');
+        
+        // Show save button
+        if (saveButton) {
+            saveButton.style.display = 'flex';
+        }
         
         // Show annotation controls
         showAnnotationControls();
@@ -536,7 +542,12 @@ function editAnalysis() {
         // Exit annotation mode
         editButton.innerHTML = '<i class="fas fa-edit me-1"></i> Editar Análisis';
         editButton.classList.remove('btn-danger');
-        editButton.classList.add('btn-warning');
+        editButton.classList.add('btn-edit-mode');
+        
+        // Hide save button
+        if (saveButton) {
+            saveButton.style.display = 'none';
+        }
         
         // Hide annotation controls
         hideAnnotationControls();
@@ -1008,6 +1019,83 @@ function updateAnnotationIndicators() {
             }
         }
     });
+}
+
+// Function to save analysis and annotations to database
+async function saveAnalysisToDatabase() {
+    const saveButton = document.getElementById('save-analysis-btn');
+    
+    if (!saveButton) return;
+    
+    // Show saving state
+    saveButton.classList.add('saving');
+    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Guardando...';
+    saveButton.disabled = true;
+    
+    try {
+        // Prepare data to save
+        const saveData = {
+            doc_id: window.data._id,
+            analysis: window.data.analysis.original,
+            annotations: annotations,
+            highlight_html: {
+                contenido_general: document.querySelector('#highlight-contenido .markup-area')?.innerHTML || '',
+                lenguaje: document.querySelector('#highlight-lenguaje .markup-area')?.innerHTML || '',
+                fuentes: document.querySelector('#highlight-fuentes .markup-area')?.innerHTML || ''
+            },
+            timestamp: new Date().toISOString()
+        };
+        
+        // Send to backend
+        const response = await fetch(window.api_url_save_annotations, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(saveData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // Show success state
+            saveButton.classList.remove('saving');
+            saveButton.classList.add('saved');
+            saveButton.innerHTML = '<i class="fas fa-check me-2"></i> Guardado';
+            
+            showNotification('Análisis y anotaciones guardados correctamente', 'success');
+            
+            // Update the document ID if it's a new document
+            if (result.doc_id) {
+                window.data._id = result.doc_id;
+            }
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                saveButton.classList.remove('saved');
+                saveButton.innerHTML = '<i class="fas fa-save me-2"></i> Guardar';
+                saveButton.disabled = false;
+            }, 3000);
+            
+        } else {
+            throw new Error('Error al guardar en la base de datos');
+        }
+        
+    } catch (error) {
+        console.error('Error saving analysis:', error);
+        
+        // Show error state
+        saveButton.classList.remove('saving');
+        saveButton.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Error';
+        saveButton.disabled = false;
+        
+        showNotification('Error al guardar el análisis: ' + error.message, 'error');
+        
+        // Reset button after 3 seconds
+        setTimeout(() => {
+            saveButton.innerHTML = '<i class="fas fa-save me-2"></i> Guardar';
+        }, 3000);
+    }
 }
 
 // Function to show notification

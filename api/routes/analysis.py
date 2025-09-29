@@ -160,3 +160,79 @@ def save_edits():
     else:
         return jsonify(success=False, error='No se pudo actualizar el documento')
 
+
+@bp.route('/save_annotations', methods=['POST'])
+# @role_required('user','admin')
+def save_annotations():
+    """Save analysis and manual annotations to database"""
+    try:
+        data = request.get_json()
+        doc_id = data.get('doc_id')
+        analysis = data.get('analysis')
+        annotations = data.get('annotations', [])
+        highlight_html = data.get('highlight_html', {})
+        timestamp = data.get('timestamp')
+        
+        print(f"[SAVE_ANNOTATIONS] Received data:")
+        print(f"  - doc_id: {doc_id}")
+        print(f"  - annotations count: {len(annotations)}")
+        print(f"  - highlight_html keys: {list(highlight_html.keys())}")
+        print(f"  - timestamp: {timestamp}")
+        
+        if not doc_id:
+            return jsonify(success=False, error='Document ID is required'), 400
+        
+        # Prepare update data
+        update_data = {
+            'analysis.original': analysis,
+            'annotations': annotations,
+            'highlight.edited': highlight_html,
+            'updated_at': datetime.now(timezone.utc)
+        }
+        
+        # If it's a new document (no existing doc_id), create it
+        if doc_id == 'new' or not ObjectId.is_valid(doc_id):
+            # Create new document
+            new_doc = {
+                'analysis': {
+                    'original': analysis,
+                    'edited': None
+                },
+                'annotations': annotations,
+                'highlight': {
+                    'original': {},
+                    'edited': highlight_html
+                },
+                'created_at': datetime.now(timezone.utc),
+                'updated_at': datetime.now(timezone.utc),
+                'status': 'draft'
+            }
+            
+            print(f"[SAVE_ANNOTATIONS] Creating new document with {len(annotations)} annotations")
+            result = db.DB_ANALYSIS.insert_one(new_doc)
+            new_doc_id = str(result.inserted_id)
+            
+            print(f"[DB] ✅ New document created with ID: {new_doc_id}")
+            print(f"[DB] Document contains {len(annotations)} annotations")
+            return jsonify(success=True, doc_id=new_doc_id)
+        
+        else:
+            # Update existing document
+            print(f"[SAVE_ANNOTATIONS] Updating existing document {doc_id} with {len(annotations)} annotations")
+            result = db.DB_ANALYSIS.update_one(
+                {'_id': ObjectId(doc_id)},
+                {'$set': update_data}
+            )
+            
+            if result.modified_count == 1:
+                print(f"[DB] ✅ Document updated with ID: {doc_id}")
+                print(f"[DB] Document now contains {len(annotations)} annotations")
+                return jsonify(success=True, doc_id=doc_id)
+            else:
+                print(f"[DB] ❌ Failed to update document {doc_id}")
+                return jsonify(success=False, error='No se pudo actualizar el documento')
+                
+    except Exception as e:
+        print(f"[ERROR] Error saving annotations: {str(e)}")
+        return jsonify(success=False, error=f'Error interno: {str(e)}'), 500
+

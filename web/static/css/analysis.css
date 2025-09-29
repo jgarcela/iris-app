@@ -537,6 +537,199 @@ mark[data-variable]:hover {
   font-size: 0.6rem;
 }
 
+/* Minimalist Tools Panel Styles */
+.tools-panel-minimal {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.tools-panel-minimal:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.panel-header-minimal {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f3f4;
+  background: #fafbfc;
+}
+
+.panel-title-minimal {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.panel-title-minimal i {
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.model-info-minimal {
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f3f4;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.model-label {
+  color: #6c757d;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.model-value {
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: #f8f9fa;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.action-buttons-minimal {
+  padding: 0.75rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.btn-minimal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #495057;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-minimal:hover {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-minimal i {
+  font-size: 0.75rem;
+}
+
+/* Button Variants */
+.btn-export {
+  color: #6c757d;
+}
+
+.btn-export:hover {
+  color: #495057;
+}
+
+.btn-edit-mode {
+  color: #ffc107;
+  border-color: #ffc107;
+  background: #fff9e6;
+}
+
+.btn-edit-mode:hover {
+  background: #fff3cd;
+  border-color: #ffb300;
+  color: #856404;
+}
+
+.btn-save {
+  color: #28a745;
+  border-color: #28a745;
+  background: #f8fff9;
+}
+
+.btn-save:hover {
+  background: #e6f7e6;
+  border-color: #1e7e34;
+  color: #155724;
+}
+
+.btn-save.saving {
+  background: #28a745;
+  color: white;
+  border-color: #1e7e34;
+}
+
+.btn-save.saved {
+  background: #6c757d;
+  color: white;
+  border-color: #5a6268;
+}
+
+.btn-finish {
+  color: #dc3545;
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.btn-finish:hover {
+  background: #ffe6e6;
+  border-color: #c82333;
+  color: #721c24;
+}
+
+/* Editing Mode Styles */
+.annotation-mode .tools-panel-minimal {
+  border-color: #ffc107;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+}
+
+.annotation-mode .panel-header-minimal {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+  border-bottom-color: #ffc107;
+}
+
+.annotation-mode .panel-title-minimal {
+  color: #856404;
+}
+
+.annotation-mode .panel-title-minimal i {
+  color: #ffc107;
+}
+
+.annotation-mode .btn-edit-mode {
+  background: #ffc107;
+  color: #212529;
+  border-color: #ffb300;
+  font-weight: 600;
+}
+
+.annotation-mode .btn-edit-mode:hover {
+  background: #ffb300;
+  border-color: #ff8c00;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .action-buttons-minimal {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  
+  .btn-minimal {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
 #edit-indicator {
   animation: pulse 2s infinite;
 }

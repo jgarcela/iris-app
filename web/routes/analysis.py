@@ -55,6 +55,7 @@ FUENTES_VARIABLES = ast.literal_eval(config['FUENTES']['VARIABLES'])
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
 URL_API_ENDPOINT_ANALYSIS_EDITS = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_EDITS}"
+URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/save_annotations"
 
 URL_API_ENDPOINT_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}"
 URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GET_DOCUMENT}"
@@ -234,7 +235,8 @@ def analyze():
             contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
             lenguaje_variables=LENGUAJE_VARIABLES,
             fuentes_variables=FUENTES_VARIABLES,
-            api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS
+            api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
+            api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
         )
     else:
         logger.error("[/ANALYSIS/ANALYZE] Error in API request")
@@ -309,5 +311,6 @@ def analyze_v0():
         contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
         lenguaje_variables=LENGUAJE_VARIABLES,
         fuentes_variables=FUENTES_VARIABLES,
-        api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS
+        api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
+        api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
     )

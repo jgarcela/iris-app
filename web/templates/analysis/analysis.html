@@ -8,40 +8,42 @@
         <!-- Left Column - Analysis Tools -->
         <div class="col-md-4">
             <!-- Analysis Tools Panel -->
-            <div class="analysis-tools-panel">
-                <h5 class="panel-title">
-                    <i class="fas fa-tools me-2"></i>
-                    {{ _('Herramientas de Análisis') }}
-                </h5>
-                
-                <!-- Model Info -->
-                <div class="model-info">
-                    <strong>{{ _('Modelo seleccionado') }}:</strong>
-                    <span id="selected-model">{{ data.model }}</span>
+            <div class="analysis-tools-panel tools-panel-minimal">
+                <div class="panel-header-minimal">
+                    <h6 class="panel-title-minimal">
+                        <i class="fas fa-tools me-2"></i>
+                        {{ _('Herramientas de Análisis') }}
+                    </h6>
                 </div>
                 
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <div class="d-flex gap-1 mb-2">
-                        <button class="btn btn-primary btn-sm" onclick="generatePDF()">
-                            <i class="fas fa-file-pdf me-1"></i>
-                            {{ _('Generar PDF') }}
-                        </button>
-                        <button class="btn btn-success btn-sm" onclick="generateWord()">
-                            <i class="fas fa-file-word me-1"></i>
-                            {{ _('Generar Word') }}
-                        </button>
-                    </div>
-                    <div class="d-flex gap-1">
-                        <button class="btn btn-warning btn-sm" onclick="editAnalysis()">
-                            <i class="fas fa-edit me-1"></i>
-                            {{ _('Editar Análisis') }}
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="finishAnalysis()">
-                            <i class="fas fa-check me-1"></i>
-                            {{ _('Finalizar') }}
-                        </button>
-                    </div>
+                <!-- Model Info Minimal -->
+                <div class="model-info-minimal">
+                    <span class="model-label">{{ _('Modelo') }}:</span>
+                    <span class="model-value" id="selected-model">{{ data.model }}</span>
+                </div>
+                
+                <!-- Action Buttons Minimal -->
+                <div class="action-buttons-minimal">
+                    <button class="btn-minimal btn-export" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf me-2"></i>
+                        {{ _('PDF') }}
+                    </button>
+                    <button class="btn-minimal btn-export" onclick="generateWord()">
+                        <i class="fas fa-file-word me-2"></i>
+                        {{ _('Word') }}
+                    </button>
+                    <button class="btn-minimal btn-edit-mode" onclick="editAnalysis()">
+                        <i class="fas fa-edit me-2"></i>
+                        {{ _('Editar Análisis') }}
+                    </button>
+                    <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
+                        <i class="fas fa-save me-2"></i>
+                        {{ _('Guardar') }}
+                    </button>
+                    <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
+                        <i class="fas fa-check me-2"></i>
+                        {{ _('Finalizar') }}
+                    </button>
                 </div>
             </div>
 
@@ -190,6 +192,7 @@
     window.data = {{ data | tojson | safe }};
     window.highlight_color_map = {{ highlight_map | safe }};
     window.api_url_edit = {{ api_url_edit | tojson | safe }};
+    window.api_url_save_annotations = {{ api_url_save_annotations | tojson | safe }};
 </script>
 
 <!-- External Scripts -->
