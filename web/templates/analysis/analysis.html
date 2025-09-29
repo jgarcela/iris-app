@@ -19,133 +19,130 @@
         </h4>
         <div class="action-buttons">
           <!-- Model Info -->
-          <div class="model-info mb-3 p-3 bg-light rounded">
-            <div class="d-flex align-items-center">
-              <i class="fas fa-brain text-primary me-2"></i>
-              <div>
-                <small class="text-muted d-block">{{ _('Modelo seleccionado') }}</small>
-                <strong class="text-primary">{{ data.model | title }}</strong>
+          <div class="model-info mb-2 p-2 bg-light rounded">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-brain text-primary me-2"></i>
+                <div>
+                  <small class="text-muted d-block">{{ _('Modelo') }}</small>
+                  <strong class="text-primary">{{ data.model | title }}</strong>
+                </div>
               </div>
+              <a href="/" class="btn btn-success btn-sm">
+                <i class="fas fa-flag-checkered me-1"></i>{{ _('Finalizar') }}
+              </a>
             </div>
           </div>
           
-          <!-- Action Buttons -->
-          <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}" class="btn btn-outline-danger w-100 mb-2">
-            <i class="fas fa-file-pdf me-2"></i>{{ _('Generar PDF') }}
-          </a>
-          <a href="{{ url_for('analysis.generate_report_word', doc_id=data._id) }}" class="btn btn-outline-primary w-100 mb-2">
-            <i class="fas fa-file-word me-2"></i>{{ _('Generar Word') }}
-          </a>
-          <a href="/" class="btn btn-success w-100">
-            <i class="fas fa-flag-checkered me-2"></i>{{ _('Finalizar análisis') }}
-          </a>
+          <!-- Action Buttons Row -->
+          <div class="d-flex gap-1">
+            <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}" class="btn btn-outline-danger btn-sm flex-fill">
+              <i class="fas fa-file-pdf me-1"></i>{{ _('PDF') }}
+            </a>
+            <a href="{{ url_for('analysis.generate_report_word', doc_id=data._id) }}" class="btn btn-outline-primary btn-sm flex-fill">
+              <i class="fas fa-file-word me-1"></i>{{ _('Word') }}
+            </a>
+          </div>
+        </div>
+</div>
+
+      <!-- Panel 2: Inclusivity Score -->
+      <div class="analysis-tools-panel mb-3">
+        <h4 class="panel-title collapsible-header" data-target="inclusivity-content">
+          <i class="fas fa-heart me-2"></i>{{ _('Puntuación de inclusividad') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
+        </h4>
+        <div class="collapsible-content" id="inclusivity-content">
+          <div class="score-bar">
+            <div class="fill" style="width: {{ score }}%;"></div>
+          </div>
+          <div class="score-value">{{ score }}/100</div>
+          <div class="metrics">
+            <div class="metric">
+              <span class="label">{{ _('Total palabras') }}</span>
+              <span class="value">{{ total_words }}</span>
+            </div>
+            <div class="metric">
+              <span class="label">{{ _('Términos sesgados') }}</span>
+              <span class="value">{{ biased_terms|length }}</span>
+            </div>
+            <div class="metric">
+              <span class="label">{{ _('Términos inclusivos') }}</span>
+              <span class="value">{{ inclusive_terms|length }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Panel 2: Analysis Results -->
-      <div class="analysis-tools-panel">
-        <h4 class="panel-title">
-          <i class="fas fa-chart-bar me-2"></i>{{ _('Resultados del Análisis') }}
+      <!-- Panel 3: Content General -->
+      <div class="analysis-tools-panel mb-3">
+        <h4 class="panel-title collapsible-header" data-target="contenido-content">
+          <i class="fas fa-list me-2"></i>{{ _('Contenido General') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
         </h4>
-        <p class="text-muted small mb-3">{{ _('Selecciona cada apartado individualmente para ver el texto resaltado correspondiente') }}</p>
-        
-        <!-- Inclusivity Score -->
-        <div class="analysis-tools-panel mb-3">
-          <h5 class="panel-title collapsible-header" data-target="inclusivity-content">
-            <i class="fas fa-heart me-2"></i>{{ _('Puntuación de inclusividad') }}
-            <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-          </h5>
-          <div class="collapsible-content" id="inclusivity-content">
-            <div class="score-bar">
-              <div class="fill" style="width: {{ score }}%;"></div>
-            </div>
-            <div class="score-value">{{ score }}/100</div>
-            <div class="metrics">
-              <div class="metric">
-                <span class="label">{{ _('Total palabras') }}</span>
-                <span class="value">{{ total_words }}</span>
-              </div>
-              <div class="metric">
-                <span class="label">{{ _('Términos sesgados') }}</span>
-                <span class="value">{{ biased_terms|length }}</span>
-              </div>
-              <div class="metric">
-                <span class="label">{{ _('Términos inclusivos') }}</span>
-                <span class="value">{{ inclusive_terms|length }}</span>
-              </div>
+        <div class="collapsible-content" id="contenido-content">
+          <div class="category-stats">
+            <div class="stat-item">
+              <span class="stat-label">{{ _('Total variables') }}</span>
+              <span class="stat-value">{{ data.analysis.original.contenido_general|length }}</span>
             </div>
           </div>
-        </div>
-
-        <!-- Content General -->
-        <div class="analysis-tools-panel mb-3">
-          <h5 class="panel-title collapsible-header" data-target="contenido-content">
-            <i class="fas fa-list me-2"></i>{{ _('Contenido General') }}
-            <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-          </h5>
-          <div class="collapsible-content" id="contenido-content">
-            <ul class="list-unstyled">
-              {% for key, value in data.analysis.original.contenido_general.items() %}
-              {% set color = highlight_map.get(key, "#ffffff") %}
-              <li class="mb-2">
-                <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
-              </li>
-              {% endfor %}
-            </ul>
+          <div class="variables-grid" id="contenido-variables">
+            <!-- Content will be populated by JavaScript -->
           </div>
         </div>
+      </div>
 
-        <!-- Language Analysis -->
-        <div class="analysis-tools-panel mb-3">
-          <h5 class="panel-title collapsible-header" data-target="lenguaje-content">
-            <i class="fas fa-language me-2"></i>{{ _('Lenguaje y Análisis del discurso') }}
-            <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-          </h5>
-          <div class="collapsible-content" id="lenguaje-content">
-            <ul class="list-unstyled">
-              {% for key, value in data.analysis.original.lenguaje.items() %}
-              {% set color = highlight_map.get(key, "#ffffff") %}
-              <li class="mb-2">
-                <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
-              </li>
-              {% endfor %}
-            </ul>
+      <!-- Panel 4: Language Analysis -->
+      <div class="analysis-tools-panel mb-3">
+        <h4 class="panel-title collapsible-header" data-target="lenguaje-content">
+          <i class="fas fa-language me-2"></i>{{ _('Lenguaje y Análisis del discurso') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
+        </h4>
+        <div class="collapsible-content" id="lenguaje-content">
+          <div class="category-stats">
+            <div class="stat-item">
+              <span class="stat-label">{{ _('Total variables') }}</span>
+              <span class="stat-value">{{ data.analysis.original.lenguaje|length }}</span>
+            </div>
+          </div>
+          <div class="variables-grid" id="lenguaje-variables">
+            <!-- Content will be populated by JavaScript -->
           </div>
         </div>
+      </div>
 
-        <!-- Sources -->
-        <div class="analysis-tools-panel mb-3">
-          <h5 class="panel-title collapsible-header" data-target="fuentes-content">
-            <i class="fas fa-quote-left me-2"></i>{{ _('Fuentes de información') }}
-            <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-          </h5>
-          <div class="collapsible-content" id="fuentes-content">
-            <ul class="list-unstyled">
-              {% for fuente in data.analysis.original.fuentes.fuentes %}
-                {% for key, value in fuente.items() %}
-                {% set color = highlight_map.get(key, "#ffffff") %}
-                <li class="mb-2">
-                  <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
-                </li>
-                {% endfor %}
-              {% endfor %}
-            </ul>
+      <!-- Panel 5: Sources -->
+      <div class="analysis-tools-panel mb-3">
+        <h4 class="panel-title collapsible-header" data-target="fuentes-content">
+          <i class="fas fa-quote-left me-2"></i>{{ _('Fuentes de información') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
+        </h4>
+        <div class="collapsible-content" id="fuentes-content">
+          <div class="category-stats">
+            <div class="stat-item">
+              <span class="stat-label">{{ _('Total fuentes') }}</span>
+              <span class="stat-value">{{ data.analysis.original.fuentes.fuentes|length }}</span>
+            </div>
+          </div>
+          <div class="sources-grid" id="fuentes-sources">
+            <!-- Content will be populated by JavaScript -->
           </div>
         </div>
+      </div>
 
-        <!-- Recommendations -->
-        <div class="analysis-tools-panel">
-          <h5 class="panel-title collapsible-header" data-target="recommendations-content">
-            <i class="fas fa-lightbulb me-2"></i>{{ _('Recomendaciones generales') }}
-            <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-          </h5>
-          <div class="collapsible-content" id="recommendations-content">
-            <ul class="list-unstyled">
-              {% for rec in recommendations %}
-              <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>{{ rec }}</li>
-              {% endfor %}
-            </ul>
-          </div>
+      <!-- Panel 6: Recommendations -->
+      <div class="analysis-tools-panel">
+        <h4 class="panel-title collapsible-header" data-target="recommendations-content">
+          <i class="fas fa-lightbulb me-2"></i>{{ _('Recomendaciones generales') }}
+          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
+        </h4>
+        <div class="collapsible-content" id="recommendations-content">
+          <ul class="list-unstyled">
+            {% for rec in recommendations %}
+            <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>{{ rec }}</li>
+            {% endfor %}
+          </ul>
         </div>
       </div>
     </div>
@@ -173,33 +170,6 @@
         </div>
         {% endif %}
 
-        <!-- 1. Texto plain: siempre visible -->
-        <div class="plain-text">
-            <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
-        </div>
-
-        <!-- 2. Texto highlighted: oculto hasta abrir -->
-        <div class="highlight-text" style="display: none;">
-            <div class="highlight-controls" style="margin-bottom: 10px;">
-                <button id="edit-mode-toggle" class="edit-button">
-                  <i class="fa fa-pen"></i> Editar
-                </button>  
-              
-                <button id="save-changes" class="save-button" style="display: none;">
-                  <i class="fa fa-save"></i> Guardar cambios
-                </button>
-              </div>
-              
-            <div class="markup-area">
-                <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
-            </div>
-        </div>
-        <!-- Tooltip predicciones -->
-        <div id="tooltip" class="custom-tooltip">
-            <i class="fas fa-check" title="Aceptar"></i>
-            <i class="fas fa-times" title="Rechazar"></i>
-        </div> 
-        <!-- Tooltip new -->
         <div id="variable-tooltip" class="custom-tooltip" style="display: none;">
             {% for var in contenido_general_variables %}
                 <button class="var-btn" data-block="contenido" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
@@ -212,51 +182,69 @@
             {% endfor %}
         </div>
                   
-        <!-- Si hay título o autoría, los mostramos antes del texto -->
-        {% if data.title or data.authors or data.url %}
-        <div class="article-meta">
-            {% if data.title %}
-                <h2>{{ data.title }}</h2>
-            {% endif %}
+        <!-- Text Content -->
+        <div class="text-container">
+          <!-- Si hay título o autoría, los mostramos antes del texto -->
+          {% if data.title or data.authors or data.url %}
+          <div class="article-meta">
+              {% if data.title %}
+                  <h2>{{ data.title }}</h2>
+              {% endif %}
 
-            {% if data.authors %}
-                <p><strong>Autoría:</strong>
-                    {{ data.authors if data.authors is string else data.authors | join(', ') }}
-                </p>
-            {% endif %}
+              {% if data.authors %}
+                  <p><strong>Autoría:</strong>
+                      {{ data.authors if data.authors is string else data.authors | join(', ') }}
+                  </p>
+              {% endif %}
 
-            {% if data.url %}
-                <p><strong>Fuente:</strong> <a href="{{ data.url }}" target="_blank">{{ data.url }}</a></p>
-            {% endif %}
-        </div>
-        {% endif %}
+              {% if data.url %}
+                  <p><strong>Fuente:</strong> <a href="{{ data.url }}" target="_blank">{{ data.url }}</a></p>
+              {% endif %}
+          </div>
+          {% endif %}
 
-        <!-- 1. Texto plain: siempre visible -->
-        <div class="plain-text">
-            <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
-        </div>
-
-        <!-- 2. Texto highlighted: oculto hasta abrir -->
-        <div class="highlight-text" style="display: none;">
-            <div class="highlight-controls" style="margin-bottom: 10px;">
-                <button id="edit-mode-toggle" class="edit-button">
-                  <i class="fa fa-pen"></i> Editar
-                </button>  
-              
-                <button id="save-changes" class="save-button" style="display: none;">
-                  <i class="fa fa-save"></i> Guardar cambios
-                </button>
+          <!-- Texto del análisis -->
+          <div class="analysis-text">
+              <!-- Texto normal (por defecto) -->
+              <div class="plain-text">
+                  <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
               </div>
-              
-            <div class="markup-area">
-                <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
-            </div>
-        </div>
+
+              <!-- Texto highlighted por categorías -->
+              <div class="highlight-text" style="display: none;">
+                  <!-- Contenido General -->
+                  <div id="highlight-contenido" class="highlight-block" style="display: none;">
+                      {% if data.highlight and data.highlight.original and data.highlight.original.contenido_general %}
+                          {{ data.highlight.original.contenido_general | safe }}
+                      {% else %}
+                          <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
+                      {% endif %}
+                  </div>
+                  
+                  <!-- Lenguaje -->
+                  <div id="highlight-lenguaje" class="highlight-block" style="display: none;">
+                      {% if data.highlight and data.highlight.original and data.highlight.original.lenguaje %}
+                          {{ data.highlight.original.lenguaje | safe }}
+                      {% else %}
+                          <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
+                      {% endif %}
+                  </div>
+                  
+                  <!-- Fuentes -->
+                  <div id="highlight-fuentes" class="highlight-block" style="display: none;">
+                      {% if data.highlight and data.highlight.original and data.highlight.original.fuentes %}
+                          {{ data.highlight.original.fuentes | safe }}
+                      {% else %}
+                          <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
+                      {% endif %}
+                  </div>
+              </div>
+          </div>
         <!-- Tooltip predicciones -->
         <div id="tooltip" class="custom-tooltip">
             <i class="fas fa-check" title="Aceptar"></i>
             <i class="fas fa-times" title="Rechazar"></i>
-        </div> 
+            </div>
         <!-- Tooltip new -->
         <div id="variable-tooltip" class="custom-tooltip" style="display: none;">
             {% for var in contenido_general_variables %}
@@ -269,9 +257,15 @@
                 <button class="var-btn" data-block="fuentes" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
             {% endfor %}
         </div>
-      </div>
+        
+        <!-- Highlight tooltip -->
+        <div id="highlight-tooltip" class="highlight-tooltip">
+            <div class="tooltip-title"></div>
+            <div class="tooltip-description"></div>
+        </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 
@@ -280,10 +274,1042 @@
     window.highlight_color_map = {{ highlight_map | safe }};
     window.api_url_edit = {{ api_url_edit | tojson | safe }};
 </script>
+
+<!-- Collapsible functionality -->
+<script>
+// Variable mappings from config.ini
+const variableMappings = {
+    // CONTENIDO_GENERAL
+    'genero_nombre_propio_titular': {'1': 'No hay', '2': 'Sí, hombre', '3': 'Sí, mujer', '4': 'Sí, mujer y hombre'},
+    'genero_personas_mencionadas': {'1': 'No hay', '2': 'Sí, hombre', '3': 'Sí, mujer', '4': 'Sí, mujer y hombre'},
+    'genero_periodista': {'1': 'Masculino', '2': 'Femenino', '3': 'Mixto', '4': 'Ns/Nc', '5': 'Agencia/otros medios', '6': 'Redacción', '7': 'Corporativo'},
+    'tema': {'1': 'Científica/Investigación', '2': 'Comunicación', '3': 'De farándula o espectáculo', '4': 'Deportiva', '5': 'Economía (incluido: consumo; compras; viajes…)', '6': 'Educación/cultura', '7': 'Empleo/Trabajo', '8': 'Empresa', '9': 'Judicial', '10': 'Medioambiente', '11': 'Policial', '12': 'Política', '13': 'Salud', '14': 'Social', '15': 'Tecnología', '16': 'Transporte', '17': 'Otros'},
+    'cita_titular': {'0': 'No', '1': 'Sí'},
+    
+    // LENGUAJE
+    'lenguaje_sexista': {'1': 'No', '2': 'Sí', '3': 'Sí, además se observa un salto semántico'},
+    'androcentrismo': {'1': 'No', '2': 'Sí'},
+    'asimetria': {'1': 'No', '2': 'Sí'},
+    'cargos_mujeres': {'1': 'No', '2': 'Sí'},
+    'comparacion_mujeres_hombres': {'1': 'No', '2': 'Sí'},
+    'denominacion_dependiente': {'1': 'No', '2': 'Sí'},
+    'denominacion_redundante': {'1': 'No', '2': 'Sí'},
+    'denominacion_sexualizada': {'1': 'No', '2': 'Sí'},
+    'dual_aparente': {'1': 'No', '2': 'Sí'},
+    'excepcion_noticiabilidad': {'1': 'No', '2': 'Sí'},
+    'hombre_humanidad': {'1': 'No', '2': 'Sí'},
+    'infantilizacion': {'1': 'No', '2': 'Sí'},
+    'masculino_generico': {'1': 'No', '2': 'Sí'},
+    'sexismo_social': {'1': 'No', '2': 'Sí'},
+    
+    // FUENTES
+    'nombre_fuente': {'1': 'No', '2': 'Sí'},
+    'declaracion_fuente': {'1': 'No', '2': 'Sí'},
+    'tipo_fuente': {'1': 'Abogado/a', '2': 'Activista', '3': 'Actor/Actriz', '4': 'Alto Cargo Directivo/a', '5': 'Alumno/a', '6': 'Analista', '7': 'Arquitecto/a', '8': 'Artista', '9': 'Ciudadano/a', '10': 'Corporativa', '11': 'Deportista', '12': 'Dir. Cine / guionista', '13': 'Director/a o presidente/a', '14': 'Economista', '15': 'El Papa', '16': 'Escritor/a', '17': 'Experto/a', '18': 'Famoso/a', '19': 'Institucional', '20': 'Investigador/a', '21': 'Médico', '22': 'Músico/a', '23': 'Periodista', '24': 'Personaje de Ficción', '25': 'Político/a', '26': 'Rey/Reina', '27': 'Trabajador/a'},
+    'genero_fuente': {'1': 'Masculino', '2': 'Femenino', '3': 'Ns/Nc'}
+};
+
+// Function to convert numeric values to strings
+function convertValueToLabel(variableName, value) {
+    if (variableMappings[variableName] && variableMappings[variableName][value.toString()]) {
+        return variableMappings[variableName][value.toString()];
+    }
+    return value; // Return original value if no mapping found
+}
+
+// Function to render variable card
+function renderVariableCard(key, value, color) {
+    const title = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    let valueHtml = '';
+    if (Array.isArray(value)) {
+        if (value.length > 0) {
+            valueHtml = `<div class="value-list">${value.map(item => `<span class="value-item">${item}</span>`).join('')}</div>`;
+        } else {
+            valueHtml = '<span class="value-empty">No hay datos</span>';
+        }
+    } else {
+        valueHtml = `<span class="value-single">${value}</span>`;
+    }
+    
+    return `
+        <div class="variable-card">
+            <div class="variable-header">
+                <div class="variable-icon" style="background-color: ${color};">
+                    <i class="fas fa-circle"></i>
+                </div>
+                <div class="variable-title">${title}</div>
+            </div>
+            <div class="variable-value">
+                ${valueHtml}
+            </div>
+        </div>
+    `;
+}
+
+// Function to render source card
+function renderSourceCard(fuente, index) {
+    let sourceDetails = '';
+    Object.keys(fuente).forEach(key => {
+        const color = window.highlight_color_map[key] || '#ffffff';
+        const title = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        
+        let valueHtml = '';
+        if (Array.isArray(fuente[key])) {
+            valueHtml = `<div class="source-value-list">${fuente[key].map(item => `<span class="source-value-item">${item}</span>`).join('')}</div>`;
+        } else {
+            valueHtml = `<span class="source-value-single">${fuente[key]}</span>`;
+        }
+        
+        sourceDetails += `
+            <div class="source-item">
+                <div class="source-item-header">
+                    <div class="source-item-icon" style="background-color: ${color};">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="source-item-label">${title}</span>
+                </div>
+                <div class="source-item-value">
+                    ${valueHtml}
+                </div>
+            </div>
+        `;
+    });
+    
+    return `
+        <div class="source-card">
+            <div class="source-header">
+                <div class="source-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="source-title">Fuente #${index + 1}</div>
+            </div>
+            <div class="source-details">
+                ${sourceDetails}
+            </div>
+        </div>
+    `;
+}
+
+// Function to render all content
+function renderContent() {
+    // Render contenido general
+    const contenidoGeneral = window.data.analysis.original.contenido_general;
+    const contenidoContainer = document.getElementById('contenido-variables');
+    if (contenidoGeneral && contenidoContainer) {
+        let html = '';
+        Object.keys(contenidoGeneral).forEach(key => {
+            const value = contenidoGeneral[key];
+            const convertedValue = Array.isArray(value) 
+                ? value.map(item => convertValueToLabel(key, item))
+                : convertValueToLabel(key, value);
+            const color = window.highlight_color_map[key] || '#ffffff';
+            html += renderVariableCard(key, convertedValue, color);
+        });
+        contenidoContainer.innerHTML = html;
+    }
+    
+    // Render lenguaje
+    const lenguaje = window.data.analysis.original.lenguaje;
+    const lenguajeContainer = document.getElementById('lenguaje-variables');
+    if (lenguaje && lenguajeContainer) {
+        let html = '';
+        Object.keys(lenguaje).forEach(key => {
+            const value = lenguaje[key];
+            const color = window.highlight_color_map[key] || '#ffffff';
+            
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                // Handle nested objects (like androcentrismo, asimetria, etc.)
+                let subItems = '';
+                Object.keys(value).forEach(subKey => {
+                    const subValue = value[subKey];
+                    
+                    if (subKey === 'etiqueta' && Array.isArray(subValue)) {
+                        // Convert etiqueta array values
+                        const convertedEtiqueta = subValue.map(item => convertValueToLabel(key, item));
+                        subItems += `
+                            <div class="sub-item">
+                                <span class="sub-label">${subKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
+                                <div class="sub-value-list">${convertedEtiqueta.map(item => `<span class="sub-value-item">${item}</span>`).join('')}</div>
+                            </div>
+                        `;
+                    } else if (subKey === 'ejemplos_articulo' && Array.isArray(subValue)) {
+                        // Keep ejemplos_articulo as is (these are text examples)
+                        subItems += `
+                            <div class="sub-item">
+                                <span class="sub-label">${subKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
+                                <div class="sub-value-list">${subValue.map(item => `<span class="sub-value-item">${item}</span>`).join('')}</div>
+                            </div>
+                        `;
+                    } else {
+                        // Handle other sub-values
+                        const convertedSubValue = Array.isArray(subValue) 
+                            ? subValue.map(item => convertValueToLabel(subKey, item))
+                            : convertValueToLabel(subKey, subValue);
+                        
+                        if (Array.isArray(convertedSubValue)) {
+                            subItems += `
+                                <div class="sub-item">
+                                    <span class="sub-label">${subKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
+                                    <div class="sub-value-list">${convertedSubValue.map(item => `<span class="sub-value-item">${item}</span>`).join('')}</div>
+                                </div>
+                            `;
+                        } else {
+                            subItems += `
+                                <div class="sub-item">
+                                    <span class="sub-label">${subKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
+                                    <span class="sub-value-single">${convertedSubValue}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+                
+                html += `
+                    <div class="variable-card">
+                        <div class="variable-header">
+                            <div class="variable-icon" style="background-color: ${color};">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="variable-title">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                        </div>
+                        <div class="variable-value">
+                            <div class="value-structure">${subItems}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const convertedValue = Array.isArray(value) 
+                    ? value.map(item => convertValueToLabel(key, item))
+                    : convertValueToLabel(key, value);
+                html += renderVariableCard(key, convertedValue, color);
+            }
+        });
+        lenguajeContainer.innerHTML = html;
+    }
+    
+    // Render fuentes
+    const fuentes = window.data.analysis.original.fuentes;
+    const fuentesContainer = document.getElementById('fuentes-sources');
+    if (fuentes && fuentes.fuentes && fuentesContainer) {
+        let html = '';
+        fuentes.fuentes.forEach((fuente, index) => {
+            // Convert values in the fuente object
+            const convertedFuente = {};
+            Object.keys(fuente).forEach(key => {
+                const value = fuente[key];
+                convertedFuente[key] = Array.isArray(value) 
+                    ? value.map(item => convertValueToLabel(key, item))
+                    : convertValueToLabel(key, value);
+            });
+            html += renderSourceCard(convertedFuente, index);
+        });
+        fuentesContainer.innerHTML = html;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Render all content with converted values
+    renderContent();
+    
+    // Setup automatic highlight display based on dropdown state
+    const plainText = document.querySelector('.plain-text');
+    const highlightText = document.querySelector('.highlight-text');
+    const highlightBlocks = {
+        'contenido': document.getElementById('highlight-contenido'),
+        'lenguaje': document.getElementById('highlight-lenguaje'),
+        'fuentes': document.getElementById('highlight-fuentes')
+    };
+    
+    // Function to show specific highlight block
+    function showHighlightBlock(category) {
+        if (!highlightText || !plainText) return;
+        
+        // Hide plain text and show highlight container
+        plainText.style.display = 'none';
+        highlightText.style.display = 'block';
+        
+        // Hide all highlight blocks
+        Object.values(highlightBlocks).forEach(block => {
+            if (block) block.style.display = 'none';
+        });
+        
+        // Show the specific category block
+        if (highlightBlocks[category]) {
+            highlightBlocks[category].style.display = 'block';
+            
+            // Process highlights after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                processHighlights();
+            }, 100);
+        }
+    }
+    
+    // Function to hide highlights and show plain text
+    function hideHighlights() {
+        if (!highlightText || !plainText) return;
+        
+        plainText.style.display = 'block';
+        highlightText.style.display = 'none';
+        
+        // Hide all highlight blocks
+        Object.values(highlightBlocks).forEach(block => {
+            if (block) block.style.display = 'none';
+        });
+    }
+    
+    
+    // Function to process highlights with tooltips
+    function processHighlights() {
+        const tooltip = document.getElementById('highlight-tooltip');
+        
+        if (!tooltip) {
+            console.error('Tooltip element not found!');
+            return;
+        }
+        
+        
+        // Variable descriptions for tooltips
+        const variableDescriptions = {
+            // Contenido General
+            'genero_nombre_propio_titular': 'Género del nombre propio en el titular',
+            'genero_personas_mencionadas': 'Género de las personas mencionadas en el artículo',
+            'genero_periodista': 'Género del periodista que escribió el artículo',
+            'tema': 'Tema principal del artículo',
+            'cita_titular': 'Presencia de citas en el titular',
+            
+            // Lenguaje
+            'lenguaje_sexista': 'Uso de lenguaje sexista en el texto',
+            'androcentrismo': 'Presencia de androcentrismo en el discurso',
+            'asimetria': 'Asimetría en el tratamiento de géneros',
+            'cargos_mujeres': 'Menciones específicas de cargos de mujeres',
+            'comparacion_mujeres_hombres': 'Comparaciones entre mujeres y hombres',
+            'denominacion_dependiente': 'Denominaciones dependientes por género',
+            'denominacion_redundante': 'Denominaciones redundantes',
+            'denominacion_sexualizada': 'Denominaciones sexualizadas',
+            'dual_aparente': 'Dual aparente en el lenguaje',
+            'excepcion_noticiabilidad': 'Excepción de noticiabilidad por género',
+            'hombre_humanidad': 'Uso de "hombre" para referirse a la humanidad',
+            'infantilizacion': 'Infantilización de mujeres',
+            'masculino_generico': 'Uso del masculino genérico',
+            'sexismo_social': 'Sexismo social en el contenido',
+            
+            // Fuentes
+            'nombre_fuente': 'Nombre de la fuente',
+            'declaracion_fuente': 'Declaración de la fuente',
+            'tipo_fuente': 'Tipo de fuente consultada',
+            'genero_fuente': 'Género de la fuente'
+        };
+        
+        // Find actual highlight elements (mark elements with color-* classes)
+        const highlightElements = document.querySelectorAll('mark[class*="color-"]');
+        
+        console.log('Found mark elements:', highlightElements.length);
+        
+        highlightElements.forEach(element => {
+            // Add tooltip functionality
+            element.addEventListener('mouseenter', function(e) {
+                const classList = Array.from(this.classList);
+                const colorClasses = classList.filter(cls => cls.startsWith('color-'));
+                
+                console.log('Mark element classes:', classList);
+                console.log('Found color classes:', colorClasses);
+                
+                if (colorClasses.length > 0) {
+                    // Get the actual analysis data for this color
+                    let variableName = 'Variable de análisis';
+                    let description = 'Texto destacado para análisis';
+                    
+                    // Variable mappings from config.ini
+                    const variableMappings = {
+                        // CONTENIDO_GENERAL
+                        'genero_nombre_propio_titular': {'1': 'No hay', '2': 'Sí, hombre', '3': 'Sí, mujer', '4': 'Sí, mujer y hombre'},
+                        'genero_personas_mencionadas': {'1': 'No hay', '2': 'Sí, hombre', '3': 'Sí, mujer', '4': 'Sí, mujer y hombre'},
+                        'genero_periodista': {'1': 'Masculino', '2': 'Femenino', '3': 'Mixto', '4': 'Ns/Nc', '5': 'Agencia/otros medios', '6': 'Redacción', '7': 'Corporativo'},
+                        'tema': {'1': 'Científica/Investigación', '2': 'Comunicación', '3': 'De farándula o espectáculo', '4': 'Deportiva', '5': 'Economía (incluido: consumo; compras; viajes…)', '6': 'Educación/cultura', '7': 'Empleo/Trabajo', '8': 'Empresa', '9': 'Judicial', '10': 'Medioambiente', '11': 'Policial', '12': 'Política', '13': 'Salud', '14': 'Social', '15': 'Tecnología', '16': 'Transporte', '17': 'Otros'},
+                        'cita_titular': {'0': 'No', '1': 'Sí'},
+
+                        // LENGUAJE
+                        'lenguaje_sexista': {'1': 'No', '2': 'Sí', '3': 'Sí, además se observa un salto semántico'},
+                        'androcentrismo': {'1': 'No', '2': 'Sí'},
+                        'asimetria': {'1': 'No', '2': 'Sí'},
+                        'cargos_mujeres': {'1': 'No', '2': 'Sí'},
+                        'comparacion_mujeres_hombres': {'1': 'No', '2': 'Sí'},
+                        'denominacion_dependiente': {'1': 'No', '2': 'Sí'},
+                        'denominacion_redundante': {'1': 'No', '2': 'Sí'},
+                        'denominacion_sexualizada': {'1': 'No', '2': 'Sí'},
+                        'dual_aparente': {'1': 'No', '2': 'Sí'},
+                        'excepcion_noticiabilidad': {'1': 'No', '2': 'Sí'},
+                        'hombre_humanidad': {'1': 'No', '2': 'Sí'},
+                        'infantilizacion': {'1': 'No', '2': 'Sí'},
+                        'masculino_generico': {'1': 'No', '2': 'Sí'},
+                        'sexismo_social': {'1': 'No', '2': 'Sí'},
+
+                        // FUENTES
+                        'nombre_fuente': {'1': 'No', '2': 'Sí'},
+                        'declaracion_fuente': {'1': 'No', '2': 'Sí'},
+                        'tipo_fuente': {'1': 'Abogado/a', '2': 'Activista', '3': 'Actor/Actriz', '4': 'Alto Cargo Directivo/a', '5': 'Alumno/a', '6': 'Analista', '7': 'Arquitecto/a', '8': 'Artista', '9': 'Ciudadano/a', '10': 'Corporativa', '11': 'Deportista', '12': 'Dir. Cine / guionista', '13': 'Director/a o presidente/a', '14': 'Economista', '15': 'El Papa', '16': 'Escritor/a', '17': 'Experto/a', '18': 'Famoso/a', '19': 'Institucional', '20': 'Investigador/a', '21': 'Médico', '22': 'Músico/a', '23': 'Periodista', '24': 'Personaje de Ficción', '25': 'Político/a', '26': 'Rey/Reina', '27': 'Trabajador/a'},
+                        'genero_fuente': {'1': 'Masculino', '2': 'Femenino', '3': 'Ns/Nc'}
+                    };
+                    
+                    // Function to convert numeric values to strings
+                    function convertValueToLabel(variableName, value) {
+                        if (variableMappings[variableName] && variableMappings[variableName][value.toString()]) {
+                            return variableMappings[variableName][value.toString()];
+                        }
+                        return value; // Return original value if no mapping found
+                    }
+                    
+                    // Try to get real data from the analysis results
+                    if (window.data && window.data.analysis && window.data.analysis.original) {
+                        const analysis = window.data.analysis.original;
+                        
+                        // Map color classes to specific variables based on HIGHLIGHT_COLOR_MAP from config.ini
+                        const colorToVariableMap = {
+                            'color-1': { category: 'contenido_general', variable: 'nombre_propio_titular' },
+                            'color-2': { category: 'contenido_general', variable: 'cita_textual_titular' },
+                            'color-3': { category: 'contenido_general', variable: 'personas_mencionadas' },
+                            'color-4': { category: 'lenguaje', variable: 'lenguaje_sexista' },
+                            'color-5': { category: 'lenguaje', variable: 'hombre_humanidad' },
+                            'color-6': { category: 'lenguaje', variable: 'dual_aparente' },
+                            'color-7': { category: 'lenguaje', variable: 'cargos_mujeres' },
+                            'color-8': { category: 'lenguaje', variable: 'sexismo_social' },
+                            'color-9': { category: 'lenguaje', variable: 'androcentrismo' },
+                            'color-10': { category: 'lenguaje', variable: 'asimetria' },
+                            'color-11': { category: 'lenguaje', variable: 'infantilizacion' },
+                            'color-12': { category: 'lenguaje', variable: 'denominacion_sexualizada' },
+                            'color-13': { category: 'lenguaje', variable: 'denominacion_redundante' },
+                            'color-14': { category: 'lenguaje', variable: 'denominacion_dependiente' },
+                            'color-15': { category: 'lenguaje', variable: 'masculino_generico' },
+                            'color-16': { category: 'contenido_general', variable: 'criterios_excepcion_noticiabilidad' },
+                            'color-17': { category: 'lenguaje', variable: 'comparacion_mujeres_hombres' },
+                            'color-18': { category: 'fuentes', variable: 'nombre_fuente' },
+                            'color-19': { category: 'fuentes', variable: 'declaracion_fuente' },
+                            'color-20': { category: 'fuentes', variable: 'tipo_fuente' },
+                            'color-21': { category: 'fuentes', variable: 'genero_fuente' }
+                        };
+                        
+                        // Process all color classes and collect tooltip data
+                        const tooltipData = [];
+                        
+                        // Determine which category we're currently viewing
+                        const currentHighlightBlock = this.closest('.highlight-block');
+                        let currentCategory = null;
+                        if (currentHighlightBlock) {
+                            if (currentHighlightBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
+                            else if (currentHighlightBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
+                            else if (currentHighlightBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
+                        }
+                        
+                        console.log('Current highlight block:', currentHighlightBlock?.id);
+                        console.log('Current category:', currentCategory);
+                        console.log('Color classes to process:', colorClasses);
+                        
+                        for (const colorClass of colorClasses) {
+                            const mapping = colorToVariableMap[colorClass];
+                            console.log('Processing color class:', colorClass);
+                            console.log('Mapping:', mapping);
+                            
+                            if (mapping && analysis[mapping.category]) {
+                                console.log('Category data exists:', mapping.category);
+                                
+                                // Only process variables that match the current category
+                                if (currentCategory && mapping.category !== currentCategory) {
+                                    console.log('Skipping - category mismatch:', mapping.category, 'vs', currentCategory);
+                                    continue;
+                                }
+                                
+                                console.log('Processing variable:', mapping.variable);
+                                
+                                const categoryData = analysis[mapping.category];
+                                let varValue = null;
+                                
+                                // Get the value based on category
+                                if (mapping.category === 'fuentes' && categoryData.fuentes) {
+                                    if (categoryData.fuentes.length > 0) {
+                                        varValue = categoryData.fuentes[0][mapping.variable];
+                                    }
+                                } else if (mapping.category === 'lenguaje' && categoryData[mapping.variable]) {
+                                    const langVar = categoryData[mapping.variable];
+                                    if (typeof langVar === 'object' && !Array.isArray(langVar) && langVar.etiqueta) {
+                                        varValue = langVar.etiqueta;
+                                    } else {
+                                        varValue = langVar;
+                                    }
+                                } else {
+                                    varValue = categoryData[mapping.variable];
+                                }
+                                
+                                // Convert value to label and add to tooltip data
+                                if (varValue && (Array.isArray(varValue) ? varValue.length > 0 : true)) {
+                                    const variableName = mapping.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                    const convertedValue = Array.isArray(varValue) 
+                                        ? varValue.map(item => convertValueToLabel(mapping.variable, item)).join(', ')
+                                        : convertValueToLabel(mapping.variable, varValue);
+                                    
+                                    tooltipData.push({
+                                        variable: variableName,
+                                        value: convertedValue
+                                    });
+                                }
+                            }
+                        }
+                        
+                        // Display tooltip with all variables
+                        console.log('Final tooltip data:', tooltipData);
+                        if (tooltipData.length > 0) {
+                            const title = tooltipData.length === 1 ? tooltipData[0].variable : 'Variables de análisis';
+                            const description = tooltipData.map(item => `${item.variable}: ${item.value}`).join('\n');
+                            
+                            console.log('Showing tooltip with title:', title);
+                            console.log('Description:', description);
+                            
+                            tooltip.querySelector('.tooltip-title').textContent = title;
+                            tooltip.querySelector('.tooltip-description').textContent = description;
+                            
+                            const rect = this.getBoundingClientRect();
+                            let left = rect.left + (rect.width / 2) - 100;
+                            let top = rect.top - 50;
+                            if (left < 10) left = 10;
+                            if (left + 200 > window.innerWidth - 10) left = window.innerWidth - 210;
+                            if (top < 10) top = rect.bottom + 10;
+                            
+                            tooltip.style.left = left + 'px';
+                            tooltip.style.top = top + 'px';
+                            tooltip.style.position = 'fixed';
+                            tooltip.style.zIndex = '9999';
+                            tooltip.classList.add('show');
+                        }
+                    }
+                }
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                tooltip.classList.remove('show');
+            });
+        });
+    }
+    
+    // Setup collapsible panels
+    const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+    
+    collapsibleHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const content = document.getElementById(targetId);
+            const icon = this.querySelector('.toggle-icon');
+
+            if (content && icon) {
+                if (content.style.display === 'none' || content.style.display === '') {
+                    // Opening panel
+                    content.style.display = 'block';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                    
+                    // Show corresponding highlight block only if highlights exist
+                    if (targetId === 'contenido-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.contenido_general) {
+                        showHighlightBlock('contenido');
+                    } else if (targetId === 'lenguaje-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.lenguaje) {
+                        showHighlightBlock('lenguaje');
+                    } else if (targetId === 'fuentes-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.fuentes) {
+                        showHighlightBlock('fuentes');
+                    }
+                } else {
+                    // Closing panel
+                    content.style.display = 'none';
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                    
+                    // Hide highlights and show plain text
+                    hideHighlights();
+                }
+            }
+        });
+
+        // Initialize all panels as collapsed
+        const targetId = header.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        if (content) {
+            content.style.display = 'none';
+        }
+    });
+});
+</script>
+
 <script type="module" src="{{ url_for('static', filename='js/accordion.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_prediction.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_tooltip.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_human.js') }}"></script>
 
+<style>
+.analysis-tools-panel,
+.text-analysis-panel {
+  background: var(--secondary-color);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--medium-gray);
+  height: fit-content;
+}
+
+.panel-title {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--light-gray);
+  font-size: 0.95rem;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all var(--transition-speed) ease;
+}
+
+.collapsible-header:hover {
+  color: var(--primary-color);
+}
+
+.toggle-icon {
+  transition: transform var(--transition-speed) ease;
+}
+
+.collapsible-content {
+  margin-top: 0.5rem;
+}
+
+.model-info {
+  background: var(--light-gray) !important;
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-sm);
+  padding: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.action-buttons .d-flex.gap-1 {
+  gap: 0.25rem !important;
+}
+
+.action-buttons .btn-sm {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.score-bar {
+  width: 100%;
+  height: 12px;
+  background: var(--light-gray);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.score-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+  transition: width 0.3s ease;
+}
+
+.score-value {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background: var(--light-gray);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.85rem;
+}
+
+.metric .label {
+  font-size: 0.8rem;
+  color: var(--dark-gray);
+}
+
+.metric .value {
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  background: var(--secondary-color);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.list-unstyled li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.list-unstyled li:last-child {
+  border-bottom: none;
+}
+
+/* Category Statistics */
+.category-stats {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: var(--light-gray);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--medium-gray);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--dark-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.stat-value {
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  background: var(--secondary-color);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Variables Grid */
+.variables-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.variable-card {
+  background: #ffffff;
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem;
+  border: 1px solid var(--light-gray);
+  border-left: 3px solid var(--primary-color);
+  transition: all var(--transition-speed) ease;
+}
+
+.variable-card:hover {
+  border-left-color: var(--secondary-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.variable-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.variable-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.variable-icon i {
+  font-size: 4px;
+  color: white;
+}
+
+.variable-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  font-size: 0.85rem;
+}
+
+.variable-value {
+  margin-left: 1rem;
+}
+
+.value-single {
+  color: var(--text-black-color);
+  font-weight: var(--font-weight-medium);
+  font-size: 0.8rem;
+}
+
+.value-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.value-item {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.value-empty {
+  color: var(--dark-gray);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+/* Value Structure for complex data */
+.value-structure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sub-item {
+  background: var(--secondary-color);
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  border-left: 3px solid var(--primary-color);
+}
+
+.sub-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sub-value-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sub-value-item {
+  background: var(--light-gray);
+  color: var(--text-black-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.85rem;
+}
+
+.sub-value-single {
+  color: var(--text-black-color);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Sources Grid */
+.sources-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.source-card {
+  background: #ffffff;
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem;
+  border: 1px solid var(--light-gray);
+  border-left: 3px solid var(--primary-color);
+  transition: all var(--transition-speed) ease;
+}
+
+.source-card:hover {
+  border-left-color: var(--secondary-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.source-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.source-icon {
+  width: 20px;
+  height: 20px;
+  background: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+}
+
+.source-icon i {
+  color: white;
+  font-size: 0.7rem;
+}
+
+.source-title {
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+  font-size: 0.85rem;
+}
+
+.source-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.source-item {
+  background: var(--light-gray);
+  padding: 0.5rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--medium-gray);
+}
+
+.source-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.source-item-icon {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.source-item-icon i {
+  font-size: 3px;
+  color: white;
+}
+
+.source-item-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--primary-color);
+  font-size: 0.8rem;
+}
+
+.source-item-value {
+  margin-left: 0.75rem;
+}
+
+.source-value-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.source-value-item {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.source-value-single {
+  color: var(--text-black-color);
+  font-weight: var(--font-weight-medium);
+  font-size: 0.8rem;
+}
+
+/* Highlight blocks styling */
+.highlight-block {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.highlight-block p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.highlight-block p:last-child {
+  margin-bottom: 0;
+}
+
+/* Simple, clean highlights */
+.highlighted-text {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.highlighted-text:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Category-specific subtle colors */
+.highlight-contenido .highlighted-text {
+  background-color: rgba(0, 123, 255, 0.15);
+  border-bottom-color: #007bff;
+}
+
+.highlight-lenguaje .highlighted-text {
+  background-color: rgba(40, 167, 69, 0.15);
+  border-bottom-color: #28a745;
+}
+
+.highlight-fuentes .highlighted-text {
+  background-color: rgba(255, 193, 7, 0.15);
+  border-bottom-color: #ffc107;
+}
+
+/* Tooltip styles */
+.highlight-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  max-width: 250px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.highlight-tooltip.show {
+  opacity: 1;
+}
+
+.highlight-tooltip .tooltip-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #fff;
+}
+
+.highlight-tooltip .tooltip-description {
+  font-size: 0.75rem;
+  color: #e9ecef;
+  line-height: 1.3;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .analysis-tools-panel,
+  .text-analysis-panel {
+    margin-bottom: 1rem;
+  }
+}
+</style>
 
 {% endblock %}
