@@ -365,6 +365,42 @@ function processHighlights() {
     });
 }
 
+// Function to add manual annotation highlights to existing highlights
+function addManualHighlights() {
+    // Only add manual highlights if we're in annotation mode
+    if (!annotationMode) return;
+    
+    const highlightTextElement = document.querySelector('.highlight-text .markup-area');
+    if (!highlightTextElement) return;
+    
+    let highlightedText = highlightTextElement.innerHTML;
+    
+    // Process only new manual annotations (not already processed)
+    annotations.forEach(annotation => {
+        const { text, variable, timestamp } = annotation;
+        
+        // Check if this annotation was already processed by looking for the data-variable attribute
+        const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const existingPattern = new RegExp(`<mark[^>]*data-variable="${variable}"[^>]*>.*?${escapedText}.*?</mark>`, 'gi');
+        
+        if (!existingPattern.test(highlightedText)) {
+            // This annotation hasn't been processed yet, add it
+            const colorClass = window.highlight_color_map && window.highlight_color_map[variable] 
+                ? window.highlight_color_map[variable] 
+                : 'color-1';
+            
+            const pattern = new RegExp(`(${escapedText})`, 'gi');
+            highlightedText = highlightedText.replace(pattern, `<mark class="${colorClass}" data-variable="${variable}">$1</mark>`);
+        }
+    });
+    
+    // Update the highlight text
+    highlightTextElement.innerHTML = highlightedText;
+    
+    // Process highlights for tooltips
+    processHighlights();
+}
+
 // Function to show specific highlight block
 function showHighlightBlock(category) {
     const plainText = document.querySelector('.plain-text');
@@ -389,6 +425,9 @@ function showHighlightBlock(category) {
     // Show the specific category block
     if (highlightBlocks[category]) {
         highlightBlocks[category].style.display = 'block';
+        
+        // Add manual highlights to existing highlights
+        addManualHighlights();
         
         // Process highlights after a short delay to ensure DOM is ready
         setTimeout(() => {
@@ -435,6 +474,9 @@ function setupCollapsiblePanels() {
                     icon.classList.remove('fa-chevron-down');
                     icon.classList.add('fa-chevron-up');
                     
+                    // Re-render content to include any new manual annotations
+                    renderContent();
+                    
                     // Show corresponding highlight block only if highlights exist
                     if (targetId === 'contenido-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.contenido_general) {
                         showHighlightBlock('contenido');
@@ -462,6 +504,563 @@ function setupCollapsiblePanels() {
             content.style.display = 'none';
         }
     });
+}
+
+// ===========================================
+// MANUAL ANNOTATION FUNCTIONALITY
+// ===========================================
+
+let annotationMode = false;
+let selectedText = '';
+let currentSelection = null;
+let annotations = [];
+
+// Function to enter annotation mode
+function editAnalysis() {
+    annotationMode = !annotationMode;
+    const editButton = document.querySelector('button[onclick="editAnalysis()"]');
+    
+    if (annotationMode) {
+        // Enter annotation mode
+        editButton.innerHTML = '<i class="fas fa-times me-1"></i> Salir de Anotación';
+        editButton.classList.remove('btn-warning');
+        editButton.classList.add('btn-danger');
+        
+        // Show annotation controls
+        showAnnotationControls();
+        
+        // Enable text selection
+        enableTextSelection();
+        
+    } else {
+        // Exit annotation mode
+        editButton.innerHTML = '<i class="fas fa-edit me-1"></i> Editar Análisis';
+        editButton.classList.remove('btn-danger');
+        editButton.classList.add('btn-warning');
+        
+        // Hide annotation controls
+        hideAnnotationControls();
+        
+        // Disable text selection
+        disableTextSelection();
+    }
+}
+
+// Function to show annotation controls
+function showAnnotationControls() {
+    // Add annotation mode indicator
+    const annotationIndicator = document.createElement('div');
+    annotationIndicator.id = 'annotation-indicator';
+    annotationIndicator.className = 'alert alert-info mb-3';
+    annotationIndicator.innerHTML = '<i class="fas fa-highlighter me-2"></i>Modo de anotación activo - Selecciona texto para anotar';
+    
+    const leftPanel = document.querySelector('.col-md-4');
+    leftPanel.insertBefore(annotationIndicator, leftPanel.firstChild);
+    
+    // Add annotation panel
+    const annotationPanel = document.createElement('div');
+    annotationPanel.id = 'annotation-panel';
+    annotationPanel.className = 'analysis-tools-panel mb-3';
+    annotationPanel.style.display = 'none';
+    annotationPanel.innerHTML = `
+        <div class="annotation-header">
+            <h6 class="panel-title mb-2">
+                <i class="fas fa-tag me-2"></i>Anotar Texto
+            </h6>
+            <button type="button" class="btn-close btn-close-sm" onclick="hideAnnotationPanel()"></button>
+        </div>
+        
+        <div class="selected-text-preview mb-3">
+            <small class="text-muted">Texto seleccionado:</small>
+            <div class="selected-text-content" id="selected-text-content" style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-style: italic;"></div>
+        </div>
+        
+        <div class="annotation-form">
+            <div class="mb-2">
+                <label class="form-label small">Categoría</label>
+                <select class="form-select form-select-sm" id="annotation-category">
+                    <option value="">Selecciona categoría</option>
+                    <option value="contenido_general">Contenido General</option>
+                    <option value="lenguaje">Lenguaje</option>
+                    <option value="fuentes">Fuentes</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label class="form-label small">Variable</label>
+                <select class="form-select form-select-sm" id="annotation-variable">
+                    <option value="">Selecciona variable</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small">Valor</label>
+                <select class="form-select form-select-sm" id="annotation-value">
+                    <option value="">Selecciona valor</option>
+                </select>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveAnnotation()">
+                    <i class="fas fa-save me-1"></i>Guardar Anotación
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="hideAnnotationPanel()">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    leftPanel.insertBefore(annotationPanel, leftPanel.children[2]);
+    
+    // Setup annotation form handlers
+    setupAnnotationHandlers();
+}
+
+// Function to hide annotation controls
+function hideAnnotationControls() {
+    const annotationIndicator = document.getElementById('annotation-indicator');
+    const annotationPanel = document.getElementById('annotation-panel');
+    
+    if (annotationIndicator) annotationIndicator.remove();
+    if (annotationPanel) annotationPanel.remove();
+}
+
+// Function to enable text selection
+function enableTextSelection() {
+    const analysisText = document.querySelector('.analysis-text');
+    if (analysisText) {
+        analysisText.addEventListener('mouseup', handleTextSelection);
+        analysisText.addEventListener('keyup', handleTextSelection);
+        analysisText.style.cursor = 'text';
+        
+        // Add annotation mode class to body
+        document.body.classList.add('annotation-mode');
+    }
+}
+
+// Function to disable text selection
+function disableTextSelection() {
+    const analysisText = document.querySelector('.analysis-text');
+    if (analysisText) {
+        analysisText.removeEventListener('mouseup', handleTextSelection);
+        analysisText.removeEventListener('keyup', handleTextSelection);
+        analysisText.style.cursor = 'default';
+        
+        // Remove annotation mode class from body
+        document.body.classList.remove('annotation-mode');
+    }
+}
+
+// Function to handle text selection
+function handleTextSelection() {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    
+    if (selectedText && selectedText.length > 0) {
+        currentSelection = {
+            text: selectedText,
+            range: selection.getRangeAt(0)
+        };
+        
+        // Show annotation panel
+        showAnnotationPanel();
+        
+        // Update selected text preview
+        document.getElementById('selected-text-content').textContent = selectedText;
+    }
+}
+
+// Function to show annotation panel
+function showAnnotationPanel() {
+    const annotationPanel = document.getElementById('annotation-panel');
+    if (annotationPanel) {
+        annotationPanel.style.display = 'block';
+    }
+}
+
+// Function to hide annotation panel
+function hideAnnotationPanel() {
+    const annotationPanel = document.getElementById('annotation-panel');
+    if (annotationPanel) {
+        annotationPanel.style.display = 'none';
+    }
+    
+    // Clear selection
+    if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+    }
+}
+
+// Function to setup annotation handlers
+function setupAnnotationHandlers() {
+    // Category change handler
+    const categorySelect = document.getElementById('annotation-category');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', handleCategoryChange);
+    }
+    
+    // Variable change handler
+    const variableSelect = document.getElementById('annotation-variable');
+    if (variableSelect) {
+        variableSelect.addEventListener('change', handleVariableChange);
+    }
+}
+
+// Function to handle category change
+function handleCategoryChange() {
+    const category = document.getElementById('annotation-category').value;
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    
+    // Clear variable and value selects
+    variableSelect.innerHTML = '<option value="">Selecciona variable</option>';
+    valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
+    
+    if (category) {
+        // Get variables for the selected category from config.ini
+        const variables = getVariablesForCategory(category);
+        
+        variables.forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable;
+            option.textContent = variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            variableSelect.appendChild(option);
+        });
+    }
+}
+
+// Function to handle variable change
+function handleVariableChange() {
+    const variable = document.getElementById('annotation-variable').value;
+    const valueSelect = document.getElementById('annotation-value');
+    
+    // Clear value select
+    valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
+    
+    if (variable) {
+        // Get values for the selected variable from config.ini
+        const values = getValuesForVariable(variable);
+        
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value.key;
+            option.textContent = value.label;
+            valueSelect.appendChild(option);
+        });
+    }
+}
+
+// Function to get variables for category
+function getVariablesForCategory(category) {
+    const categoryVariables = {
+        'contenido_general': [
+            'genero_nombre_propio_titular', 'genero_personas_mencionadas', 'genero_periodista',
+            'tema', 'cita_titular', 'criterios_excepcion_noticiabilidad'
+        ],
+        'lenguaje': [
+            'lenguaje_sexista', 'androcentrismo', 'asimetria', 'cargos_mujeres',
+            'comparacion_mujeres_hombres', 'denominacion_dependiente', 'denominacion_redundante',
+            'denominacion_sexualizada', 'dual_aparente', 'excepcion_noticiabilidad',
+            'hombre_humanidad', 'infantilizacion', 'masculino_generico', 'sexismo_social'
+        ],
+        'fuentes': [
+            'nombre_fuente', 'declaracion_fuente', 'tipo_fuente', 'genero_fuente'
+        ]
+    };
+    
+    return categoryVariables[category] || [];
+}
+
+// Function to get values for variable
+function getValuesForVariable(variable) {
+    const variableMappings = {
+        // CONTENIDO_GENERAL
+        'genero_nombre_propio_titular': [
+            {key: '1', label: 'No hay'}, {key: '2', label: 'Sí, hombre'}, 
+            {key: '3', label: 'Sí, mujer'}, {key: '4', label: 'Sí, mujer y hombre'}
+        ],
+        'genero_personas_mencionadas': [
+            {key: '1', label: 'No hay'}, {key: '2', label: 'Sí, hombre'}, 
+            {key: '3', label: 'Sí, mujer'}, {key: '4', label: 'Sí, mujer y hombre'}
+        ],
+        'genero_periodista': [
+            {key: '1', label: 'Masculino'}, {key: '2', label: 'Femenino'}, 
+            {key: '3', label: 'Mixto'}, {key: '4', label: 'Ns/Nc'}, 
+            {key: '5', label: 'Agencia/otros medios'}, {key: '6', label: 'Redacción'}, 
+            {key: '7', label: 'Corporativo'}
+        ],
+        'tema': [
+            {key: '1', label: 'Científica/Investigación'}, {key: '2', label: 'Comunicación'}, 
+            {key: '3', label: 'De farándula o espectáculo'}, {key: '4', label: 'Deportiva'}, 
+            {key: '5', label: 'Economía (incluido: consumo; compras; viajes…)'}, 
+            {key: '6', label: 'Educación/cultura'}, {key: '7', label: 'Empleo/Trabajo'}, 
+            {key: '8', label: 'Empresa'}, {key: '9', label: 'Judicial'}, 
+            {key: '10', label: 'Medioambiente'}, {key: '11', label: 'Policial'}, 
+            {key: '12', label: 'Política'}, {key: '13', label: 'Salud'}, 
+            {key: '14', label: 'Social'}, {key: '15', label: 'Tecnología'}, 
+            {key: '16', label: 'Transporte'}, {key: '17', label: 'Otros'}
+        ],
+        'cita_titular': [
+            {key: '0', label: 'No'}, {key: '1', label: 'Sí'}
+        ],
+        'criterios_excepcion_noticiabilidad': [
+            {key: '1', label: 'No'}, {key: '2', label: 'Sí'}
+        ],
+        
+        // LENGUAJE
+        'lenguaje_sexista': [
+            {key: '1', label: 'No'}, {key: '2', label: 'Sí'}, 
+            {key: '3', label: 'Sí, además se observa un salto semántico'}
+        ],
+        'androcentrismo': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'asimetria': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'cargos_mujeres': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'comparacion_mujeres_hombres': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'denominacion_dependiente': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'denominacion_redundante': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'denominacion_sexualizada': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'dual_aparente': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'excepcion_noticiabilidad': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'hombre_humanidad': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'infantilizacion': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'masculino_generico': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'sexismo_social': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        
+        // FUENTES
+        'nombre_fuente': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'declaracion_fuente': [{key: '1', label: 'No'}, {key: '2', label: 'Sí'}],
+        'tipo_fuente': [
+            {key: '1', label: 'Abogado/a'}, {key: '2', label: 'Activista'}, 
+            {key: '3', label: 'Actor/Actriz'}, {key: '4', label: 'Alto Cargo Directivo/a'}, 
+            {key: '5', label: 'Alumno/a'}, {key: '6', label: 'Analista'}, 
+            {key: '7', label: 'Arquitecto/a'}, {key: '8', label: 'Artista'}, 
+            {key: '9', label: 'Ciudadano/a'}, {key: '10', label: 'Corporativa'}, 
+            {key: '11', label: 'Deportista'}, {key: '12', label: 'Dir. Cine / guionista'}, 
+            {key: '13', label: 'Director/a o presidente/a'}, {key: '14', label: 'Economista'}, 
+            {key: '15', label: 'El Papa'}, {key: '16', label: 'Escritor/a'}, 
+            {key: '17', label: 'Experto/a'}, {key: '18', label: 'Famoso/a'}, 
+            {key: '19', label: 'Institucional'}, {key: '20', label: 'Investigador/a'}, 
+            {key: '21', label: 'Médico'}, {key: '22', label: 'Músico/a'}, 
+            {key: '23', label: 'Periodista'}, {key: '24', label: 'Personaje de Ficción'}, 
+            {key: '25', label: 'Político/a'}, {key: '26', label: 'Rey/Reina'}, 
+            {key: '27', label: 'Trabajador/a'}
+        ],
+        'genero_fuente': [
+            {key: '1', label: 'Masculino'}, {key: '2', label: 'Femenino'}, 
+            {key: '3', label: 'Ns/Nc'}
+        ]
+    };
+    
+    return variableMappings[variable] || [];
+}
+
+// Function to save annotation
+function saveAnnotation() {
+    const category = document.getElementById('annotation-category').value;
+    const variable = document.getElementById('annotation-variable').value;
+    const value = document.getElementById('annotation-value').value;
+    
+    if (!category || !variable || !value) {
+        showNotification('Por favor completa todos los campos', 'error');
+        return;
+    }
+    
+    if (!currentSelection) {
+        showNotification('No hay texto seleccionado', 'error');
+        return;
+    }
+    
+    // Create annotation object
+    const annotation = {
+        text: currentSelection.text,
+        category: category,
+        variable: variable,
+        value: value,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Add to annotations array
+    annotations.push(annotation);
+    
+    // Integrate annotation into analysis data structure
+    integrateAnnotationIntoAnalysis(annotation);
+    
+    // Apply highlight to the text
+    applyHighlight(currentSelection.range, variable);
+    
+    // Show success message
+    showNotification('Anotación guardada correctamente', 'success');
+    
+    // Hide annotation panel
+    hideAnnotationPanel();
+    
+    // Clear form
+    document.getElementById('annotation-category').value = '';
+    document.getElementById('annotation-variable').innerHTML = '<option value="">Selecciona variable</option>';
+    document.getElementById('annotation-value').innerHTML = '<option value="">Selecciona valor</option>';
+}
+
+// Function to integrate annotation into analysis data structure
+function integrateAnnotationIntoAnalysis(annotation) {
+    const { category, variable, value, text } = annotation;
+    
+    // Ensure analysis data structure exists
+    if (!window.data.analysis) {
+        window.data.analysis = {};
+    }
+    if (!window.data.analysis.original) {
+        window.data.analysis.original = {};
+    }
+    
+    // Initialize category if it doesn't exist
+    if (!window.data.analysis.original[category]) {
+        window.data.analysis.original[category] = {};
+    }
+    
+    // Handle different category structures
+    if (category === 'contenido_general') {
+        // For contenido_general, add to the variable array
+        if (!window.data.analysis.original[category][variable]) {
+            window.data.analysis.original[category][variable] = [];
+        }
+        window.data.analysis.original[category][variable].push(text);
+        
+    } else if (category === 'lenguaje') {
+        // For lenguaje, add to the variable's etiqueta array
+        if (!window.data.analysis.original[category][variable]) {
+            window.data.analysis.original[category][variable] = {
+                etiqueta: [],
+                ejemplos_articulo: []
+            };
+        }
+        if (!window.data.analysis.original[category][variable].etiqueta) {
+            window.data.analysis.original[category][variable].etiqueta = [];
+        }
+        window.data.analysis.original[category][variable].etiqueta.push(value);
+        window.data.analysis.original[category][variable].ejemplos_articulo.push(text);
+        
+    } else if (category === 'fuentes') {
+        // For fuentes, add to the fuentes array
+        if (!window.data.analysis.original[category].fuentes) {
+            window.data.analysis.original[category].fuentes = [];
+        }
+        
+        // Check if there's already a source with this text
+        let existingSource = window.data.analysis.original[category].fuentes.find(source => 
+            source.nombre_fuente === text || source.declaracion_fuente === text
+        );
+        
+        if (existingSource) {
+            // Update existing source
+            existingSource[variable] = value;
+        } else {
+            // Create new source
+            const newSource = {
+                nombre_fuente: variable === 'nombre_fuente' ? text : '',
+                declaracion_fuente: variable === 'declaracion_fuente' ? text : '',
+                tipo_fuente: variable === 'tipo_fuente' ? value : '',
+                genero_fuente: variable === 'genero_fuente' ? value : ''
+            };
+            newSource[variable] = value;
+            window.data.analysis.original[category].fuentes.push(newSource);
+        }
+    }
+    
+    // Re-render the content to show the new annotation
+    renderContent();
+    
+    // Add manual highlights to existing highlights
+    addManualHighlights();
+    
+    // Update annotation indicators
+    updateAnnotationIndicators();
+}
+
+// Function to apply highlight (this is now handled by addManualHighlights)
+function applyHighlight(range, variable) {
+    // This function is kept for compatibility but the actual highlighting
+    // is now handled by addManualHighlights() which preserves existing highlights
+    console.log('Highlight applied for variable:', variable);
+}
+
+// Function to update annotation indicators
+function updateAnnotationIndicators() {
+    // Add visual indicators to show which categories have manual annotations
+    const categories = ['contenido', 'lenguaje', 'fuentes'];
+    
+    categories.forEach(category => {
+        const header = document.querySelector(`[data-target="${category}-content"]`);
+        if (header) {
+            // Remove existing indicator
+            const existingIndicator = header.querySelector('.annotation-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            // Check if this category has manual annotations
+            const hasAnnotations = annotations.some(annotation => annotation.category === category);
+            
+            if (hasAnnotations) {
+                // Add indicator
+                const indicator = document.createElement('span');
+                indicator.className = 'annotation-indicator badge bg-warning ms-2';
+                indicator.innerHTML = '<i class="fas fa-edit me-1"></i>Manual';
+                indicator.title = 'Contiene anotaciones manuales';
+                header.appendChild(indicator);
+            }
+        }
+    });
+}
+
+// Function to show notification
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// ===========================================
+// EXPORT FUNCTIONS
+// ===========================================
+
+// Make functions globally available
+window.editAnalysis = editAnalysis;
+window.generatePDF = generatePDF;
+window.generateWord = generateWord;
+window.finishAnalysis = finishAnalysis;
+
+// Function to generate PDF
+function generatePDF() {
+    showNotification('Funcionalidad de PDF en desarrollo', 'info');
+    // TODO: Implement PDF generation
+}
+
+// Function to generate Word document
+function generateWord() {
+    showNotification('Funcionalidad de Word en desarrollo', 'info');
+    // TODO: Implement Word generation
+}
+
+// Function to finish analysis
+function finishAnalysis() {
+    if (confirm('¿Estás seguro de que quieres finalizar el análisis?')) {
+        showNotification('Análisis finalizado', 'success');
+        // TODO: Implement finish analysis logic
+        // Could redirect to a summary page or close the analysis
+    }
 }
 
 // Initialize when DOM is loaded
