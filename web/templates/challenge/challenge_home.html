@@ -1,0 +1,231 @@
+{% extends "challenge/challenge_base.html" %}
+
+{% block title %}{{ _('Desafío de Análisis IRIS - Semana de la Ciencia') }}{% endblock %}
+
+{% block challenge_content %}
+<div class="container-fluid py-4">
+    <!-- Header del Desafío -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="challenge-header">
+                <h1 class="display-4 fw-bold text-primary mb-3">
+                    <i class="fas fa-trophy me-3"></i>
+                    {{ _('Desafío de Análisis IRIS') }}
+                </h1>
+                <p class="lead text-muted mb-4">
+                    {{ _('¿Puedes analizar sesgos de género mejor que la Inteligencia Artificial?') }}
+                </p>
+                <div class="challenge-badge">
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        {{ _('Semana de la Ciencia 2025') }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        {{ _('¿Cómo funciona el desafío?') }}
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon">
+                                <i class="fas fa-mouse-pointer fa-2x text-primary mb-2"></i>
+                                <h5>{{ _('1. Selecciona un texto') }}</h5>
+                                <p class="text-muted small">{{ _('Elige uno de los 10 textos disponibles') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon">
+                                <i class="fas fa-edit fa-2x text-success mb-2"></i>
+                                <h5>{{ _('2. Analiza manualmente') }}</h5>
+                                <p class="text-muted small">{{ _('Identifica sesgos usando nuestras herramientas') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon">
+                                <i class="fas fa-robot fa-2x text-warning mb-2"></i>
+                                <h5>{{ _('3. Compara con IA') }}</h5>
+                                <p class="text-muted small">{{ _('Ve cómo se compara tu análisis con el de la IA') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Textos -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-list-alt me-2"></i>
+                {{ _('Textos del Desafío') }}
+            </h2>
+            
+            <div class="row">
+                {% for text in texts %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card h-100 text-card" data-text-id="{{ text.id }}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
+                            <span class="badge 
+                                {% if text.difficulty == 'Fácil' %}bg-success
+                                {% elif text.difficulty == 'Medio' %}bg-warning
+                                {% else %}bg-danger{% endif %}" 
+                                title="{% if text.difficulty == 'Fácil' %}Sesgos evidentes y obvios{% elif text.difficulty == 'Medio' %}Sesgos sutiles pero detectables{% else %}Sesgos muy sutiles o complejos{% endif %}">
+                                {{ text.difficulty }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text text-muted small">
+                                {{ text.text[:150] }}{% if text.text|length > 150 %}...{% endif %}
+                            </p>
+                            <div class="categories mb-3">
+                                {% for category in text.categories %}
+                                <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <button class="btn btn-primary w-100 start-analysis-btn" 
+                                    data-text-id="{{ text.id }}">
+                                <i class="fas fa-play me-2"></i>
+                                {{ _('Comenzar Análisis') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas del Desafío -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body text-center py-4">
+                    <h4 class="mb-3">{{ _('Estadísticas del Desafío') }}</h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-file-alt fa-2x text-primary mb-2"></i>
+                                <h5>10</h5>
+                                <p class="text-muted">{{ _('Textos disponibles') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                <h5 id="participants-count">0</h5>
+                                <p class="text-muted">{{ _('Participantes') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                <h5 id="avg-score">0%</h5>
+                                <p class="text-muted">{{ _('Puntuación promedio') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-trophy fa-2x text-danger mb-2"></i>
+                                <h5 id="best-score">0%</h5>
+                                <p class="text-muted">{{ _('Mejor puntuación') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.challenge-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+}
+
+.challenge-header h1 {
+    color: white !important;
+}
+
+.challenge-badge {
+    margin-top: 1rem;
+}
+
+.step-icon {
+    padding: 1rem;
+    border-radius: 10px;
+    background: #f8f9fa;
+    transition: transform 0.3s ease;
+}
+
+.step-icon:hover {
+    transform: translateY(-5px);
+}
+
+.text-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.text-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.stat-item {
+    padding: 1rem;
+}
+
+.categories .badge {
+    font-size: 0.75rem;
+}
+
+.start-analysis-btn {
+    transition: all 0.3s ease;
+}
+
+.start-analysis-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar clics en los botones de análisis
+    document.querySelectorAll('.start-analysis-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const textId = this.getAttribute('data-text-id');
+            window.location.href = `/challenge/analyze/${textId}`;
+        });
+    });
+
+    // Cargar estadísticas del desafío
+    loadChallengeStats();
+});
+
+function loadChallengeStats() {
+    // Simular carga de estadísticas (en una implementación real, esto vendría de la API)
+    document.getElementById('participants-count').textContent = '127';
+    document.getElementById('avg-score').textContent = '73%';
+    document.getElementById('best-score').textContent = '94%';
+}
+</script>
+{% endblock %}

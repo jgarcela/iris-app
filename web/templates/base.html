@@ -103,6 +103,15 @@
                   href="{{ url_for('dashboard.dashboard_iris') }}">
                   <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
                 </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
+                  href="{{ url_for('challenge.challenge_home') }}">
+                  <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
+                  {% if 'challenge' in current_user.roles %}
+                  <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem;">{{ _('Temporal') }}</span>
+                  {% endif %}
+                </a>
               </li>            
               {% if 'admin' in current_user.roles %}
                 <li class="nav-item">

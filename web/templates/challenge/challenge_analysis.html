@@ -1,0 +1,859 @@
+{% extends "challenge/challenge_base.html" %}
+
+{% block title %}{{ _('Análisis del Desafío') }} - {{ text_data.title }}{% endblock %}
+
+{% block challenge_content %}
+<div class="container-fluid py-4">
+    <!-- Header del Análisis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-microscope me-2 text-primary"></i>
+                        {{ text_data.title }}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <span class="badge 
+                            {% if text_data.difficulty == 'Fácil' %}bg-success
+                            {% elif text_data.difficulty == 'Medio' %}bg-warning
+                            {% else %}bg-danger{% endif %} me-2">
+                            {{ text_data.difficulty }}
+                        </span>
+                        {{ _('Desafío de Análisis IRIS') }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        {{ _('Volver al Desafío') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progreso del Análisis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-tasks me-2"></i>
+                        {{ _('Progreso del Análisis') }}
+                    </h5>
+                    <div class="progress-steps">
+                        <div class="step active" id="step-manual">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h6>{{ _('Análisis Manual') }}</h6>
+                                <p class="text-muted small">{{ _('Identifica sesgos manualmente') }}</p>
+                            </div>
+                        </div>
+                        <div class="step" id="step-ai">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h6>{{ _('Análisis con IA') }}</h6>
+                                <p class="text-muted small">{{ _('Compara con inteligencia artificial') }}</p>
+                            </div>
+                        </div>
+                        <div class="step" id="step-results">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h6>{{ _('Resultados') }}</h6>
+                                <p class="text-muted small">{{ _('Ve tu puntuación') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="row">
+        <!-- Panel de Análisis Manual -->
+        <div class="col-lg-4">
+            <div class="analysis-panel" id="manual-panel">
+                <div class="panel-header">
+                    <h5 class="panel-title">
+                        <i class="fas fa-edit me-2"></i>
+                        {{ _('Análisis Manual') }}
+                    </h5>
+                    <div class="panel-actions">
+                        <button class="btn btn-sm btn-outline-primary" id="edit-mode-btn">
+                            <i class="fas fa-pen me-1"></i>
+                            {{ _('Modo Edición') }}
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="panel-content">
+                    <!-- Variables Cargadas -->
+                    <div class="variables-section mb-4">
+                        <h6 class="section-title">
+                            <i class="fas fa-list me-2"></i>
+                            {{ _('Variables Disponibles') }}
+                        </h6>
+                        <div class="variables-grid">
+                            <div class="variable-category">
+                                <h6 class="category-title">{{ _('Contenido General') }}</h6>
+                                <div class="variable-list">
+                                    <span class="variable-tag">personas_mencionadas</span>
+                                    <span class="variable-tag">genero_periodista</span>
+                                    <span class="variable-tag">tema</span>
+                                </div>
+                            </div>
+                            <div class="variable-category">
+                                <h6 class="category-title">{{ _('Lenguaje') }}</h6>
+                                <div class="variable-list">
+                                    <span class="variable-tag">lenguaje_sexista</span>
+                                    <span class="variable-tag">androcentrismo</span>
+                                    <span class="variable-tag">asimetria</span>
+                                    <span class="variable-tag">infantilizacion</span>
+                                    <span class="variable-tag">denominacion_sexualizada</span>
+                                    <span class="variable-tag">denominacion_redundante</span>
+                                    <span class="variable-tag">denominacion_dependiente</span>
+                                    <span class="variable-tag">masculino_generico</span>
+                                    <span class="variable-tag">dual_aparente</span>
+                                    <span class="variable-tag">hombre_humanidad</span>
+                                    <span class="variable-tag">cargos_mujeres</span>
+                                    <span class="variable-tag">sexismo_social</span>
+                                    <span class="variable-tag">comparacion_mujeres_hombres</span>
+                                    <span class="variable-tag">criterios_excepcion_noticiabilidad</span>
+                                </div>
+                            </div>
+                            <div class="variable-category">
+                                <h6 class="category-title">{{ _('Fuentes') }}</h6>
+                                <div class="variable-list">
+                                    <span class="variable-tag">nombre_fuente</span>
+                                    <span class="variable-tag">genero_fuente</span>
+                                    <span class="variable-tag">tipo_fuente</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen de Anotaciones -->
+                    <div class="annotations-summary">
+                        <h6 class="section-title">
+                            <i class="fas fa-sticky-note me-2"></i>
+                            {{ _('Mis Anotaciones') }}
+                        </h6>
+                        <div id="annotations-list" class="annotations-list">
+                            <p class="text-muted text-center py-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {{ _('Selecciona texto para comenzar a anotar') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="action-buttons">
+                        <button class="btn btn-success w-100 mb-2" id="analyze-with-ai-btn" disabled>
+                            <i class="fas fa-robot me-2"></i>
+                            {{ _('Analizar con IA') }}
+                        </button>
+                        <button class="btn btn-outline-primary w-100" id="save-analysis-btn" disabled>
+                            <i class="fas fa-save me-2"></i>
+                            {{ _('Guardar Análisis') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Texto -->
+        <div class="col-lg-8">
+            <div class="text-analysis-area">
+                <div class="text-header">
+                    <h5 class="text-title">{{ text_data.title }}</h5>
+                    <div class="text-meta">
+                        <span class="badge bg-light text-dark me-2">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ _('Tiempo estimado: 15 min') }}
+                        </span>
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-target me-1"></i>
+                            {{ _('Objetivo: Identificar todos los sesgos') }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="text-content" id="analysis-text">
+                    <div class="text-body">
+                        <p>{{ text_data.text }}</p>
+                    </div>
+                </div>
+
+                <!-- Panel de Anotación (aparece al seleccionar texto) -->
+                <div class="annotation-panel" id="annotation-panel" style="display: none;">
+                    <div class="annotation-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tag me-2"></i>
+                            {{ _('Anotar Texto Seleccionado') }}
+                        </h6>
+                        <button class="btn-close" id="close-annotation-panel"></button>
+                    </div>
+                    <div class="annotation-content">
+                        <div class="selected-text mb-3">
+                            <strong>{{ _('Texto seleccionado:') }}</strong>
+                            <span id="selected-text-preview" class="text-primary"></span>
+                        </div>
+                        <form id="annotation-form">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ _('Categoría') }}</label>
+                                    <select class="form-select" id="annotation-category" required>
+                                        <option value="">{{ _('Seleccionar...') }}</option>
+                                        <option value="contenido_general">{{ _('Contenido General') }}</option>
+                                        <option value="lenguaje">{{ _('Lenguaje') }}</option>
+                                        <option value="fuentes">{{ _('Fuentes') }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ _('Variable') }}</label>
+                                    <select class="form-select" id="annotation-variable" required>
+                                        <option value="">{{ _('Seleccionar...') }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ _('Valor') }}</label>
+                                    <select class="form-select" id="annotation-value" required>
+                                        <option value="">{{ _('Seleccionar...') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>
+                                    {{ _('Agregar Anotación') }}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary ms-2" id="cancel-annotation">
+                                    {{ _('Cancelar') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Resultados -->
+<div class="modal fade" id="resultsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-line me-2"></i>
+                    {{ _('Resultados del Análisis') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="results-content">
+                    <!-- Contenido de resultados se carga aquí -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ _('Cerrar') }}
+                </button>
+                <button type="button" class="btn btn-primary" id="save-results-btn">
+                    <i class="fas fa-save me-2"></i>
+                    {{ _('Guardar Resultados') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.analysis-panel {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.panel-title {
+    margin: 0;
+    color: #495057;
+}
+
+.panel-content {
+    padding: 1rem;
+}
+
+.section-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.variables-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.variable-category {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.category-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.variable-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.variable-tag {
+    background: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.text-analysis-area {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.text-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.text-title {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+.text-content {
+    padding: 1.5rem;
+}
+
+.text-body {
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.annotation-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+.annotation-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.annotation-content {
+    padding: 1rem;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: #007bff;
+    color: white;
+}
+
+.step.completed .step-number {
+    background: #28a745;
+    color: white;
+}
+
+.step-content h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.step-content p {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 60px;
+    right: -50%;
+    height: 2px;
+    background: #e9ecef;
+    z-index: -1;
+}
+
+.step.completed:not(:last-child)::after {
+    background: #28a745;
+}
+
+.annotations-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.annotation-item {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #007bff;
+}
+
+.annotation-text {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.annotation-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.action-buttons {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+</style>
+
+<script>
+// Datos del texto actual
+const currentText = {{ text_data | tojson | safe }};
+let annotations = [];
+let isEditMode = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChallengeAnalysis();
+});
+
+function initializeChallengeAnalysis() {
+    setupTextSelection();
+    setupAnnotationForm();
+    setupActionButtons();
+    updateProgressSteps();
+}
+
+function setupTextSelection() {
+    const textElement = document.getElementById('analysis-text');
+    
+    textElement.addEventListener('mouseup', function(e) {
+        if (!isEditMode) return;
+        
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        
+        if (selectedText.length > 0) {
+            showAnnotationPanel(selectedText, selection.getRangeAt(0));
+        }
+    });
+}
+
+function setupAnnotationForm() {
+    const form = document.getElementById('annotation-form');
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    
+    // Manejar cambio de categoría
+    categorySelect.addEventListener('change', function() {
+        updateVariableOptions(this.value);
+    });
+    
+    // Manejar cambio de variable
+    variableSelect.addEventListener('change', function() {
+        updateValueOptions(categorySelect.value, this.value);
+    });
+    
+    // Manejar envío del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveAnnotation();
+    });
+    
+    // Manejar cancelar
+    document.getElementById('cancel-annotation').addEventListener('click', function() {
+        hideAnnotationPanel();
+    });
+    
+    // Manejar cerrar panel
+    document.getElementById('close-annotation-panel').addEventListener('click', function() {
+        hideAnnotationPanel();
+    });
+}
+
+function setupActionButtons() {
+    // Botón de modo edición
+    document.getElementById('edit-mode-btn').addEventListener('click', function() {
+        toggleEditMode();
+    });
+    
+    // Botón de análisis con IA
+    document.getElementById('analyze-with-ai-btn').addEventListener('click', function() {
+        analyzeWithAI();
+    });
+    
+    // Botón de guardar análisis
+    document.getElementById('save-analysis-btn').addEventListener('click', function() {
+        saveAnalysis();
+    });
+}
+
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const btn = document.getElementById('edit-mode-btn');
+    const textArea = document.getElementById('analysis-text');
+    
+    if (isEditMode) {
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> {{ _("Modo Edición Activo") }}';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        textArea.style.cursor = 'text';
+        textArea.classList.add('edit-mode');
+    } else {
+        btn.innerHTML = '<i class="fas fa-pen me-1"></i> {{ _("Modo Edición") }}';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline-primary');
+        textArea.style.cursor = 'default';
+        textArea.classList.remove('edit-mode');
+        hideAnnotationPanel();
+    }
+}
+
+function showAnnotationPanel(selectedText, range) {
+    const panel = document.getElementById('annotation-panel');
+    const preview = document.getElementById('selected-text-preview');
+    
+    preview.textContent = selectedText;
+    panel.style.display = 'block';
+    
+    // Guardar el rango para después
+    window.currentSelection = {
+        text: selectedText,
+        range: range
+    };
+}
+
+function hideAnnotationPanel() {
+    const panel = document.getElementById('annotation-panel');
+    panel.style.display = 'none';
+    window.currentSelection = null;
+}
+
+function updateVariableOptions(category) {
+    const variableSelect = document.getElementById('annotation-variable');
+    variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    const variables = {
+        'contenido_general': ['personas_mencionadas', 'genero_periodista', 'tema'],
+        'lenguaje': ['lenguaje_sexista', 'androcentrismo', 'asimetria', 'infantilizacion', 'denominacion_sexualizada', 'denominacion_redundante', 'denominacion_dependiente', 'masculino_generico', 'dual_aparente', 'hombre_humanidad', 'cargos_mujeres', 'sexismo_social', 'comparacion_mujeres_hombres', 'criterios_excepcion_noticiabilidad'],
+        'fuentes': ['nombre_fuente', 'genero_fuente', 'tipo_fuente']
+    };
+    
+    if (variables[category]) {
+        variables[category].forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable;
+            option.textContent = variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            variableSelect.appendChild(option);
+        });
+    }
+}
+
+function updateValueOptions(category, variable) {
+    const valueSelect = document.getElementById('annotation-value');
+    valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    // Valores de ejemplo (en una implementación real, esto vendría del config.ini)
+    const values = {
+        'personas_mencionadas': ['1', '2', '3'],
+        'genero_periodista': ['1', '2', '3'],
+        'tema': ['1', '2', '3', '4', '5'],
+        'lenguaje_sexista': ['1', '2'],
+        'androcentrismo': ['1', '2'],
+        'asimetria': ['1', '2'],
+        'infantilizacion': ['1', '2'],
+        'denominacion_sexualizada': ['1', '2'],
+        'denominacion_redundante': ['1', '2'],
+        'denominacion_dependiente': ['1', '2'],
+        'masculino_generico': ['1', '2'],
+        'dual_aparente': ['1', '2'],
+        'hombre_humanidad': ['1', '2'],
+        'cargos_mujeres': ['1', '2'],
+        'sexismo_social': ['1', '2'],
+        'comparacion_mujeres_hombres': ['1', '2'],
+        'criterios_excepcion_noticiabilidad': ['1', '2'],
+        'nombre_fuente': ['1', '2', '3'],
+        'genero_fuente': ['1', '2', '3'],
+        'tipo_fuente': ['1', '2', '3']
+    };
+    
+    if (values[variable]) {
+        values[variable].forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = `Valor ${value}`;
+            valueSelect.appendChild(option);
+        });
+    }
+}
+
+function saveAnnotation() {
+    const category = document.getElementById('annotation-category').value;
+    const variable = document.getElementById('annotation-variable').value;
+    const value = document.getElementById('annotation-value').value;
+    const selectedText = window.currentSelection ? window.currentSelection.text : '';
+    
+    if (!category || !variable || !value || !selectedText) {
+        alert('{{ _("Por favor completa todos los campos") }}');
+        return;
+    }
+    
+    const annotation = {
+        id: Date.now(),
+        text: selectedText,
+        category: category,
+        variable: variable,
+        value: value,
+        timestamp: new Date().toISOString()
+    };
+    
+    annotations.push(annotation);
+    updateAnnotationsList();
+    hideAnnotationPanel();
+    
+    // Habilitar botones
+    document.getElementById('analyze-with-ai-btn').disabled = false;
+    document.getElementById('save-analysis-btn').disabled = false;
+}
+
+function updateAnnotationsList() {
+    const container = document.getElementById('annotations-list');
+    
+    if (annotations.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("Selecciona texto para comenzar a anotar") }}</p>';
+        return;
+    }
+    
+    container.innerHTML = annotations.map(annotation => `
+        <div class="annotation-item">
+            <div class="annotation-text">"${annotation.text}"</div>
+            <div class="annotation-meta">
+                <strong>${annotation.category}</strong> → ${annotation.variable} = ${annotation.value}
+            </div>
+        </div>
+    `).join('');
+}
+
+function analyzeWithAI() {
+    if (annotations.length === 0) {
+        alert('{{ _("Por favor realiza al menos una anotación antes de analizar con IA") }}');
+        return;
+    }
+    
+    // Simular análisis con IA
+    const loadingBtn = document.getElementById('analyze-with-ai-btn');
+    const originalText = loadingBtn.innerHTML;
+    loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Analizando...") }}';
+    loadingBtn.disabled = true;
+    
+    setTimeout(() => {
+        // Simular respuesta de IA
+        const aiAnalysis = generateMockAIAnalysis();
+        showResults(aiAnalysis);
+        
+        loadingBtn.innerHTML = originalText;
+        loadingBtn.disabled = false;
+        
+        // Actualizar progreso
+        document.getElementById('step-ai').classList.add('completed');
+        document.getElementById('step-results').classList.add('active');
+    }, 2000);
+}
+
+function generateMockAIAnalysis() {
+    // Generar análisis simulado de IA
+    return {
+        contenido_general: {
+            personas_mencionadas: ['María González', 'Carlos Ruiz'],
+            genero_periodista: 2,
+            tema: 1
+        },
+        lenguaje: {
+            lenguaje_sexista: 1,
+            androcentrismo: 1,
+            asimetria: 1
+        },
+        fuentes: {
+            fuentes: [
+                { nombre_fuente: 'María González', genero_fuente: 2, tipo_fuente: 1 },
+                { nombre_fuente: 'Carlos Ruiz', genero_fuente: 1, tipo_fuente: 1 }
+            ]
+        }
+    };
+}
+
+function showResults(aiAnalysis) {
+    const modal = new bootstrap.Modal(document.getElementById('resultsModal'));
+    const content = document.getElementById('results-content');
+    
+    // Calcular métricas de comparación
+    const metrics = calculateComparisonMetrics(annotations, aiAnalysis);
+    
+    content.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>{{ _("Tu Análisis Manual") }}</h6>
+                <div class="analysis-summary">
+                    <p><strong>{{ _("Anotaciones realizadas:") }}</strong> ${annotations.length}</p>
+                    <div class="annotations-preview">
+                        ${annotations.map(ann => `
+                            <div class="annotation-preview">
+                                <span class="text-primary">"${ann.text}"</span>
+                                <span class="text-muted">→ ${ann.variable} = ${ann.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>{{ _("Análisis de IA") }}</h6>
+                <div class="ai-summary">
+                    <p><strong>{{ _("Variables detectadas:") }}</strong> ${Object.keys(aiAnalysis).length}</p>
+                    <div class="ai-preview">
+                        <div class="ai-category">
+                            <strong>Contenido General:</strong>
+                            <ul>
+                                <li>Personas mencionadas: ${aiAnalysis.contenido_general.personas_mencionadas.join(', ')}</li>
+                                <li>Género periodista: ${aiAnalysis.contenido_general.genero_periodista}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <h6>{{ _("Métricas de Comparación") }}</h6>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">{{ _("Precisión") }}</div>
+                        <div class="metric-value">${metrics.precision}%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">{{ _("Cobertura") }}</div>
+                        <div class="metric-value">${metrics.recall}%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">{{ _("Puntuación Total") }}</div>
+                        <div class="metric-value score-highlight">${metrics.totalScore}%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+}
+
+function calculateComparisonMetrics(manualAnnotations, aiAnalysis) {
+    // Lógica simplificada de comparación
+    const totalVariables = Object.keys(aiAnalysis).length * 3; // Estimación
+    const detectedVariables = manualAnnotations.length;
+    
+    const precision = Math.min(100, (detectedVariables / totalVariables) * 100);
+    const recall = Math.min(100, (detectedVariables / 5) * 100); // Estimación
+    const totalScore = Math.round((precision + recall) / 2);
+    
+    return {
+        precision: Math.round(precision),
+        recall: Math.round(recall),
+        totalScore: totalScore
+    };
+}
+
+function saveAnalysis() {
+    // Implementar guardado del análisis
+    alert('{{ _("Análisis guardado correctamente") }}');
+}
+
+function updateProgressSteps() {
+    // Actualizar indicadores de progreso
+    if (annotations.length > 0) {
+        document.getElementById('step-manual').classList.add('completed');
+        document.getElementById('step-ai').classList.add('active');
+    }
+}
+</script>
+{% endblock %}
