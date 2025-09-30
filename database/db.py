@@ -25,6 +25,7 @@ COLLECTION_USERS = config['DATABASE']['COLLECTION_USERS']
 COLLECTION_ROLES = config['DATABASE']['COLLECTION_ROLES']
 COLLECTION_PERMISSIONS = config['DATABASE']['COLLECTION_PERMISSIONS']
 COLLECTION_SEMANA_CIENCIA = config['DATABASE'].get('COLLECTION_SEMANA_CIENCIA', 'iris_semana_ciencia_2025')
+COLLECTION_AI_CACHE = config['DATABASE'].get('COLLECTION_AI_CACHE', 'iris_ai_cache')
 
 
 # Construir URI de conexión (autenticación si se usa)
@@ -49,6 +50,7 @@ DB_USERS       = db[COLLECTION_USERS]
 DB_ROLES       = db[COLLECTION_ROLES]
 DB_PERMISSIONS = db[COLLECTION_PERMISSIONS]
 DB_SEMANA_CIENCIA = db[COLLECTION_SEMANA_CIENCIA]
+DB_AI_CACHE = db[COLLECTION_AI_CACHE]
 
 
 # Índices
@@ -58,6 +60,8 @@ DB_PERMISSIONS.create_index('name', unique=True)
 # Índices básicos para la colección del desafío si procede
 try:
     DB_SEMANA_CIENCIA.create_index('created_at')
+    DB_AI_CACHE.create_index('text_id', unique=True)
+    DB_AI_CACHE.create_index('created_at')
 except Exception:
     pass
 

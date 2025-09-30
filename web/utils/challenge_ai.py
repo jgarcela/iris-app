@@ -1,18 +1,11 @@
-# web/routes/challenge.py
-from flask import Blueprint, render_template, request, jsonify, session
-from flask_babel import get_locale, _
-from web.utils.challenge_decorators import challenge_required, get_current_user
-from database.db import DB_SEMANA_CIENCIA, DB_AI_CACHE
-import configparser, ast
+import ast
+import configparser
+import json
 try:
     import openai
 except Exception:
     openai = None
-import json
-import os
 
-bp = Blueprint('challenge', __name__, url_prefix='/challenge')
-# === Config OpenAI (copiado y adaptado de api/utils/analysis.py) ===
 config = configparser.ConfigParser()
 config.read('config.ini')
 MODELS = ast.literal_eval(config['API']['MODELS'])
@@ -24,37 +17,6 @@ if openai is not None:
     except Exception:
         pass
 
-def analyze_task_challenge(model_key: str, text: str, title: str, task: str):
-    """Lógica inspirada en api.utils.analysis.analyze_text, simplificada.
-    Devuelve un dict parseado desde JSON que responde al prompt de {task}.
-    """
-    if openai is None:
-        return None
-    try:
-        with open(f'api/prompts/{task}.txt', 'r', encoding='utf-8') as f:
-            prompt = f.read()
-    except Exception:
-        return None
-
-    user_prompt = f"""
-Titulo: {title}
-Articulo: {text}
-"""
-    try:
-        completion = openai.chat.completions.create(
-            model=MODELS.get(model_key, OPENAI_MODEL),
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0
-        )
-        response_message = completion.choices[0].message.content
-        return json.loads(response_message)
-    except Exception:
-        return None
-
-# Sample texts for the challenge
 CHALLENGE_TEXTS = [
     {
         'id': 1,
@@ -129,197 +91,35 @@ CHALLENGE_TEXTS = [
     }
 ]
 
-@bp.route('/')
-@challenge_required
-def challenge_home():
-    """Página principal del desafío"""
-    return render_template('challenge/challenge_home.html', 
-                         texts=CHALLENGE_TEXTS,
-                         language=get_locale())
-
-@bp.route('/analyze/<int:text_id>')
-@challenge_required
-def analyze_text(text_id):
-    """Página de análisis individual"""
-    text_data = next((text for text in CHALLENGE_TEXTS if text['id'] == text_id), None)
-    if not text_data:
-        return "Texto no encontrado", 404
-    
-    return render_template('challenge/challenge_analysis.html', 
-                         text_data=text_data,
-                         language=get_locale())
-
-@bp.route('/results')
-@challenge_required
-def results():
-    """Página de resultados y ranking"""
-    return render_template('challenge/challenge_results.html', 
-                         language=get_locale())
-
-@bp.route('/analyze-ai', methods=['POST'])
-@challenge_required
-def analyze_with_ai():
-    """Endpoint para análisis con IA"""
+def analyze_task_challenge(model_key: str, text: str, title: str, task: str):
+    if openai is None:
+        return None
     try:
-        data = request.get_json()
-        text_id = data.get('text_id')
-        manual_annotations = data.get('manual_annotations', [])
-        text_data = data.get('text_data', {})
-        
-        # Obtener el texto del desafío
-        challenge_text = next((text for text in CHALLENGE_TEXTS if text['id'] == text_id), None)
-        if not challenge_text:
-            return jsonify({'success': False, 'error': 'Texto no encontrado'}), 404
-        
-        # Intentar recuperar análisis de IA previo desde caché
-        cache_doc = DB_AI_CACHE.find_one({'text_id': text_id})
-        if cache_doc and isinstance(cache_doc.get('ai_analysis'), dict):
-            ai_analysis = cache_doc['ai_analysis']
-        else:
-            # Fallback: simular análisis con IA (o llamar a API real)
-            ai_analysis = simulate_ai_analysis(challenge_text, manual_annotations)
+        with open(f'api/prompts/{task}.txt', 'r', encoding='utf-8') as f:
+            prompt = f.read()
+    except Exception:
+        return None
 
-        # Calcular puntuaciones y métricas de comparación
-        manual_dict = _manual_annotations_to_dict(manual_annotations)
-        metrics = calculate_comparison_metrics(manual_dict, ai_analysis)
-        total_score = metrics.get('total_score')
-        
-        # Guardar análisis en sesión para la página de resultados
-        session[f'ai_analysis_{text_id}'] = ai_analysis
-        session[f'manual_annotations_{text_id}'] = manual_annotations
-        session[f'text_data_{text_id}'] = text_data
-
-        # Persistir resultado del análisis en MongoDB (colección iris_semana_ciencia_2025)
-        try:
-            user = get_current_user() or {}
-            document = {
-                'text_id': text_id,
-                'text_title': challenge_text.get('title'),
-                'manual_annotations': manual_annotations,
-                'ai_analysis': ai_analysis,
-                'metrics': metrics,
-                'total_score': total_score,
-                'language': str(get_locale()),
-                'user_id': user.get('id'),
-                'source': 'challenge',
-                'created_at': __import__('datetime').datetime.now(__import__('datetime').timezone.utc),
-                'updated_at': __import__('datetime').datetime.now(__import__('datetime').timezone.utc)
-            }
-            insert_result = DB_SEMANA_CIENCIA.insert_one(document)
-            saved_id = str(insert_result.inserted_id)
-        except Exception as e:
-            # No bloquear el flujo si falla el guardado; devolver el error para logging
-            saved_id = None
-            print(f"[WARN] Failed to persist challenge analysis: {e}")
-        
-        return jsonify({
-            'success': True,
-            'ai_analysis': ai_analysis,
-            'redirect_url': f'/challenge/ai-results/{text_id}',
-            'saved_id': saved_id,
-            'total_score': total_score
-        })
-        
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@bp.route('/ai-results/<int:text_id>')
-@challenge_required
-def ai_results(text_id):
-    """Página de resultados del análisis con IA"""
-    # Obtener datos de la sesión
-    ai_analysis = session.get(f'ai_analysis_{text_id}', {})
-    manual_annotations = session.get(f'manual_annotations_{text_id}', [])
-    text_data = session.get(f'text_data_{text_id}', {})
-    
-    if not ai_analysis:
-        return "Análisis no encontrado", 404
-    
-    return render_template('challenge/challenge_ai_results.html',
-                         text_data=text_data,
-                         ai_analysis=ai_analysis,
-                         manual_annotations=manual_annotations,
-                         analysis_data={'text_id': text_id},
-                         language=get_locale())
-
-@bp.route('/api/compare', methods=['POST'])
-@challenge_required
-def compare_analysis():
-    """API para comparar análisis manual vs IA"""
+    user_prompt = f"""
+Titulo: {title}
+Articulo: {text}
+"""
     try:
-        data = request.get_json()
-        manual_analysis = data.get('manual_analysis', {})
-        ai_analysis = data.get('ai_analysis', {})
-        text_id = data.get('text_id')
-        
-        # Calcular métricas de comparación
-        comparison_metrics = calculate_comparison_metrics(manual_analysis, ai_analysis)
-        
-        return jsonify({
-            'success': True,
-            'metrics': comparison_metrics,
-            'score': comparison_metrics['total_score']
-        })
-        
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        completion = openai.chat.completions.create(
+            model=MODELS.get(model_key, OPENAI_MODEL),
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0
+        )
+        response_message = completion.choices[0].message.content
+        return json.loads(response_message)
+    except Exception:
+        return None
 
-def calculate_comparison_metrics(manual, ai):
-    """Calcular métricas de comparación entre análisis manual e IA"""
-    metrics = {
-        'contenido_general': {'precision': 0, 'recall': 0, 'f1': 0},
-        'lenguaje': {'precision': 0, 'recall': 0, 'f1': 0},
-        'fuentes': {'precision': 0, 'recall': 0, 'f1': 0},
-        'total_score': 0
-    }
-    
-    # Calcular métricas por categoría
-    for category in ['contenido_general', 'lenguaje', 'fuentes']:
-        if category in manual and category in ai:
-            manual_vars = set(manual[category].keys()) if isinstance(manual[category], dict) else set()
-            ai_vars = set(ai[category].keys()) if isinstance(ai[category], dict) else set()
-            
-            if ai_vars:
-                precision = len(manual_vars & ai_vars) / len(ai_vars)
-                recall = len(manual_vars & ai_vars) / len(manual_vars) if manual_vars else 0
-                f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-                
-                metrics[category] = {
-                    'precision': round(precision * 100, 2),
-                    'recall': round(recall * 100, 2),
-                    'f1': round(f1 * 100, 2)
-                }
-    
-    # Calcular puntuación total (promedio ponderado)
-    weights = {'contenido_general': 0.4, 'lenguaje': 0.4, 'fuentes': 0.2}
-    total_score = sum(metrics[cat]['f1'] * weights[cat] for cat in weights.keys())
-    metrics['total_score'] = round(total_score, 2)
-    
-    return metrics
-
-def _manual_annotations_to_dict(manual_annotations):
-    """Convertir lista de anotaciones manuales a dict por categorías/variables"""
-    result = {
-        'contenido_general': {},
-        'lenguaje': {},
-        'fuentes': {}
-    }
-    if not isinstance(manual_annotations, list):
-        return result
-    for ann in manual_annotations:
-        category = ann.get('category')
-        variable = ann.get('variable')
-        value = ann.get('value')
-        if category in result and variable:
-            result[category][variable] = value
-    return result
 
 def simulate_ai_analysis(text_data, manual_annotations):
-    """Análisis IA simplificado usando la lógica de api.utils.analysis.analyze_text.
-
-    Ejecuta 3 tareas (contenido_general, lenguaje, fuentes) y adapta
-    el resultado al esquema esperado por el desafío (valores enteros y contadores).
-    """
     title = text_data.get('title', '')
     text = text_data.get('text', '')
 
@@ -331,7 +131,6 @@ def simulate_ai_analysis(text_data, manual_annotations):
         except Exception:
             return default
 
-    # Fallback si no podemos importar analyze_text (por entorno)
     if openai is None:
         return {
             'contenido_general': {
@@ -362,14 +161,12 @@ def simulate_ai_analysis(text_data, manual_annotations):
             }
         }
 
-    # 1) Contenido general
-    cg = analyze_task_challenge(model_key='avanzado', text=text, title=title, task='contenido_general') or {}
+    cg = analyze_task_challenge('avanzado', text, title, 'contenido_general') or {}
     personas = cg.get('personas_mencionadas') or []
     genero_periodista = cg.get('genero_periodista')
     tema = cg.get('tema')
 
-    # 2) Lenguaje
-    lg = analyze_task_challenge(model_key='avanzado', text=text, title=title, task='lenguaje') or {}
+    lg = analyze_task_challenge('avanzado', text, title, 'lenguaje') or {}
 
     def map_lenguaje(label_obj):
         if not isinstance(label_obj, dict):
@@ -394,8 +191,7 @@ def simulate_ai_analysis(text_data, manual_annotations):
         'criterios_excepcion_noticiabilidad': map_lenguaje(lg.get('excepcion_noticiabilidad', {})),
     }
 
-    # 3) Fuentes
-    fs = analyze_task_challenge(model_key='avanzado', text=text, title=title, task='fuentes') or {}
+    fs = analyze_task_challenge('avanzado', text, title, 'fuentes') or {}
     fuentes = fs.get('fuentes') or []
 
     def mode_or_first(items, key, default=1):
@@ -403,12 +199,11 @@ def simulate_ai_analysis(text_data, manual_annotations):
             values = [int(it.get(key)) for it in items if key in it]
             if not values:
                 return default
-            # modo sencillo
             return max(set(values), key=values.count)
         except Exception:
             return default
 
-    ai_analysis = {
+    return {
         'contenido_general': {
             'personas_mencionadas': len(personas),
             'genero_periodista': safe_first_int(genero_periodista, 1),
@@ -422,5 +217,4 @@ def simulate_ai_analysis(text_data, manual_annotations):
         }
     }
 
-    return ai_analysis
 
