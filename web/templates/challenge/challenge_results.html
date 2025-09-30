@@ -498,12 +498,12 @@ function setupActionButtons() {
         if (navigator.share) {
             navigator.share({
                 title: '{{ _("Mis resultados en el Desafío IRIS") }}',
-                text: '{{ _("He obtenido una puntuación del 78% en el análisis de sesgos de género. ¿Puedes superarme?") }}',
+                text: '{{ _("He obtenido una puntuación del 78%% en el análisis de sesgos de género. ¿Puedes superarme?") }}',
                 url: window.location.href
             });
         } else {
             // Fallback para navegadores que no soportan Web Share API
-            const shareText = '{{ _("Mis resultados en el Desafío IRIS: 78% de precisión en análisis de sesgos de género") }}';
+            const shareText = '{{ _("Mis resultados en el Desafío IRIS: 78%% de precisión en análisis de sesgos de género") }}';
             navigator.clipboard.writeText(shareText).then(() => {
                 alert('{{ _("Resultados copiados al portapapeles") }}');
             });
