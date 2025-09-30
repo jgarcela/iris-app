@@ -1,7 +1,7 @@
 # web/routes/challenge.py
 from flask import Blueprint, render_template, request, jsonify, session
 from flask_babel import get_locale, _
-from web.utils.challenge_decorators import challenge_required, challenge_only, challenge_admin_required
+from web.utils.challenge_decorators import challenge_required
 import json
 import os
 
@@ -164,43 +164,3 @@ def calculate_comparison_metrics(manual, ai):
     
     return metrics
 
-@bp.route('/admin')
-@challenge_admin_required
-def challenge_admin():
-    """Panel de administración del desafío"""
-    return render_template('challenge/challenge_admin.html', 
-                         language=get_locale())
-
-@bp.route('/admin/users')
-@challenge_admin_required
-def challenge_users():
-    """Gestión de usuarios del desafío"""
-    # Aquí se implementaría la lógica para obtener usuarios con rol challenge
-    return jsonify({
-        'users': [
-            {'id': 1, 'name': 'Participante 1', 'email': 'p1@example.com', 'score': 85, 'analyses': 3},
-            {'id': 2, 'name': 'Participante 2', 'email': 'p2@example.com', 'score': 72, 'analyses': 2},
-            {'id': 3, 'name': 'Participante 3', 'email': 'p3@example.com', 'score': 91, 'analyses': 5}
-        ]
-    })
-
-@bp.route('/admin/assign-role', methods=['POST'])
-@challenge_admin_required
-def assign_challenge_role():
-    """Asignar rol de desafío a un usuario"""
-    try:
-        data = request.get_json()
-        user_email = data.get('email')
-        
-        if not user_email:
-            return jsonify({'success': False, 'error': 'Email requerido'}), 400
-        
-        # Aquí se implementaría la lógica para asignar el rol
-        # Por ahora, simulamos la respuesta
-        return jsonify({
-            'success': True, 
-            'message': f'Rol de desafío asignado a {user_email}'
-        })
-        
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500

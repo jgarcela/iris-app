@@ -44,45 +44,6 @@
                     </a>
                 </li>
                        {% if current_user and 'admin' in current_user.roles %}
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'challenge.challenge_admin' %}active{% endif %}" 
-                       href="{{ url_for('challenge.challenge_admin') }}">
-                        <i class="fas fa-cogs me-1"></i> {{ _('Administración') }}
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" 
-                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-tools me-1"></i> {{ _('Sistema') }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('analysis.create_analysis') }}">
-                                <i class="fas fa-search-plus me-2"></i>
-                                {{ _('Análisis Completo') }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('table.table_iris') }}">
-                                <i class="fas fa-history me-2"></i>
-                                {{ _('Histórico') }}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('dashboard.dashboard_iris') }}">
-                                <i class="fas fa-chart-bar me-2"></i>
-                                {{ _('Dashboard') }}
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('admin.admin_dashboard') }}">
-                                <i class="fas fa-user-cog me-2"></i>
-                                {{ _('Administración General') }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
                 {% endif %}
             </ul>
             
