@@ -143,7 +143,9 @@ def analyze_with_ai():
                 'ai_analysis': ai_analysis,
                 'language': str(get_locale()),
                 'user_id': user.get('id'),
-                'created_at': __import__('datetime').datetime.utcnow()
+                'source': 'challenge',
+                'created_at': __import__('datetime').datetime.now(__import__('datetime').timezone.utc),
+                'updated_at': __import__('datetime').datetime.now(__import__('datetime').timezone.utc)
             }
             insert_result = DB_SEMANA_CIENCIA.insert_one(document)
             saved_id = str(insert_result.inserted_id)

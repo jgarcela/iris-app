@@ -92,6 +92,7 @@ def analysis_analyze():
         return jsonify({'error': 'Error interno en el servidor.'}), 500
 
     # Estructura editable
+    from datetime import datetime, timezone
     document = {
         'model': model,
         'text': text,
@@ -122,7 +123,9 @@ def analysis_analyze():
                 'lenguaje': None
             }
         },
-        'timestamp': datetime.now(timezone.utc)
+        'source': 'regular',
+        'created_at': datetime.now(timezone.utc),
+        'updated_at': datetime.now(timezone.utc)
     }
 
     # Guardar en MongoDB
@@ -133,8 +136,9 @@ def analysis_analyze():
     except Exception as e:
         print(f"Error al guardar en MongoDB: {e}")
 
-    # Convertir timestamp a string
-    document['timestamp'] = document['timestamp'].isoformat()
+    # Convertir timestamps a string
+    document['created_at'] = document['created_at'].isoformat()
+    document['updated_at'] = document['updated_at'].isoformat()
     document['status'] = 'ok'
 
     return jsonify(document), 200
