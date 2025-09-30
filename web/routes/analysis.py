@@ -15,7 +15,7 @@ from docx.enum.text import WD_COLOR_INDEX
 import io
 
 from web.utils.logger import logger
-from web.utils.decorators import login_required
+from web.utils.decorators import login_required, challenge_restricted
 
 from flask import render_template, make_response, current_app, request
 from weasyprint import HTML
@@ -186,6 +186,7 @@ def generate_report_word(doc_id):
 
 @bp.route('/create_analysis', methods=['GET', 'POST'])
 @login_required
+@challenge_restricted
 def create_analysis():
     logger.debug(f"[/HOME] Language: {get_locale()}")
     logger.info("[/HOME] Rendering create analysis template...")

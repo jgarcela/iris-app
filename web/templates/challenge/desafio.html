@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">
+          <i class="fas fa-trophy me-2"></i>
+          {{ _('Desafío IRIS') }}
+        </h4>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">{{ _('¡Bienvenido al Desafío!') }}</h5>
+        <p class="card-text">
+          {{ _('Esta es la página del desafío donde podrás participar en actividades especiales.') }}
+        </p>
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          {{ _('Como usuario con rol de desafío, tienes acceso limitado a ciertas secciones de la aplicación.') }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
