@@ -1,7 +1,8 @@
 # web/routes/challenge.py
 from flask import Blueprint, render_template, request, jsonify, session
 from flask_babel import get_locale, _
-from web.utils.challenge_decorators import challenge_required
+from web.utils.challenge_decorators import challenge_required, get_current_user
+from database.db import DB_SEMANA_CIENCIA
 import json
 import os
 
@@ -131,11 +132,31 @@ def analyze_with_ai():
         session[f'ai_analysis_{text_id}'] = ai_analysis
         session[f'manual_annotations_{text_id}'] = manual_annotations
         session[f'text_data_{text_id}'] = text_data
+
+        # Persistir resultado del análisis en MongoDB (colección iris_semana_ciencia_2025)
+        try:
+            user = get_current_user() or {}
+            document = {
+                'text_id': text_id,
+                'text_title': challenge_text.get('title'),
+                'manual_annotations': manual_annotations,
+                'ai_analysis': ai_analysis,
+                'language': str(get_locale()),
+                'user_id': user.get('id'),
+                'created_at': __import__('datetime').datetime.utcnow()
+            }
+            insert_result = DB_SEMANA_CIENCIA.insert_one(document)
+            saved_id = str(insert_result.inserted_id)
+        except Exception as e:
+            # No bloquear el flujo si falla el guardado; devolver el error para logging
+            saved_id = None
+            print(f"[WARN] Failed to persist challenge analysis: {e}")
         
         return jsonify({
             'success': True,
             'ai_analysis': ai_analysis,
-            'redirect_url': f'/challenge/ai-results/{text_id}'
+            'redirect_url': f'/challenge/ai-results/{text_id}',
+            'saved_id': saved_id
         })
         
     except Exception as e:
