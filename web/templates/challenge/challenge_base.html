@@ -32,7 +32,11 @@
 
 <style>
 .challenge-hero {
-    background: linear-gradient(135deg, #eef2ff 0%, #f8f9ff 100%);
+    /* Gradient base + soft decorative blobs */
+    background:
+        radial-gradient(1200px 400px at -10% -50%, rgba(102, 126, 234, 0.18) 0%, rgba(102, 126, 234, 0) 60%),
+        radial-gradient(800px 300px at 110% -20%, rgba(255, 193, 7, 0.18) 0%, rgba(255, 193, 7, 0) 60%),
+        linear-gradient(135deg, #eef2ff 0%, #f8f9ff 100%);
     border-bottom: 1px solid #e9ecef;
 }
 .challenge-mini-nav .mini-link {
