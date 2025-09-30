@@ -109,6 +109,57 @@ def results():
     return render_template('challenge/challenge_results.html', 
                          language=get_locale())
 
+@bp.route('/analyze-ai', methods=['POST'])
+@challenge_required
+def analyze_with_ai():
+    """Endpoint para análisis con IA"""
+    try:
+        data = request.get_json()
+        text_id = data.get('text_id')
+        manual_annotations = data.get('manual_annotations', [])
+        text_data = data.get('text_data', {})
+        
+        # Obtener el texto del desafío
+        challenge_text = next((text for text in CHALLENGE_TEXTS if text['id'] == text_id), None)
+        if not challenge_text:
+            return jsonify({'success': False, 'error': 'Texto no encontrado'}), 404
+        
+        # Simular análisis con IA (aquí conectarías con tu API real de IA)
+        ai_analysis = simulate_ai_analysis(challenge_text, manual_annotations)
+        
+        # Guardar análisis en sesión para la página de resultados
+        session[f'ai_analysis_{text_id}'] = ai_analysis
+        session[f'manual_annotations_{text_id}'] = manual_annotations
+        session[f'text_data_{text_id}'] = text_data
+        
+        return jsonify({
+            'success': True,
+            'ai_analysis': ai_analysis,
+            'redirect_url': f'/challenge/ai-results/{text_id}'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/ai-results/<int:text_id>')
+@challenge_required
+def ai_results(text_id):
+    """Página de resultados del análisis con IA"""
+    # Obtener datos de la sesión
+    ai_analysis = session.get(f'ai_analysis_{text_id}', {})
+    manual_annotations = session.get(f'manual_annotations_{text_id}', [])
+    text_data = session.get(f'text_data_{text_id}', {})
+    
+    if not ai_analysis:
+        return "Análisis no encontrado", 404
+    
+    return render_template('challenge/challenge_ai_results.html',
+                         text_data=text_data,
+                         ai_analysis=ai_analysis,
+                         manual_annotations=manual_annotations,
+                         analysis_data={'text_id': text_id},
+                         language=get_locale())
+
 @bp.route('/api/compare', methods=['POST'])
 @challenge_required
 def compare_analysis():
@@ -163,4 +214,53 @@ def calculate_comparison_metrics(manual, ai):
     metrics['total_score'] = round(total_score, 2)
     
     return metrics
+
+def simulate_ai_analysis(text_data, manual_annotations):
+    """Simular análisis con IA basado en el texto y anotaciones manuales"""
+    # Esta es una simulación - en producción conectarías con tu API real de IA
+    import random
+    
+    # Generar análisis simulado basado en el contenido del texto
+    ai_analysis = {
+        'contenido_general': {
+            'personas_mencionadas': random.randint(1, 3),
+            'genero_periodista': random.randint(1, 3),
+            'tema': random.randint(1, 5)
+        },
+        'lenguaje': {
+            'lenguaje_sexista': random.randint(1, 2),
+            'androcentrismo': random.randint(1, 2),
+            'asimetria': random.randint(1, 2),
+            'infantilizacion': random.randint(1, 2),
+            'denominacion_sexualizada': random.randint(1, 2),
+            'denominacion_redundante': random.randint(1, 2),
+            'denominacion_dependiente': random.randint(1, 2),
+            'masculino_generico': random.randint(1, 2),
+            'dual_aparente': random.randint(1, 2),
+            'hombre_humanidad': random.randint(1, 2),
+            'cargos_mujeres': random.randint(1, 2),
+            'sexismo_social': random.randint(1, 2),
+            'comparacion_mujeres_hombres': random.randint(1, 2),
+            'criterios_excepcion_noticiabilidad': random.randint(1, 2)
+        },
+        'fuentes': {
+            'nombre_fuente': random.randint(1, 3),
+            'genero_fuente': random.randint(1, 3),
+            'tipo_fuente': random.randint(1, 3)
+        }
+    }
+    
+    # Ajustar algunos valores basándose en las anotaciones manuales para hacer la comparación más realista
+    if manual_annotations:
+        for annotation in manual_annotations:
+            category = annotation.get('category', '')
+            variable = annotation.get('variable', '')
+            value = annotation.get('value', '')
+            
+            if category in ai_analysis and variable in ai_analysis[category]:
+                # A veces coincidir con el análisis manual, a veces no
+                if random.random() > 0.3:  # 70% de probabilidad de coincidir
+                    ai_analysis[category][variable] = int(value)
+    
+    return ai_analysis
 

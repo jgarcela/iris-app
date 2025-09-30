@@ -150,13 +150,9 @@
 
                     <!-- Botones de Acción -->
                     <div class="action-buttons">
-                        <button class="btn btn-success w-100 mb-2" id="analyze-with-ai-btn" disabled>
-                            <i class="fas fa-robot me-2"></i>
-                            {{ _('Analizar con IA') }}
-                        </button>
-                        <button class="btn btn-outline-primary w-100" id="save-analysis-btn" disabled>
-                            <i class="fas fa-save me-2"></i>
-                            {{ _('Guardar Análisis') }}
+                        <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
+                            <i class="fas fa-check me-2"></i>
+                            {{ _('Finalizar y comparar con IA') }}
                         </button>
                     </div>
                 </div>
@@ -241,34 +237,6 @@
     </div>
 </div>
 
-<!-- Modal de Resultados -->
-<div class="modal fade" id="resultsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-chart-line me-2"></i>
-                    {{ _('Resultados del Análisis') }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="results-content">
-                    <!-- Contenido de resultados se carga aquí -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    {{ _('Cerrar') }}
-                </button>
-                <button type="button" class="btn btn-primary" id="save-results-btn">
-                    <i class="fas fa-save me-2"></i>
-                    {{ _('Guardar Resultados') }}
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <style>
 .analysis-panel {
@@ -558,12 +526,7 @@ function setupActionButtons() {
         toggleEditMode();
     });
     
-    // Botón de análisis con IA
-    document.getElementById('analyze-with-ai-btn').addEventListener('click', function() {
-        analyzeWithAI();
-    });
-    
-    // Botón de guardar análisis
+    // Botón finalizar: guarda y compara automáticamente con IA
     document.getElementById('save-analysis-btn').addEventListener('click', function() {
         saveAnalysis();
     });
@@ -692,8 +655,7 @@ function saveAnnotation() {
     updateAnnotationsList();
     hideAnnotationPanel();
     
-    // Habilitar botones
-    document.getElementById('analyze-with-ai-btn').disabled = false;
+    // Habilitar botón
     document.getElementById('save-analysis-btn').disabled = false;
 }
 
@@ -721,131 +683,53 @@ function analyzeWithAI() {
         return;
     }
     
-    // Simular análisis con IA
-    const loadingBtn = document.getElementById('analyze-with-ai-btn');
+    // Mostrar loading
+    const loadingBtn = document.getElementById('save-analysis-btn');
     const originalText = loadingBtn.innerHTML;
     loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Analizando...") }}';
     loadingBtn.disabled = true;
     
-    setTimeout(() => {
-        // Simular respuesta de IA
-        const aiAnalysis = generateMockAIAnalysis();
-        showResults(aiAnalysis);
-        
+    // Enviar datos al backend para análisis con IA
+    const analysisData = {
+        text_id: currentText.id,
+        manual_annotations: annotations,
+        text_data: currentText
+    };
+    
+    fetch('/challenge/analyze-ai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(analysisData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirigir a la página de resultados
+            window.location.href = data.redirect_url;
+        } else {
+            throw new Error(data.error || 'Error desconocido');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{ _("Error al analizar con IA. Inténtalo de nuevo.") }}');
         loadingBtn.innerHTML = originalText;
         loadingBtn.disabled = false;
-        
-        // Actualizar progreso
-        document.getElementById('step-ai').classList.add('completed');
-        document.getElementById('step-results').classList.add('active');
-    }, 2000);
+    });
 }
 
-function generateMockAIAnalysis() {
-    // Generar análisis simulado de IA
-    return {
-        contenido_general: {
-            personas_mencionadas: ['María González', 'Carlos Ruiz'],
-            genero_periodista: 2,
-            tema: 1
-        },
-        lenguaje: {
-            lenguaje_sexista: 1,
-            androcentrismo: 1,
-            asimetria: 1
-        },
-        fuentes: {
-            fuentes: [
-                { nombre_fuente: 'María González', genero_fuente: 2, tipo_fuente: 1 },
-                { nombre_fuente: 'Carlos Ruiz', genero_fuente: 1, tipo_fuente: 1 }
-            ]
-        }
-    };
-}
-
-function showResults(aiAnalysis) {
-    const modal = new bootstrap.Modal(document.getElementById('resultsModal'));
-    const content = document.getElementById('results-content');
-    
-    // Calcular métricas de comparación
-    const metrics = calculateComparisonMetrics(annotations, aiAnalysis);
-    
-    content.innerHTML = `
-        <div class="row">
-            <div class="col-md-6">
-                <h6>{{ _("Tu Análisis Manual") }}</h6>
-                <div class="analysis-summary">
-                    <p><strong>{{ _("Anotaciones realizadas:") }}</strong> ${annotations.length}</p>
-                    <div class="annotations-preview">
-                        ${annotations.map(ann => `
-                            <div class="annotation-preview">
-                                <span class="text-primary">"${ann.text}"</span>
-                                <span class="text-muted">→ ${ann.variable} = ${ann.value}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <h6>{{ _("Análisis de IA") }}</h6>
-                <div class="ai-summary">
-                    <p><strong>{{ _("Variables detectadas:") }}</strong> ${Object.keys(aiAnalysis).length}</p>
-                    <div class="ai-preview">
-                        <div class="ai-category">
-                            <strong>Contenido General:</strong>
-                            <ul>
-                                <li>Personas mencionadas: ${aiAnalysis.contenido_general.personas_mencionadas.join(', ')}</li>
-                                <li>Género periodista: ${aiAnalysis.contenido_general.genero_periodista}</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row mt-4">
-            <div class="col-12">
-                <h6>{{ _("Métricas de Comparación") }}</h6>
-                <div class="metrics-grid">
-                    <div class="metric-item">
-                        <div class="metric-label">{{ _("Precisión") }}</div>
-                        <div class="metric-value">${metrics.precision}%</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">{{ _("Cobertura") }}</div>
-                        <div class="metric-value">${metrics.recall}%</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">{{ _("Puntuación Total") }}</div>
-                        <div class="metric-value score-highlight">${metrics.totalScore}%</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    modal.show();
-}
-
-function calculateComparisonMetrics(manualAnnotations, aiAnalysis) {
-    // Lógica simplificada de comparación
-    const totalVariables = Object.keys(aiAnalysis).length * 3; // Estimación
-    const detectedVariables = manualAnnotations.length;
-    
-    const precision = Math.min(100, (detectedVariables / totalVariables) * 100);
-    const recall = Math.min(100, (detectedVariables / 5) * 100); // Estimación
-    const totalScore = Math.round((precision + recall) / 2);
-    
-    return {
-        precision: Math.round(precision),
-        recall: Math.round(recall),
-        totalScore: totalScore
-    };
-}
 
 function saveAnalysis() {
-    // Implementar guardado del análisis
+    if (annotations.length === 0) {
+        alert('{{ _("Por favor realiza al menos una anotación antes de finalizar") }}');
+        return;
+    }
+    // Simular guardado del análisis
     alert('{{ _("Análisis guardado correctamente") }}');
+    // Ejecutar automáticamente el análisis con IA y mostrar comparación
+    analyzeWithAI();
 }
 
 function updateProgressSteps() {
