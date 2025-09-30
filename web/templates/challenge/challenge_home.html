@@ -4,26 +4,6 @@
 
 {% block challenge_content %}
 <div class="container-fluid py-4">
-    <!-- Header del Desafío -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <div class="challenge-header">
-                <h1 class="display-4 fw-bold text-primary mb-3">
-                    <i class="fas fa-trophy me-3"></i>
-                    {{ _('Desafío de Análisis IRIS') }}
-                </h1>
-                <p class="lead text-muted mb-4">
-                    {{ _('¿Puedes analizar sesgos de género mejor que la Inteligencia Artificial?') }}
-                </p>
-                <div class="challenge-badge">
-                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
-                        <i class="fas fa-calendar-alt me-2"></i>
-                        {{ _('Semana de la Ciencia 2025') }}
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Instrucciones -->
     <div class="row mb-5">
@@ -151,22 +131,6 @@
 </div>
 
 <style>
-.challenge-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 3rem 2rem;
-    border-radius: 20px;
-    margin-bottom: 2rem;
-}
-
-.challenge-header h1 {
-    color: white !important;
-}
-
-.challenge-badge {
-    margin-top: 1rem;
-}
-
 .step-icon {
     padding: 1rem;
     border-radius: 10px;

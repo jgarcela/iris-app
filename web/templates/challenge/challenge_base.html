@@ -3,220 +3,62 @@
 {% block title %}{{ _('Desafío IRIS') }} - {{ self.title() }}{% endblock %}
 
 {% block content %}
-<!-- Navbar específico para el desafío -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('challenge.challenge_home') }}">
-            <img
-                src="{{ url_for('static', filename='imgs/logo_iris.png') }}"
-                alt="IRIS Logo"
-                width="32"
-                height="32"
-            />
-            <span class="ms-2 fw-bold">IRIS</span>
-            <span class="badge bg-warning text-dark ms-2">{{ _('Desafío') }}</span>
-        </a>
-        
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#challengeNavbar"
-            aria-controls="challengeNavbar"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="challengeNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}" 
-                       href="{{ url_for('challenge.challenge_home') }}">
-                        <i class="fas fa-home me-1"></i> {{ _('Inicio') }}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'challenge.results' %}active{% endif %}" 
-                       href="{{ url_for('challenge.results') }}">
-                        <i class="fas fa-trophy me-1"></i> {{ _('Resultados') }}
-                    </a>
-                </li>
-                       {% if current_user and 'admin' in current_user.roles %}
-                {% endif %}
-            </ul>
-            
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="challengeUserDropdown" 
-                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user me-1"></i>
-                        {{ session.get('user_name', 'Usuario') }}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('challenge.results') }}">
-                                <i class="fas fa-chart-line me-2"></i>
-                                {{ _('Mis Resultados') }}
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                <i class="fas fa-sign-out-alt me-2"></i>
-                                {{ _('Cerrar Sesión') }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+<!-- Encabezado minimalista del desafío -->
+<section class="challenge-hero">
+    <div class="container text-center py-4">
+        <h1 class="fw-bold mb-2"><i class="fas fa-trophy me-2"></i>{{ _('Desafío de Análisis IRIS') }}</h1>
+        <p class="text-muted mb-3">{{ _('¿Puedes analizar sesgos de género mejor que la Inteligencia Artificial?') }}</p>
+        <div>
+            <span class="badge bg-warning text-dark px-3 py-2">
+                <i class="fas fa-calendar-alt me-2"></i>{{ _('Semana de la Ciencia 2025') }}
+            </span>
+        </div>
+        <div class="challenge-mini-nav mt-4">
+            <a class="mini-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}" href="{{ url_for('challenge.challenge_home') }}">{{ _('Inicio') }}</a>
+            <span class="mx-2 text-secondary">•</span>
+            <a class="mini-link {% if request.endpoint == 'challenge.results' %}active{% endif %}" href="{{ url_for('challenge.results') }}">{{ _('Resultados') }}</a>
         </div>
     </div>
-</nav>
+</section>
 
 <!-- Contenido principal -->
 <main>
     {% block challenge_content %}{% endblock %}
+    
+    <footer class="challenge-footer text-center text-muted small py-4">
+        <div class="container">IRIS · {{ _('Desafío temporal para participantes autorizados') }}</div>
+    </footer>
 </main>
 
-<!-- Footer específico del desafío -->
-<footer class="bg-light py-4 mt-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="fw-bold">{{ _('Desafío IRIS - Semana de la Ciencia 2025') }}</h6>
-                <p class="text-muted small mb-0">
-                    {{ _('Análisis de sesgos de género en medios de comunicación') }}
-                </p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <p class="text-muted small mb-0">
-                    <i class="fas fa-calendar me-1"></i>
-                    {{ _('Evento temporal') }}
-                </p>
-                <p class="text-muted small mb-0">
-                    <i class="fas fa-users me-1"></i>
-                    {{ _('Solo participantes autorizados') }}
-                </p>
-            </div>
-        </div>
-    </div>
-</footer>
-
 <style>
-/* Estilos específicos para el desafío */
-.navbar-brand .badge {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.5rem;
+.challenge-hero {
+    background: linear-gradient(135deg, #eef2ff 0%, #f8f9ff 100%);
+    border-bottom: 1px solid #e9ecef;
 }
-
-.challenge-navbar {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.navbar-nav .nav-link {
-    color: #495057;
+.challenge-mini-nav .mini-link {
+    text-decoration: none;
+    color: #6c757d;
     font-weight: 500;
-    transition: color 0.3s ease;
 }
-
-.navbar-nav .nav-link:hover,
-.navbar-nav .nav-link.active {
-    color: #007bff;
+.challenge-mini-nav .mini-link.active,
+.challenge-mini-nav .mini-link:hover {
+    color: #0d6efd;
 }
-
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border-radius: 8px;
-}
-
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    transition: background-color 0.3s ease;
-}
-
-.dropdown-item:hover {
-    background-color: #f8f9fa;
-}
-
-footer {
+.challenge-footer {
     border-top: 1px solid #e9ecef;
 }
-
-/* Indicador de rol temporal */
-.role-indicator {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: #ffc107;
-    color: #212529;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    z-index: 1000;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-    .navbar-brand .badge {
-        display: none;
-    }
-    
-    .role-indicator {
-        position: static;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
+    .challenge-mini-nav .mx-2 { display: none; }
 }
 </style>
 
-<!-- Indicador de rol temporal -->
-<div class="role-indicator" id="role-indicator">
-    <i class="fas fa-clock me-1"></i>
-    <span id="role-text">{{ _('Rol Temporal - Desafío') }}</span>
-</div>
-
 <script>
-// Funcionalidad específica del desafío
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si el usuario tiene rol de desafío
     const currentUser = {{ current_user | tojson | safe }};
     const userRoles = currentUser ? (currentUser.roles || []) : [];
-    
     if (!userRoles.includes('admin') && !userRoles.includes('challenge')) {
-        // Redirigir si no tiene permisos (admin o challenge)
         window.location.href = "{{ url_for('home') }}";
     }
-    
-    // Actualizar indicador de rol según el tipo de usuario
-    const roleIndicator = document.getElementById('role-indicator');
-    const roleText = document.getElementById('role-text');
-    
-    if (userRoles.includes('admin')) {
-        roleIndicator.innerHTML = '<i class="fas fa-crown me-1"></i><span>Admin - Acceso Completo</span>';
-        roleIndicator.style.background = '#dc3545';
-        roleIndicator.style.color = 'white';
-    } else if (userRoles.includes('challenge')) {
-        roleIndicator.innerHTML = '<i class="fas fa-clock me-1"></i><span>Rol Temporal - Desafío</span>';
-        roleIndicator.style.background = '#ffc107';
-        roleIndicator.style.color = '#212529';
-    }
-    
-    // Configurar tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
 });
 </script>
 {% endblock %}
