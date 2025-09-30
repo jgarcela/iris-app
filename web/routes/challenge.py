@@ -127,6 +127,11 @@ def analyze_with_ai():
         
         # Simular análisis con IA (aquí conectarías con tu API real de IA)
         ai_analysis = simulate_ai_analysis(challenge_text, manual_annotations)
+
+        # Calcular puntuaciones y métricas de comparación
+        manual_dict = _manual_annotations_to_dict(manual_annotations)
+        metrics = calculate_comparison_metrics(manual_dict, ai_analysis)
+        total_score = metrics.get('total_score')
         
         # Guardar análisis en sesión para la página de resultados
         session[f'ai_analysis_{text_id}'] = ai_analysis
@@ -141,6 +146,8 @@ def analyze_with_ai():
                 'text_title': challenge_text.get('title'),
                 'manual_annotations': manual_annotations,
                 'ai_analysis': ai_analysis,
+                'metrics': metrics,
+                'total_score': total_score,
                 'language': str(get_locale()),
                 'user_id': user.get('id'),
                 'source': 'challenge',
@@ -158,7 +165,8 @@ def analyze_with_ai():
             'success': True,
             'ai_analysis': ai_analysis,
             'redirect_url': f'/challenge/ai-results/{text_id}',
-            'saved_id': saved_id
+            'saved_id': saved_id,
+            'total_score': total_score
         })
         
     except Exception as e:
@@ -237,6 +245,23 @@ def calculate_comparison_metrics(manual, ai):
     metrics['total_score'] = round(total_score, 2)
     
     return metrics
+
+def _manual_annotations_to_dict(manual_annotations):
+    """Convertir lista de anotaciones manuales a dict por categorías/variables"""
+    result = {
+        'contenido_general': {},
+        'lenguaje': {},
+        'fuentes': {}
+    }
+    if not isinstance(manual_annotations, list):
+        return result
+    for ann in manual_annotations:
+        category = ann.get('category')
+        variable = ann.get('variable')
+        value = ann.get('value')
+        if category in result and variable:
+            result[category][variable] = value
+    return result
 
 def simulate_ai_analysis(text_data, manual_annotations):
     """Simular análisis con IA basado en el texto y anotaciones manuales"""
