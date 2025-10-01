@@ -86,32 +86,34 @@
               </a>
             </li>
             {% if current_user %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'analysis.create_analysis' %}active{% endif %}"
-                  href="{{ url_for('analysis.create_analysis') }}">
-                  <i class="fas fa-search-plus me-1"></i> {{ _('Análisis') }}
-                </a>
-              </li>  
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'table.table_iris' %}active{% endif %}"
-                  href="{{ url_for('table.table_iris') }}">
-                  <i class="fas fa-history me-1"></i> {{ _('Histórico') }}
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_iris' %}active{% endif %}"
-                  href="{{ url_for('dashboard.dashboard_iris') }}">
-                  <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
-                </a>
-              </li>
+              {% if 'challenge' not in current_user.roles %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'analysis.create_analysis' %}active{% endif %}"
+                    href="{{ url_for('analysis.create_analysis') }}">
+                    <i class="fas fa-search-plus me-1"></i> {{ _('Análisis') }}
+                  </a>
+                </li>  
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'table.table_iris' %}active{% endif %}"
+                    href="{{ url_for('table.table_iris') }}">
+                    <i class="fas fa-history me-1"></i> {{ _('Histórico') }}
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_iris' %}active{% endif %}"
+                    href="{{ url_for('dashboard.dashboard_iris') }}">
+                    <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
+                  </a>
+                </li>            
+              {% endif %}
               {% if 'admin' in current_user.roles or 'challenge' in current_user.roles %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
-                  href="{{ url_for('challenge.challenge_home') }}">
-                  <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
-                </a>
-              </li>  
-              {% endif %}          
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
+                    href="{{ url_for('challenge.challenge_home') }}">
+                    <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
+                  </a>
+                </li>
+              {% endif %}
               {% if 'admin' in current_user.roles %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}"
