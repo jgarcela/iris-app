@@ -24,7 +24,10 @@ def get_challenge_texts():
         
         texts = list(texts_cursor)
         
-  
+        # Convert ObjectId to string for JSON serialization
+        for text in texts:
+            if '_id' in text:
+                text['_id'] = str(text['_id'])
         
         # If no texts found in database, return empty list
         if not texts:
