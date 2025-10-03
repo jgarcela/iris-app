@@ -114,7 +114,7 @@
                                     <h6 class="mb-2">
                                         <i class="fas fa-info-circle me-2"></i>
                                         <span id="instructions-title">{{ _('¿Qué debes anotar?') }}</span>
-                                    </h6>
+                        </h6>
                                     <div id="no-annotation-message" class="text-center py-3" style="display: none;">
                                         <div class="alert alert-success">
                                             <i class="fas fa-eye fa-2x mb-3 text-success"></i>
@@ -125,8 +125,8 @@
                                                 <li><i class="fas fa-check text-success me-2"></i> {{ _('Lenguaje sexista obvio') }}</li>
                                                 <li><i class="fas fa-check text-success me-2"></i> {{ _('Cualquier sesgo que notes en el texto') }}</li>
                                             </ul>
-                                        </div>
-                                    </div>
+                                </div>
+                            </div>
                                     <div id="variables-to-annotate">
                                         <div class="row g-2">
                                             <div class="col-12">
@@ -139,8 +139,8 @@
                                                         <li><i class="fas fa-check text-success me-1"></i> {{ _('Género del periodista') }}</li>
                                                         <li><i class="fas fa-check text-success me-1"></i> {{ _('Personas mencionadas') }}</li>
                                                     </ul>
-                                                </div>
-                                            </div>
+                                </div>
+                            </div>
                                             <div class="col-12">
                                                 <div class="variable-category-info">
                                                     <h6 class="text-warning small">
@@ -1022,14 +1022,14 @@ function toggleEditMode() {
     
     if (isEditMode) {
         btn.innerHTML = '<i class="fas fa-check me-1"></i> {{ _("Modo Edición Activo") }}';
-        btn.classList.remove('btn-outline-primary');
-        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-primary', 'btn-primary');
+        btn.classList.add('btn-warning');
         textArea.style.cursor = 'text';
         textArea.classList.add('edit-mode');
     } else {
         btn.innerHTML = '<i class="fas fa-pen me-1"></i> {{ _("Modo Edición") }}';
-        btn.classList.remove('btn-success');
-        btn.classList.add('btn-outline-primary');
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-primary');
         textArea.style.cursor = 'default';
         textArea.classList.remove('edit-mode');
         hideAnnotationPanel();
@@ -1048,6 +1048,9 @@ function showAnnotationPanel(selectedText, range) {
         text: selectedText,
         range: range
     };
+    
+    // Initialize the annotation form with current text difficulty
+    initializeAnnotationFormForTextDifficulty();
 }
 
 function hideAnnotationPanel() {
@@ -1056,13 +1059,11 @@ function hideAnnotationPanel() {
     window.currentSelection = null;
 }
 
-function updateVariableOptions(category) {
-    const variableSelect = document.getElementById('annotation-variable');
-    variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+function initializeAnnotationFormForTextDifficulty() {
+    // Get current difficulty level from text data
+    let textDifficulty = currentText?.difficulty || 'facil';
     
-    // Get current difficulty level from text data or fallback to user difficulty
-    let textDifficulty = currentText?.difficulty || currentText?.nivel_dificultad || 'facil';
-    let userDifficulty = localStorage.getItem('userDifficulty') || 'facil';
+    console.log('Initializing annotation form for text difficulty:', textDifficulty);
     
     // Map possible difficulty values to our internal keys
     const difficultyMapping = {
@@ -1079,85 +1080,152 @@ function updateVariableOptions(category) {
         'advanced': 'dificil'
     };
     
-    // Normalize the difficulty values
-    textDifficulty = difficultyMapping[textDifficulty] || 'facil';
-    userDifficulty = difficultyMapping[userDifficulty] || 'facil';
+    // Normalize the difficulty value
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    
+    // Update category options based on text difficulty
+    updateCategoryOptionsForAnnotationForm(textDifficulty);
+    
+    // Clear and reset the form
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    
+    if (categorySelect) categorySelect.value = '';
+    if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    // If there's a default category available, select it and load its variables
+    if (categorySelect.options.length > 1) {
+        const firstCategory = categorySelect.options[1].value;
+        categorySelect.value = firstCategory;
+        updateVariableOptions(firstCategory);
+    }
+}
+
+function updateCategoryOptionsForAnnotationForm(difficulty) {
+    const categorySelect = document.getElementById('annotation-category');
+    if (!categorySelect) return;
+    
+    // Clear existing options
+    categorySelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    
+    // Show categories based on available variables for this difficulty level
+    const availableCategories = [];
+    
+    if (variables.contenido_general) {
+        availableCategories.push({ value: 'contenido_general', text: 'Contenido General' });
+    }
+    
+    if (variables.lenguaje) {
+        availableCategories.push({ value: 'lenguaje', text: 'Lenguaje' });
+    }
+    
+    if (variables.fuentes) {
+        availableCategories.push({ value: 'fuentes', text: 'Fuentes' });
+    }
+    
+    availableCategories.forEach(category => {
+        const optionElement = document.createElement('option');
+        optionElement.value = category.value;
+        optionElement.textContent = category.text;
+        categorySelect.appendChild(optionElement);
+    });
+}
+
+function updateVariableOptions(category) {
+    const variableSelect = document.getElementById('annotation-variable');
+    variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    // Get current difficulty level from text data
+    let textDifficulty = currentText?.difficulty || 'facil';
+    
+    console.log('updateVariableOptions - Raw difficulty from database:', textDifficulty);
+    console.log('updateVariableOptions - Category:', category);
+    
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty value
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    
+    console.log('updateVariableOptions - Normalized difficulty:', textDifficulty);
     
     // Use text difficulty as primary
     const variables = DIFFICULTY_VARIABLES[textDifficulty];
     
-    // For "Fácil" level, show general bias options regardless of category
-    if (textDifficulty === 'facil') {
-        const generalBiasOptions = [
-            { value: 'sesgo_genero_general', text: 'Sesgo de género general' },
-            { value: 'lenguaje_sexista_general', text: 'Lenguaje sexista general' },
-            { value: 'androcentrismo_general', text: 'Androcentrismo general' },
-            { value: 'otro_sesgo', text: 'Otro tipo de sesgo' }
-        ];
-        
-        generalBiasOptions.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option.value;
-            optionElement.textContent = option.text;
-            variableSelect.appendChild(optionElement);
-        });
-        return;
-    }
+    console.log('updateVariableOptions - Variables for difficulty:', variables);
     
-    // For other levels, show specific variables based on category
+    // Show variables based on selected category and difficulty level
     let availableVariables = [];
     
     if (category === 'contenido_general' && variables.contenido_general) {
         availableVariables = variables.contenido_general;
+        console.log('updateVariableOptions - Using contenido_general variables:', availableVariables);
     } else if (category === 'lenguaje' && variables.lenguaje) {
         availableVariables = variables.lenguaje;
+        console.log('updateVariableOptions - Using lenguaje variables:', availableVariables);
     } else if (category === 'fuentes' && variables.fuentes) {
         availableVariables = variables.fuentes;
+        console.log('updateVariableOptions - Using fuentes variables:', availableVariables);
     }
     
+    console.log('updateVariableOptions - Final available variables:', availableVariables);
+    
     availableVariables.forEach(variable => {
-            const option = document.createElement('option');
-            option.value = variable;
+        const option = document.createElement('option');
+        option.value = variable;
         option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            variableSelect.appendChild(option);
-        });
+        variableSelect.appendChild(option);
+    });
 }
 
 function updateValueOptions(category, variable) {
     const valueSelect = document.getElementById('annotation-value');
     valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
     
-    // Valores de ejemplo (en una implementación real, esto vendría del config.ini)
-    const values = {
-        'personas_mencionadas': ['1', '2', '3'],
-        'genero_periodista': ['1', '2', '3'],
-        'tema': ['1', '2', '3', '4', '5'],
-        'lenguaje_sexista': ['1', '2'],
-        'androcentrismo': ['1', '2'],
-        'asimetria': ['1', '2'],
-        'infantilizacion': ['1', '2'],
-        'denominacion_sexualizada': ['1', '2'],
-        'denominacion_redundante': ['1', '2'],
-        'denominacion_dependiente': ['1', '2'],
-        'masculino_generico': ['1', '2'],
-        'dual_aparente': ['1', '2'],
-        'hombre_humanidad': ['1', '2'],
-        'cargos_mujeres': ['1', '2'],
-        'sexismo_social': ['1', '2'],
-        'comparacion_mujeres_hombres': ['1', '2'],
-        'criterios_excepcion_noticiabilidad': ['1', '2'],
-        'nombre_fuente': ['1', '2', '3'],
-        'genero_fuente': ['1', '2', '3'],
-        'tipo_fuente': ['1', '2', '3']
-    };
+    // Solo las variables de género necesitan valores específicos
+    const genderVariables = [
+        'genero_nombre_propio_titular',
+        'genero_personas_mencionadas', 
+        'genero_fuente'
+    ];
     
-    if (values[variable]) {
-        values[variable].forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = `Valor ${value}`;
-            valueSelect.appendChild(option);
+    if (genderVariables.includes(variable)) {
+        // Valores para variables de género
+        const genderValues = [
+            { value: '1', text: 'Hombre' },
+            { value: '2', text: 'Mujer' },
+            { value: '3', text: 'No especificado' }
+        ];
+        
+        genderValues.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            valueSelect.appendChild(optionElement);
         });
+    } else {
+        // Para otras variables, solo pueden ser "Presente" (si no, no las marcarías)
+        const optionElement = document.createElement('option');
+        optionElement.value = '1';
+        optionElement.textContent = 'Presente';
+        optionElement.selected = true; // Seleccionar por defecto
+        valueSelect.appendChild(optionElement);
     }
 }
 
