@@ -33,6 +33,81 @@
         </div>
     </div>
 
+    <!-- Difficulty Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" id="difficulty-info-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="difficulty-badge me-3" id="difficulty-badge">
+                            <span class="badge fs-6 px-3 py-2" id="difficulty-level">Fácil</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-1" id="difficulty-title">{{ _('Análisis de Nivel Fácil') }}</h5>
+                            <p class="text-muted mb-0" id="difficulty-description">{{ _('Sesgos evidentes y obvios') }}</p>
+                        </div>
+                    </div>
+                    <div class="difficulty-instructions" id="difficulty-instructions">
+                        <h6 class="mb-2">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span id="instructions-title">{{ _('¿Qué debes anotar?') }}</span>
+                        </h6>
+                        <div id="no-annotation-message" class="text-center py-4" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="fas fa-eye fa-2x mb-3 text-success"></i>
+                                <h5>{{ _('Análisis General de Sesgos') }}</h5>
+                                <p class="mb-2">{{ _('En este nivel debes identificar y anotar:') }}</p>
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i> {{ _('Sesgos de género evidentes') }}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {{ _('Lenguaje sexista obvio') }}</li>
+                                    <li><i class="fas fa-check text-success me-2"></i> {{ _('Cualquier sesgo que notes en el texto') }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row" id="variables-to-annotate">
+                            <div class="col-md-4">
+                                <div class="variable-category-info">
+                                    <h6 class="text-primary">
+                                        <i class="fas fa-file-text me-1"></i>
+                                        {{ _('Contenido General') }}
+                                    </h6>
+                                    <ul class="list-unstyled small" id="contenido-variables">
+                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género del periodista') }}</li>
+                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Personas mencionadas') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="variable-category-info">
+                                    <h6 class="text-warning">
+                                        <i class="fas fa-language me-1"></i>
+                                        {{ _('Lenguaje') }}
+                                    </h6>
+                                    <ul class="list-unstyled small" id="lenguaje-variables">
+                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Lenguaje sexista') }}</li>
+                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Androcentrismo') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="variable-category-info">
+                                    <h6 class="text-info">
+                                        <i class="fas fa-quote-left me-1"></i>
+                                        {{ _('Fuentes') }}
+                                    </h6>
+                                    <ul class="list-unstyled small" id="fuentes-variables">
+                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género de fuentes') }}</li>
+                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Tipo de fuentes') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Progreso del Análisis -->
     <div class="row mb-4">
         <div class="col-12">
@@ -92,10 +167,10 @@
                             </div>
                             <button class="btn btn-primary" id="edit-mode-btn">
                                 <i class="fas fa-pen me-2"></i>
-                                {{ _('Modo Edición') }}
-                            </button>
-                        </div>
+                            {{ _('Modo Edición') }}
+                        </button>
                     </div>
+                </div>
                     <!-- Variables Cargadas -->
                     <div class="variables-section mb-4">
                         <h6 class="section-title">
@@ -298,6 +373,69 @@
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
+/* Difficulty Information Styles */
+#difficulty-info-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #007bff;
+}
+
+.difficulty-badge .badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.difficulty-badge .badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.difficulty-badge .badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+    color: #212529 !important;
+}
+
+.difficulty-badge .badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+.difficulty-instructions {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.variable-category-info {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    height: 100%;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.variable-category-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.variable-category-info h6 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.variable-category-info ul li {
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.variable-category-info ul li i {
+    width: 12px;
+}
+
 .section-title {
     color: #6c757d;
     font-size: 0.9rem;
@@ -491,11 +629,364 @@
 // Datos del texto actual
 const currentText = {{ text_data | tojson | safe }};
 let annotations = [];
+
+// Difficulty levels and their corresponding variables
+const DIFFICULTY_VARIABLES = {
+    'facil': {
+        'contenido_general': null,
+        'lenguaje': null,
+        'fuentes': null
+    },
+    'medio': {
+        'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas'],
+        'lenguaje': ['androcentrismo', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
+        'fuentes': null
+    },
+    'dificil': {
+        'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas'],
+        'lenguaje': ['androcentrismo', 'asimetria', 'cargos_mujeres', 'comparacion_mujeres_hombres', 'denominacion_dependiente', 'denominacion_redundante', 'denominacion_sexualizada', 'dual_aparente', 'excepcion_noticiabilidad', 'hombre_humanidad', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
+        'fuentes': ['declaracion_fuente', 'genero_fuente', 'nombre_fuente']
+    }
+};
+
+const DIFFICULTY_INFO = {
+    'facil': {
+        title: 'Análisis de Nivel Fácil',
+        description: 'Sesgos evidentes y obvios',
+        badgeClass: 'bg-success',
+        badgeText: 'Fácil'
+    },
+    'medio': {
+        title: 'Análisis de Nivel Intermedio',
+        description: 'Sesgos moderados y sutiles',
+        badgeClass: 'bg-warning',
+        badgeText: 'Intermedio'
+    },
+    'dificil': {
+        title: 'Análisis de Nivel Avanzado',
+        description: 'Sesgos complejos y detallados',
+        badgeClass: 'bg-danger',
+        badgeText: 'Avanzado'
+    }
+};
+
+const VARIABLE_DESCRIPTIONS = {
+    'genero_nombre_propio_titular': 'Género del periodista',
+    'genero_personas_mencionadas': 'Género de personas mencionadas',
+    'nombre_propio_titular': 'Nombre del periodista',
+    'personas_mencionadas': 'Personas mencionadas',
+    'androcentrismo': 'Androcentrismo',
+    'infantilizacion': 'Infantilización',
+    'lenguaje_sexista': 'Lenguaje sexista',
+    'masculino_generico': 'Masculino genérico',
+    'sexismo_social': 'Sexismo social',
+    'asimetria': 'Asimetría',
+    'cargos_mujeres': 'Cargos de mujeres',
+    'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+    'denominacion_dependiente': 'Denominación dependiente',
+    'denominacion_redundante': 'Denominación redundante',
+    'denominacion_sexualizada': 'Denominación sexualizada',
+    'dual_aparente': 'Dual aparente',
+    'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+    'hombre_humanidad': 'Hombre como humanidad',
+    'declaracion_fuente': 'Declaración de fuente',
+    'genero_fuente': 'Género de fuente',
+    'nombre_fuente': 'Nombre de fuente'
+};
 let isEditMode = false;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Log the current text data to see what fields are available
+    console.log('Current text data:', currentText);
+    console.log('Available fields:', Object.keys(currentText || {}));
+    
     initializeChallengeAnalysis();
+    updateDifficultyInfo();
 });
+
+function updateDifficultyInfo() {
+    // Get difficulty from text data
+    let textDifficulty = currentText?.difficulty;
+    
+    console.log('Raw difficulty from database:', textDifficulty);
+    console.log('Current text title:', currentText?.title);
+    
+    // If no difficulty in text data, determine based on text title or content
+    if (!textDifficulty) {
+        // Check if this is the "Debate sobre paridad" text (which should be medium)
+        if (currentText?.title && currentText.title.includes('paridad')) {
+            textDifficulty = 'medio';
+        } else {
+            // Default to user difficulty
+            textDifficulty = localStorage.getItem('userDifficulty') || 'facil';
+        }
+    }
+    
+    let userDifficulty = localStorage.getItem('userDifficulty') || 'facil';
+    
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty values
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    userDifficulty = difficultyMapping[userDifficulty] || 'facil';
+    
+    // Use text difficulty as primary
+    let displayDifficulty = textDifficulty;
+    
+    console.log('Text difficulty:', textDifficulty);
+    console.log('User difficulty:', userDifficulty);
+    console.log('Display difficulty:', displayDifficulty);
+    
+    // Update difficulty badge and title
+    const difficultyInfo = DIFFICULTY_INFO[displayDifficulty];
+    
+    if (!difficultyInfo) {
+        console.error('Invalid difficulty level:', displayDifficulty);
+        displayDifficulty = 'facil'; // fallback
+        const fallbackInfo = DIFFICULTY_INFO[displayDifficulty];
+        updateDifficultyUI(fallbackInfo);
+        updateVariablesToAnnotate(displayDifficulty);
+        return;
+    }
+    
+    updateDifficultyUI(difficultyInfo);
+    updateVariablesToAnnotate(displayDifficulty);
+}
+
+function updateDifficultyUI(difficultyInfo) {
+    const badgeElement = document.getElementById('difficulty-level');
+    const titleElement = document.getElementById('difficulty-title');
+    const descriptionElement = document.getElementById('difficulty-description');
+    
+    if (badgeElement) {
+        badgeElement.textContent = difficultyInfo.badgeText;
+        badgeElement.className = `badge fs-6 px-3 py-2 ${difficultyInfo.badgeClass}`;
+    }
+    
+    if (titleElement) {
+        titleElement.textContent = difficultyInfo.title;
+    }
+    
+    if (descriptionElement) {
+        descriptionElement.textContent = difficultyInfo.description;
+    }
+}
+
+function updateVariablesToAnnotate(difficulty) {
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    const noAnnotationMessage = document.getElementById('no-annotation-message');
+    const variablesContainer = document.getElementById('variables-to-annotate');
+    const instructionsTitle = document.getElementById('instructions-title');
+    
+    // Check if this is the "Fácil" level (general bias annotation)
+    if (difficulty === 'facil' && !variables.contenido_general && !variables.lenguaje && !variables.fuentes) {
+        // Show general bias annotation message and hide specific variables
+        if (noAnnotationMessage) noAnnotationMessage.style.display = 'block';
+        if (variablesContainer) variablesContainer.style.display = 'none';
+        if (instructionsTitle) instructionsTitle.textContent = '{{ _("¿Qué debes anotar?") }}';
+        
+        // Update available variables for annotation form
+        updateAvailableVariablesForDifficulty(difficulty);
+        return;
+    }
+    
+    // Hide "no annotation" message and show variables
+    if (noAnnotationMessage) noAnnotationMessage.style.display = 'none';
+    if (variablesContainer) variablesContainer.style.display = 'block';
+    if (instructionsTitle) instructionsTitle.textContent = '{{ _("¿Qué debes anotar?") }}';
+    
+    // Update contenido general variables
+    const contenidoList = document.getElementById('contenido-variables');
+    if (contenidoList) {
+        if (variables.contenido_general) {
+            contenidoList.innerHTML = variables.contenido_general.map(variable => 
+                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+            ).join('');
+        } else {
+            contenidoList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
+        }
+    }
+    
+    // Update lenguaje variables
+    const lenguajeList = document.getElementById('lenguaje-variables');
+    if (lenguajeList) {
+        if (variables.lenguaje) {
+            lenguajeList.innerHTML = variables.lenguaje.map(variable => 
+                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+            ).join('');
+        } else {
+            lenguajeList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
+        }
+    }
+    
+    // Update fuentes variables
+    const fuentesList = document.getElementById('fuentes-variables');
+    if (fuentesList) {
+        if (variables.fuentes) {
+            fuentesList.innerHTML = variables.fuentes.map(variable => 
+                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+            ).join('');
+        } else {
+            fuentesList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
+        }
+    }
+    
+    // Update available variables for annotation form
+    updateAvailableVariablesForDifficulty(difficulty);
+}
+
+function updateAvailableVariablesForDifficulty(difficulty) {
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty value
+    difficulty = difficultyMapping[difficulty] || 'facil';
+    
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    
+    if (!categorySelect || !variableSelect) return;
+    
+    // Clear existing options
+    variableSelect.innerHTML = '<option value="">{{ _("Selecciona una variable") }}</option>';
+    
+    // For "Fácil" level, add general bias categories
+    if (difficulty === 'facil') {
+        // Add general bias options
+        const generalBiasOptions = [
+            { value: 'sesgo_genero_general', text: 'Sesgo de género general' },
+            { value: 'lenguaje_sexista_general', text: 'Lenguaje sexista general' },
+            { value: 'androcentrismo_general', text: 'Androcentrismo general' },
+            { value: 'otro_sesgo', text: 'Otro tipo de sesgo' }
+        ];
+        
+        generalBiasOptions.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            variableSelect.appendChild(optionElement);
+        });
+        return;
+    }
+    
+    // For other levels, populate with specific variables based on available categories
+    const allVariables = [];
+    
+    if (variables.contenido_general) {
+        variables.contenido_general.forEach(variable => {
+            allVariables.push({
+                value: variable,
+                text: VARIABLE_DESCRIPTIONS[variable] || variable,
+                category: 'contenido_general'
+            });
+        });
+    }
+    
+    if (variables.lenguaje) {
+        variables.lenguaje.forEach(variable => {
+            allVariables.push({
+                value: variable,
+                text: VARIABLE_DESCRIPTIONS[variable] || variable,
+                category: 'lenguaje'
+            });
+        });
+    }
+    
+    if (variables.fuentes) {
+        variables.fuentes.forEach(variable => {
+            allVariables.push({
+                value: variable,
+                text: VARIABLE_DESCRIPTIONS[variable] || variable,
+                category: 'fuentes'
+            });
+        });
+    }
+    
+    // Add variables to select
+    allVariables.forEach(variable => {
+        const optionElement = document.createElement('option');
+        optionElement.value = variable.value;
+        optionElement.textContent = variable.text;
+        optionElement.dataset.category = variable.category;
+        variableSelect.appendChild(optionElement);
+    });
+    
+    // Update category select to show only available categories
+    updateCategoryOptionsForDifficulty(difficulty);
+}
+
+function updateCategoryOptionsForDifficulty(difficulty) {
+    const categorySelect = document.getElementById('annotation-category');
+    if (!categorySelect) return;
+    
+    // Clear existing options
+    categorySelect.innerHTML = '<option value="">{{ _("Selecciona una categoría") }}</option>';
+    
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    
+    // For "Fácil" level, show general categories
+    if (difficulty === 'facil') {
+        const generalCategories = [
+            { value: 'sesgo_general', text: 'Sesgo General' }
+        ];
+        
+        generalCategories.forEach(category => {
+            const optionElement = document.createElement('option');
+            optionElement.value = category.value;
+            optionElement.textContent = category.text;
+            categorySelect.appendChild(optionElement);
+        });
+        return;
+    }
+    
+    // For other levels, show specific categories based on available variables
+    const availableCategories = [];
+    
+    if (variables.contenido_general) {
+        availableCategories.push({ value: 'contenido_general', text: 'Contenido General' });
+    }
+    
+    if (variables.lenguaje) {
+        availableCategories.push({ value: 'lenguaje', text: 'Lenguaje' });
+    }
+    
+    if (variables.fuentes) {
+        availableCategories.push({ value: 'fuentes', text: 'Fuentes' });
+    }
+    
+    availableCategories.forEach(category => {
+        const optionElement = document.createElement('option');
+        optionElement.value = category.value;
+        optionElement.textContent = category.text;
+        categorySelect.appendChild(optionElement);
+    });
+}
 
 function initializeChallengeAnalysis() {
     setupTextSelection();
@@ -545,6 +1036,10 @@ function setupAnnotationForm() {
     document.getElementById('cancel-annotation').addEventListener('click', function() {
         hideAnnotationPanel();
     });
+    
+    // Initialize variables based on current text difficulty
+    const textDifficulty = currentText?.difficulty || currentText?.nivel_dificultad || 'facil';
+    updateAvailableVariablesForDifficulty(textDifficulty);
     
     // Manejar cerrar panel
     document.getElementById('close-annotation-panel').addEventListener('click', function() {
@@ -609,20 +1104,67 @@ function updateVariableOptions(category) {
     const variableSelect = document.getElementById('annotation-variable');
     variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
     
-    const variables = {
-        'contenido_general': ['personas_mencionadas', 'genero_periodista', 'tema'],
-        'lenguaje': ['lenguaje_sexista', 'androcentrismo', 'asimetria', 'infantilizacion', 'denominacion_sexualizada', 'denominacion_redundante', 'denominacion_dependiente', 'masculino_generico', 'dual_aparente', 'hombre_humanidad', 'cargos_mujeres', 'sexismo_social', 'comparacion_mujeres_hombres', 'criterios_excepcion_noticiabilidad'],
-        'fuentes': ['nombre_fuente', 'genero_fuente', 'tipo_fuente']
+    // Get current difficulty level from text data or fallback to user difficulty
+    let textDifficulty = currentText?.difficulty || currentText?.nivel_dificultad || 'facil';
+    let userDifficulty = localStorage.getItem('userDifficulty') || 'facil';
+    
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
     };
     
-    if (variables[category]) {
-        variables[category].forEach(variable => {
+    // Normalize the difficulty values
+    textDifficulty = difficultyMapping[textDifficulty] || 'facil';
+    userDifficulty = difficultyMapping[userDifficulty] || 'facil';
+    
+    // Use text difficulty as primary
+    const variables = DIFFICULTY_VARIABLES[textDifficulty];
+    
+    // For "Fácil" level, show general bias options regardless of category
+    if (textDifficulty === 'facil') {
+        const generalBiasOptions = [
+            { value: 'sesgo_genero_general', text: 'Sesgo de género general' },
+            { value: 'lenguaje_sexista_general', text: 'Lenguaje sexista general' },
+            { value: 'androcentrismo_general', text: 'Androcentrismo general' },
+            { value: 'otro_sesgo', text: 'Otro tipo de sesgo' }
+        ];
+        
+        generalBiasOptions.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            variableSelect.appendChild(optionElement);
+        });
+        return;
+    }
+    
+    // For other levels, show specific variables based on category
+    let availableVariables = [];
+    
+    if (category === 'contenido_general' && variables.contenido_general) {
+        availableVariables = variables.contenido_general;
+    } else if (category === 'lenguaje' && variables.lenguaje) {
+        availableVariables = variables.lenguaje;
+    } else if (category === 'fuentes' && variables.fuentes) {
+        availableVariables = variables.fuentes;
+    }
+    
+    availableVariables.forEach(variable => {
             const option = document.createElement('option');
             option.value = variable;
-            option.textContent = variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             variableSelect.appendChild(option);
         });
-    }
 }
 
 function updateValueOptions(category, variable) {
