@@ -80,15 +80,22 @@
                         <i class="fas fa-edit me-2"></i>
                         {{ _('Análisis Manual') }}
                     </h5>
-                    <div class="panel-actions">
-                        <button class="btn btn-sm btn-outline-primary" id="edit-mode-btn">
-                            <i class="fas fa-pen me-1"></i>
-                            {{ _('Modo Edición') }}
-                        </button>
-                    </div>
                 </div>
                 
                 <div class="panel-content">
+                    <!-- Modo Edición Button - More Prominent -->
+                    <div class="edit-mode-section mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ _('Modo de Análisis') }}</h6>
+                                <small class="text-muted">{{ _('Activa el modo edición para marcar sesgos') }}</small>
+                            </div>
+                            <button class="btn btn-primary" id="edit-mode-btn">
+                                <i class="fas fa-pen me-2"></i>
+                                {{ _('Modo Edición') }}
+                            </button>
+                        </div>
+                    </div>
                     <!-- Variables Cargadas -->
                     <div class="variables-section mb-4">
                         <h6 class="section-title">
@@ -264,6 +271,31 @@
 
 .panel-content {
     padding: 1rem;
+}
+
+.edit-mode-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.edit-mode-section h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.edit-mode-section .btn {
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.edit-mode-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .section-title {
