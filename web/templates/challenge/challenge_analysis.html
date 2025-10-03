@@ -234,6 +234,16 @@
                             <strong>{{ _('Texto seleccionado:') }}</strong>
                             <span id="selected-text-preview" class="text-primary"></span>
                         </div>
+                        
+                        <!-- Simple message for easy level -->
+                        <div id="simple-annotation-message" class="text-center py-4" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
+                                <h6>{{ _('Anotación General de Sesgo') }}</h6>
+                                <p class="mb-3">{{ _('Has seleccionado texto que contiene un sesgo de género. ¿Confirmas que quieres anotar este sesgo?') }}</p>
+                            </div>
+                        </div>
+                        
                         <form id="annotation-form">
                             <div class="row">
                                 <div class="col-md-4">
@@ -1083,23 +1093,59 @@ function initializeAnnotationFormForTextDifficulty() {
     // Normalize the difficulty value
     textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
     
-    // Update category options based on text difficulty
-    updateCategoryOptionsForAnnotationForm(textDifficulty);
-    
-    // Clear and reset the form
+    // Get form elements
     const categorySelect = document.getElementById('annotation-category');
     const variableSelect = document.getElementById('annotation-variable');
     const valueSelect = document.getElementById('annotation-value');
+    const formContainer = document.querySelector('#annotation-form .row');
     
-    if (categorySelect) categorySelect.value = '';
-    if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
-    if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
-    
-    // If there's a default category available, select it and load its variables
-    if (categorySelect.options.length > 1) {
-        const firstCategory = categorySelect.options[1].value;
-        categorySelect.value = firstCategory;
-        updateVariableOptions(firstCategory);
+    if (textDifficulty === 'facil') {
+        // For easy level, hide the form and show simple confirmation
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+        
+        // Remove required attributes for easy level
+        if (categorySelect) categorySelect.removeAttribute('required');
+        if (variableSelect) variableSelect.removeAttribute('required');
+        if (valueSelect) valueSelect.removeAttribute('required');
+        
+        // Show simple message for easy level
+        const simpleMessage = document.getElementById('simple-annotation-message');
+        if (simpleMessage) {
+            simpleMessage.style.display = 'block';
+        }
+    } else {
+        // For other levels, show the full form
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
+        
+        // Add required attributes back for other levels
+        if (categorySelect) categorySelect.setAttribute('required', 'required');
+        if (variableSelect) variableSelect.setAttribute('required', 'required');
+        if (valueSelect) valueSelect.setAttribute('required', 'required');
+        
+        // Hide simple message
+        const simpleMessage = document.getElementById('simple-annotation-message');
+        if (simpleMessage) {
+            simpleMessage.style.display = 'none';
+        }
+        
+        // Update category options based on text difficulty
+        updateCategoryOptionsForAnnotationForm(textDifficulty);
+        
+        // Clear and reset the form
+        if (categorySelect) categorySelect.value = '';
+        if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+        if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+        
+        // If there's a default category available, select it and load its variables
+        if (categorySelect && categorySelect.options.length > 1) {
+            const firstCategory = categorySelect.options[1].value;
+            categorySelect.value = firstCategory;
+            updateVariableOptions(firstCategory);
+        }
     }
 }
 
@@ -1230,24 +1276,62 @@ function updateValueOptions(category, variable) {
 }
 
 function saveAnnotation() {
-    const category = document.getElementById('annotation-category').value;
-    const variable = document.getElementById('annotation-variable').value;
-    const value = document.getElementById('annotation-value').value;
     const selectedText = window.currentSelection ? window.currentSelection.text : '';
     
-    if (!category || !variable || !value || !selectedText) {
-        alert('{{ _("Por favor completa todos los campos") }}');
+    if (!selectedText) {
+        alert('{{ _("No hay texto seleccionado") }}');
         return;
     }
     
-    const annotation = {
-        id: Date.now(),
-        text: selectedText,
-        category: category,
-        variable: variable,
-        value: value,
-        timestamp: new Date().toISOString()
+    // Get current difficulty level
+    let textDifficulty = currentText?.difficulty || 'facil';
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
     };
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    
+    let annotation;
+    
+    if (textDifficulty === 'facil') {
+        // For easy level, create a simple annotation
+        annotation = {
+            id: Date.now(),
+            text: selectedText,
+            category: 'sesgo_general',
+            variable: 'sesgo_detectado',
+            value: '1',
+            timestamp: new Date().toISOString()
+        };
+    } else {
+        // For other levels, use the form values
+        const category = document.getElementById('annotation-category').value;
+        const variable = document.getElementById('annotation-variable').value;
+        const value = document.getElementById('annotation-value').value;
+        
+        if (!category || !variable || !value) {
+            alert('{{ _("Por favor completa todos los campos") }}');
+            return;
+        }
+        
+        annotation = {
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: variable,
+            value: value,
+            timestamp: new Date().toISOString()
+        };
+    }
     
     annotations.push(annotation);
     updateAnnotationsList();
