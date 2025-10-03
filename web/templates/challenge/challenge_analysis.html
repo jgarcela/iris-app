@@ -33,80 +33,6 @@
         </div>
     </div>
 
-    <!-- Difficulty Information -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm" id="difficulty-info-card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="difficulty-badge me-3" id="difficulty-badge">
-                            <span class="badge fs-6 px-3 py-2" id="difficulty-level">Fácil</span>
-                        </div>
-                        <div>
-                            <h5 class="mb-1" id="difficulty-title">{{ _('Análisis de Nivel Fácil') }}</h5>
-                            <p class="text-muted mb-0" id="difficulty-description">{{ _('Sesgos evidentes y obvios') }}</p>
-                        </div>
-                    </div>
-                    <div class="difficulty-instructions" id="difficulty-instructions">
-                        <h6 class="mb-2">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <span id="instructions-title">{{ _('¿Qué debes anotar?') }}</span>
-                        </h6>
-                        <div id="no-annotation-message" class="text-center py-4" style="display: none;">
-                            <div class="alert alert-success">
-                                <i class="fas fa-eye fa-2x mb-3 text-success"></i>
-                                <h5>{{ _('Análisis General de Sesgos') }}</h5>
-                                <p class="mb-2">{{ _('En este nivel debes identificar y anotar:') }}</p>
-                                <ul class="list-unstyled mb-0">
-                                    <li><i class="fas fa-check text-success me-2"></i> {{ _('Sesgos de género evidentes') }}</li>
-                                    <li><i class="fas fa-check text-success me-2"></i> {{ _('Lenguaje sexista obvio') }}</li>
-                                    <li><i class="fas fa-check text-success me-2"></i> {{ _('Cualquier sesgo que notes en el texto') }}</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="row" id="variables-to-annotate">
-                            <div class="col-md-4">
-                                <div class="variable-category-info">
-                                    <h6 class="text-primary">
-                                        <i class="fas fa-file-text me-1"></i>
-                                        {{ _('Contenido General') }}
-                                    </h6>
-                                    <ul class="list-unstyled small" id="contenido-variables">
-                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género del periodista') }}</li>
-                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Personas mencionadas') }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="variable-category-info">
-                                    <h6 class="text-warning">
-                                        <i class="fas fa-language me-1"></i>
-                                        {{ _('Lenguaje') }}
-                                    </h6>
-                                    <ul class="list-unstyled small" id="lenguaje-variables">
-                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Lenguaje sexista') }}</li>
-                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Androcentrismo') }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="variable-category-info">
-                                    <h6 class="text-info">
-                                        <i class="fas fa-quote-left me-1"></i>
-                                        {{ _('Fuentes') }}
-                                    </h6>
-                                    <ul class="list-unstyled small" id="fuentes-variables">
-                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género de fuentes') }}</li>
-                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Tipo de fuentes') }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Progreso del Análisis -->
     <div class="row mb-4">
@@ -171,46 +97,76 @@
                         </button>
                     </div>
                 </div>
-                    <!-- Variables Cargadas -->
-                    <div class="variables-section mb-4">
-                        <h6 class="section-title">
-                            <i class="fas fa-list me-2"></i>
-                            {{ _('Variables Disponibles') }}
-                        </h6>
-                        <div class="variables-grid">
-                            <div class="variable-category">
-                                <h6 class="category-title">{{ _('Contenido General') }}</h6>
-                                <div class="variable-list">
-                                    <span class="variable-tag">personas_mencionadas</span>
-                                    <span class="variable-tag">genero_periodista</span>
-                                    <span class="variable-tag">tema</span>
+                    <!-- Difficulty Information -->
+                    <div class="difficulty-section mb-4">
+                        <div class="card border-0 shadow-sm" id="difficulty-info-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="difficulty-badge me-3" id="difficulty-badge">
+                                        <span class="badge fs-6 px-3 py-2" id="difficulty-level">Fácil</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1" id="difficulty-title">{{ _('Análisis de Nivel Fácil') }}</h5>
+                                        <p class="text-muted mb-0" id="difficulty-description">{{ _('Sesgos evidentes y obvios') }}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="variable-category">
-                                <h6 class="category-title">{{ _('Lenguaje') }}</h6>
-                                <div class="variable-list">
-                                    <span class="variable-tag">lenguaje_sexista</span>
-                                    <span class="variable-tag">androcentrismo</span>
-                                    <span class="variable-tag">asimetria</span>
-                                    <span class="variable-tag">infantilizacion</span>
-                                    <span class="variable-tag">denominacion_sexualizada</span>
-                                    <span class="variable-tag">denominacion_redundante</span>
-                                    <span class="variable-tag">denominacion_dependiente</span>
-                                    <span class="variable-tag">masculino_generico</span>
-                                    <span class="variable-tag">dual_aparente</span>
-                                    <span class="variable-tag">hombre_humanidad</span>
-                                    <span class="variable-tag">cargos_mujeres</span>
-                                    <span class="variable-tag">sexismo_social</span>
-                                    <span class="variable-tag">comparacion_mujeres_hombres</span>
-                                    <span class="variable-tag">criterios_excepcion_noticiabilidad</span>
-                                </div>
-                            </div>
-                            <div class="variable-category">
-                                <h6 class="category-title">{{ _('Fuentes') }}</h6>
-                                <div class="variable-list">
-                                    <span class="variable-tag">nombre_fuente</span>
-                                    <span class="variable-tag">genero_fuente</span>
-                                    <span class="variable-tag">tipo_fuente</span>
+                                <div class="difficulty-instructions" id="difficulty-instructions">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <span id="instructions-title">{{ _('¿Qué debes anotar?') }}</span>
+                                    </h6>
+                                    <div id="no-annotation-message" class="text-center py-3" style="display: none;">
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-eye fa-2x mb-3 text-success"></i>
+                                            <h6>{{ _('Análisis General de Sesgos') }}</h6>
+                                            <p class="mb-2 small">{{ _('En este nivel debes identificar y anotar:') }}</p>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li><i class="fas fa-check text-success me-2"></i> {{ _('Sesgos de género evidentes') }}</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> {{ _('Lenguaje sexista obvio') }}</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> {{ _('Cualquier sesgo que notes en el texto') }}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div id="variables-to-annotate">
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <div class="variable-category-info">
+                                                    <h6 class="text-primary small">
+                                                        <i class="fas fa-file-text me-1"></i>
+                                                        {{ _('Contenido General') }}
+                                                    </h6>
+                                                    <ul class="list-unstyled small" id="contenido-variables">
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género del periodista') }}</li>
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Personas mencionadas') }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="variable-category-info">
+                                                    <h6 class="text-warning small">
+                                                        <i class="fas fa-language me-1"></i>
+                                                        {{ _('Lenguaje') }}
+                                                    </h6>
+                                                    <ul class="list-unstyled small" id="lenguaje-variables">
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Lenguaje sexista') }}</li>
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Androcentrismo') }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="variable-category-info">
+                                                    <h6 class="text-info small">
+                                                        <i class="fas fa-quote-left me-1"></i>
+                                                        {{ _('Fuentes') }}
+                                                    </h6>
+                                                    <ul class="list-unstyled small" id="fuentes-variables">
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género de fuentes') }}</li>
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Tipo de fuentes') }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -374,66 +330,66 @@
 }
 
 /* Difficulty Information Styles */
-#difficulty-info-card {
+.difficulty-section #difficulty-info-card {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-left: 4px solid #007bff;
 }
 
-.difficulty-badge .badge {
-    font-size: 0.9rem;
+.difficulty-section .difficulty-badge .badge {
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.difficulty-badge .badge.bg-success {
+.difficulty-section .difficulty-badge .badge.bg-success {
     background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
 }
 
-.difficulty-badge .badge.bg-warning {
+.difficulty-section .difficulty-badge .badge.bg-warning {
     background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
     color: #212529 !important;
 }
 
-.difficulty-badge .badge.bg-danger {
+.difficulty-section .difficulty-badge .badge.bg-danger {
     background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
 }
 
-.difficulty-instructions {
+.difficulty-section .difficulty-instructions {
     background: rgba(255, 255, 255, 0.7);
     border-radius: 0.5rem;
-    padding: 1rem;
-    margin-top: 1rem;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
 }
 
-.variable-category-info {
+.difficulty-section .variable-category-info {
     background: white;
     border-radius: 0.5rem;
-    padding: 1rem;
-    height: 100%;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
     border: 1px solid #e9ecef;
     transition: all 0.3s ease;
 }
 
-.variable-category-info:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.difficulty-section .variable-category-info:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.variable-category-info h6 {
+.difficulty-section .variable-category-info h6 {
     font-weight: 600;
-    margin-bottom: 0.75rem;
-    font-size: 0.9rem;
-}
-
-.variable-category-info ul li {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     font-size: 0.8rem;
-    line-height: 1.4;
 }
 
-.variable-category-info ul li i {
-    width: 12px;
+.difficulty-section .variable-category-info ul li {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.difficulty-section .variable-category-info ul li i {
+    width: 10px;
 }
 
 .section-title {
