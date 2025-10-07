@@ -250,36 +250,18 @@ function processHighlights() {
             const colorClasses = classList.filter(cls => cls.startsWith('color-'));
             
             if (colorClasses.length > 0) {
-                // Try to get real data from the analysis results
                 if (window.data && window.data.analysis && window.data.analysis.original) {
                     const analysis = window.data.analysis.original;
+                    const highlightColorMap = window.highlight_color_map || {};
                     
-                    // Map color classes to specific variables based on HIGHLIGHT_COLOR_MAP from config.ini
-                    const colorToVariableMap = {
-                        'color-1': { category: 'contenido_general', variable: 'nombre_propio_titular' },
-                        'color-2': { category: 'contenido_general', variable: 'cita_textual_titular' },
-                        'color-3': { category: 'contenido_general', variable: 'personas_mencionadas' },
-                        'color-4': { category: 'lenguaje', variable: 'lenguaje_sexista' },
-                        'color-5': { category: 'lenguaje', variable: 'hombre_humanidad' },
-                        'color-6': { category: 'lenguaje', variable: 'dual_aparente' },
-                        'color-7': { category: 'lenguaje', variable: 'cargos_mujeres' },
-                        'color-8': { category: 'lenguaje', variable: 'sexismo_social' },
-                        'color-9': { category: 'lenguaje', variable: 'androcentrismo' },
-                        'color-10': { category: 'lenguaje', variable: 'asimetria' },
-                        'color-11': { category: 'lenguaje', variable: 'infantilizacion' },
-                        'color-12': { category: 'lenguaje', variable: 'denominacion_sexualizada' },
-                        'color-13': { category: 'lenguaje', variable: 'denominacion_redundante' },
-                        'color-14': { category: 'lenguaje', variable: 'denominacion_dependiente' },
-                        'color-15': { category: 'lenguaje', variable: 'masculino_generico' },
-                        'color-16': { category: 'contenido_general', variable: 'criterios_excepcion_noticiabilidad' },
-                        'color-17': { category: 'lenguaje', variable: 'comparacion_mujeres_hombres' },
-                        'color-18': { category: 'fuentes', variable: 'nombre_fuente' },
-                        'color-19': { category: 'fuentes', variable: 'declaracion_fuente' },
-                        'color-20': { category: 'fuentes', variable: 'tipo_fuente' },
-                        'color-21': { category: 'fuentes', variable: 'genero_fuente' }
-                    };
+                    // Reverse map color -> [variables]
+                    const colorToVariables = {};
+                    Object.keys(highlightColorMap).forEach(variableName => {
+                        const color = highlightColorMap[variableName];
+                        if (!colorToVariables[color]) colorToVariables[color] = [];
+                        colorToVariables[color].push(variableName);
+                    });
                     
-                    // Process all color classes and collect tooltip data
                     const tooltipData = [];
                     
                     // Determine which category we're currently viewing
@@ -291,50 +273,70 @@ function processHighlights() {
                         else if (currentHighlightBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
                     }
                     
+                    const isFuenteVariable = (v) => ['nombre_fuente','declaracion_fuente','tipo_fuente','genero_fuente'].includes(v);
+                    
+                    const fuentesFallback = {
+                      'color-3': ['nombre_fuente'],
+                      'color-4': ['declaracion_fuente']
+                    };
                     for (const colorClass of colorClasses) {
-                        const mapping = colorToVariableMap[colorClass];
-                        
-                        if (mapping && analysis[mapping.category]) {
-                            // Only process variables that match the current category
-                            if (currentCategory && mapping.category !== currentCategory) {
-                                continue;
+                        let variablesForColor = colorToVariables[colorClass] || [];
+                        // En Fuentes, priorizar también las variables de fallback aunque el color mapee a otras categorías
+                        if (currentCategory === 'fuentes') {
+                          const extra = fuentesFallback[colorClass] || [];
+                          if (extra.length) {
+                            const set = new Set([...(variablesForColor || []), ...extra]);
+                            variablesForColor = Array.from(set);
+                          }
+                        }
+                        for (const variableNameRaw of variablesForColor) {
+                            let category = null;
+                            if (analysis.contenido_general && Object.prototype.hasOwnProperty.call(analysis.contenido_general, variableNameRaw)) {
+                                category = 'contenido_general';
+                            } else if (analysis.lenguaje && Object.prototype.hasOwnProperty.call(analysis.lenguaje, variableNameRaw)) {
+                                category = 'lenguaje';
+                            } else if (analysis.fuentes && isFuenteVariable(variableNameRaw)) {
+                                category = 'fuentes';
                             }
                             
-                            const categoryData = analysis[mapping.category];
-                            let varValue = null;
+                            if (!category) continue;
+                            if (currentCategory && category !== currentCategory) continue;
                             
-                            // Get the value based on category
-                            if (mapping.category === 'fuentes' && categoryData.fuentes) {
-                                if (categoryData.fuentes.length > 0) {
-                                    varValue = categoryData.fuentes[0][mapping.variable];
+                            let varValue = null;
+                            if (category === 'fuentes' && analysis.fuentes && Array.isArray(analysis.fuentes.fuentes)) {
+                                const values = analysis.fuentes.fuentes
+                                  .map(src => src ? src[variableNameRaw] : undefined)
+                                  .filter(v => v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : String(v).trim() !== ''));
+                                if (values.length > 0) {
+                                  // Aplanar y unificar valores
+                                  const flat = values.flat ? values.flat() : ([]).concat(...values);
+                                  // Convertir etiquetas si procede
+                                  const converted = flat.map(item => convertValueToLabel(variableNameRaw, item));
+                                  // Quitar duplicados manteniendo orden
+                                  const unique = Array.from(new Set(converted.map(v => typeof v === 'string' ? v.trim() : v)));
+                                  varValue = unique;
                                 }
-                            } else if (mapping.category === 'lenguaje' && categoryData[mapping.variable]) {
-                                const langVar = categoryData[mapping.variable];
-                                if (typeof langVar === 'object' && !Array.isArray(langVar) && langVar.etiqueta) {
+                            } else if (category === 'lenguaje') {
+                                const langVar = analysis.lenguaje[variableNameRaw];
+                                if (langVar && typeof langVar === 'object' && !Array.isArray(langVar) && langVar.etiqueta) {
                                     varValue = langVar.etiqueta;
                                 } else {
                                     varValue = langVar;
                                 }
-                            } else {
-                                varValue = categoryData[mapping.variable];
+                            } else if (category === 'contenido_general') {
+                                varValue = analysis.contenido_general[variableNameRaw];
                             }
                             
-                            // Convert value to label and add to tooltip data
-                            if (varValue && (Array.isArray(varValue) ? varValue.length > 0 : true)) {
-                                const variableName = mapping.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                const convertedValue = Array.isArray(varValue) 
-                                    ? varValue.map(item => convertValueToLabel(mapping.variable, item)).join(', ')
-                                    : convertValueToLabel(mapping.variable, varValue);
-                                
-                                tooltipData.push({
-                                    variable: variableName,
-                                    value: convertedValue
-                                });
+                            if (varValue !== undefined && varValue !== null && (Array.isArray(varValue) ? varValue.length > 0 : true)) {
+                                const prettyVar = variableNameRaw.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                const convertedValue = Array.isArray(varValue)
+                                  ? varValue.map(item => convertValueToLabel(variableNameRaw, item)).join(', ')
+                                  : convertValueToLabel(variableNameRaw, varValue);
+                                tooltipData.push({ variable: prettyVar, value: convertedValue });
                             }
                         }
                     }
                     
-                    // Display tooltip with all variables
                     if (tooltipData.length > 0) {
                         const title = tooltipData.length === 1 ? tooltipData[0].variable : 'Variables de análisis';
                         const description = tooltipData.map(item => `${item.variable}: ${item.value}`).join('\n');
@@ -989,7 +991,7 @@ function integrateAnnotationIntoAnalysis(annotation) {
 function applyHighlight(range, variable) {
     // This function is kept for compatibility but the actual highlighting
     // is now handled by addManualHighlights() which preserves existing highlights
-    console.log('Highlight applied for variable:', variable);
+    
 }
 
 // Function to update annotation indicators

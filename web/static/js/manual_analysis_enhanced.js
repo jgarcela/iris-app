@@ -549,7 +549,7 @@ function saveAnalysis() {
     };
     
     // Here you would typically send the data to the server
-    console.log('Saving analysis:', analysisData);
+    
     
     // For now, just show success message
     showSuccess(`Análisis guardado con ${annotations.length} anotaciones.`);

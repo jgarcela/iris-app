@@ -21,12 +21,8 @@ $(function () {
     showRefresh: true,
     showFullscreen: true,
     toolbar: '#toolbar',
-    onSearch: function (text) {
-      console.log('Búsqueda realizada:', text);
-    },
-    onRefresh: function () {
-      console.log('Tabla actualizada');
-    }
+    onSearch: function (text) {},
+    onRefresh: function () {}
   });
 
   // 2) Función para generar y descargar CSV de filas (selected o all)
@@ -205,7 +201,7 @@ $(function () {
   function limpiarFiltros() {
     $("#tabla-noticias").bootstrapTable('clearFilter');
     $("#tabla-noticias").bootstrapTable('resetSearch');
-    console.log('Filtros limpiados');
+    
   }
 
   // 7) Vinculamos los botones de exportación a sus funciones
@@ -224,11 +220,7 @@ $(function () {
   });
 
   // 9) Añadir indicador de carga
-  $(document).on('load-success.bs.table', '#tabla-noticias', function() {
-    console.log('Tabla cargada correctamente');
-  });
+  $(document).on('load-success.bs.table', '#tabla-noticias', function() {});
 
-  $(document).on('load-error.bs.table', '#tabla-noticias', function() {
-    console.error('Error al cargar la tabla');
-  });
+  $(document).on('load-error.bs.table', '#tabla-noticias', function() {});
 });
