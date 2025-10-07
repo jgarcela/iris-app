@@ -47,30 +47,51 @@
                 </div>
             </div>
 
-            <!-- Inclusivity Score -->
+            <!-- Help / Info Panel as dropdown -->
             <div class="analysis-tools-panel">
-                <h5 class="panel-title">
-                    <i class="fas fa-chart-line me-2"></i>
-                    {{ _('Puntuación de Inclusividad') }}
-                </h5>
-                
-                <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
-                <div class="score-bar">
-                    <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
+                <div class="collapsible-header" data-target="help-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ _('Cómo editar anotaciones') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
                 </div>
-                
-                <div class="metrics">
-                    <div class="metric">
-                        <span class="label">{{ _('Contenido General') }}</span>
-                        <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
+                <div id="help-content" class="collapsible-content">
+                    <div class="small">
+                        <div class="mb-2"><strong>{{ _('Editar/aceptar/eliminar') }}:</strong> {{ _('haz clic en cualquier texto resaltado para abrir el menú de acciones. Al aceptar verás un check junto al fragmento.') }}</div>
+                        <div class="mb-2"><strong>{{ _('Crear anotaciones nuevas') }}:</strong> {{ _('selecciona un fragmento del texto y elige la variable/valor desde el panel; se abrirá un selector con opciones válidas.') }}</div>
+                        <div class="mb-0"><strong>{{ _('Guardar cambios') }}:</strong> {{ _('usa el botón Guardar del panel para persistir las anotaciones.') }}</div>
                     </div>
-                    <div class="metric">
-                        <span class="label">{{ _('Lenguaje') }}</span>
-                        <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
+                </div>
+            </div>
+
+            <!-- Inclusivity Score as dropdown -->
+            <div class="analysis-tools-panel">
+                <div class="collapsible-header" data-target="score-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        {{ _('Puntuación de Inclusividad') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="score-content" class="collapsible-content">
+                    <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
+                    <div class="score-bar">
+                        <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
                     </div>
-                    <div class="metric">
-                        <span class="label">{{ _('Fuentes') }}</span>
-                        <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="label">{{ _('Contenido General') }}</span>
+                            <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">{{ _('Lenguaje') }}</span>
+                            <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">{{ _('Fuentes') }}</span>
+                            <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,16 +170,6 @@
                     <i class="fas fa-file-alt me-2"></i>
                     {{ _('Análisis del Texto') }}
                 </h5>
-                <div class="alert alert-info py-2 px-3 mb-3">
-                    <div class="d-flex align-items-start">
-                        <i class="fas fa-info-circle me-2 mt-1"></i>
-                        <div class="small">
-                            <div><strong>Editar anotaciones:</strong> haz clic en cualquier texto <em>resaltado</em> para <strong>editar</strong>, <strong>aceptar</strong> o <strong>eliminar</strong> la anotación. Al aceptar verás un <strong>check</strong> junto al fragmento.</div>
-                            <div><strong>Crear anotaciones nuevas:</strong> selecciona un fragmento del texto y elige la variable/valor desde el panel lateral; se abrirá un selector con las opciones válidas.</div>
-                            <div><strong>Guardar cambios:</strong> usa el botón <em>Guardar</em> del panel izquierdo para persistir las anotaciones.</div>
-                        </div>
-                    </div>
-                </div>
                 
                 <!-- Plain Text -->
                 <div class="plain-text">
