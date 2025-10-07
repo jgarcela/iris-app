@@ -149,6 +149,16 @@
                     <i class="fas fa-file-alt me-2"></i>
                     {{ _('Análisis del Texto') }}
                 </h5>
+                <div class="alert alert-info py-2 px-3 mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-info-circle me-2 mt-1"></i>
+                        <div class="small">
+                            <div><strong>Editar anotaciones:</strong> haz clic en cualquier texto <em>resaltado</em> para <strong>editar</strong>, <strong>aceptar</strong> o <strong>eliminar</strong> la anotación. Al aceptar verás un <strong>check</strong> junto al fragmento.</div>
+                            <div><strong>Crear anotaciones nuevas:</strong> selecciona un fragmento del texto y elige la variable/valor desde el panel lateral; se abrirá un selector con las opciones válidas.</div>
+                            <div><strong>Guardar cambios:</strong> usa el botón <em>Guardar</em> del panel izquierdo para persistir las anotaciones.</div>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Plain Text -->
                 <div class="plain-text">
@@ -159,6 +169,7 @@
                 
                 <!-- Highlighted Text -->
                 <div class="highlight-text" style="display: none;">
+                    <div class="small text-muted mb-2"><i class="fas fa-mouse-pointer me-1"></i>Haz clic sobre un resaltado para editar, aceptar o eliminar la anotación.</div>
                     <!-- Contenido General Highlights -->
                     <div id="highlight-contenido" class="highlight-block highlight-contenido" style="display: none;">
                         <h6 class="mb-3">{{ _('Contenido General') }}</h6>
@@ -187,6 +198,53 @@
     <div class="tooltip-title"></div>
     <div class="tooltip-description"></div>
 </div>
+
+<!-- Generic Modal for edits -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalTitle">Editar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editModalForm">
+          <div class="mb-3" id="singleInputGroup" style="display:none;">
+            <label class="form-label" id="singleInputLabel">Valor</label>
+            <input type="text" class="form-control" id="singleInput" />
+          </div>
+          <div class="mb-3" id="selectInputGroup" style="display:none;">
+            <label class="form-label" id="selectInputLabel">Selecciona</label>
+            <select class="form-select" id="selectInput"></select>
+            <div class="form-text" id="selectHelp" style="display:none;">Puedes seleccionar múltiples valores manteniendo Ctrl/⌘.</div>
+          </div>
+          <div id="fuenteForm" style="display:none;">
+            <div class="mb-2">
+              <label class="form-label">Nombre de la fuente</label>
+              <input type="text" class="form-control" id="fuenteNombre" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Declaración</label>
+              <textarea class="form-control" id="fuenteDeclaracion" rows="3"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Tipo (clave)</label>
+              <input type="text" class="form-control" id="fuenteTipo" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Género (clave)</label>
+              <input type="text" class="form-control" id="fuenteGenero" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="editModalSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+  </div>
 
 <script>
     window.data = {{ data | tojson | safe }};
