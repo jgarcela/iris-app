@@ -65,6 +65,18 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    <!-- Tabs para elegir vista de dificultad del análisis IA -->
+                    <ul class="nav nav-pills mb-3" id="ai-difficulty-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab-easy" onclick="switchAIView('easy')">{{ _('Fácil') }}</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab-medium" onclick="switchAIView('medium')">{{ _('Medio') }}</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab-hard" onclick="switchAIView('hard')">{{ _('Difícil') }}</button>
+                        </li>
+                    </ul>
                     <div class="ai-summary">
                         <p><strong>{{ _('Variables detectadas:') }}</strong> <span id="ai-variables-count">0</span></p>
                         <div id="ai-analysis-details">
@@ -229,102 +241,134 @@
 </style>
 
 <script>
-// Datos del análisis (en una implementación real, esto vendría del backend)
-const analysisData = {{ analysis_data | tojson | safe }};
+// Datos desde el backend
 const manualAnnotations = {{ manual_annotations | tojson | safe }};
-const aiAnalysis = {{ ai_analysis | tojson | safe }};
+const analyses = {
+  easy: {{ ai_analysis_easy | tojson | safe }},
+  medium: {{ ai_analysis_medium | tojson | safe }},
+  hard: {{ ai_analysis_hard | tojson | safe }}
+};
+let currentDifficulty = {{ current_difficulty | tojson | safe }};
+let aiAnalysis = analyses[currentDifficulty] || {};
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadAnalysisResults();
+  updateDifficultyTabs();
+  loadAnalysisResults();
 });
 
+function switchAIView(level) {
+  currentDifficulty = level;
+  aiAnalysis = analyses[level] || {};
+  updateDifficultyTabs();
+  loadAIAnalysis();
+}
+
+function updateDifficultyTabs() {
+  const levels = ['easy','medium','hard'];
+  levels.forEach(l => {
+    const el = document.getElementById(`tab-${l}`);
+    if (!el) return;
+    el.classList.toggle('active', l === currentDifficulty);
+  });
+}
+
 function loadAnalysisResults() {
-    // Cargar anotaciones manuales
-    loadManualAnnotations();
-    
-    // Cargar análisis de IA
-    loadAIAnalysis();
-    
-    // Calcular y mostrar métricas
-    calculateMetrics();
+  loadManualAnnotations();
+  loadAIAnalysis();
+  calculateMetrics();
 }
 
 function loadManualAnnotations() {
-    const container = document.getElementById('manual-annotations-list');
-    const countElement = document.getElementById('manual-annotations-count');
-    
-    countElement.textContent = manualAnnotations.length;
-    
-    if (manualAnnotations.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("No se realizaron anotaciones manuales") }}</p>';
-        return;
-    }
-    
-    container.innerHTML = manualAnnotations.map(annotation => `
-        <div class="annotation-item">
-            <div class="annotation-text">"${annotation.text}"</div>
-            <div class="annotation-meta">
-                <strong>${annotation.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong> → 
-                ${annotation.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} = ${annotation.value}
-            </div>
-        </div>
-    `).join('');
+  const container = document.getElementById('manual-annotations-list');
+  const countElement = document.getElementById('manual-annotations-count');
+  countElement.textContent = manualAnnotations.length;
+  if (manualAnnotations.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("No se realizaron anotaciones manuales") }}</p>';
+    return;
+  }
+  container.innerHTML = manualAnnotations.map(annotation => `
+    <div class="annotation-item">
+      <div class="annotation-text">"${annotation.text}"</div>
+      <div class="annotation-meta">
+        <strong>${annotation.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong> → 
+        ${annotation.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} = ${annotation.value}
+      </div>
+    </div>
+  `).join('');
 }
 
 function loadAIAnalysis() {
-    const container = document.getElementById('ai-analysis-details');
-    const countElement = document.getElementById('ai-variables-count');
-    
-    // Contar variables detectadas
-    let totalVariables = 0;
-    Object.keys(aiAnalysis).forEach(category => {
-        totalVariables += Object.keys(aiAnalysis[category]).length;
-    });
-    countElement.textContent = totalVariables;
-    
+  const container = document.getElementById('ai-analysis-details');
+  const countElement = document.getElementById('ai-variables-count');
+
+  // Render según dificultad
+  if (currentDifficulty === 'easy' && Array.isArray(aiAnalysis.sesgos)) {
+    countElement.textContent = aiAnalysis.sesgos.length;
     container.innerHTML = `
-        <div class="ai-category">
-            <h6>{{ _("Contenido General") }}</h6>
-            <ul>
-                <li>{{ _("Personas mencionadas:") }} ${aiAnalysis.contenido_general?.personas_mencionadas || 'N/A'}</li>
-                <li>{{ _("Género periodista:") }} ${aiAnalysis.contenido_general?.genero_periodista || 'N/A'}</li>
-                <li>{{ _("Tema:") }} ${aiAnalysis.contenido_general?.tema || 'N/A'}</li>
-            </ul>
-        </div>
-        <div class="ai-category">
-            <h6>{{ _("Lenguaje") }}</h6>
-            <ul>
-                <li>{{ _("Lenguaje sexista:") }} ${aiAnalysis.lenguaje?.lenguaje_sexista || 'N/A'}</li>
-                <li>{{ _("Androcentrismo:") }} ${aiAnalysis.lenguaje?.androcentrismo || 'N/A'}</li>
-                <li>{{ _("Asimetría:") }} ${aiAnalysis.lenguaje?.asimetria || 'N/A'}</li>
-                <li>{{ _("Infantilización:") }} ${aiAnalysis.lenguaje?.infantilizacion || 'N/A'}</li>
-                <li>{{ _("Masculino genérico:") }} ${aiAnalysis.lenguaje?.masculino_generico || 'N/A'}</li>
-            </ul>
-        </div>
-        <div class="ai-category">
-            <h6>{{ _("Fuentes") }}</h6>
-            <ul>
-                <li>{{ _("Nombre fuente:") }} ${aiAnalysis.fuentes?.nombre_fuente || 'N/A'}</li>
-                <li>{{ _("Género fuente:") }} ${aiAnalysis.fuentes?.genero_fuente || 'N/A'}</li>
-                <li>{{ _("Tipo fuente:") }} ${aiAnalysis.fuentes?.tipo_fuente || 'N/A'}</li>
-            </ul>
-        </div>
+      <div class="ai-category">
+        <h6>{{ _("Sesgos detectados") }}</h6>
+        <ul>
+          ${aiAnalysis.sesgos.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>
     `;
+    return;
+  }
+
+  // Medium / Hard (categorías)
+  let totalVariables = 0;
+  const cg = aiAnalysis.contenido_general || {};
+  const lg = aiAnalysis.lenguaje || {};
+  const ft = aiAnalysis.fuentes || {};
+
+  // Contador básico (número de campos con valor no vacío)
+  [cg, lg, ft].forEach(group => {
+    if (!group) return;
+    Object.values(group).forEach(v => { if (v && (Array.isArray(v) ? v.length : String(v).length)) totalVariables++; });
+  });
+  countElement.textContent = totalVariables;
+
+  container.innerHTML = `
+    <div class="ai-category">
+      <h6>{{ _("Contenido General") }}</h6>
+      <ul>
+        <li>{{ _("Personas mencionadas:") }} ${cg.personas_mencionadas ?? 'N/A'}</li>
+        <li>{{ _("Género periodista:") }} ${cg.genero_periodista ?? 'N/A'}</li>
+        <li>{{ _("Tema:") }} ${cg.tema ?? 'N/A'}</li>
+      </ul>
+    </div>
+    <div class="ai-category">
+      <h6>{{ _("Lenguaje") }}</h6>
+      <ul>
+        <li>{{ _("Lenguaje sexista:") }} ${lg.lenguaje_sexista ?? 'N/A'}</li>
+        <li>{{ _("Androcentrismo:") }} ${lg.androcentrismo ?? 'N/A'}</li>
+        <li>{{ _("Asimetría:") }} ${lg.asimetria ?? 'N/A'}</li>
+        <li>{{ _("Infantilización:") }} ${lg.infantilizacion ?? 'N/A'}</li>
+        <li>{{ _("Masculino genérico:") }} ${lg.masculino_generico ?? 'N/A'}</li>
+      </ul>
+    </div>
+    <div class="ai-category">
+      <h6>{{ _("Fuentes") }}</h6>
+      <ul>
+        <li>{{ _("Nombre fuente:") }} ${ft.nombre_fuente ?? 'N/A'}</li>
+        <li>{{ _("Género fuente:") }} ${ft.genero_fuente ?? 'N/A'}</li>
+        <li>{{ _("Tipo fuente:") }} ${ft.tipo_fuente ?? 'N/A'}</li>
+      </ul>
+    </div>
+  `;
 }
 
 function calculateMetrics() {
-    // Lógica simplificada de comparación
-    const totalPossibleVariables = 15; // Estimación del total de variables posibles
-    const detectedVariables = manualAnnotations.length;
-    const aiDetectedVariables = Object.keys(aiAnalysis).length * 3; // Estimación
-    
-    const precision = Math.min(100, (detectedVariables / totalPossibleVariables) * 100);
-    const recall = Math.min(100, (detectedVariables / aiDetectedVariables) * 100);
-    const totalScore = Math.round((precision + recall) / 2);
-    
-    document.getElementById('precision-score').textContent = Math.round(precision) + '%';
-    document.getElementById('recall-score').textContent = Math.round(recall) + '%';
-    document.getElementById('total-score').textContent = totalScore + '%';
+  // Métrica demo simple
+  const detectedVariables = manualAnnotations.length;
+  const aiCount = document.getElementById('ai-variables-count').textContent;
+  const aiDetectedVariables = Math.max(1, parseInt(aiCount, 10));
+  const precision = Math.min(100, (detectedVariables / (detectedVariables + Math.max(0, aiDetectedVariables - detectedVariables))) * 100) || 0;
+  const recall = Math.min(100, (detectedVariables / aiDetectedVariables) * 100) || 0;
+  const totalScore = Math.round((precision + recall) / 2);
+  document.getElementById('precision-score').textContent = Math.round(precision) + '%';
+  document.getElementById('recall-score').textContent = Math.round(recall) + '%';
+  document.getElementById('total-score').textContent = totalScore + '%';
 }
 </script>
 {% endblock %}
