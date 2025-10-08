@@ -91,6 +91,10 @@ def analysis_analyze():
         logger.exception("Error en el análisis")
         return jsonify({'error': 'Error interno en el servidor.'}), 500
 
+    # Get user information from request headers or session
+    user_id = request.headers.get('X-User-ID', 'anonymous')
+    user_email = request.headers.get('X-User-Email', 'anonymous@example.com')
+    
     # Estructura editable
     document = {
         'model': model,
@@ -98,6 +102,8 @@ def analysis_analyze():
         'title': title,
         'authors': authors,
         'url': url,
+        'user_id': user_id,
+        'user_email': user_email,
         'analysis': {
             'original': {
                 'contenido_general': analysis_contenido_general,
@@ -190,10 +196,16 @@ def save_annotations():
             'updated_at': datetime.now(timezone.utc)
         }
         
+        # Get user information from request headers
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        user_email = request.headers.get('X-User-Email', 'anonymous@example.com')
+        
         # If it's a new document (no existing doc_id), create it
         if doc_id == 'new' or not ObjectId.is_valid(doc_id):
             # Create new document
             new_doc = {
+                'user_id': user_id,
+                'user_email': user_email,
                 'analysis': {
                     'original': analysis,
                     'edited': None
@@ -256,15 +268,21 @@ def get_analysis_history():
         print(f"  - model: {model_filter}")
         print(f"  - limit: {limit}, offset: {offset}")
         
+        # Get user information from request headers
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        
         # Build MongoDB query
-        query = {}
+        query = {'user_id': user_id}  # Only show analyses for the current user
         
         # Search in title, text, and authors
         if search_query:
-            query['$or'] = [
-                {'title': {'$regex': search_query, '$options': 'i'}},
-                {'text': {'$regex': search_query, '$options': 'i'}},
-                {'authors': {'$regex': search_query, '$options': 'i'}}
+            query['$and'] = [
+                {'user_id': user_id},
+                {'$or': [
+                    {'title': {'$regex': search_query, '$options': 'i'}},
+                    {'text': {'$regex': search_query, '$options': 'i'}},
+                    {'authors': {'$regex': search_query, '$options': 'i'}}
+                ]}
             ]
         
         # Filter by model
@@ -323,6 +341,54 @@ def get_analysis_history():
         
     except Exception as e:
         print(f"[ERROR] Error getting analysis history: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error interno: {str(e)}'
+        }), 500
+
+
+@bp.route('/<analysis_id>', methods=['GET'])
+def get_analysis_by_id(analysis_id):
+    """Get a specific analysis by ID"""
+    try:
+        # Get user information from request headers
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        
+        # Validate ObjectId
+        if not ObjectId.is_valid(analysis_id):
+            return jsonify({
+                'success': False,
+                'error': 'ID de análisis inválido'
+            }), 400
+        
+        # Find analysis by ID and user
+        analysis = db.DB_ANALYSIS.find_one({
+            '_id': ObjectId(analysis_id),
+            'user_id': user_id
+        })
+        
+        if not analysis:
+            return jsonify({
+                'success': False,
+                'error': 'Análisis no encontrado o no tienes permisos para verlo'
+            }), 404
+        
+        # Convert ObjectId to string and format timestamps
+        analysis['_id'] = str(analysis['_id'])
+        if 'timestamp' in analysis:
+            analysis['timestamp'] = analysis['timestamp'].isoformat()
+        if 'created_at' in analysis:
+            analysis['created_at'] = analysis['created_at'].isoformat()
+        if 'updated_at' in analysis:
+            analysis['updated_at'] = analysis['updated_at'].isoformat()
+        
+        return jsonify({
+            'success': True,
+            'analysis': analysis
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error getting analysis by ID: {str(e)}")
         return jsonify({
             'success': False,
             'error': f'Error interno: {str(e)}'
