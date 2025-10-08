@@ -22,28 +22,44 @@
                     <span class="model-value" id="selected-model">{{ data.model }}</span>
                 </div>
                 
-                <!-- Action Buttons Minimal -->
-                <div class="action-buttons-minimal">
-                    <button class="btn-minimal btn-export" onclick="generatePDF()">
-                        <i class="fas fa-file-pdf me-2"></i>
-                        {{ _('PDF') }}
-                    </button>
-                    <button class="btn-minimal btn-export" onclick="generateWord()">
-                        <i class="fas fa-file-word me-2"></i>
-                        {{ _('Word') }}
-                    </button>
-                    <button class="btn-minimal btn-edit-mode" onclick="editAnalysis()">
-                        <i class="fas fa-edit me-2"></i>
-                        {{ _('Editar Análisis') }}
-                    </button>
-                    <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
-                        <i class="fas fa-save me-2"></i>
-                        {{ _('Guardar') }}
-                    </button>
-                    <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
-                        <i class="fas fa-check me-2"></i>
-                        {{ _('Finalizar') }}
-                    </button>
+                <!-- Export Buttons -->
+                <div class="button-group">
+                    <div class="button-group-title">
+                        <i class="fas fa-download me-1"></i>
+                        {{ _('Exportar') }}
+                    </div>
+                    <div class="action-buttons-minimal">
+                        <button class="btn-minimal btn-export" onclick="generatePDF()">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            {{ _('PDF') }}
+                        </button>
+                        <button class="btn-minimal btn-export" onclick="generateWord()">
+                            <i class="fas fa-file-word me-2"></i>
+                            {{ _('Word') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <div class="button-group-title">
+                        <i class="fas fa-cogs me-1"></i>
+                        {{ _('Acciones') }}
+                    </div>
+                    <div class="action-buttons-minimal">
+                        <button class="btn-minimal btn-edit-mode" onclick="editAnalysis()">
+                            <i class="fas fa-edit me-2"></i>
+                            {{ _('Editar Análisis') }}
+                        </button>
+                        <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
+                            <i class="fas fa-save me-2"></i>
+                            {{ _('Guardar') }}
+                        </button>
+                        <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
+                            <i class="fas fa-check me-2"></i>
+                            {{ _('Finalizar') }}
+                        </button>
+                    </div>
                 </div>
             </div>
 

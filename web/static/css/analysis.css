@@ -614,11 +614,41 @@ mark[data-variable]:hover {
   text-transform: capitalize;
 }
 
+/* Button Groups */
+.button-group {
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.button-group:last-child {
+  border-bottom: none;
+}
+
+.button-group-title {
+  padding: 0.5rem 1rem 0.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.button-group-title i {
+  font-size: 0.7rem;
+  color: #adb5bd;
+}
+
 .action-buttons-minimal {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem 0.75rem 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
+}
+
+/* Special case for 3 buttons in actions group */
+.button-group:last-child .action-buttons-minimal {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .btn-minimal {
