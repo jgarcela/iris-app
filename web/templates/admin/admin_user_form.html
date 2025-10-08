@@ -8,80 +8,162 @@
 {% endblock %}
 
 {% block admin_content %}
-<h1 class="h2 mt-4">
-  {% if action=='create' %}{{ _('Crear cuenta') }}{% else %}{{ _('Editar cuenta') }}{% endif %}
-</h1>
-
-<form method="post" class="row g-3">
-  <div class="col-md-6">
-    <label for="first_name" class="form-label">{{ _('Nombre') }}</label>
-    <input
-      type="text"
-      id="first_name"
-      name="first_name"
-      class="form-control"
-      required
-      value="{{ user.first_name if user else '' }}"
-    >
-  </div>
-  <div class="col-md-6">
-    <label for="last_name" class="form-label">{{ _('Apellido') }}</label>
-    <input
-      type="text"
-      id="last_name"
-      name="last_name"
-      class="form-control"
-      required
-      value="{{ user.last_name if user else '' }}"
-    >
-  </div>
-  <div class="col-md-6">
-    <label for="email" class="form-label">{{ _('Email') }}</label>
-    <input
-      type="email"
-      id="email"
-      name="email"
-      class="form-control"
-      required
-      value="{{ user.email if user else '' }}"
-    >
-  </div>
-  <div class="col-md-6">
-    <label for="password" class="form-label">
-      {{ _('Contraseña') }}
-      {% if action=='edit' %}<small>({{ _('dejar vacío para no cambiar') }})</small>{% endif %}
-    </label>
-    <input
-      type="password"
-      id="password"
-      name="password"
-      class="form-control"
-      {% if action=='create' %}required{% endif %}
-    >
-  </div>
-  <div class="col-12">
-    <label class="form-label">{{ _('Roles') }}</label>
-    <div class="d-flex flex-wrap">
-      {% for r in roles %}
-      <div class="form-check me-3">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="role-{{ r }}"
-          name="roles"
-          value="{{ r }}"
-          {% if user and r in user.roles %}checked{% endif %}
-        >
-        <label class="form-check-label" for="role-{{ r }}">{{ r }}</label>
+<div class="admin-form-container">
+  <!-- Header Section -->
+  <div class="admin-form-header">
+    <div class="d-flex align-items-center mb-3">
+      <div class="form-icon">
+        <i class="fas fa-user-edit"></i>
       </div>
-      {% endfor %}
+      <div class="form-title-section">
+        <h1 class="form-title">
+          {% if action=='create' %}{{ _('Crear cuenta') }}{% else %}{{ _('Editar cuenta') }}{% endif %}
+        </h1>
+        <p class="form-subtitle">
+          {% if action=='create' %}
+            {{ _('Crear una nueva cuenta de usuario en el sistema') }}
+          {% else %}
+            {{ _('Modificar los datos de la cuenta de usuario') }}
+          {% endif %}
+        </p>
+      </div>
     </div>
   </div>
-  <div class="col-12">
-    <button type="submit" class="btn btn-success">
-      {% if action=='create' %}{{ _('Crear') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
-    </button>
-    <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary">{{ _('Cancelar') }}</a>
+
+  <!-- Form Section -->
+  <div class="admin-form-card">
+    <form method="post" class="admin-form">
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-user me-2"></i>
+          <h3>{{ _('Información Personal') }}</h3>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="first_name" class="form-label">
+                <i class="fas fa-user me-1"></i>{{ _('Nombre') }}
+              </label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                class="form-control modern-input"
+                required
+                value="{{ user.first_name if user else '' }}"
+                placeholder="{{ _('Ingresa el nombre') }}"
+              >
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="last_name" class="form-label">
+                <i class="fas fa-user me-1"></i>{{ _('Apellido') }}
+              </label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                class="form-control modern-input"
+                required
+                value="{{ user.last_name if user else '' }}"
+                placeholder="{{ _('Ingresa el apellido') }}"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-envelope me-2"></i>
+          <h3>{{ _('Información de Cuenta') }}</h3>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="email" class="form-label">
+                <i class="fas fa-envelope me-1"></i>{{ _('Email') }}
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="form-control modern-input"
+                required
+                value="{{ user.email if user else '' }}"
+                placeholder="{{ _('usuario@ejemplo.com') }}"
+              >
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="password" class="form-label">
+                <i class="fas fa-lock me-1"></i>{{ _('Contraseña') }}
+                {% if action=='edit' %}
+                  <span class="form-help">({{ _('dejar vacío para no cambiar') }})</span>
+                {% endif %}
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control modern-input"
+                {% if action=='create' %}required{% endif %}
+                placeholder="{{ _('Ingresa la contraseña') }}"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roles Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-user-tag me-2"></i>
+          <h3>{{ _('Roles y Permisos') }}</h3>
+          <p class="section-description">{{ _('Selecciona los roles que tendrá este usuario') }}</p>
+        </div>
+        <div class="roles-grid">
+          {% for r in roles %}
+          <div class="role-checkbox">
+            <input
+              class="role-checkbox-input"
+              type="checkbox"
+              id="role-{{ r }}"
+              name="roles"
+              value="{{ r }}"
+              {% if user and r in user.roles %}checked{% endif %}
+            >
+            <label class="role-checkbox-label" for="role-{{ r }}">
+              <div class="role-card">
+                <div class="role-icon">
+                  <i class="fas fa-user-tag"></i>
+                </div>
+                <div class="role-content">
+                  <span class="role-name">{{ r|title }}</span>
+                  <span class="role-badge role-{{ r|lower }}">{{ r|title }}</span>
+                </div>
+              </div>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-save">
+          <i class="fas fa-save me-2"></i>
+          {% if action=='create' %}{{ _('Crear cuenta') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
+        </button>
+        <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary btn-cancel">
+          <i class="fas fa-times me-2"></i>{{ _('Cancelar') }}
+        </a>
+      </div>
+    </form>
   </div>
-</form>
+</div>
 {% endblock %}

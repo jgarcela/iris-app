@@ -8,46 +8,106 @@
 {% endblock %}
 
 {% block admin_content %}
-<h1 class="h2 mt-4">
-  {% if action=='create' %}{{ _('Crear rol') }}{% else %}{{ _('Editar rol') }}{% endif %}
-</h1>
-
-<form method="post" class="row g-3">
-  <div class="col-md-4">
-    <label for="name" class="form-label">{{ _('Nombre del rol') }}</label>
-    <input
-      type="text"
-      id="name"
-      name="name"
-      class="form-control"
-      required
-      value="{{ role.name if role else '' }}"
-      {% if action=='edit' %}readonly{% endif %}
-    >
-  </div>
-  <div class="col-12">
-    <label class="form-label">{{ _('Permisos') }}</label>
-    <div class="d-flex flex-wrap">
-      {% for p in all_permissions %}
-      <div class="form-check me-3">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="perm-{{ p }}"
-          name="permissions"
-          value="{{ p }}"
-          {% if role and p in role.permissions %}checked{% endif %}
-        >
-        <label class="form-check-label" for="perm-{{ p }}">{{ p }}</label>
+<div class="admin-form-container">
+  <!-- Header Section -->
+  <div class="admin-form-header">
+    <div class="d-flex align-items-center mb-3">
+      <div class="form-icon">
+        <i class="fas fa-user-tag"></i>
       </div>
-      {% endfor %}
+      <div class="form-title-section">
+        <h1 class="form-title">
+          {% if action=='create' %}{{ _('Crear rol') }}{% else %}{{ _('Editar rol') }}{% endif %}
+        </h1>
+        <p class="form-subtitle">
+          {% if action=='create' %}
+            {{ _('Crear un nuevo rol con permisos específicos') }}
+          {% else %}
+            {{ _('Modificar los permisos del rol') }}
+          {% endif %}
+        </p>
+      </div>
     </div>
   </div>
-  <div class="col-12">
-    <button type="submit" class="btn btn-success">
-      {% if action=='create' %}{{ _('Crear') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
-    </button>
-    <a href="{{ url_for('admin.list_roles') }}" class="btn btn-secondary">{{ _('Cancelar') }}</a>
+
+  <!-- Form Section -->
+  <div class="admin-form-card">
+    <form method="post" class="admin-form">
+      <!-- Role Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-user-tag me-2"></i>
+          <h3>{{ _('Información del Rol') }}</h3>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="name" class="form-label">
+                <i class="fas fa-tag me-1"></i>{{ _('Nombre del rol') }}
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                class="form-control modern-input"
+                required
+                value="{{ role.name if role else '' }}"
+                placeholder="{{ _('Ingresa el nombre del rol') }}"
+                {% if action=='edit' %}readonly{% endif %}
+              >
+              {% if action=='edit' %}
+                <div class="form-help">{{ _('El nombre del rol no se puede modificar') }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permissions Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-key me-2"></i>
+          <h3>{{ _('Permisos del Rol') }}</h3>
+          <p class="section-description">{{ _('Selecciona los permisos que tendrá este rol') }}</p>
+        </div>
+        <div class="permissions-grid">
+          {% for p in all_permissions %}
+          <div class="permission-checkbox">
+            <input
+              class="permission-checkbox-input"
+              type="checkbox"
+              id="perm-{{ p }}"
+              name="permissions"
+              value="{{ p }}"
+              {% if role and p in role.permissions %}checked{% endif %}
+            >
+            <label class="permission-checkbox-label" for="perm-{{ p }}">
+              <div class="permission-card">
+                <div class="permission-icon">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="permission-content">
+                  <span class="permission-name">{{ p|title }}</span>
+                  <span class="permission-badge permission-{{ p|lower|replace('_', '-') }}">{{ p|title }}</span>
+                </div>
+              </div>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-save">
+          <i class="fas fa-save me-2"></i>
+          {% if action=='create' %}{{ _('Crear rol') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
+        </button>
+        <a href="{{ url_for('admin.list_roles') }}" class="btn btn-secondary btn-cancel">
+          <i class="fas fa-times me-2"></i>{{ _('Cancelar') }}
+        </a>
+      </div>
+    </form>
   </div>
-</form>
+</div>
 {% endblock %}
