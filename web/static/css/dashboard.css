@@ -142,42 +142,42 @@
 
 .dashboard-filters select,
 .dashboard-filters input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
   background: var(--secondary-color);
   color: #1a202c;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-  transition: all var(--transition-speed) ease;
+  transition: all 0.2s ease;
 }
 
 .dashboard-filters select:focus,
 .dashboard-filters input:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(93, 224, 230, 0.1);
-  transform: translateY(-1px);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(20, 38, 55, 0.1);
+  transform: none;
 }
 
 .dashboard-filters .filter-submit button {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); /* degradado azul */
+  background: var(--primary-color);
   color: #ffffff;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-filters .filter-submit button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(13, 110, 253, 0.35);
+  background: #0f1f2e;
+  transform: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .dashboard-filters .filter-submit button i {
@@ -380,40 +380,42 @@
 .filter-date input[type="date"],
 .filter-db select {
   width: 100%;
-  padding: 0.6rem;
-  border: 1px solid var(--input-border-color);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  background: var(--secondary-color);
+  color: var(--text-black-color);
 }
 .filter-date input[type="date"]:focus,
 .filter-db select:focus {
-  border-color: var(--violet-iris-color);
+  border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(94,42,132,0.2);
+  box-shadow: 0 0 0 2px rgba(20, 38, 55, 0.1);
 }
 
-/* Botón filtrar */
+/* Minimalistic filter submit button */
 .filter-submit button {
-  padding: 0.75rem 1.4rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  padding: 0.625rem 1.25rem;
+  background: var(--primary-color);
   color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
   font-weight: 500;
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .filter-submit button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(13, 110, 253, 0.35);
+  background: #0f1f2e;
+  transform: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Chips/Badges informativos (para usar si se añaden en plantillas) */
