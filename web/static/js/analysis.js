@@ -860,6 +860,7 @@ function showHighlightBlock(category) {
         // Process highlights after a short delay to ensure DOM is ready
         setTimeout(() => {
             processHighlights();
+            attachHighlightSelectionHandler();
         }, 100);
     }
 }
@@ -883,6 +884,8 @@ function hideHighlights() {
     Object.values(highlightBlocks).forEach(block => {
         if (block) block.style.display = 'none';
     });
+
+    detachHighlightSelectionHandler();
 }
 
 // Setup collapsible panels
@@ -1697,4 +1700,82 @@ function openSelectModal({ title, label, options, multiple = false, initial = []
     };
     const modalEl = document.getElementById('editModal');
     if (window.bootstrap && modalEl) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+// ================================
+// Selection → Add Annotation in highlight view
+// ================================
+let highlightSelectionHandlerBound = false;
+function attachHighlightSelectionHandler() {
+    if (highlightSelectionHandlerBound) return;
+    const area = document.querySelector('.highlight-text .highlight-block[style*="display: block"] .markup-area') || document.querySelector('.highlight-text .markup-area');
+    if (!area) return;
+    const handler = function(e) {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed) return;
+        if (!area.contains(sel.anchorNode)) return;
+        const text = sel.toString().trim();
+        if (!text) return;
+        // Determine current category from visible block
+        const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
+        let currentCategory = null;
+        if (visibleBlock) {
+            if (visibleBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
+            else if (visibleBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
+            else if (visibleBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
+        }
+        // Step 1: pick variable for category
+        const variableOptions = getVariablesForCategory(currentCategory).map(v => ({ value: v, label: v.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) }));
+        openSelectModal({
+            title: 'Nueva anotación',
+            label: 'Variable',
+            options: variableOptions,
+            multiple: false,
+            initial: [],
+            onSave: (variable) => {
+                if (!variable) return;
+                // Step 2: pick value for variable
+                const valueOptions = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
+                openSelectModal({
+                    title: 'Selecciona valor',
+                    label: 'Valor',
+                    options: valueOptions,
+                    multiple: false,
+                    initial: [],
+                    onSave: (value) => {
+                        if (!value) return;
+                        // Integrate into data
+                        const annotation = { text, category: currentCategory, variable, value };
+                        integrateAnnotationIntoAnalysis(annotation);
+                        // Wrap selection in mark with color
+                        const range = sel.getRangeAt(0);
+                        const colorClass = window.highlight_color_map && window.highlight_color_map[variable] ? window.highlight_color_map[variable] : 'color-1';
+                        const mark = document.createElement('mark');
+                        mark.className = colorClass;
+                        mark.textContent = text;
+                        try {
+                            range.deleteContents();
+                            range.insertNode(mark);
+                        } catch (_) {}
+                        window.getSelection().removeAllRanges();
+                        // Re-run highlight processing
+                        processHighlights();
+                    }
+                });
+            }
+        });
+    };
+    area.addEventListener('mouseup', handler);
+    area.dataset.highlightSelectionHandler = 'true';
+    highlightSelectionHandlerBound = true;
+}
+
+function detachHighlightSelectionHandler() {
+    const area = document.querySelector('.highlight-text .markup-area');
+    if (!area) return;
+    if (area.dataset.highlightSelectionHandler) {
+        area.replaceWith(area.cloneNode(true));
+        delete area.dataset.highlightSelectionHandler;
+    }
+    highlightSelectionHandlerBound = false;
 }
