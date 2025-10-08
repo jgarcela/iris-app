@@ -314,3 +314,60 @@ def analyze_v0():
         api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
         api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
     )
+
+
+@bp.route('/history', methods=['GET'])
+@login_required
+def analysis_history():
+    """Display analysis history page with search and filtering capabilities"""
+    logger.info(f"[/ANALYSIS/HISTORY] Request from {request.remote_addr} [{request.method}]")
+    
+    # Get search and filter parameters
+    search_query = request.args.get('search', '').strip()
+    date_from = request.args.get('date_from', '').strip()
+    date_to = request.args.get('date_to', '').strip()
+    model_filter = request.args.get('model', '').strip()
+    
+    # Prepare API call to get analysis history
+    api_url = f"http://{API_HOST}:{API_PORT}/analysis/history"
+    
+    # Prepare query parameters for API
+    api_params = {}
+    if search_query:
+        api_params['search'] = search_query
+    if date_from:
+        api_params['date_from'] = date_from
+    if date_to:
+        api_params['date_to'] = date_to
+    if model_filter:
+        api_params['model'] = model_filter
+    
+    try:
+        # Call API to get analysis history
+        response = requests.get(api_url, params=api_params, headers=API_HEADERS, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            analyses = data.get('analyses', [])
+        else:
+            # Fallback: return empty list if API is not available yet
+            analyses = []
+            logger.warning(f"API returned status {response.status_code}, using empty list")
+    except Exception as e:
+        # Fallback: return empty list if API call fails
+        analyses = []
+        logger.warning(f"Failed to fetch analysis history: {e}")
+    
+    # Get unique models for filter dropdown
+    models = list(set([analysis.get('model', '') for analysis in analyses if analysis.get('model')]))
+    models.sort()
+    
+    return render_template(
+        'analysis/analysis_history.html',
+        analyses=analyses,
+        search_query=search_query,
+        date_from=date_from,
+        date_to=date_to,
+        model_filter=model_filter,
+        models=models,
+        total_count=len(analyses)
+    )
