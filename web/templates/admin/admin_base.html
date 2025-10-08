@@ -22,25 +22,31 @@
   <div class="row">
 
     <!-- Sidebar de administración -->
-    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-      <div class="sidebar-sticky pt-3">
-        <h6 class="sidebar-heading px-3 mb-1 text-muted">
+    <nav class="col-md-2 d-none d-md-block sidebar">
+      <div class="history-header mb-3">
+        <h6 class="mb-2">
+          <i class="fas fa-cogs me-2 text-primary"></i>
           {{ _('Administración') }}
         </h6>
+        <p class="small text-muted mb-0">
+          {{ _('Panel de control') }}
+        </p>
+      </div>
+      <div class="sidebar-sticky">
         <ul class="nav flex-column">
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_users') }}">
-              <i class="fas fa-users me-1"></i> {{ _('Personas Usuarias') }}
+              <i class="fas fa-users me-2"></i> {{ _('Personas Usuarias') }}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_roles') }}">
-              <i class="fas fa-user-tag me-1"></i> {{ _('Roles') }}
+              <i class="fas fa-user-tag me-2"></i> {{ _('Roles') }}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_permissions') }}">
-              <i class="fas fa-key me-1"></i> {{ _('Permisos') }}
+              <i class="fas fa-key me-2"></i> {{ _('Permisos') }}
             </a>
           </li>
         </ul>

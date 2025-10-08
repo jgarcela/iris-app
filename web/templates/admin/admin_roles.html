@@ -2,12 +2,28 @@
 {% block title %}Admin · {{ _('Roles') }}{% endblock %}
 
 {% block admin_content %}
-<h1 class="h2 mt-4 d-flex justify-content-between align-items-center">
-  {{ _('Roles') }}
-  <a href="{{ url_for('admin.create_role') }}" class="btn btn-success">
-    <i class="fas fa-plus me-1"></i> {{ _('Crear rol') }}
-  </a>
-</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-6 mb-3">
+                            <i class="fas fa-user-tag me-3 text-primary"></i>
+                            {{ _('Gestión de Roles') }}
+                        </h1>
+                        <p class="lead text-muted">
+                            {{ _('Administra los roles y permisos del sistema') }}
+                        </p>
+                    </div>
+                    <a href="{{ url_for('admin.create_role') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>{{ _('Crear rol') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <div class="table-responsive">
   <table
@@ -63,5 +79,6 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 </div>
 {% endblock %}

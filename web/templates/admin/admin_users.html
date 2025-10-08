@@ -1,19 +1,28 @@
 {% extends 'admin/admin_base.html' %}
 {% block title %}Admin · {{ _('Cuentas') }}{% endblock %}
 {% block admin_content %}
-
-<!-- Header Section -->
-<div class="admin-page-header">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h1 class="admin-page-title">{{ _('Gestión de Cuentas') }}</h1>
-      <p class="admin-page-subtitle">{{ _('Administra las cuentas de usuario del sistema') }}</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-6 mb-3">
+                            <i class="fas fa-users me-3 text-primary"></i>
+                            {{ _('Gestión de Cuentas') }}
+                        </h1>
+                        <p class="lead text-muted">
+                            {{ _('Administra las cuentas de usuario del sistema') }}
+                        </p>
+                    </div>
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>{{ _('Crear cuenta') }}
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    <a href="{{ url_for('admin.create_user') }}" class="btn btn-create-user">
-      <i class="fas fa-plus me-2"></i>{{ _('Crear cuenta') }}
-    </a>
-  </div>
-</div>
 
 <!-- Stats Cards -->
 <div class="row mb-4">
@@ -217,5 +226,5 @@
 
 <!-- Toolbar for Bootstrap Table -->
 <div id="toolbar" style="display: none;"></div>
-
+</div>
 {% endblock %}

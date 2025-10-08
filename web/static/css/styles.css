@@ -1634,3 +1634,47 @@
   font-size: 0.85rem;
   padding: 0 0.25rem;
 }
+
+/* ==================== */
+/* History Header Styles */
+/* ==================== */
+.history-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 2rem;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.search-filters-panel .card {
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-filters-panel .card > .card-header {
+  background: #f8f9fa !important;
+  color: #212529 !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  text-align: left !important;
+  padding: 1rem 1.25rem !important;
+  box-shadow: none !important;
+}
+
+.results-summary {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .history-header {
+    padding: 1rem;
+  }
+  
+  .history-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .search-filters-panel .row > div {
+    margin-bottom: 1rem;
+  }
+}

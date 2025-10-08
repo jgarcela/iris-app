@@ -2,8 +2,22 @@
 {% block title %}Admin · {{ _('Dashboard') }}{% endblock %}
 
 {% block admin_content %}
-<h1 class="h2 mt-4">{{ _('Panel de control') }}</h1>
-<div class="row my-4">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-cogs me-3 text-primary"></i>
+                    {{ _('Panel de control') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Administra usuarios, roles y permisos del sistema') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row my-4">
   <div class="col-md-4">
     <div class="card text-white bg-primary mb-3">
       <div class="card-header">{{ _('Personas Usuarias') }}</div>
@@ -34,5 +48,6 @@
       </div>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}
