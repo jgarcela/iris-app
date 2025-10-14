@@ -26,6 +26,9 @@
           <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="clear-selections">
             <i class="fas fa-eraser me-2"></i>{{ _('Limpiar Selecciones') }}
           </button>
+          <a href="{{ url_for('glossary.glossary_home') }}" class="btn btn-outline-info w-100 mb-2">
+            <i class="fas fa-book me-2"></i>{{ _('Glosario de variables') }}
+          </a>
           <button type="button" class="btn btn-success w-100" id="save-analysis">
             <i class="fas fa-save me-2"></i>{{ _('Guardar Análisis') }}
           </button>
