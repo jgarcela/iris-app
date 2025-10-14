@@ -94,6 +94,51 @@ def glossary_home():
         'genero_fuente': 'Género de la persona citada como fuente (cuando procede).',
     }
 
+    # Practical tips for annotators (Spanish)
+    tips = {
+        # Contenido general
+        'cita_textual_titular': 'Solo marca “Sí” si hay comillas o un estilo inequívoco de cita directa.',
+        'genero_nombre_propio_titular': 'Si hay varios nombres, marca la opción que mejor refleje el conjunto.',
+        'genero_personas_mencionadas': 'Cuenta el conjunto global del texto; no es necesario anotar uno por uno.',
+        'genero_periodista': 'Usa la autoría indicada; si es agencia o redacción, selecciónalo.',
+        'nombre_propio_titular': 'Incluye nombres propios tal como aparecen, sin deduplicar.',
+        'personas_mencionadas': 'Incluye las personas relevantes para el contenido, aunque no tengan cargo.',
+        'tema': 'Elige la temática predominante. Si dudas entre dos, escoge la más específica.',
+
+        # Lenguaje y análisis del discurso
+        'lenguaje_sexista': 'Revisa ejemplos del texto; ante la duda, marca “No”.',
+        'androcentrismo': 'Fíjate si lo masculino se usa como referente por defecto.',
+        'asimetria': 'Compara trato, relevancia y denominaciones entre mujeres y hombres.',
+        'cargos_mujeres': 'Cuenta menciones explícitas de cargos/profesiones desempeñados por mujeres.',
+        'comparacion_mujeres_hombres': 'Incluye comparaciones explícitas e implícitas relevantes para el enfoque.',
+        'denominacion_dependiente': 'Detecta “esposa de…”, “madre de…”, etc., cuando definan a la mujer por relación.',
+        'denominacion_redundante': 'Evita marcar si el marcador de género añade información pertinente.',
+        'denominacion_sexualizada': 'Busca énfasis en rasgos físicos o sexuales irrelevantes para el tema.',
+        'dual_aparente': 'No confundir con desdoblamientos genuinos con simetría en el trato.',
+        'excepcion_noticiabilidad': 'Valora si la relevancia se debe a romper una expectativa de género.',
+        'hombre_humanidad': 'Ej.: “el hombre ha llegado a la Luna” como sinónimo de humanidad.',
+        'infantilizacion': 'Detecta diminutivos, tono condescendiente, o tratamientos no profesionales.',
+        'masculino_generico': 'Revisa plurales masculinos para colectivos mixtos (“los alumnos” por “el alumnado”).',
+        'sexismo_social': 'Identifica estereotipos y marcos que asignan roles desiguales.',
+
+        # Fuentes de información
+        'nombre_fuente': 'Respeta la forma original del nombre o entidad citada.',
+        'declaracion_fuente': 'Selecciona ideas o citas atribuibles a la fuente.',
+        'tipo_fuente': 'Elige el perfil que mejor describa la voz citada.',
+        'genero_fuente': 'Marca solo si es deducible del texto; si no, déjalo en blanco.',
+    }
+
+    # Example snippets (Spanish)
+    examples = {
+        'cita_textual_titular': '“La ciencia avanza cada día”, afirma la investigadora.',
+        'genero_nombre_propio_titular': 'Titular: “María y Jorge ganan el premio”.',
+        'lenguaje_sexista': '“Los hombres de ciencia descubrieron…” (texto trata sobre un equipo mixto).',
+        'denominacion_dependiente': '“Esposa del ministro lidera el proyecto”.',
+        'hombre_humanidad': '“El hombre ha conquistado el espacio”.',
+        'masculino_generico': '“Los alumnos deben entregar el trabajo” (grupo mixto).',
+        'tipo_fuente': 'Ej.: Experto/a, Institucional, Periodista, Político/a.',
+    }
+
     def build_items(var_keys, specific_maps, fallback_map=None, category_title=''):
         items = []
         for key in var_keys:
