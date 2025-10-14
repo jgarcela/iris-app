@@ -93,6 +93,12 @@
                 </a>
               </li>  
                 <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'glossary.glossary_home' %}active{% endif %}"
+                    href="{{ url_for('glossary.glossary_home') }}">
+                    <i class="fas fa-book me-1"></i> {{ _('Glosario') }}
+                  </a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'table.table_iris' %}active{% endif %}"
                     href="{{ url_for('table.table_iris') }}">
                     <i class="fas fa-database me-1"></i> {{ _('Base de Datos') }}
