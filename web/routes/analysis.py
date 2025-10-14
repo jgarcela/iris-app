@@ -1,7 +1,7 @@
 # web/analysis.py
 import json
 import re
-from flask import Blueprint, render_template, request, jsonify, session, abort
+from flask import Blueprint, render_template, request, jsonify, session, abort, current_app, g
 import requests
 from flask_babel import get_locale
 import configparser
@@ -59,6 +59,27 @@ URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS = f"http://{API_HOST}:{API_PORT}/{END
 
 URL_API_ENDPOINT_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}"
 URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GET_DOCUMENT}"
+
+#  ----------------- HELPER FUNCTIONS -----------------
+def get_user_info():
+    """Get current user information from context processor"""
+    # The current_user is injected by the context processor in __init__.py
+    # We need to get it from the template context
+    from flask import has_request_context
+    if has_request_context():
+        # Try to get user info from the request context
+        # This is a workaround since current_user is only available in templates
+        token = request.cookies.get('access_token_cookie')
+        if token:
+            try:
+                headers = {'Authorization': f'Bearer {token}'}
+                resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
+                if resp.ok:
+                    user = resp.json().get('user')
+                    return user
+            except Exception:
+                pass
+    return None
 
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/generate_report/<doc_id>', methods=['GET'])
@@ -221,9 +242,16 @@ def analyze():
                'url': url,
                'analysis_mode': analysis_mode}
 
+    # Add user information to headers
+    headers = API_HEADERS.copy()
+    user = get_user_info()
+    if user:
+        headers['X-User-ID'] = user.get('id', 'anonymous')
+        headers['X-User-Email'] = user.get('email', 'anonymous@example.com')
+    
     # Llamada a la API
     logger.info(f"[/ANALYSIS/ANALYZE] Sending request to API ({URL_API_ENDPOINT_ANALYSIS_ANALYZE})...")
-    resp = requests.post(URL_API_ENDPOINT_ANALYSIS_ANALYZE, json=payload, headers=API_HEADERS)
+    resp = requests.post(URL_API_ENDPOINT_ANALYSIS_ANALYZE, json=payload, headers=headers)
     if resp.status_code == 200:
         data = resp.json()
         logger.info(f"[/ANALYSIS/ANALYZE] Received response from API: {data}")
@@ -315,3 +343,112 @@ def analyze_v0():
         api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
         api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
     )
+
+
+@bp.route('/history', methods=['GET'])
+@login_required
+def analysis_history():
+    """Display analysis history page with search and filtering capabilities"""
+    logger.info(f"[/ANALYSIS/HISTORY] Request from {request.remote_addr} [{request.method}]")
+    
+    # Get search and filter parameters
+    search_query = request.args.get('search', '').strip()
+    date_from = request.args.get('date_from', '').strip()
+    date_to = request.args.get('date_to', '').strip()
+    model_filter = request.args.get('model', '').strip()
+    
+    # Prepare API call to get analysis history
+    api_url = f"http://{API_HOST}:{API_PORT}/analysis/history"
+    
+    # Prepare query parameters for API
+    api_params = {}
+    if search_query:
+        api_params['search'] = search_query
+    if date_from:
+        api_params['date_from'] = date_from
+    if date_to:
+        api_params['date_to'] = date_to
+    if model_filter:
+        api_params['model'] = model_filter
+    
+    # Add user information to headers
+    headers = API_HEADERS.copy()
+    user = get_user_info()
+    if user:
+        headers['X-User-ID'] = user.get('id', 'anonymous')
+        headers['X-User-Email'] = user.get('email', 'anonymous@example.com')
+    
+    try:
+        # Call API to get analysis history
+        response = requests.get(api_url, params=api_params, headers=headers, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            analyses = data.get('analyses', [])
+        else:
+            # Fallback: return empty list if API is not available yet
+            analyses = []
+            logger.warning(f"API returned status {response.status_code}, using empty list")
+    except Exception as e:
+        # Fallback: return empty list if API call fails
+        analyses = []
+        logger.warning(f"Failed to fetch analysis history: {e}")
+    
+    # Get unique models for filter dropdown
+    models = list(set([analysis.get('model', '') for analysis in analyses if analysis.get('model')]))
+    models.sort()
+    
+    return render_template(
+        'analysis/analysis_history.html',
+        analyses=analyses,
+        search_query=search_query,
+        date_from=date_from,
+        date_to=date_to,
+        model_filter=model_filter,
+        models=models,
+        total_count=len(analyses)
+    )
+
+
+@bp.route('/view/<analysis_id>', methods=['GET'])
+@login_required
+def view_analysis(analysis_id):
+    """Display a specific analysis"""
+    logger.info(f"[/ANALYSIS/VIEW/{analysis_id}] Request from {request.remote_addr} [{request.method}]")
+    
+    try:
+        # Call API to get the specific analysis
+        api_url = f"http://{API_HOST}:{API_PORT}/analysis/{analysis_id}"
+        
+        # Add user information to headers
+        headers = API_HEADERS.copy()
+        user = get_user_info()
+        if user:
+            headers['X-User-ID'] = user.get('id', 'anonymous')
+            headers['X-User-Email'] = user.get('email', 'anonymous@example.com')
+        
+        response = requests.get(api_url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                analysis = data.get('analysis')
+                
+                return render_template(
+                    'analysis/analysis.html',
+                    language=get_locale(),
+                    data=analysis,
+                    highlight_map=HIGHLIGHT_COLOR_MAP,
+                    contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
+                    lenguaje_variables=LENGUAJE_VARIABLES,
+                    fuentes_variables=FUENTES_VARIABLES,
+                    api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
+                    api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
+                )
+            else:
+                abort(404, description=data.get('error', 'Análisis no encontrado'))
+        else:
+            abort(response.status_code, description="Error al obtener el análisis")
+            
+    except Exception as e:
+        logger.error(f"Error viewing analysis {analysis_id}: {e}")
+        abort(500, description="Error interno del servidor")

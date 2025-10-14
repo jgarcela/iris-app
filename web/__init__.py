@@ -118,7 +118,11 @@ from web.routes.table import bp as table_bp
 from web.routes.auth import bp as auth_bp
 from web.routes.contact import bp as contact_bp
 from web.routes.admin import bp as admin_bp
+<<<<<<< HEAD
 from web.routes.challenge import bp as challenge_bp
+=======
+from web.routes.glossary import bp as glossary_bp
+>>>>>>> feat/improve-create-analysis
 
 app.register_blueprint(analysis_bp)
 app.register_blueprint(dashboard_bp)
@@ -127,7 +131,11 @@ app.register_blueprint(table_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(contact_bp)
 app.register_blueprint(admin_bp)
+<<<<<<< HEAD
 app.register_blueprint(challenge_bp)
+=======
+app.register_blueprint(glossary_bp)
+>>>>>>> feat/improve-create-analysis
 
 
 # ==================================

@@ -22,25 +22,31 @@
   <div class="row">
 
     <!-- Sidebar de administración -->
-    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-      <div class="sidebar-sticky pt-3">
-        <h6 class="sidebar-heading px-3 mb-1 text-muted">
+    <nav class="col-md-2 d-none d-md-block sidebar">
+      <div class="history-header mb-3">
+        <h6 class="mb-2">
+          <i class="fas fa-cogs me-2 text-primary"></i>
           {{ _('Administración') }}
         </h6>
+        <p class="small text-muted mb-0">
+          {{ _('Panel de control') }}
+        </p>
+      </div>
+      <div class="sidebar-sticky">
         <ul class="nav flex-column">
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_users') }}">
-              <i class="fas fa-users me-1"></i> {{ _('Personas Usuarias') }}
+              <i class="fas fa-users me-2"></i> {{ _('Personas Usuarias') }}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_roles') }}">
-              <i class="fas fa-user-tag me-1"></i> {{ _('Roles') }}
+              <i class="fas fa-user-tag me-2"></i> {{ _('Roles') }}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_permissions') }}">
-              <i class="fas fa-key me-1"></i> {{ _('Permisos') }}
+              <i class="fas fa-key me-2"></i> {{ _('Permisos') }}
             </a>
           </li>
         </ul>
@@ -254,6 +260,232 @@
 
       // Initialize table when page loads
       initializeTable();
+
+      // Roles table functionality
+      if ($('#roles-table').length) {
+        initializeRolesTable();
+      }
+
+      // Permissions table functionality
+      if ($('#permissions-table').length) {
+        initializePermissionsTable();
+      }
     });
+
+    // Roles table functionality
+    function initializeRolesTable() {
+      let allRoles = [];
+      let filteredRoles = [];
+      let currentPage = 1;
+      const rolesPerPage = 10;
+
+      function initializeRolesData() {
+        allRoles = [];
+        $('#roles-table tbody tr').each(function() {
+          const $row = $(this);
+          allRoles.push({
+            element: $row,
+            id: $row.find('.role-id').text(),
+            name: $row.find('.role-name-badge').text().trim(),
+            permissions: $row.data('permissions') ? $row.data('permissions').split(',') : []
+          });
+        });
+        filteredRoles = [...allRoles];
+        updateRolesPagination();
+        showCurrentRolesPage();
+      }
+
+      $('#role-search').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterRoles(searchTerm, $('#permission-filter').val());
+      });
+
+      $('#permission-filter').on('change', function() {
+        const selectedPermission = $(this).val();
+        filterRoles($('#role-search').val().toLowerCase(), selectedPermission);
+      });
+
+      function filterRoles(searchTerm, permissionFilter) {
+        filteredRoles = allRoles.filter(role => {
+          const matchesSearch = !searchTerm || 
+            role.name.toLowerCase().includes(searchTerm);
+          
+          const matchesPermission = !permissionFilter || role.permissions.includes(permissionFilter);
+          
+          return matchesSearch && matchesPermission;
+        });
+
+        currentPage = 1;
+        updateRolesPagination();
+        showCurrentRolesPage();
+      }
+
+      function showCurrentRolesPage() {
+        allRoles.forEach(role => role.element.hide());
+        
+        const startIndex = (currentPage - 1) * rolesPerPage;
+        const endIndex = startIndex + rolesPerPage;
+        const rolesToShow = filteredRoles.slice(startIndex, endIndex);
+        
+        rolesToShow.forEach(role => role.element.show());
+        
+        const totalRoles = filteredRoles.length;
+        const startRole = totalRoles > 0 ? startIndex + 1 : 0;
+        const endRole = Math.min(endIndex, totalRoles);
+        $('#roles-pagination-info').text(`Mostrando ${startRole}-${endRole} de ${totalRoles} roles`);
+      }
+
+      function updateRolesPagination() {
+        const totalPages = Math.ceil(filteredRoles.length / rolesPerPage);
+        const $pageNumbers = $('#roles-page-numbers');
+        $pageNumbers.empty();
+
+        $('#prev-roles-page').prop('disabled', currentPage === 1);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const $pageBtn = $(`<span class="page-number ${i === currentPage ? 'active' : ''}">${i}</span>`);
+          $pageBtn.on('click', function() {
+            currentPage = i;
+            showCurrentRolesPage();
+            updateRolesPagination();
+          });
+          $pageNumbers.append($pageBtn);
+        }
+
+        $('#next-roles-page').prop('disabled', currentPage === totalPages);
+      }
+
+      $('#prev-roles-page').on('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showCurrentRolesPage();
+          updateRolesPagination();
+        }
+      });
+
+      $('#next-roles-page').on('click', function() {
+        const totalPages = Math.ceil(filteredRoles.length / rolesPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          showCurrentRolesPage();
+          updateRolesPagination();
+        }
+      });
+
+      $('#refresh-roles-table').on('click', function() {
+        location.reload();
+      });
+
+      initializeRolesData();
+    }
+
+    // Permissions table functionality
+    function initializePermissionsTable() {
+      let allPermissions = [];
+      let filteredPermissions = [];
+      let currentPage = 1;
+      const permissionsPerPage = 10;
+
+      function initializePermissionsData() {
+        allPermissions = [];
+        $('#permissions-table tbody tr').each(function() {
+          const $row = $(this);
+          allPermissions.push({
+            element: $row,
+            id: $row.find('.permission-id').text(),
+            name: $row.find('.permission-name-badge').text().trim(),
+            description: $row.find('.permission-description').text(),
+            type: $row.data('type')
+          });
+        });
+        filteredPermissions = [...allPermissions];
+        updatePermissionsPagination();
+        showCurrentPermissionsPage();
+      }
+
+      $('#permission-search').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterPermissions(searchTerm, $('#permission-type-filter').val());
+      });
+
+      $('#permission-type-filter').on('change', function() {
+        const selectedType = $(this).val();
+        filterPermissions($('#permission-search').val().toLowerCase(), selectedType);
+      });
+
+      function filterPermissions(searchTerm, typeFilter) {
+        filteredPermissions = allPermissions.filter(permission => {
+          const matchesSearch = !searchTerm || 
+            permission.name.toLowerCase().includes(searchTerm) ||
+            permission.description.toLowerCase().includes(searchTerm);
+          
+          const matchesType = !typeFilter || permission.type.includes(typeFilter);
+          
+          return matchesSearch && matchesType;
+        });
+
+        currentPage = 1;
+        updatePermissionsPagination();
+        showCurrentPermissionsPage();
+      }
+
+      function showCurrentPermissionsPage() {
+        allPermissions.forEach(permission => permission.element.hide());
+        
+        const startIndex = (currentPage - 1) * permissionsPerPage;
+        const endIndex = startIndex + permissionsPerPage;
+        const permissionsToShow = filteredPermissions.slice(startIndex, endIndex);
+        
+        permissionsToShow.forEach(permission => permission.element.show());
+        
+        const totalPermissions = filteredPermissions.length;
+        const startPermission = totalPermissions > 0 ? startIndex + 1 : 0;
+        const endPermission = Math.min(endIndex, totalPermissions);
+        $('#permissions-pagination-info').text(`Mostrando ${startPermission}-${endPermission} de ${totalPermissions} permisos`);
+      }
+
+      function updatePermissionsPagination() {
+        const totalPages = Math.ceil(filteredPermissions.length / permissionsPerPage);
+        const $pageNumbers = $('#permissions-page-numbers');
+        $pageNumbers.empty();
+
+        $('#prev-permissions-page').prop('disabled', currentPage === 1);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const $pageBtn = $(`<span class="page-number ${i === currentPage ? 'active' : ''}">${i}</span>`);
+          $pageBtn.on('click', function() {
+            currentPage = i;
+            showCurrentPermissionsPage();
+            updatePermissionsPagination();
+          });
+          $pageNumbers.append($pageBtn);
+        }
+
+        $('#next-permissions-page').prop('disabled', currentPage === totalPages);
+      }
+
+      $('#prev-permissions-page').on('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showCurrentPermissionsPage();
+          updatePermissionsPagination();
+        }
+      });
+
+      $('#next-permissions-page').on('click', function() {
+        const totalPages = Math.ceil(filteredPermissions.length / permissionsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          showCurrentPermissionsPage();
+          updatePermissionsPagination();
+        }
+      });
+
+      $('#refresh-permissions-table').on('click', function() {
+        location.reload();
+      });
+
+      initializePermissionsData();
+    }
   </script>
 {% endblock %}

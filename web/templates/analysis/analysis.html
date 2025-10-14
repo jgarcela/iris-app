@@ -5,6 +5,20 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-file-alt me-3 text-primary"></i>
+                    {{ _('Análisis de Texto') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Análisis detallado del contenido con herramientas de edición y anotación') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <!-- Left Column - Analysis Tools -->
         <div class="col-md-4">
             <!-- Analysis Tools Panel -->
@@ -22,55 +36,97 @@
                     <span class="model-value" id="selected-model">{{ data.model }}</span>
                 </div>
                 
-                <!-- Action Buttons Minimal -->
-                <div class="action-buttons-minimal">
-                    <button class="btn-minimal btn-export" onclick="generatePDF()">
-                        <i class="fas fa-file-pdf me-2"></i>
-                        {{ _('PDF') }}
-                    </button>
-                    <button class="btn-minimal btn-export" onclick="generateWord()">
-                        <i class="fas fa-file-word me-2"></i>
-                        {{ _('Word') }}
-                    </button>
-                    <button class="btn-minimal btn-edit-mode" onclick="editAnalysis()">
-                        <i class="fas fa-edit me-2"></i>
-                        {{ _('Editar Análisis') }}
-                    </button>
-                    <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
-                        <i class="fas fa-save me-2"></i>
-                        {{ _('Guardar') }}
-                    </button>
-                    <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
-                        <i class="fas fa-check me-2"></i>
-                        {{ _('Finalizar') }}
-                    </button>
+                <!-- Export Buttons -->
+                <div class="button-group">
+                    <div class="button-group-title">
+                        <i class="fas fa-download me-1"></i>
+                        {{ _('Exportar') }}
+                    </div>
+                    <div class="action-buttons-minimal">
+                        <button class="btn-minimal btn-export" onclick="generatePDF()">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            {{ _('PDF') }}
+                        </button>
+                        <button class="btn-minimal btn-export" onclick="generateWord()">
+                            <i class="fas fa-file-word me-2"></i>
+                            {{ _('Word') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <div class="button-group-title">
+                        <i class="fas fa-cogs me-1"></i>
+                        {{ _('Acciones') }}
+                    </div>
+                    <div class="action-buttons-minimal">
+                        <button class="btn-minimal btn-edit-mode" onclick="editAnalysis()">
+                            <i class="fas fa-edit me-2"></i>
+                            {{ _('Editar Análisis') }}
+                        </button>
+                        <a class="btn-minimal" href="{{ url_for('glossary.glossary_home') }}">
+                            <i class="fas fa-book me-2"></i>
+                            {{ _('Glosario de variables') }}
+                        </a>
+                        <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
+                            <i class="fas fa-save me-2"></i>
+                            {{ _('Guardar') }}
+                        </button>
+                        <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
+                            <i class="fas fa-check me-2"></i>
+                            {{ _('Finalizar') }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Inclusivity Score -->
+            <!-- Help / Info Panel as dropdown -->
             <div class="analysis-tools-panel">
-                <h5 class="panel-title">
-                    <i class="fas fa-chart-line me-2"></i>
-                    {{ _('Puntuación de Inclusividad') }}
-                </h5>
-                
-                <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
-                <div class="score-bar">
-                    <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
+                <div class="collapsible-header" data-target="help-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ _('Cómo editar anotaciones') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
                 </div>
-                
-                <div class="metrics">
-                    <div class="metric">
-                        <span class="label">{{ _('Contenido General') }}</span>
-                        <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
+                <div id="help-content" class="collapsible-content">
+                    <div class="small">
+                        <div class="mb-2"><strong>{{ _('Editar/aceptar/eliminar') }}:</strong> {{ _('haz clic en cualquier texto resaltado para abrir el menú de acciones. Al aceptar verás un check junto al fragmento.') }}</div>
+                        <div class="mb-2"><strong>{{ _('Crear anotaciones nuevas') }}:</strong> {{ _('selecciona un fragmento del texto y elige la variable/valor desde el panel; se abrirá un selector con opciones válidas.') }}</div>
+                        <div class="mb-2"><strong>{{ _('Nota') }}:</strong> {{ _('No es necesario anotar cada una de las variables; marca solo las que identifiques en el texto. Es normal que un texto no contenga todas las variables posibles.') }}</div>
+                        <div class="mb-0"><strong>{{ _('Guardar cambios') }}:</strong> {{ _('usa el botón Guardar del panel para persistir las anotaciones.') }}</div>
                     </div>
-                    <div class="metric">
-                        <span class="label">{{ _('Lenguaje') }}</span>
-                        <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
+                </div>
+            </div>
+
+            <!-- Inclusivity Score as dropdown -->
+            <div class="analysis-tools-panel">
+                <div class="collapsible-header" data-target="score-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        {{ _('Puntuación de Inclusividad') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="score-content" class="collapsible-content">
+                    <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
+                    <div class="score-bar">
+                        <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
                     </div>
-                    <div class="metric">
-                        <span class="label">{{ _('Fuentes') }}</span>
-                        <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="label">{{ _('Contenido General') }}</span>
+                            <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">{{ _('Lenguaje') }}</span>
+                            <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">{{ _('Fuentes') }}</span>
+                            <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -159,6 +215,7 @@
                 
                 <!-- Highlighted Text -->
                 <div class="highlight-text" style="display: none;">
+                    <div class="small text-muted mb-2"><i class="fas fa-mouse-pointer me-1"></i>Haz clic sobre un resaltado para editar, aceptar o eliminar la anotación.</div>
                     <!-- Contenido General Highlights -->
                     <div id="highlight-contenido" class="highlight-block highlight-contenido" style="display: none;">
                         <h6 class="mb-3">{{ _('Contenido General') }}</h6>
@@ -187,6 +244,53 @@
     <div class="tooltip-title"></div>
     <div class="tooltip-description"></div>
 </div>
+
+<!-- Generic Modal for edits -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalTitle">Editar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editModalForm">
+          <div class="mb-3" id="singleInputGroup" style="display:none;">
+            <label class="form-label" id="singleInputLabel">Valor</label>
+            <input type="text" class="form-control" id="singleInput" />
+          </div>
+          <div class="mb-3" id="selectInputGroup" style="display:none;">
+            <label class="form-label" id="selectInputLabel">Selecciona</label>
+            <select class="form-select" id="selectInput"></select>
+            <div class="form-text" id="selectHelp" style="display:none;">Puedes seleccionar múltiples valores manteniendo Ctrl/⌘.</div>
+          </div>
+          <div id="fuenteForm" style="display:none;">
+            <div class="mb-2">
+              <label class="form-label">Nombre de la fuente</label>
+              <input type="text" class="form-control" id="fuenteNombre" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Declaración</label>
+              <textarea class="form-control" id="fuenteDeclaracion" rows="3"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Tipo (clave)</label>
+              <input type="text" class="form-control" id="fuenteTipo" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Género (clave)</label>
+              <input type="text" class="form-control" id="fuenteGenero" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="editModalSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+  </div>
 
 <script>
     window.data = {{ data | tojson | safe }};

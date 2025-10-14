@@ -28,7 +28,7 @@ export function initSelectionTooltip() {
         'fuentes': 'fuentes'
       }[currentKey];
 
-      console.log("Block:", block);
+      
   
       // 👇 Oculta/muestra los botones según el acordeón abierto
       variableTooltip.querySelectorAll("button.var-btn").forEach(btn => {
