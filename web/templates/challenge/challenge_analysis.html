@@ -54,7 +54,7 @@
                         <div class="step" id="step-ai">
                             <div class="step-number">2</div>
                             <div class="step-content">
-                                <h6>{{ _('Análisis con IA') }}</h6>
+                                <h6>{{ _('Análisis con IRIS') }}</h6>
                                 <p class="text-muted small">{{ _('Compara con inteligencia artificial') }}</p>
                             </div>
                         </div>
@@ -190,7 +190,7 @@
                     <div class="action-buttons">
                         <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
                             <i class="fas fa-check me-2"></i>
-                            {{ _('Finalizar y comparar con IA') }}
+                            {{ _('Finalizar y comparar con IRIS') }}
                         </button>
                     </div>
                 </div>
@@ -1361,7 +1361,7 @@ function updateAnnotationsList() {
 
 function analyzeWithAI() {
     if (annotations.length === 0) {
-        alert('{{ _("Por favor realiza al menos una anotación antes de analizar con IA") }}');
+        alert('{{ _("Por favor realiza al menos una anotación antes de analizar con IRIS") }}');
         return;
     }
     
@@ -1396,7 +1396,7 @@ function analyzeWithAI() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('{{ _("Error al analizar con IA. Inténtalo de nuevo.") }}');
+        alert('{{ _("Error al analizar con IRIS. Inténtalo de nuevo.") }}');
         loadingBtn.innerHTML = originalText;
         loadingBtn.disabled = false;
     });
