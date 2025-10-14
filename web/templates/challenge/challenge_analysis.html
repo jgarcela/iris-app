@@ -114,7 +114,8 @@
                                     <h6 class="mb-2">
                                         <i class="fas fa-info-circle me-2"></i>
                                         <span id="instructions-title">{{ _('¿Qué debes anotar?') }}</span>
-                        </h6>
+                                    </h6>
+                                    <p class="text-muted small mb-2">{{ _('No es necesario anotar todas las variables; solo las que identifiques. Un texto puede no contener todas las variables posibles.') }}</p>
                                     <div id="no-annotation-message" class="text-center py-3" style="display: none;">
                                         <div class="alert alert-success">
                                             <i class="fas fa-eye fa-2x mb-3 text-success"></i>
@@ -591,9 +592,11 @@
 }
 </style>
 
+<script id="current-text-data" type="application/json">{{ text_data | tojson | safe }}</script>
+
 <script>
 // Datos del texto actual
-const currentText = {{ text_data | tojson | safe }};
+const currentText = JSON.parse(document.getElementById('current-text-data').textContent);
 let annotations = [];
 
 // Difficulty levels and their corresponding variables
