@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Glosario de variables') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="history-header mb-4">
+        <h1 class="display-6 mb-2">
+          <i class="fas fa-book me-3 text-primary"></i>
+          {{ _('Glosario de variables') }}
+        </h1>
+        <p class="text-muted mb-0">{{ _('Consulta las variables utilizadas en el análisis, junto con sus valores posibles cuando apliquen.') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="search-filters-panel mb-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-search me-2"></i>
+              {{ _('Búsqueda y Filtros') }}
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-4">
+                <label for="glossary-category-filter" class="form-label">
+                  <i class="fas fa-layer-group me-1"></i>
+                  {{ _('Categoría') }}
+                </label>
+                <select id="glossary-category-filter" class="form-select">
+                  <option value="all" selected>{{ _('Todas') }}</option>
+                  {% for group in glossary %}
+                    <option value="{{ group.category_key }}">{{ _(group.category_title) }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% for group in glossary %}
+        <div class="analysis-tools-panel mb-3 glossary-group" data-category="{{ group.category_key }}">
+          <div class="collapsible-header" data-target="glossary-{{ group.category_key }}">
+            <h5 class="panel-title mb-0">
+              <i class="fas fa-layer-group me-2"></i>
+              {{ _(group.category_title) }}
+            </h5>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <div id="glossary-{{ group.category_key }}" class="collapsible-content">
+            <div class="variables-grid">
+              {% for item in group.variables %}
+                <div class="variable-card">
+                  <div class="variable-header">
+                    <span class="variable-title">{{ _(item.title) }}</span>
+                  </div>
+                  <div class="variable-meta small text-muted">
+                    <i class="fas fa-folder-open me-1"></i>{{ _(item.category_title) }}
+                  </div>
+                  <div class="variable-description mt-2">
+                    {{ _(item.description) }}
+                  </div>
+                  {% if item.options %}
+                    <div class="variable-options small mt-3">
+                      <div class="fw-semibold mb-2">{{ _('Valores posibles') }}:</div>
+                      <div class="d-flex flex-wrap gap-2">
+                        {% for k, v in item.options.items() %}
+                          <span class="badge bg-light text-dark border">
+                            <code class="me-1">{{ k }}</code> {{ v }}
+                          </span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% else %}
+                    <div class="variable-options text-muted small mt-2">
+                      {{ _('Entrada de texto libre o sin catálogo predefinido de valores.') }}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script type="module" src="{{ url_for('static', filename='js/accordion.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">
+<script>
+  (function() {
+    const select = document.getElementById('glossary-category-filter');
+    const groups = Array.from(document.querySelectorAll('.glossary-group'));
+    if (!select || groups.length === 0) return;
+
+    const applyFilter = () => {
+      const value = select.value;
+      groups.forEach(group => {
+        const cat = group.getAttribute('data-category');
+        group.style.display = (value === 'all' || value === cat) ? '' : 'none';
+      });
+    };
+
+    select.addEventListener('change', applyFilter);
+  })();
+  </script>
+<script>
+  // Enable collapsible behavior for glossary panels (mirrors analysis page behavior)
+  document.addEventListener('DOMContentLoaded', function() {
+    const headers = document.querySelectorAll('.collapsible-header');
+    headers.forEach(header => {
+      header.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        const icon = this.querySelector('.toggle-icon');
+        if (!content || !icon) return;
+        const isHidden = (content.style.display === 'none' || content.style.display === '');
+        content.style.display = isHidden ? 'block' : 'none';
+        icon.classList.toggle('fa-chevron-down', !isHidden);
+        icon.classList.toggle('fa-chevron-up', isHidden);
+      });
+      // initialize collapsed
+      const targetId = header.getAttribute('data-target');
+      const content = document.getElementById(targetId);
+      if (content) content.style.display = 'none';
+    });
+  });
+</script>
+{% endblock %}
+
+

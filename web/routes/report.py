@@ -5,6 +5,7 @@ from flask_babel import get_locale
 import configparser
 import ast
 from web.utils.logger import logger
+from web.utils.decorators import challenge_restricted
 
 
 # ----------------- BLUEPRINT -----------------
@@ -33,6 +34,7 @@ URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANA
 
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/create', methods=['GET', 'POST'])
+@challenge_restricted
 def create():
     logger.info(f"[/REPORT/CREATE] Request to report/create from {request.remote_addr} with method {request.method}")
     logger.info("[/REPORT/CREATE] Rendering report create template...")

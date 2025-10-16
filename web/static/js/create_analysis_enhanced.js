@@ -31,16 +31,15 @@ function initializeCreateAnalysis() {
 function setupModeSelection() {
     const modeOptions = document.querySelectorAll('.mode-card-modern, .mode-option, .mode-card, .mode-card-compact');
     
-    console.log('Found mode options:', modeOptions.length);
     
     modeOptions.forEach((option, index) => {
-        console.log(`Option ${index}:`, option, 'data-mode:', option.dataset.mode);
+        
         
         option.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             const mode = this.dataset.mode;
-            console.log('Mode option clicked:', mode);
+            
             selectMode(mode);
         });
         
@@ -50,7 +49,7 @@ function setupModeSelection() {
                 e.preventDefault();
                 e.stopPropagation();
                 const mode = this.dataset.mode;
-                console.log('Mode option key pressed:', mode);
+                
                 selectMode(mode);
             }
         });
@@ -66,7 +65,6 @@ function setupModeSelection() {
  * Select analysis mode and update UI
  */
 function selectMode(mode) {
-    console.log('selectMode called with:', mode);
     
     // Remove selected class from all options
     document.querySelectorAll('.mode-card-modern, .mode-option, .mode-card, .mode-card-compact').forEach(option => {
@@ -76,14 +74,13 @@ function selectMode(mode) {
     
     // Add selected class to clicked option
     const selectedOption = document.querySelector(`[data-mode="${mode}"]`);
-    console.log('Selected option found:', selectedOption);
     
     if (selectedOption) {
         selectedOption.classList.add('selected');
         selectedOption.setAttribute('aria-pressed', 'true');
-        console.log('Added selected class to:', selectedOption);
+        
     } else {
-        console.error('No option found with data-mode:', mode);
+        
     }
     
     // Update hidden input
@@ -98,7 +95,7 @@ function selectMode(mode) {
     // Update analysis info badge
     updateAnalysisInfo(mode);
     
-    console.log(`Analysis mode changed to: ${mode}`);
+    
 }
 
 /**
@@ -109,13 +106,12 @@ function updateUIForMode(mode) {
     const analysisModeInfo = document.getElementById('analysis-mode-info');
     const modelInfo = document.getElementById('model-info');
     
-    console.log('Updating UI for mode:', mode);
     
     if (mode === 'automatic') {
         // Show model selection for automatic mode
         if (modelSelection) {
             modelSelection.style.display = 'block';
-            console.log('Showing model selection');
+            
         }
         
         // Update analysis mode info
@@ -139,7 +135,7 @@ function updateUIForMode(mode) {
         // Hide model selection for manual mode
         if (modelSelection) {
             modelSelection.style.display = 'none';
-            console.log('Hiding model selection');
+            
         }
         
         // Update analysis mode info
@@ -541,7 +537,7 @@ function setupClearTextButton() {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing...');
+    
     setupModeSelection();
     setupModelSelection();
     // Guard optional initializers if not present to avoid breaking the rest
@@ -557,7 +553,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize with automatic mode selected
     selectMode('automatic');
-    console.log('Initialized with automatic mode selected');
     
     // Setup clear text button
     setupClearTextButton();

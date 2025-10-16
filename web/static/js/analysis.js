@@ -47,12 +47,12 @@ function renderVariableCard(key, value, color) {
     let valueHtml = '';
     if (Array.isArray(value)) {
         if (value.length > 0) {
-            valueHtml = `<div class="value-list">${value.map(item => `<span class="value-item">${item}</span>`).join('')}</div>`;
+            valueHtml = `<div class="value-list">${value.map((item, idx) => `<span class=\"value-item\">${item} <button class=\"btn btn-sm btn-link text-danger p-0 ms-1\" data-action=\"delete-item\" data-key=\"${key}\" data-index=\"${idx}\" title=\"Eliminar\"><i class=\"fas fa-times\"></i></button></span>`).join('')}</div>`;
         } else {
             valueHtml = '<span class="value-empty">No hay datos</span>';
         }
     } else {
-        valueHtml = `<span class="value-single">${value}</span>`;
+        valueHtml = `<span class=\"value-single\">${value}</span>`;
     }
     
     return `
@@ -62,6 +62,10 @@ function renderVariableCard(key, value, color) {
                     <i class="fas fa-circle"></i>
                 </div>
                 <div class="variable-title">${title}</div>
+                <div class=\"ms-auto d-flex gap-1\">
+                    <button class=\"btn btn-sm btn-outline-primary\" data-action=\"add-item\" data-key=\"${key}\" title=\"Añadir\"><i class=\"fas fa-plus\"></i></button>
+                    <button class=\"btn btn-sm btn-outline-secondary\" data-action=\"edit-variable\" data-key=\"${key}\" title=\"Editar\"><i class=\"fas fa-pen\"></i></button>
+                </div>
             </div>
             <div class="variable-value">
                 ${valueHtml}
@@ -110,6 +114,11 @@ function renderSourceCard(fuente, index) {
             <div class="source-details">
                 ${sourceDetails}
             </div>
+            <div class=\"d-flex gap-1 mt-2\">
+                <button class=\"btn btn-sm btn-outline-primary\" data-action=\"add-fuente-item\" data-index=\"${index}\" title=\"Añadir campo\"><i class=\"fas fa-plus\"></i></button>
+                <button class=\"btn btn-sm btn-outline-secondary\" data-action=\"edit-fuente\" data-index=\"${index}\" title=\"Editar fuente\"><i class=\"fas fa-pen\"></i></button>
+                <button class=\"btn btn-sm btn-outline-danger\" data-action=\"delete-fuente\" data-index=\"${index}\" title=\"Eliminar fuente\"><i class=\"fas fa-trash\"></i></button>
+            </div>
         </div>
     `;
 }
@@ -130,6 +139,7 @@ function renderContent() {
             html += renderVariableCard(key, convertedValue, color);
         });
         contenidoContainer.innerHTML = html;
+        bindContenidoGeneralHandlers();
     }
     
     // Render lenguaje
@@ -189,15 +199,17 @@ function renderContent() {
                 });
                 
                 html += `
-                    <div class="variable-card">
-                        <div class="variable-header">
-                            <div class="variable-icon" style="background-color: ${color};">
-                                <i class="fas fa-circle"></i>
+                    <div class=\"variable-card\">
+                        <div class=\"variable-header\">
+                            <div class=\"variable-icon\" style=\"background-color: ${color};\">\n                                <i class=\"fas fa-circle\"></i>\n                            </div>
+                            <div class=\"variable-title\">${key.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase())}</div>
+                            <div class=\"ms-auto d-flex gap-1\">
+                                <button class=\"btn btn-sm btn-outline-primary\" data-action=\"add-etiqueta\" data-key=\"${key}\" title=\"Añadir etiqueta\"><i class=\"fas fa-plus\"></i></button>
+                                <button class=\"btn btn-sm btn-outline-primary\" data-action=\"add-ejemplo\" data-key=\"${key}\" title=\"Añadir ejemplo\"><i class=\"fas fa-quote-right\"></i></button>
                             </div>
-                            <div class="variable-title">${key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
                         </div>
-                        <div class="variable-value">
-                            <div class="value-structure">${subItems}</div>
+                        <div class=\"variable-value\">
+                            <div class=\"value-structure\">${subItems}</div>
                         </div>
                     </div>
                 `;
@@ -209,6 +221,7 @@ function renderContent() {
             }
         });
         lenguajeContainer.innerHTML = html;
+        bindLenguajeHandlers();
     }
     
     // Render fuentes
@@ -228,7 +241,221 @@ function renderContent() {
             html += renderSourceCard(convertedFuente, index);
         });
         fuentesContainer.innerHTML = html;
+        bindFuentesHandlers();
     }
+}
+
+function bindFuentesHandlers() {
+    const container = document.getElementById('fuentes-sources');
+    if (!container) return;
+    // Eliminar fuente
+    container.querySelectorAll('[data-action="delete-fuente"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'), 10);
+            const list = window.data.analysis.original.fuentes.fuentes || [];
+            if (idx >= 0 && idx < list.length) {
+                list.splice(idx, 1);
+                renderContent();
+            }
+        });
+    });
+    // Editar fuente completa (prompt por campos)
+    container.querySelectorAll('[data-action="edit-fuente"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'), 10);
+            const list = window.data.analysis.original.fuentes.fuentes || [];
+            const fuente = list[idx];
+            if (!fuente) return;
+            openFuenteFormModal(fuente, (val) => {
+                list[idx] = {
+                    nombre_fuente: val.nombre_fuente,
+                    declaracion_fuente: val.declaracion_fuente,
+                    tipo_fuente: val.tipo_fuente,
+                    genero_fuente: val.genero_fuente
+                };
+                renderContent();
+            });
+        });
+    });
+    // Añadir campo a fuente
+    container.querySelectorAll('[data-action="add-fuente-item"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-index'), 10);
+            const list = window.data.analysis.original.fuentes.fuentes || [];
+            const fuente = list[idx];
+            if (!fuente) return;
+            const campo = prompt('Campo a añadir (nombre_fuente, declaracion_fuente, tipo_fuente, genero_fuente):');
+            if (campo === null) return;
+            const valor = prompt('Valor del campo:');
+            if (valor === null) return;
+            const key = String(campo).trim();
+            if (!key) return;
+            fuente[key] = valor.trim();
+            list[idx] = fuente;
+            renderContent();
+        });
+    });
+    // Añadir nueva fuente (botón general si no existe)
+    let addButton = document.getElementById('add-new-fuente');
+    if (!addButton) {
+        addButton = document.createElement('button');
+        addButton.id = 'add-new-fuente';
+        addButton.className = 'btn btn-sm btn-primary my-2';
+        addButton.textContent = 'Añadir nueva fuente';
+        container.parentElement.insertBefore(addButton, container);
+    }
+    addButton.onclick = () => {
+        openFuenteFormModal({}, (val) => {
+            const list = window.data.analysis.original.fuentes.fuentes || [];
+            list.push({
+                nombre_fuente: val.nombre_fuente,
+                declaracion_fuente: val.declaracion_fuente,
+                tipo_fuente: val.tipo_fuente,
+                genero_fuente: val.genero_fuente
+            });
+            window.data.analysis.original.fuentes.fuentes = list;
+            renderContent();
+        });
+    };
+}
+
+function bindLenguajeHandlers() {
+    const container = document.getElementById('lenguaje-variables');
+    if (!container) return;
+    // Añadir etiqueta: pide clave de etiqueta (número) o texto mapeado
+    container.querySelectorAll('[data-action="add-etiqueta"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key');
+            const options = getValuesForVariable(key).map(v => ({ value: v.key, label: v.label }));
+            openSelectModal({
+                title: 'Añadir etiqueta',
+                label: 'Selecciona etiqueta',
+                options: options,
+                multiple: false,
+                initial: [],
+                onSave: (val) => {
+                    if (!val) return;
+                    const store = window.data.analysis.original.lenguaje[key] || { etiqueta: [], ejemplos_articulo: [] };
+                    store.etiqueta = store.etiqueta || [];
+                    store.etiqueta.push(val);
+                    window.data.analysis.original.lenguaje[key] = store;
+                    renderContent();
+                }
+            });
+        });
+    });
+    // Añadir ejemplo de artículo
+    container.querySelectorAll('[data-action="add-ejemplo"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key');
+            openSingleInputModal('Añadir ejemplo', 'Texto del ejemplo', '', (val) => {
+                if (!val) return;
+                const store = window.data.analysis.original.lenguaje[key] || { etiqueta: [], ejemplos_articulo: [] };
+                store.ejemplos_articulo = store.ejemplos_articulo || [];
+                store.ejemplos_articulo.push(val);
+                window.data.analysis.original.lenguaje[key] = store;
+                renderContent();
+            });
+        });
+    });
+    // Eliminar chips dentro de value-structure (etiquetas y ejemplos)
+    container.querySelectorAll('.sub-item .sub-value-list .sub-value-item').forEach((chip, idx) => {
+        // Agregar botón de eliminar si no existe
+        if (!chip.querySelector('button[data-action="delete-subitem"]')) {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn btn-sm btn-link text-danger p-0 ms-1';
+            delBtn.setAttribute('data-action', 'delete-subitem');
+            delBtn.innerHTML = '<i class="fas fa-times"></i>';
+            chip.appendChild(delBtn);
+        }
+    });
+    container.querySelectorAll('button[data-action="delete-subitem"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const chip = e.currentTarget.closest('.sub-value-item');
+            const subItem = e.currentTarget.closest('.sub-item');
+            const label = subItem.querySelector('.sub-label');
+            if (!chip || !subItem || !label) return;
+            const subKey = label.textContent.replace(':','').trim().toLowerCase().replace(/\s+/g,'_');
+            // Encontrar variable padre por proximidad (buscamos título en tarjeta)
+            const card = e.currentTarget.closest('.variable-card');
+            const title = card?.querySelector('.variable-title')?.textContent || '';
+            const variableKey = title.toLowerCase().replace(/\s+/g,'_');
+            const store = window.data.analysis.original.lenguaje[variableKey];
+            if (!store) return;
+            const list = Array.isArray(store[subKey]) ? store[subKey] : [];
+            const text = chip.childNodes[0]?.nodeValue?.trim() || chip.textContent.trim();
+            const idx = list.findIndex(v => String(v).trim() === text);
+            if (idx >= 0) {
+                list.splice(idx, 1);
+                store[subKey] = list;
+                window.data.analysis.original.lenguaje[variableKey] = store;
+                renderContent();
+            }
+        });
+    });
+}
+
+function bindContenidoGeneralHandlers() {
+    const container = document.getElementById('contenido-variables');
+    if (!container) return;
+    container.querySelectorAll('[data-action="delete-item"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key');
+            const index = parseInt(btn.getAttribute('data-index'), 10);
+            const arr = window.data.analysis.original.contenido_general[key];
+            if (Array.isArray(arr)) {
+                arr.splice(index, 1);
+            } else {
+                window.data.analysis.original.contenido_general[key] = '';
+            }
+            renderContent();
+        });
+    });
+    container.querySelectorAll('[data-action="add-item"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key');
+            const values = getValuesForVariable(key).map(v => ({ value: v.key, label: v.label }));
+            openSelectModal({
+                title: 'Añadir valor',
+                label: 'Selecciona un valor',
+                options: values,
+                multiple: false,
+                initial: [],
+                onSave: (val) => {
+                    if (!val) return;
+                    const current = window.data.analysis.original.contenido_general[key];
+                    if (Array.isArray(current)) {
+                        current.push(val);
+                    } else if (current) {
+                        window.data.analysis.original.contenido_general[key] = [current, val];
+                    } else {
+                        window.data.analysis.original.contenido_general[key] = [val];
+                    }
+                    renderContent();
+                }
+            });
+        });
+    });
+    container.querySelectorAll('[data-action="edit-variable"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-key');
+            const current = window.data.analysis.original.contenido_general[key];
+            const currentStr = Array.isArray(current) ? current.join(', ') : (current ?? '');
+            const values = getValuesForVariable(key).map(v => ({ value: v.key, label: v.label }));
+            const currentList = Array.isArray(current) ? current : (current ? [current] : []);
+            openSelectModal({
+                title: 'Editar valor',
+                label: 'Selecciona valores',
+                options: values,
+                multiple: true,
+                initial: currentList,
+                onSave: (selected) => {
+                    window.data.analysis.original.contenido_general[key] = Array.isArray(selected) ? selected : (selected ? [selected] : []);
+                    renderContent();
+                }
+            });
+        });
+    });
 }
 
 // Function to process highlights with tooltips
@@ -243,43 +470,39 @@ function processHighlights() {
     // Find actual highlight elements (mark elements with color-* classes)
     const highlightElements = document.querySelectorAll('mark[class*="color-"]');
     
+    // Ensure actions popover exists
+    ensureMarkActionsPopover();
+
     highlightElements.forEach(element => {
+        // provenance defaults to ai for loaded highlights
+        if (!element.dataset.provenance) {
+            element.dataset.provenance = 'ai';
+        }
+        // Remove empty marks defensively
+        if (!element.textContent || element.textContent.trim() === '') {
+            const span = document.createElement('span');
+            span.textContent = '';
+            element.replaceWith(span);
+            return;
+        }
         // Add tooltip functionality
         element.addEventListener('mouseenter', function(e) {
             const classList = Array.from(this.classList);
             const colorClasses = classList.filter(cls => cls.startsWith('color-'));
             
             if (colorClasses.length > 0) {
-                // Try to get real data from the analysis results
                 if (window.data && window.data.analysis && window.data.analysis.original) {
                     const analysis = window.data.analysis.original;
+                    const highlightColorMap = window.highlight_color_map || {};
                     
-                    // Map color classes to specific variables based on HIGHLIGHT_COLOR_MAP from config.ini
-                    const colorToVariableMap = {
-                        'color-1': { category: 'contenido_general', variable: 'nombre_propio_titular' },
-                        'color-2': { category: 'contenido_general', variable: 'cita_textual_titular' },
-                        'color-3': { category: 'contenido_general', variable: 'personas_mencionadas' },
-                        'color-4': { category: 'lenguaje', variable: 'lenguaje_sexista' },
-                        'color-5': { category: 'lenguaje', variable: 'hombre_humanidad' },
-                        'color-6': { category: 'lenguaje', variable: 'dual_aparente' },
-                        'color-7': { category: 'lenguaje', variable: 'cargos_mujeres' },
-                        'color-8': { category: 'lenguaje', variable: 'sexismo_social' },
-                        'color-9': { category: 'lenguaje', variable: 'androcentrismo' },
-                        'color-10': { category: 'lenguaje', variable: 'asimetria' },
-                        'color-11': { category: 'lenguaje', variable: 'infantilizacion' },
-                        'color-12': { category: 'lenguaje', variable: 'denominacion_sexualizada' },
-                        'color-13': { category: 'lenguaje', variable: 'denominacion_redundante' },
-                        'color-14': { category: 'lenguaje', variable: 'denominacion_dependiente' },
-                        'color-15': { category: 'lenguaje', variable: 'masculino_generico' },
-                        'color-16': { category: 'contenido_general', variable: 'criterios_excepcion_noticiabilidad' },
-                        'color-17': { category: 'lenguaje', variable: 'comparacion_mujeres_hombres' },
-                        'color-18': { category: 'fuentes', variable: 'nombre_fuente' },
-                        'color-19': { category: 'fuentes', variable: 'declaracion_fuente' },
-                        'color-20': { category: 'fuentes', variable: 'tipo_fuente' },
-                        'color-21': { category: 'fuentes', variable: 'genero_fuente' }
-                    };
+                    // Reverse map color -> [variables]
+                    const colorToVariables = {};
+                    Object.keys(highlightColorMap).forEach(variableName => {
+                        const color = highlightColorMap[variableName];
+                        if (!colorToVariables[color]) colorToVariables[color] = [];
+                        colorToVariables[color].push(variableName);
+                    });
                     
-                    // Process all color classes and collect tooltip data
                     const tooltipData = [];
                     
                     // Determine which category we're currently viewing
@@ -291,50 +514,70 @@ function processHighlights() {
                         else if (currentHighlightBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
                     }
                     
+                    const isFuenteVariable = (v) => ['nombre_fuente','declaracion_fuente','tipo_fuente','genero_fuente'].includes(v);
+                    
+                    const fuentesFallback = {
+                      'color-3': ['nombre_fuente'],
+                      'color-4': ['declaracion_fuente']
+                    };
                     for (const colorClass of colorClasses) {
-                        const mapping = colorToVariableMap[colorClass];
-                        
-                        if (mapping && analysis[mapping.category]) {
-                            // Only process variables that match the current category
-                            if (currentCategory && mapping.category !== currentCategory) {
-                                continue;
+                        let variablesForColor = colorToVariables[colorClass] || [];
+                        // En Fuentes, priorizar también las variables de fallback aunque el color mapee a otras categorías
+                        if (currentCategory === 'fuentes') {
+                          const extra = fuentesFallback[colorClass] || [];
+                          if (extra.length) {
+                            const set = new Set([...(variablesForColor || []), ...extra]);
+                            variablesForColor = Array.from(set);
+                          }
+                        }
+                        for (const variableNameRaw of variablesForColor) {
+                            let category = null;
+                            if (analysis.contenido_general && Object.prototype.hasOwnProperty.call(analysis.contenido_general, variableNameRaw)) {
+                                category = 'contenido_general';
+                            } else if (analysis.lenguaje && Object.prototype.hasOwnProperty.call(analysis.lenguaje, variableNameRaw)) {
+                                category = 'lenguaje';
+                            } else if (analysis.fuentes && isFuenteVariable(variableNameRaw)) {
+                                category = 'fuentes';
                             }
                             
-                            const categoryData = analysis[mapping.category];
-                            let varValue = null;
+                            if (!category) continue;
+                            if (currentCategory && category !== currentCategory) continue;
                             
-                            // Get the value based on category
-                            if (mapping.category === 'fuentes' && categoryData.fuentes) {
-                                if (categoryData.fuentes.length > 0) {
-                                    varValue = categoryData.fuentes[0][mapping.variable];
+                            let varValue = null;
+                            if (category === 'fuentes' && analysis.fuentes && Array.isArray(analysis.fuentes.fuentes)) {
+                                const values = analysis.fuentes.fuentes
+                                  .map(src => src ? src[variableNameRaw] : undefined)
+                                  .filter(v => v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : String(v).trim() !== ''));
+                                if (values.length > 0) {
+                                  // Aplanar y unificar valores
+                                  const flat = values.flat ? values.flat() : ([]).concat(...values);
+                                  // Convertir etiquetas si procede
+                                  const converted = flat.map(item => convertValueToLabel(variableNameRaw, item));
+                                  // Quitar duplicados manteniendo orden
+                                  const unique = Array.from(new Set(converted.map(v => typeof v === 'string' ? v.trim() : v)));
+                                  varValue = unique;
                                 }
-                            } else if (mapping.category === 'lenguaje' && categoryData[mapping.variable]) {
-                                const langVar = categoryData[mapping.variable];
-                                if (typeof langVar === 'object' && !Array.isArray(langVar) && langVar.etiqueta) {
+                            } else if (category === 'lenguaje') {
+                                const langVar = analysis.lenguaje[variableNameRaw];
+                                if (langVar && typeof langVar === 'object' && !Array.isArray(langVar) && langVar.etiqueta) {
                                     varValue = langVar.etiqueta;
                                 } else {
                                     varValue = langVar;
                                 }
-                            } else {
-                                varValue = categoryData[mapping.variable];
+                            } else if (category === 'contenido_general') {
+                                varValue = analysis.contenido_general[variableNameRaw];
                             }
                             
-                            // Convert value to label and add to tooltip data
-                            if (varValue && (Array.isArray(varValue) ? varValue.length > 0 : true)) {
-                                const variableName = mapping.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            if (varValue !== undefined && varValue !== null && (Array.isArray(varValue) ? varValue.length > 0 : true)) {
+                                const prettyVar = variableNameRaw.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                                 const convertedValue = Array.isArray(varValue) 
-                                    ? varValue.map(item => convertValueToLabel(mapping.variable, item)).join(', ')
-                                    : convertValueToLabel(mapping.variable, varValue);
-                                
-                                tooltipData.push({
-                                    variable: variableName,
-                                    value: convertedValue
-                                });
+                                  ? varValue.map(item => convertValueToLabel(variableNameRaw, item)).join(', ')
+                                  : convertValueToLabel(variableNameRaw, varValue);
+                                tooltipData.push({ variable: prettyVar, value: convertedValue });
                             }
                         }
                     }
                     
-                    // Display tooltip with all variables
                     if (tooltipData.length > 0) {
                         const title = tooltipData.length === 1 ? tooltipData[0].variable : 'Variables de análisis';
                         const description = tooltipData.map(item => `${item.variable}: ${item.value}`).join('\n');
@@ -361,6 +604,30 @@ function processHighlights() {
         
         element.addEventListener('mouseleave', function() {
             tooltip.classList.remove('show');
+        });
+
+        // Contextual actions on click
+        element.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const actions = document.getElementById('mark-actions-popover');
+            if (!actions) return;
+            const rect = element.getBoundingClientRect();
+            actions.style.position = 'fixed';
+            actions.style.left = (rect.left + Math.min(rect.width, 150)) + 'px';
+            actions.style.top = (rect.top - 8) + 'px';
+            actions.style.display = 'block';
+            actions.dataset.markUid = assignMarkUid(element);
+
+            // Resolve category and candidate variables
+            const currentHighlightBlock = element.closest('.highlight-block');
+            let currentCategory = null;
+            if (currentHighlightBlock) {
+                if (currentHighlightBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
+                else if (currentHighlightBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
+                else if (currentHighlightBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
+            }
+            actions.dataset.category = currentCategory || '';
+            actions.dataset.variable = resolveVariablesForMark(element, currentCategory)[0] || '';
         });
     });
 }
@@ -401,6 +668,167 @@ function addManualHighlights() {
     processHighlights();
 }
 
+// ------- Mark actions popover -------
+function ensureMarkActionsPopover() {
+    if (document.getElementById('mark-actions-popover')) return;
+    const div = document.createElement('div');
+    div.id = 'mark-actions-popover';
+    div.style.cssText = 'display:none; background:#fff; border:1px solid #dee2e6; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:6px; z-index:10000;';
+    div.innerHTML = `
+      <div class="btn-group">
+        <button class="btn btn-sm btn-outline-primary" data-action="mark-edit" title="Editar"><i class="fas fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-success" data-action="mark-accept" title="Aceptar"><i class="fas fa-check"></i></button>
+        <button class="btn btn-sm btn-outline-danger" data-action="mark-delete" title="Eliminar"><i class="fas fa-trash"></i></button>
+      </div>
+    `;
+    document.body.appendChild(div);
+    document.addEventListener('click', (e) => {
+        const pop = document.getElementById('mark-actions-popover');
+        if (!pop) return;
+        if (pop.style.display === 'block' && !pop.contains(e.target)) {
+            pop.style.display = 'none';
+        }
+    });
+    div.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        const pop = document.getElementById('mark-actions-popover');
+        const mark = findMarkByUid(pop.dataset.markUid);
+        if (!mark) return;
+        if (action === 'mark-edit') {
+            handleEditMark(mark, pop.dataset.category);
+        } else if (action === 'mark-accept') {
+            mark.classList.add('accepted');
+            mark.dataset.status = 'accepted';
+            // add visual tick if not present
+            if (!mark.nextElementSibling || !mark.nextElementSibling.classList || !mark.nextElementSibling.classList.contains('tick-icon')) {
+                const tick = document.createElement('i');
+                tick.className = 'fa fa-check tick-icon ms-1';
+                tick.title = 'Este fragmento ha sido aceptado';
+                mark.insertAdjacentElement('afterend', tick);
+            }
+            pop.style.display = 'none';
+        } else if (action === 'mark-delete') {
+            // Delete only DOM, keep data untouched
+            unwrapMark(mark);
+            pop.style.display = 'none';
+        }
+    });
+}
+
+function assignMarkUid(mark) {
+    if (!mark.dataset.uid) {
+        mark.dataset.uid = 'm_' + Math.random().toString(36).slice(2);
+    }
+    return mark.dataset.uid;
+}
+
+function findMarkByUid(uid) {
+    if (!uid) return null;
+    return document.querySelector(`mark[data-uid="${uid}"]`);
+}
+
+function unwrapMark(mark) {
+    const span = document.createElement('span');
+    span.textContent = mark.textContent;
+    mark.replaceWith(span);
+}
+
+function resolveVariablesForMark(mark, currentCategory) {
+    const classList = Array.from(mark.classList);
+    const colorClasses = classList.filter(cls => cls.startsWith('color-'));
+    const highlightColorMap = window.highlight_color_map || {};
+    const colorToVariables = {};
+    Object.keys(highlightColorMap).forEach(variableName => {
+        const color = highlightColorMap[variableName];
+        if (!colorToVariables[color]) colorToVariables[color] = [];
+        colorToVariables[color].push(variableName);
+    });
+    const candidates = [];
+    for (const color of colorClasses) {
+        const vars = colorToVariables[color] || [];
+        for (const v of vars) {
+            if (!currentCategory) { candidates.push(v); continue; }
+            if (currentCategory === 'fuentes' && ['nombre_fuente','declaracion_fuente','tipo_fuente','genero_fuente'].includes(v)) candidates.push(v);
+            if (currentCategory === 'lenguaje' && window.data.analysis.original.lenguaje && Object.prototype.hasOwnProperty.call(window.data.analysis.original.lenguaje, v)) candidates.push(v);
+            if (currentCategory === 'contenido_general' && window.data.analysis.original.contenido_general && Object.prototype.hasOwnProperty.call(window.data.analysis.original.contenido_general, v)) candidates.push(v);
+        }
+    }
+    return Array.from(new Set(candidates));
+}
+
+function handleEditMark(mark, category) {
+    const candidates = resolveVariablesForMark(mark, category);
+    const variable = candidates[0] || '';
+    if (!variable) return;
+    const options = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
+    openSelectModal({
+        title: 'Editar anotación',
+        label: 'Selecciona valor',
+        options,
+        multiple: false,
+        initial: [],
+        onSave: (val) => {
+            if (!val) return;
+            // Integrate into data similar to integrateAnnotationIntoAnalysis
+            const text = mark.textContent.trim();
+            if (category === 'contenido_general') {
+                const obj = window.data.analysis.original.contenido_general;
+                if (!obj[variable]) obj[variable] = [];
+                if (Array.isArray(obj[variable])) obj[variable].push(text); else obj[variable] = [obj[variable], text];
+            } else if (category === 'lenguaje') {
+                const obj = window.data.analysis.original.lenguaje;
+                if (!obj[variable]) obj[variable] = { etiqueta: [], ejemplos_articulo: [] };
+                obj[variable].etiqueta = obj[variable].etiqueta || [];
+                obj[variable].ejemplos_articulo = obj[variable].ejemplos_articulo || [];
+                obj[variable].etiqueta.push(val);
+                if (text) obj[variable].ejemplos_articulo.push(text);
+            } else if (category === 'fuentes') {
+                const obj = window.data.analysis.original.fuentes;
+                obj.fuentes = obj.fuentes || [];
+                // Create or update first fuente matching text
+                let f = obj.fuentes.find(s => (s.nombre_fuente === text || s.declaracion_fuente === text));
+                if (!f) { f = {}; obj.fuentes.push(f); }
+                f[variable] = val;
+                if (variable === 'nombre_fuente') f.nombre_fuente = text;
+                if (variable === 'declaracion_fuente') f.declaracion_fuente = text;
+            }
+            mark.dataset.status = 'accepted';
+            mark.classList.add('accepted');
+            renderContent();
+        }
+    });
+}
+
+function removeMarkFromData(mark, category) {
+    const text = (mark.textContent || '').trim();
+    if (!text || !category) return;
+    const data = window.data.analysis.original;
+    if (category === 'contenido_general') {
+        const obj = data.contenido_general || {};
+        Object.keys(obj).forEach(k => {
+            if (Array.isArray(obj[k])) {
+                const idx = obj[k].findIndex(v => String(v).trim() === text);
+                if (idx >= 0) obj[k].splice(idx, 1);
+            }
+        });
+    } else if (category === 'lenguaje') {
+        const obj = data.lenguaje || {};
+        Object.keys(obj).forEach(k => {
+            if (obj[k] && Array.isArray(obj[k].ejemplos_articulo)) {
+                const idx = obj[k].ejemplos_articulo.findIndex(v => String(v).trim() === text);
+                if (idx >= 0) obj[k].ejemplos_articulo.splice(idx, 1);
+            }
+        });
+    } else if (category === 'fuentes') {
+        const obj = data.fuentes || {};
+        if (Array.isArray(obj.fuentes)) {
+            obj.fuentes = obj.fuentes.filter(f => (f.nombre_fuente !== text && f.declaracion_fuente !== text));
+        }
+    }
+}
+
 // Function to show specific highlight block
 function showHighlightBlock(category) {
     const plainText = document.querySelector('.plain-text');
@@ -432,6 +860,7 @@ function showHighlightBlock(category) {
         // Process highlights after a short delay to ensure DOM is ready
         setTimeout(() => {
             processHighlights();
+            attachHighlightSelectionHandler();
         }, 100);
     }
 }
@@ -455,6 +884,8 @@ function hideHighlights() {
     Object.values(highlightBlocks).forEach(block => {
         if (block) block.style.display = 'none';
     });
+
+    detachHighlightSelectionHandler();
 }
 
 // Setup collapsible panels
@@ -989,7 +1420,7 @@ function integrateAnnotationIntoAnalysis(annotation) {
 function applyHighlight(range, variable) {
     // This function is kept for compatibility but the actual highlighting
     // is now handled by addManualHighlights() which preserves existing highlights
-    console.log('Highlight applied for variable:', variable);
+    
 }
 
 // Function to update annotation indicators
@@ -1158,4 +1589,193 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup collapsible panels
     setupCollapsiblePanels();
+    setupEditModalHelpers();
 });
+
+// Modal helpers
+let editModalInstance = null;
+function setupEditModalHelpers() {
+    const modalEl = document.getElementById('editModal');
+    if (!modalEl) return;
+    editModalInstance = window.bootstrap ? new window.bootstrap.Modal(modalEl) : null;
+}
+
+function openSingleInputModal(title, label, initialValue, onSave) {
+    const titleEl = document.getElementById('editModalTitle');
+    const singleGroup = document.getElementById('singleInputGroup');
+    const selectGroup = document.getElementById('selectInputGroup');
+    const singleLabel = document.getElementById('singleInputLabel');
+    const singleInput = document.getElementById('singleInput');
+    const fuenteForm = document.getElementById('fuenteForm');
+    const saveBtn = document.getElementById('editModalSave');
+    if (!titleEl || !singleGroup || !singleLabel || !singleInput || !saveBtn) return;
+    titleEl.textContent = title;
+    singleGroup.style.display = 'block';
+    selectGroup && (selectGroup.style.display = 'none');
+    fuenteForm && (fuenteForm.style.display = 'none');
+    singleLabel.textContent = label;
+    singleInput.value = initialValue ?? '';
+    saveBtn.onclick = () => {
+        const val = singleInput.value.trim();
+        if (onSave) onSave(val);
+        const modalEl = document.getElementById('editModal');
+        if (window.bootstrap && modalEl) window.bootstrap.Modal.getInstance(modalEl)?.hide();
+    };
+    const modalEl = document.getElementById('editModal');
+    if (window.bootstrap && modalEl) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function openFuenteFormModal(initial, onSave) {
+    const titleEl = document.getElementById('editModalTitle');
+    const singleGroup = document.getElementById('singleInputGroup');
+    const selectGroup = document.getElementById('selectInputGroup');
+    const fuenteForm = document.getElementById('fuenteForm');
+    const saveBtn = document.getElementById('editModalSave');
+    const nombre = document.getElementById('fuenteNombre');
+    const declaracion = document.getElementById('fuenteDeclaracion');
+    const tipo = document.getElementById('fuenteTipo');
+    const genero = document.getElementById('fuenteGenero');
+    if (!titleEl || !fuenteForm || !saveBtn || !nombre || !declaracion || !tipo || !genero) return;
+    titleEl.textContent = 'Editar fuente';
+    singleGroup && (singleGroup.style.display = 'none');
+    selectGroup && (selectGroup.style.display = 'none');
+    fuenteForm.style.display = 'block';
+    nombre.value = initial?.nombre_fuente ?? '';
+    declaracion.value = initial?.declaracion_fuente ?? '';
+    tipo.value = initial?.tipo_fuente ?? '';
+    genero.value = initial?.genero_fuente ?? '';
+    saveBtn.onclick = () => {
+        const val = {
+            nombre_fuente: nombre.value.trim(),
+            declaracion_fuente: declaracion.value.trim(),
+            tipo_fuente: tipo.value.trim(),
+            genero_fuente: genero.value.trim()
+        };
+        if (onSave) onSave(val);
+        const modalEl = document.getElementById('editModal');
+        if (window.bootstrap && modalEl) window.bootstrap.Modal.getInstance(modalEl)?.hide();
+    };
+    const modalEl = document.getElementById('editModal');
+    if (window.bootstrap && modalEl) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function openSelectModal({ title, label, options, multiple = false, initial = [], onSave }) {
+    const titleEl = document.getElementById('editModalTitle');
+    const singleGroup = document.getElementById('singleInputGroup');
+    const selectGroup = document.getElementById('selectInputGroup');
+    const fuenteForm = document.getElementById('fuenteForm');
+    const selectInput = document.getElementById('selectInput');
+    const selectLabel = document.getElementById('selectInputLabel');
+    const selectHelp = document.getElementById('selectHelp');
+    const saveBtn = document.getElementById('editModalSave');
+    if (!titleEl || !selectGroup || !selectInput || !saveBtn || !selectLabel) return;
+    titleEl.textContent = title;
+    singleGroup && (singleGroup.style.display = 'none');
+    fuenteForm && (fuenteForm.style.display = 'none');
+    selectGroup.style.display = 'block';
+    selectLabel.textContent = label;
+    selectInput.innerHTML = '';
+    selectInput.multiple = !!multiple;
+    if (selectHelp) selectHelp.style.display = multiple ? 'block' : 'none';
+    // options: array of { value, label }
+    (options || []).forEach(opt => {
+        const o = document.createElement('option');
+        o.value = String(opt.value);
+        o.textContent = opt.label;
+        if (Array.isArray(initial) && initial.map(String).includes(String(opt.value))) {
+            o.selected = true;
+        }
+        selectInput.appendChild(o);
+    });
+    saveBtn.onclick = () => {
+        let val;
+        if (multiple) {
+            val = Array.from(selectInput.selectedOptions).map(o => o.value);
+        } else {
+            val = selectInput.value;
+        }
+        if (onSave) onSave(val);
+        const modalEl = document.getElementById('editModal');
+        if (window.bootstrap && modalEl) window.bootstrap.Modal.getInstance(modalEl)?.hide();
+    };
+    const modalEl = document.getElementById('editModal');
+    if (window.bootstrap && modalEl) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+// ================================
+// Selection → Add Annotation in highlight view
+// ================================
+let highlightSelectionHandlerBound = false;
+function attachHighlightSelectionHandler() {
+    if (highlightSelectionHandlerBound) return;
+    const area = document.querySelector('.highlight-text .highlight-block[style*="display: block"] .markup-area') || document.querySelector('.highlight-text .markup-area');
+    if (!area) return;
+    const handler = function(e) {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed) return;
+        if (!area.contains(sel.anchorNode)) return;
+        const text = sel.toString().trim();
+        if (!text) return;
+        // Determine current category from visible block
+        const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
+        let currentCategory = null;
+        if (visibleBlock) {
+            if (visibleBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
+            else if (visibleBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
+            else if (visibleBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
+        }
+        // Step 1: pick variable for category
+        const variableOptions = getVariablesForCategory(currentCategory).map(v => ({ value: v, label: v.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) }));
+        openSelectModal({
+            title: 'Nueva anotación',
+            label: 'Variable',
+            options: variableOptions,
+            multiple: false,
+            initial: [],
+            onSave: (variable) => {
+                if (!variable) return;
+                // Step 2: pick value for variable
+                const valueOptions = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
+                openSelectModal({
+                    title: 'Selecciona valor',
+                    label: 'Valor',
+                    options: valueOptions,
+                    multiple: false,
+                    initial: [],
+                    onSave: (value) => {
+                        if (!value) return;
+                        // Integrate into data
+                        const annotation = { text, category: currentCategory, variable, value };
+                        integrateAnnotationIntoAnalysis(annotation);
+                        // Wrap selection in mark with color
+                        const range = sel.getRangeAt(0);
+                        const colorClass = window.highlight_color_map && window.highlight_color_map[variable] ? window.highlight_color_map[variable] : 'color-1';
+                        const mark = document.createElement('mark');
+                        mark.className = colorClass;
+                        mark.textContent = text;
+                        try {
+                            range.deleteContents();
+                            range.insertNode(mark);
+                        } catch (_) {}
+                        window.getSelection().removeAllRanges();
+                        // Re-run highlight processing
+                        processHighlights();
+                    }
+                });
+            }
+        });
+    };
+    area.addEventListener('mouseup', handler);
+    area.dataset.highlightSelectionHandler = 'true';
+    highlightSelectionHandlerBound = true;
+}
+
+function detachHighlightSelectionHandler() {
+    const area = document.querySelector('.highlight-text .markup-area');
+    if (!area) return;
+    if (area.dataset.highlightSelectionHandler) {
+        area.replaceWith(area.cloneNode(true));
+        delete area.dataset.highlightSelectionHandler;
+    }
+    highlightSelectionHandlerBound = false;
+}
