@@ -118,7 +118,7 @@
                   </a>
                 </li>
                 <!-- Challenge tab for non-challenge users (including admins) - only if enabled -->
-                {% if challenge_enabled %}
+                {% if challenge_enabled and 'admin' in current_user.roles %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
                     href="{{ url_for('challenge.challenge_home') }}">
