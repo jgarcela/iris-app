@@ -652,12 +652,8 @@ function addManualHighlights() {
         
         if (!existingPattern.test(highlightedText)) {
             // This annotation hasn't been processed yet, add it
-            const colorClass = window.highlight_color_map && window.highlight_color_map[variable] 
-                ? window.highlight_color_map[variable] 
-                : 'color-1';
-            
             const pattern = new RegExp(`(${escapedText})`, 'gi');
-            highlightedText = highlightedText.replace(pattern, `<mark class="${colorClass}" data-variable="${variable}">$1</mark>`);
+            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}">$1</mark>`);
         }
     });
     
@@ -1418,9 +1414,31 @@ function integrateAnnotationIntoAnalysis(annotation) {
 
 // Function to apply highlight (this is now handled by addManualHighlights)
 function applyHighlight(range, variable) {
-    // This function is kept for compatibility but the actual highlighting
-    // is now handled by addManualHighlights() which preserves existing highlights
-    
+    if (!range || !variable) return;
+    const mark = document.createElement('mark');
+    mark.setAttribute('data-variable', variable);
+    try {
+        // Prefer surroundContents to preserve selection boundaries when possible
+        const selectedText = range.toString();
+        if (!selectedText) return;
+        mark.textContent = selectedText;
+        range.deleteContents();
+        range.insertNode(mark);
+    } catch (e) {
+        // Fallback: extract and insert
+        try {
+            const contents = range.extractContents();
+            mark.appendChild(contents);
+            range.insertNode(mark);
+        } catch (_) { /* noop */ }
+    }
+    // Clear selection and re-process highlights so tooltips and actions bind
+    if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+    }
+    setTimeout(() => {
+        processHighlights();
+    }, 0);
 }
 
 // Function to update annotation indicators
@@ -1747,11 +1765,10 @@ function attachHighlightSelectionHandler() {
                         // Integrate into data
                         const annotation = { text, category: currentCategory, variable, value };
                         integrateAnnotationIntoAnalysis(annotation);
-                        // Wrap selection in mark with color
+                        // Wrap selection in mark with default styling
                         const range = sel.getRangeAt(0);
-                        const colorClass = window.highlight_color_map && window.highlight_color_map[variable] ? window.highlight_color_map[variable] : 'color-1';
                         const mark = document.createElement('mark');
-                        mark.className = colorClass;
+                        mark.setAttribute('data-variable', variable);
                         mark.textContent = text;
                         try {
                             range.deleteContents();
