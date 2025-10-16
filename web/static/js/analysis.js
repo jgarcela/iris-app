@@ -652,12 +652,8 @@ function addManualHighlights() {
         
         if (!existingPattern.test(highlightedText)) {
             // This annotation hasn't been processed yet, add it
-            const colorClass = window.highlight_color_map && window.highlight_color_map[variable] 
-                ? window.highlight_color_map[variable] 
-                : 'color-1';
-            
             const pattern = new RegExp(`(${escapedText})`, 'gi');
-            highlightedText = highlightedText.replace(pattern, `<mark class="${colorClass}" data-variable="${variable}">$1</mark>`);
+            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}">$1</mark>`);
         }
     });
     
@@ -905,16 +901,27 @@ function setupCollapsiblePanels() {
                     icon.classList.remove('fa-chevron-down');
                     icon.classList.add('fa-chevron-up');
                     
-                    // Re-render content to include any new manual annotations
-                    renderContent();
-                    
-                    // Show corresponding highlight block only if highlights exist
-                    if (targetId === 'contenido-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.contenido_general) {
-                        showHighlightBlock('contenido');
-                    } else if (targetId === 'lenguaje-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.lenguaje) {
-                        showHighlightBlock('lenguaje');
-                    } else if (targetId === 'fuentes-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.fuentes) {
-                        showHighlightBlock('fuentes');
+                    // Show text analysis panel only for analysis categories
+                    if (targetId === 'contenido-content' || targetId === 'lenguaje-content' || targetId === 'fuentes-content') {
+                        showTextAnalysisPanel();
+                        
+                        // Enable edit button when a category is opened
+                        enableEditButton();
+                        
+                        // Re-render content to include any new manual annotations
+                        renderContent();
+                        
+                        // Show corresponding highlight block for the category
+                        if (targetId === 'contenido-content') {
+                            showHighlightBlock('contenido');
+                        } else if (targetId === 'lenguaje-content') {
+                            showHighlightBlock('lenguaje');
+                        } else if (targetId === 'fuentes-content') {
+                            showHighlightBlock('fuentes');
+                        }
+                    } else {
+                        // For non-analysis categories, just re-render content
+                        renderContent();
                     }
                 } else {
                     // Closing panel
@@ -924,6 +931,9 @@ function setupCollapsiblePanels() {
                     
                     // Hide highlights and show plain text
                     hideHighlights();
+                    
+                    // Check if any other panels are still open, if not, show instructions
+                    checkAndShowInstructions();
                 }
             }
         });
@@ -935,6 +945,55 @@ function setupCollapsiblePanels() {
             content.style.display = 'none';
         }
     });
+}
+
+// Function to show text analysis panel
+function showTextAnalysisPanel() {
+    const instructionsPanel = document.querySelector('.plain-text');
+    const textAnalysisPanel = document.querySelector('.text-analysis-panel');
+    
+    if (instructionsPanel && textAnalysisPanel) {
+        instructionsPanel.style.display = 'none';
+        textAnalysisPanel.style.display = 'block';
+    }
+}
+
+// Function to check if any analysis category panels are open and show instructions if none are
+function checkAndShowInstructions() {
+    const analysisCategoryIds = ['contenido-content', 'lenguaje-content', 'fuentes-content'];
+    const instructionsPanel = document.querySelector('.plain-text');
+    const textAnalysisPanel = document.querySelector('.text-analysis-panel');
+    
+    let anyAnalysisPanelOpen = false;
+    analysisCategoryIds.forEach(id => {
+        const content = document.getElementById(id);
+        if (content && content.style.display === 'block') {
+            anyAnalysisPanelOpen = true;
+        }
+    });
+    
+    if (!anyAnalysisPanelOpen && instructionsPanel && textAnalysisPanel) {
+        instructionsPanel.style.display = 'block';
+        textAnalysisPanel.style.display = 'none';
+        // Disable edit button when no categories are open
+        disableEditButton();
+    }
+}
+
+// Function to enable edit button
+function enableEditButton() {
+    const editButton = document.getElementById('edit-analysis-btn');
+    if (editButton) {
+        editButton.disabled = false;
+    }
+}
+
+// Function to disable edit button
+function disableEditButton() {
+    const editButton = document.getElementById('edit-analysis-btn');
+    if (editButton) {
+        editButton.disabled = true;
+    }
 }
 
 // ===========================================
@@ -1418,9 +1477,31 @@ function integrateAnnotationIntoAnalysis(annotation) {
 
 // Function to apply highlight (this is now handled by addManualHighlights)
 function applyHighlight(range, variable) {
-    // This function is kept for compatibility but the actual highlighting
-    // is now handled by addManualHighlights() which preserves existing highlights
-    
+    if (!range || !variable) return;
+    const mark = document.createElement('mark');
+    mark.setAttribute('data-variable', variable);
+    try {
+        // Prefer surroundContents to preserve selection boundaries when possible
+        const selectedText = range.toString();
+        if (!selectedText) return;
+        mark.textContent = selectedText;
+        range.deleteContents();
+        range.insertNode(mark);
+    } catch (e) {
+        // Fallback: extract and insert
+        try {
+            const contents = range.extractContents();
+            mark.appendChild(contents);
+            range.insertNode(mark);
+        } catch (_) { /* noop */ }
+    }
+    // Clear selection and re-process highlights so tooltips and actions bind
+    if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+    }
+    setTimeout(() => {
+        processHighlights();
+    }, 0);
 }
 
 // Function to update annotation indicators
@@ -1747,11 +1828,10 @@ function attachHighlightSelectionHandler() {
                         // Integrate into data
                         const annotation = { text, category: currentCategory, variable, value };
                         integrateAnnotationIntoAnalysis(annotation);
-                        // Wrap selection in mark with color
+                        // Wrap selection in mark with default styling
                         const range = sel.getRangeAt(0);
-                        const colorClass = window.highlight_color_map && window.highlight_color_map[variable] ? window.highlight_color_map[variable] : 'color-1';
                         const mark = document.createElement('mark');
-                        mark.className = colorClass;
+                        mark.setAttribute('data-variable', variable);
                         mark.textContent = text;
                         try {
                             range.deleteContents();
