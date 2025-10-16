@@ -910,6 +910,33 @@ mark.accepted { outline: 1px solid rgba(0,0,0,0.08); }
   margin: 0;
 }
 
+/* Categories Section Styles */
+.categories-section {
+  margin-bottom: 1rem;
+}
+
+.categories-header {
+  padding: 0.5rem 0;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 0.75rem;
+}
+
+.categories-title {
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.categories-title i {
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .analysis-tools-panel,

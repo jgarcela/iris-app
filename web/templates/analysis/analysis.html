@@ -131,54 +131,6 @@
                 </div>
             </div>
 
-            <!-- Contenido General -->
-            <div class="analysis-tools-panel">
-                <div class="collapsible-header" data-target="contenido-content">
-                    <h5 class="panel-title mb-0">
-                        <i class="fas fa-newspaper me-2"></i>
-                        {{ _('Contenido General') }}
-                    </h5>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div id="contenido-content" class="collapsible-content">
-                    <div id="contenido-variables" class="variables-grid">
-                        <!-- Variables will be rendered by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lenguaje y Análisis del discurso -->
-            <div class="analysis-tools-panel">
-                <div class="collapsible-header" data-target="lenguaje-content">
-                    <h5 class="panel-title mb-0">
-                        <i class="fas fa-language me-2"></i>
-                        {{ _('Lenguaje y Análisis del discurso') }}
-                    </h5>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div id="lenguaje-content" class="collapsible-content">
-                    <div id="lenguaje-variables" class="variables-grid">
-                        <!-- Variables will be rendered by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fuentes de información -->
-            <div class="analysis-tools-panel">
-                <div class="collapsible-header" data-target="fuentes-content">
-                    <h5 class="panel-title mb-0">
-                        <i class="fas fa-users me-2"></i>
-                        {{ _('Fuentes de información') }}
-                    </h5>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div id="fuentes-content" class="collapsible-content">
-                    <div id="fuentes-sources" class="sources-grid">
-                        <!-- Sources will be rendered by JavaScript -->
-                    </div>
-                </div>
-            </div>
-
             <!-- Recomendaciones -->
             <div class="analysis-tools-panel">
                 <div class="collapsible-header" data-target="recomendaciones-content">
@@ -194,6 +146,64 @@
                         <li>{{ recommendation }}</li>
                         {% endfor %}
                     </ul>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-list-ul me-2"></i>
+                        {{ _('Categorías') }}
+                    </h6>
+                </div>
+                
+                <!-- Contenido General -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="contenido-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-newspaper me-2"></i>
+                            {{ _('Contenido General') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="contenido-content" class="collapsible-content">
+                        <div id="contenido-variables" class="variables-grid">
+                            <!-- Variables will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lenguaje y Análisis del discurso -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="lenguaje-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-language me-2"></i>
+                            {{ _('Lenguaje y Análisis del discurso') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="lenguaje-content" class="collapsible-content">
+                        <div id="lenguaje-variables" class="variables-grid">
+                            <!-- Variables will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fuentes de información -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="fuentes-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-users me-2"></i>
+                            {{ _('Fuentes de información') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="fuentes-content" class="collapsible-content">
+                        <div id="fuentes-sources" class="sources-grid">
+                            <!-- Sources will be rendered by JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
