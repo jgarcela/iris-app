@@ -901,15 +901,18 @@ function setupCollapsiblePanels() {
                     icon.classList.remove('fa-chevron-down');
                     icon.classList.add('fa-chevron-up');
                     
+                    // Show text analysis panel when any category is expanded
+                    showTextAnalysisPanel();
+                    
                     // Re-render content to include any new manual annotations
                     renderContent();
                     
-                    // Show corresponding highlight block only if highlights exist
-                    if (targetId === 'contenido-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.contenido_general) {
+                    // Show corresponding highlight block for the category
+                    if (targetId === 'contenido-content') {
                         showHighlightBlock('contenido');
-                    } else if (targetId === 'lenguaje-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.lenguaje) {
+                    } else if (targetId === 'lenguaje-content') {
                         showHighlightBlock('lenguaje');
-                    } else if (targetId === 'fuentes-content' && window.data.highlight && window.data.highlight.original && window.data.highlight.original.fuentes) {
+                    } else if (targetId === 'fuentes-content') {
                         showHighlightBlock('fuentes');
                     }
                 } else {
@@ -920,6 +923,9 @@ function setupCollapsiblePanels() {
                     
                     // Hide highlights and show plain text
                     hideHighlights();
+                    
+                    // Check if any other panels are still open, if not, show instructions
+                    checkAndShowInstructions();
                 }
             }
         });
@@ -931,6 +937,36 @@ function setupCollapsiblePanels() {
             content.style.display = 'none';
         }
     });
+}
+
+// Function to show text analysis panel
+function showTextAnalysisPanel() {
+    const instructionsPanel = document.querySelector('.plain-text');
+    const textAnalysisPanel = document.querySelector('.text-analysis-panel');
+    
+    if (instructionsPanel && textAnalysisPanel) {
+        instructionsPanel.style.display = 'none';
+        textAnalysisPanel.style.display = 'block';
+    }
+}
+
+// Function to check if any panels are open and show instructions if none are
+function checkAndShowInstructions() {
+    const collapsibleContents = document.querySelectorAll('.collapsible-content');
+    const instructionsPanel = document.querySelector('.plain-text');
+    const textAnalysisPanel = document.querySelector('.text-analysis-panel');
+    
+    let anyPanelOpen = false;
+    collapsibleContents.forEach(content => {
+        if (content.style.display === 'block') {
+            anyPanelOpen = true;
+        }
+    });
+    
+    if (!anyPanelOpen && instructionsPanel && textAnalysisPanel) {
+        instructionsPanel.style.display = 'block';
+        textAnalysisPanel.style.display = 'none';
+    }
 }
 
 // ===========================================

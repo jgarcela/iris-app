@@ -198,24 +198,57 @@
             </div>
         </div>
 
-        <!-- Right Column - Text Analysis -->
+        <!-- Right Column - Instructions -->
         <div class="col-md-8">
-            <div class="text-analysis-panel">
+            <!-- Instructions Panel (shown by default) -->
+            <div class="plain-text">
+                <div class="instructions-panel">
+                    <div class="instructions-content">
+                        <div class="instructions-header">
+                            <h4 class="instructions-title">¿Cómo proceder?</h4>
+                            <p class="instructions-subtitle">Elige una categoría del menú de la izquierda para comenzar</p>
+                        </div>
+                        
+                        <div class="instructions-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h6 class="step-title">Selecciona una categoría</h6>
+                                    <p class="step-description">Contenido General, Lenguaje o Fuentes</p>
+                                </div>
+                            </div>
+                            
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h6 class="step-title">Revisa las anotaciones</h6>
+                                    <p class="step-description">Observa los resaltados en el texto</p>
+                                </div>
+                            </div>
+                            
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h6 class="step-title">Edita y valida</h6>
+                                    <p class="step-description">Haz clic en los resaltados para editar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Analysis Panel (shown when categories are expanded) -->
+            <div class="text-analysis-panel" style="display: none;">
                 <h5 class="panel-title">
                     <i class="fas fa-file-alt me-2"></i>
                     {{ _('Análisis del Texto') }}
                 </h5>
                 
-                <!-- Plain Text -->
-                <div class="plain-text">
-                    <h4>{{ data.title }}</h4>
-                    <p class="text-muted mb-3">{{ data.authors }}</p>
-                    <div class="analysis-text">{{ data.text | safe }}</div>
-                </div>
-                
-                <!-- Highlighted Text -->
-                <div class="highlight-text" style="display: none;">
+                <!-- Highlighted Text Content -->
+                <div class="highlight-text">
                     <div class="small text-muted mb-2"><i class="fas fa-mouse-pointer me-1"></i>Haz clic sobre un resaltado para editar, aceptar o eliminar la anotación.</div>
+                    
                     <!-- Contenido General Highlights -->
                     <div id="highlight-contenido" class="highlight-block highlight-contenido" style="display: none;">
                         <h6 class="mb-3">{{ _('Contenido General') }}</h6>
@@ -234,6 +267,7 @@
                         <div class="markup-area">{{ data.highlight.original.fuentes | safe }}</div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>
