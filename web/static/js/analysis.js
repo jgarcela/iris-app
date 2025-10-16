@@ -905,6 +905,9 @@ function setupCollapsiblePanels() {
                     if (targetId === 'contenido-content' || targetId === 'lenguaje-content' || targetId === 'fuentes-content') {
                         showTextAnalysisPanel();
                         
+                        // Enable edit button when a category is opened
+                        enableEditButton();
+                        
                         // Re-render content to include any new manual annotations
                         renderContent();
                         
@@ -972,6 +975,24 @@ function checkAndShowInstructions() {
     if (!anyAnalysisPanelOpen && instructionsPanel && textAnalysisPanel) {
         instructionsPanel.style.display = 'block';
         textAnalysisPanel.style.display = 'none';
+        // Disable edit button when no categories are open
+        disableEditButton();
+    }
+}
+
+// Function to enable edit button
+function enableEditButton() {
+    const editButton = document.getElementById('edit-analysis-btn');
+    if (editButton) {
+        editButton.disabled = false;
+    }
+}
+
+// Function to disable edit button
+function disableEditButton() {
+    const editButton = document.getElementById('edit-analysis-btn');
+    if (editButton) {
+        editButton.disabled = true;
     }
 }
 

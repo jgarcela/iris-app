@@ -709,6 +709,22 @@ mark.accepted { outline: 1px solid rgba(0,0,0,0.08); }
   color: #856404;
 }
 
+.btn-edit-mode:disabled {
+  background: #f8f9fa;
+  border-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-edit-mode:disabled:hover {
+  background: #f8f9fa;
+  border-color: #e9ecef;
+  color: #6c757d;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-save {
   color: #28a745;
   border-color: #28a745;
