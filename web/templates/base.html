@@ -116,11 +116,18 @@
                     href="{{ url_for('dashboard.dashboard_iris') }}">
                     <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
                   </a>
+                </li>
+                <!-- Challenge tab for non-challenge users (including admins) -->
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
+                    href="{{ url_for('challenge.challenge_home') }}">
+                    <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
+                  </a>
                 </li>            
               {% else %}
                 <li class="nav-item">
-                  <a class="nav-link {% if request.endpoint == 'challenge.desafio' %}active{% endif %}"
-                    href="{{ url_for('challenge.desafio') }}">
+                  <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
+                    href="{{ url_for('challenge.challenge_home') }}">
                     <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
                   </a>
                 </li>

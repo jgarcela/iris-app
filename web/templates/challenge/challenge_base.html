@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Desafío IRIS') }} - {{ self.title() }}{% endblock %}
+
+{% block content %}
+<!-- Encabezado minimalista del desafío -->
+<section class="challenge-hero">
+    <div class="container text-center py-4">
+        <h1 class="fw-bold mb-2"><i class="fas fa-trophy me-2"></i>{{ _('Desafío de Análisis IRIS') }}</h1>
+        <p class="text-muted mb-3">{{ _('¿Puedes analizar sesgos de género mejor que la Inteligencia Artificial?') }}</p>
+        <div>
+            <span class="badge bg-warning text-dark px-3 py-2">
+                <i class="fas fa-calendar-alt me-2"></i>{{ _('Semana de la Ciencia 2025') }}
+            </span>
+        </div>
+        <div class="challenge-mini-nav mt-4">
+            <a class="mini-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}" href="{{ url_for('challenge.challenge_home') }}">{{ _('Inicio') }}</a>
+            <span class="mx-2 text-secondary">•</span>
+            <a class="mini-link {% if request.endpoint == 'challenge.results' %}active{% endif %}" href="{{ url_for('challenge.results') }}">{{ _('Resultados') }}</a>
+        </div>
+    </div>
+</section>
+
+<!-- Contenido principal -->
+<main>
+    {% block challenge_content %}{% endblock %}
+    
+    <footer class="challenge-footer text-center text-muted small py-4">
+        <div class="container">IRIS · {{ _('Desafío temporal para participantes autorizados') }}</div>
+    </footer>
+</main>
+
+<style>
+.challenge-hero {
+    position: relative;
+    overflow: hidden;
+    /* Scientific gradient with multiple layers */
+    background:
+        /* Floating particles effect */
+        radial-gradient(2px 2px at 20px 30px, rgba(0, 123, 255, 0.3), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(40, 167, 69, 0.3), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(255, 193, 7, 0.4), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(220, 53, 69, 0.3), transparent),
+        radial-gradient(2px 2px at 160px 30px, rgba(111, 66, 193, 0.3), transparent),
+        /* Main scientific gradient */
+        linear-gradient(135deg, 
+            #667eea 0%, 
+            #764ba2 25%, 
+            #f093fb 50%, 
+            #f5576c 75%, 
+            #4facfe 100%);
+    background-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px, 200px 200px, 100% 100%;
+    animation: particleFloat 20s ease-in-out infinite;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.challenge-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        /* Geometric patterns */
+        linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%),
+        linear-gradient(-45deg, transparent 40%, rgba(255, 255, 255, 0.05) 50%, transparent 60%),
+        /* Molecular structure pattern */
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 60px 60px, 60px 60px, 40px 40px, 40px 40px;
+    animation: geometricMove 15s linear infinite;
+    pointer-events: none;
+}
+
+.challenge-hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        transparent 50%, 
+        rgba(0, 0, 0, 0.05) 100%);
+    pointer-events: none;
+}
+
+.challenge-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes particleFloat {
+    0%, 100% { background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0% 0%; }
+    25% { background-position: 50px 25px, 25px 50px, 75px 20px, 100px 40px, 125px 15px, 0% 0%; }
+    50% { background-position: 100px 50px, 50px 100px, 150px 40px, 200px 80px, 250px 30px, 0% 0%; }
+    75% { background-position: 150px 75px, 75px 150px, 225px 60px, 300px 120px, 375px 45px, 0% 0%; }
+}
+
+@keyframes geometricMove {
+    0% { transform: translateX(0) translateY(0); }
+    25% { transform: translateX(10px) translateY(-5px); }
+    50% { transform: translateX(-5px) translateY(10px); }
+    75% { transform: translateX(5px) translateY(-10px); }
+    100% { transform: translateX(0) translateY(0); }
+}
+.challenge-hero h1 {
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-size: 2.5rem;
+}
+
+.challenge-hero p {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    font-size: 1.1rem;
+}
+
+.challenge-hero .badge {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+.challenge-mini-nav .mini-link {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+.challenge-mini-nav .mini-link.active,
+.challenge-mini-nav .mini-link:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+.challenge-footer {
+    border-top: 1px solid #e9ecef;
+}
+@media (max-width: 768px) {
+    .challenge-mini-nav .mx-2 { display: none; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const currentUser = {{ current_user | tojson | safe }};
+    const userRoles = currentUser ? (currentUser.roles || []) : [];
+    if (!userRoles.includes('admin') && !userRoles.includes('challenge')) {
+        window.location.href = "{{ url_for('home') }}";
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,755 @@
+{% extends "challenge/challenge_base.html" %}
+
+{% block title %}{{ _('Resultados del Desafío') }} - IRIS{% endblock %}
+
+{% block challenge_content %}
+<div class="container-fluid py-4">
+    <!-- Header de Resultados -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="results-header">
+                <h1 class="display-4 fw-bold text-primary mb-3">
+                    <i class="fas fa-trophy me-3"></i>
+                    {{ _('Resultados del Desafío') }}
+                </h1>
+                <p class="lead text-muted mb-4">
+                    {{ _('Compara tu rendimiento con otros participantes') }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tu Puntuación -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4">
+                        <i class="fas fa-user-circle me-2"></i>
+                        {{ _('Tu Rendimiento') }}
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="score-circle mx-auto">
+                                <div class="score-value" id="user-total-score">0%</div>
+                                <div class="score-label">{{ _('Puntuación Total') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="score-breakdown">
+                                <h5 class="mb-3">{{ _('Desglose por Categoría') }}</h5>
+                                
+                                <div class="category-score mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="category-name">{{ _('Contenido General') }}</span>
+                                        <span class="category-percentage" id="score-contenido">0%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" id="progress-contenido" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="category-score mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="category-name">{{ _('Lenguaje') }}</span>
+                                        <span class="category-percentage" id="score-lenguaje">0%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" id="progress-lenguaje" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="category-score mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="category-name">{{ _('Fuentes') }}</span>
+                                        <span class="category-percentage" id="score-fuentes">0%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" id="progress-fuentes" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <div class="achievement-badge" id="achievement-badge">
+                            <i class="fas fa-medal fa-2x text-warning"></i>
+                            <div class="achievement-text">
+                                <h6 id="achievement-title">{{ _('¡Buen trabajo!') }}</h6>
+                                <p class="text-muted mb-0" id="achievement-desc">{{ _('Sigue practicando para mejorar') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking de Participantes -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-crown me-2"></i>
+                        {{ _('Ranking de Participantes') }}
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">{{ _('Posición') }}</th>
+                                    <th>{{ _('Participante') }}</th>
+                                    <th class="text-center">{{ _('Puntuación') }}</th>
+                                    <th class="text-center">{{ _('Textos Analizados') }}</th>
+                                    <th class="text-center">{{ _('Tiempo Promedio') }}</th>
+                                    <th class="text-center">{{ _('Fecha') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranking-table">
+                                <!-- Datos del ranking se cargan aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas del Desafío -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-chart-bar me-2"></i>
+                {{ _('Estadísticas Generales') }}
+            </h3>
+            
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="stat-number" id="total-participants">0</h4>
+                        <p class="stat-label">{{ _('Participantes') }}</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt fa-2x text-success"></i>
+                        </div>
+                        <h4 class="stat-number" id="total-analyses">0</h4>
+                        <p class="stat-label">{{ _('Análisis Realizados') }}</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line fa-2x text-warning"></i>
+                        </div>
+                        <h4 class="stat-number" id="avg-score">0%</h4>
+                        <p class="stat-label">{{ _('Puntuación Promedio') }}</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-trophy fa-2x text-danger"></i>
+                        </div>
+                        <h4 class="stat-number" id="best-score">0%</h4>
+                        <p class="stat-label">{{ _('Mejor Puntuación') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recomendaciones -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-center mb-4">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        {{ _('Recomendaciones para Mejorar') }}
+                    </h4>
+                    
+                    <div class="recommendations" id="recommendations">
+                        <!-- Recomendaciones se cargan aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="action-buttons">
+                <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-redo me-2"></i>
+                    {{ _('Intentar Otro Texto') }}
+                </a>
+                <button class="btn btn-outline-primary btn-lg me-3" id="share-results-btn">
+                    <i class="fas fa-share me-2"></i>
+                    {{ _('Compartir Resultados') }}
+                </button>
+                <button class="btn btn-outline-secondary btn-lg" id="export-results-btn">
+                    <i class="fas fa-download me-2"></i>
+                    {{ _('Exportar Datos') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Scientific theme for results page */
+body {
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+    min-height: 100vh;
+}
+
+.results-header {
+    background: linear-gradient(135deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #f093fb 50%, 
+        #f5576c 75%, 
+        #4facfe 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 25px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.results-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px, 20px 20px;
+    animation: particleFloat 15s linear infinite;
+}
+
+.results-header h1 {
+    color: white !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2;
+}
+
+.results-header p {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateX(0) translateY(0); }
+    25% { transform: translateX(10px) translateY(-5px); }
+    50% { transform: translateX(-5px) translateY(10px); }
+    75% { transform: translateX(5px) translateY(-10px); }
+    100% { transform: translateX(0) translateY(0); }
+}
+
+.score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.score-circle::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.score-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    line-height: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.score-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+}
+
+.category-name {
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.category-percentage {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.achievement-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 25px;
+    padding: 0.6rem 1.2rem;
+    margin: 0.25rem;
+    font-size: 0.9rem;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.achievement-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+}
+
+.achievement-text {
+    margin-left: 1rem;
+    text-align: left;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem 1rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
+}
+
+.stat-icon {
+    margin-bottom: 1rem;
+}
+
+.stat-icon i {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 600;
+    margin: 0;
+}
+
+.recommendations {
+    display: grid;
+    gap: 1rem;
+}
+
+.recommendation-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.recommendation-item:hover::before {
+    opacity: 1;
+}
+
+.recommendation-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+}
+
+.recommendation-title {
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.recommendation-text {
+    color: #6c757d;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.action-buttons {
+    margin-top: 2rem;
+}
+
+.action-buttons .btn {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-buttons .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.action-buttons .btn:hover::before {
+    left: 100%;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.ranking-position {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.ranking-position.first {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ranking-position.second {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ranking-position.third {
+    background: linear-gradient(135deg, #cd7f32, #daa520);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.progress {
+    height: 10px;
+    border-radius: 5px;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.progress-bar {
+    border-radius: 5px;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+}
+
+/* Cards styling */
+.card {
+    border-radius: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.08);
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Section headers */
+h2, h3, h4, h5 {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserResults();
+    loadRanking();
+    loadStatistics();
+    loadRecommendations();
+    setupActionButtons();
+});
+
+function loadUserResults() {
+    // Simular datos del usuario (en una implementación real, esto vendría de la API)
+    const userResults = {
+        totalScore: 78,
+        categoryScores: {
+            contenido: 85,
+            lenguaje: 72,
+            fuentes: 65
+        }
+    };
+    
+    // Actualizar puntuación total
+    document.getElementById('user-total-score').textContent = userResults.totalScore + '%';
+    
+    // Actualizar puntuaciones por categoría
+    updateCategoryScore('contenido', userResults.categoryScores.contenido);
+    updateCategoryScore('lenguaje', userResults.categoryScores.lenguaje);
+    updateCategoryScore('fuentes', userResults.categoryScores.fuentes);
+    
+    // Actualizar badge de logro
+    updateAchievementBadge(userResults.totalScore);
+}
+
+function updateCategoryScore(category, score) {
+    const scoreElement = document.getElementById(`score-${category}`);
+    const progressElement = document.getElementById(`progress-${category}`);
+    
+    scoreElement.textContent = score + '%';
+    progressElement.style.width = score + '%';
+}
+
+function updateAchievementBadge(score) {
+    const titleElement = document.getElementById('achievement-title');
+    const descElement = document.getElementById('achievement-desc');
+    const badgeElement = document.getElementById('achievement-badge');
+    
+    if (score >= 90) {
+        titleElement.textContent = '{{ _("¡Excelente!") }}';
+        descElement.textContent = '{{ _("Eres un experto en análisis de sesgos") }}';
+        badgeElement.querySelector('i').className = 'fas fa-crown fa-2x text-warning';
+    } else if (score >= 75) {
+        titleElement.textContent = '{{ _("¡Muy bien!") }}';
+        descElement.textContent = '{{ _("Tienes un buen ojo para detectar sesgos") }}';
+        badgeElement.querySelector('i').className = 'fas fa-medal fa-2x text-warning';
+    } else if (score >= 60) {
+        titleElement.textContent = '{{ _("¡Buen trabajo!") }}';
+        descElement.textContent = '{{ _("Sigue practicando para mejorar") }}';
+        badgeElement.querySelector('i').className = 'fas fa-star fa-2x text-warning';
+    } else {
+        titleElement.textContent = '{{ _("¡Sigue intentando!") }}';
+        descElement.textContent = '{{ _("La práctica hace al maestro") }}';
+        badgeElement.querySelector('i').className = 'fas fa-thumbs-up fa-2x text-warning';
+    }
+}
+
+function loadRanking() {
+    // Simular datos del ranking
+    const rankingData = [
+        { position: 1, name: 'Ana García', score: 94, analyses: 8, avgTime: '12 min', date: '2024-09-29' },
+        { position: 2, name: 'Carlos López', score: 91, analyses: 7, avgTime: '15 min', date: '2024-09-29' },
+        { position: 3, name: 'María Rodríguez', score: 89, analyses: 6, avgTime: '18 min', date: '2024-09-29' },
+        { position: 4, name: 'Juan Pérez', score: 85, analyses: 5, avgTime: '20 min', date: '2024-09-29' },
+        { position: 5, name: 'Tú', score: 78, analyses: 3, avgTime: '22 min', date: '2024-09-29' },
+        { position: 6, name: 'Laura Martín', score: 76, analyses: 4, avgTime: '25 min', date: '2024-09-29' },
+        { position: 7, name: 'Pedro Sánchez', score: 72, analyses: 3, avgTime: '28 min', date: '2024-09-29' },
+        { position: 8, name: 'Sofia González', score: 68, analyses: 2, avgTime: '30 min', date: '2024-09-29' }
+    ];
+    
+    const tbody = document.getElementById('ranking-table');
+    tbody.innerHTML = rankingData.map(participant => `
+        <tr ${participant.name === 'Tú' ? 'class="table-primary"' : ''}>
+            <td class="text-center">
+                <span class="ranking-position ${participant.position <= 3 ? ['first', 'second', 'third'][participant.position - 1] : ''}">
+                    ${participant.position}
+                </span>
+            </td>
+            <td>
+                <strong>${participant.name}</strong>
+                ${participant.name === 'Tú' ? '<span class="badge bg-primary ms-2">Tú</span>' : ''}
+            </td>
+            <td class="text-center">
+                <span class="fw-bold text-primary">${participant.score}%</span>
+            </td>
+            <td class="text-center">${participant.analyses}</td>
+            <td class="text-center">${participant.avgTime}</td>
+            <td class="text-center">${participant.date}</td>
+        </tr>
+    `).join('');
+}
+
+function loadStatistics() {
+    // Simular estadísticas generales
+    document.getElementById('total-participants').textContent = '127';
+    document.getElementById('total-analyses').textContent = '456';
+    document.getElementById('avg-score').textContent = '73%';
+    document.getElementById('best-score').textContent = '94%';
+}
+
+function loadRecommendations() {
+    const recommendations = [
+        {
+            title: '{{ _("Mejora en Contenido General") }}',
+            text: '{{ _("Presta más atención a las personas mencionadas y su género. Revisa si hay equilibrio en las citas y referencias.") }}'
+        },
+        {
+            title: '{{ _("Refina tu Análisis de Lenguaje") }}',
+            text: '{{ _("Busca patrones de lenguaje sexista, androcentrismo y asimetrías en el uso de términos.") }}'
+        },
+        {
+            title: '{{ _("Profundiza en las Fuentes") }}',
+            text: '{{ _("Analiza el género y tipo de las fuentes citadas. ¿Hay diversidad en las voces expertas?") }}'
+        },
+        {
+            title: '{{ _("Practica Regularmente") }}',
+            text: '{{ _("El análisis de sesgos mejora con la práctica. Intenta analizar diferentes tipos de textos.") }}'
+        }
+    ];
+    
+    const container = document.getElementById('recommendations');
+    container.innerHTML = recommendations.map(rec => `
+        <div class="recommendation-item">
+            <div class="recommendation-title">${rec.title}</div>
+            <div class="recommendation-text">${rec.text}</div>
+        </div>
+    `).join('');
+}
+
+function setupActionButtons() {
+    // Botón de compartir resultados
+    document.getElementById('share-results-btn').addEventListener('click', function() {
+        if (navigator.share) {
+            navigator.share({
+                title: '{{ _("Mis resultados en el Desafío IRIS") }}',
+                text: '{{ _("He obtenido una puntuación del 78%% en el análisis de sesgos de género. ¿Puedes superarme?") }}',
+                url: window.location.href
+            });
+        } else {
+            // Fallback para navegadores que no soportan Web Share API
+            const shareText = '{{ _("Mis resultados en el Desafío IRIS: 78%% de precisión en análisis de sesgos de género") }}';
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert('{{ _("Resultados copiados al portapapeles") }}');
+            });
+        }
+    });
+    
+    // Botón de exportar datos
+    document.getElementById('export-results-btn').addEventListener('click', function() {
+        const resultsData = {
+            userScore: 78,
+            categoryScores: {
+                contenido: 85,
+                lenguaje: 72,
+                fuentes: 65
+            },
+            timestamp: new Date().toISOString(),
+            challenge: 'IRIS Semana de la Ciencia 2025'
+        };
+        
+        const dataStr = JSON.stringify(resultsData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'resultados-desafio-iris.json';
+        link.click();
+        
+        URL.revokeObjectURL(url);
+    });
+}
+</script>
+{% endblock %}

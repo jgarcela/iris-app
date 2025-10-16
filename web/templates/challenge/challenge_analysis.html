@@ -1,0 +1,1428 @@
+{% extends "challenge/challenge_base.html" %}
+
+{% block title %}{{ _('Análisis del Desafío') }} - {{ text_data.title }}{% endblock %}
+
+{% block challenge_content %}
+<div class="container-fluid py-4">
+    <!-- Header del Análisis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-microscope me-2 text-primary"></i>
+                        {{ text_data.title }}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <span class="badge 
+                            {% if text_data.difficulty == 'Fácil' %}bg-success
+                            {% elif text_data.difficulty == 'Medio' %}bg-warning
+                            {% else %}bg-danger{% endif %} me-2">
+                            {{ text_data.difficulty }}
+                        </span>
+                        {{ _('Desafío de Análisis IRIS') }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        {{ _('Volver al Desafío') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Progreso del Análisis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-tasks me-2"></i>
+                        {{ _('Progreso del Análisis') }}
+                    </h5>
+                    <div class="progress-steps">
+                        <div class="step active" id="step-manual">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h6>{{ _('Análisis Manual') }}</h6>
+                                <p class="text-muted small">{{ _('Identifica sesgos manualmente') }}</p>
+                            </div>
+                        </div>
+                        <div class="step" id="step-ai">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h6>{{ _('Análisis con IRIS') }}</h6>
+                                <p class="text-muted small">{{ _('Compara con inteligencia artificial') }}</p>
+                            </div>
+                        </div>
+                        <div class="step" id="step-results">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h6>{{ _('Resultados') }}</h6>
+                                <p class="text-muted small">{{ _('Ve tu puntuación') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="row">
+        <!-- Panel de Análisis Manual -->
+        <div class="col-lg-4">
+            <div class="analysis-panel" id="manual-panel">
+                <div class="panel-header">
+                    <h5 class="panel-title">
+                        <i class="fas fa-edit me-2"></i>
+                        {{ _('Análisis Manual') }}
+                    </h5>
+                </div>
+                
+                <div class="panel-content">
+                    <!-- Modo Edición Button - More Prominent -->
+                    <div class="edit-mode-section mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ _('Modo de Análisis') }}</h6>
+                                <small class="text-muted">{{ _('Activa el modo edición para marcar sesgos') }}</small>
+                            </div>
+                            <button class="btn btn-primary" id="edit-mode-btn">
+                                <i class="fas fa-pen me-2"></i>
+                            {{ _('Modo Edición') }}
+                        </button>
+                    </div>
+                </div>
+                    <!-- Difficulty Information -->
+                    <div class="difficulty-section mb-4">
+                        <div class="card border-0 shadow-sm" id="difficulty-info-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="difficulty-badge me-3" id="difficulty-badge">
+                                        <span class="badge fs-6 px-3 py-2" id="difficulty-level">Fácil</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1" id="difficulty-title">{{ _('Análisis de Nivel Fácil') }}</h5>
+                                        <p class="text-muted mb-0" id="difficulty-description">{{ _('Sesgos evidentes y obvios') }}</p>
+                                    </div>
+                                </div>
+                                <div class="difficulty-instructions" id="difficulty-instructions">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <span id="instructions-title">{{ _('¿Qué debes anotar?') }}</span>
+                                    </h6>
+                                    <p class="text-muted small mb-2">{{ _('No es necesario anotar todas las variables; solo las que identifiques. Un texto puede no contener todas las variables posibles.') }}</p>
+                                    <div id="no-annotation-message" class="text-center py-3" style="display: none;">
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-eye fa-2x mb-3 text-success"></i>
+                                            <h6>{{ _('Análisis General de Sesgos') }}</h6>
+                                            <p class="mb-2 small">{{ _('En este nivel debes identificar y anotar:') }}</p>
+                                            <ul class="list-unstyled mb-0 small">
+                                                <li><i class="fas fa-check text-success me-2"></i> {{ _('Sesgos de género evidentes') }}</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> {{ _('Lenguaje sexista obvio') }}</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> {{ _('Cualquier sesgo que notes en el texto') }}</li>
+                                            </ul>
+                                </div>
+                            </div>
+                                    <div id="variables-to-annotate">
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <div class="variable-category-info">
+                                                    <h6 class="text-primary small">
+                                                        <i class="fas fa-file-text me-1"></i>
+                                                        {{ _('Contenido General') }}
+                                                    </h6>
+                                                    <ul class="list-unstyled small" id="contenido-variables">
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género periodista') }}</li>
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Personas mencionadas') }}</li>
+                                                    </ul>
+                                </div>
+                            </div>
+                                            <div class="col-12">
+                                                <div class="variable-category-info">
+                                                    <h6 class="text-warning small">
+                                                        <i class="fas fa-language me-1"></i>
+                                                        {{ _('Lenguaje') }}
+                                                    </h6>
+                                                    <ul class="list-unstyled small" id="lenguaje-variables">
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Lenguaje sexista') }}</li>
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Androcentrismo') }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="variable-category-info">
+                                                    <h6 class="text-info small">
+                                                        <i class="fas fa-quote-left me-1"></i>
+                                                        {{ _('Fuentes') }}
+                                                    </h6>
+                                                    <ul class="list-unstyled small" id="fuentes-variables">
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Género de fuentes') }}</li>
+                                                        <li><i class="fas fa-check text-success me-1"></i> {{ _('Tipo de fuentes') }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen de Anotaciones -->
+                    <div class="annotations-summary">
+                        <h6 class="section-title">
+                            <i class="fas fa-sticky-note me-2"></i>
+                            {{ _('Mis Anotaciones') }}
+                        </h6>
+                        <div id="annotations-list" class="annotations-list">
+                            <p class="text-muted text-center py-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {{ _('Selecciona texto para comenzar a anotar') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="action-buttons">
+                        <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
+                            <i class="fas fa-check me-2"></i>
+                            {{ _('Finalizar y comparar con IRIS') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Texto -->
+        <div class="col-lg-8">
+            <div class="text-analysis-area">
+                <div class="text-header">
+                    <h5 class="text-title">{{ text_data.title }}</h5>
+                    <div class="text-meta">
+                        <span class="badge bg-light text-dark me-2">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ _('Tiempo estimado: 15 min') }}
+                        </span>
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-target me-1"></i>
+                            {{ _('Objetivo: Identificar todos los sesgos') }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="text-content" id="analysis-text">
+                    <div class="text-body">
+                        <p>{{ text_data.text }}</p>
+                    </div>
+                </div>
+
+                <!-- Panel de Anotación (aparece al seleccionar texto) -->
+                <div class="annotation-panel" id="annotation-panel" style="display: none;">
+                    <div class="annotation-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tag me-2"></i>
+                            {{ _('Anotar Texto Seleccionado') }}
+                        </h6>
+                        <button class="btn-close" id="close-annotation-panel"></button>
+                    </div>
+                    <div class="annotation-content">
+                        <div class="selected-text mb-3">
+                            <strong>{{ _('Texto seleccionado:') }}</strong>
+                            <span id="selected-text-preview" class="text-primary"></span>
+                        </div>
+                        
+                        <!-- Simple message for easy level -->
+                        <div id="simple-annotation-message" class="text-center py-4" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
+                                <h6>{{ _('Anotación General de Sesgo') }}</h6>
+                                <p class="mb-3">{{ _('Has seleccionado texto que contiene un sesgo de género. ¿Confirmas que quieres anotar este sesgo?') }}</p>
+                            </div>
+                        </div>
+                        
+                        <form id="annotation-form">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ _('Categoría') }}</label>
+                                    <select class="form-select" id="annotation-category" required>
+                                        <option value="">{{ _('Seleccionar...') }}</option>
+                                        <option value="contenido_general">{{ _('Contenido General') }}</option>
+                                        <option value="lenguaje">{{ _('Lenguaje') }}</option>
+                                        <option value="fuentes">{{ _('Fuentes') }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ _('Variable') }}</label>
+                                    <select class="form-select" id="annotation-variable" required>
+                                        <option value="">{{ _('Seleccionar...') }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ _('Valor') }}</label>
+                                    <select class="form-select" id="annotation-value" required>
+                                        <option value="">{{ _('Seleccionar...') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>
+                                    {{ _('Agregar Anotación') }}
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary ms-2" id="cancel-annotation">
+                                    {{ _('Cancelar') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+.analysis-panel {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.panel-title {
+    margin: 0;
+    color: #495057;
+}
+
+.panel-content {
+    padding: 1rem;
+}
+
+.edit-mode-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.edit-mode-section h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.edit-mode-section .btn {
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.edit-mode-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Difficulty Information Styles */
+.difficulty-section #difficulty-info-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #007bff;
+}
+
+.difficulty-section .difficulty-badge .badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.difficulty-section .difficulty-badge .badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.difficulty-section .difficulty-badge .badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+    color: #212529 !important;
+}
+
+.difficulty-section .difficulty-badge .badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+.difficulty-section .difficulty-instructions {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.difficulty-section .variable-category-info {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.difficulty-section .variable-category-info:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-section .variable-category-info h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.difficulty-section .variable-category-info ul li {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.difficulty-section .variable-category-info ul li i {
+    width: 10px;
+}
+
+.section-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.variables-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.variable-category {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.category-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.variable-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.variable-tag {
+    background: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.text-analysis-area {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.text-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.text-title {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+.text-content {
+    padding: 1.5rem;
+}
+
+.text-body {
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.annotation-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+.annotation-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.annotation-content {
+    padding: 1rem;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: #007bff;
+    color: white;
+}
+
+.step.completed .step-number {
+    background: #28a745;
+    color: white;
+}
+
+.step-content h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.step-content p {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 60px;
+    right: -50%;
+    height: 2px;
+    background: #e9ecef;
+    z-index: -1;
+}
+
+.step.completed:not(:last-child)::after {
+    background: #28a745;
+}
+
+.annotations-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.annotation-item {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #007bff;
+}
+
+.annotation-text {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.annotation-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.action-buttons {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+</style>
+
+<script id="current-text-data" type="application/json">{{ text_data | tojson | safe }}</script>
+
+<script>
+// Datos del texto actual
+const currentText = JSON.parse(document.getElementById('current-text-data').textContent);
+let annotations = [];
+
+// Difficulty levels and their corresponding variables
+const DIFFICULTY_VARIABLES = {
+    'facil': {
+        'contenido_general': null,
+        'lenguaje': null,
+        'fuentes': null
+    },
+    'medio': {
+        'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas'],
+        'lenguaje': ['androcentrismo', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
+        'fuentes': null
+    },
+    'dificil': {
+        'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas'],
+        'lenguaje': ['androcentrismo', 'asimetria', 'cargos_mujeres', 'comparacion_mujeres_hombres', 'denominacion_dependiente', 'denominacion_redundante', 'denominacion_sexualizada', 'dual_aparente', 'excepcion_noticiabilidad', 'hombre_humanidad', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
+        'fuentes': ['declaracion_fuente', 'genero_fuente', 'nombre_fuente']
+    }
+};
+
+const DIFFICULTY_INFO = {
+    'facil': {
+        title: 'Análisis de Nivel Fácil',
+        description: 'Sesgos evidentes y obvios',
+        badgeClass: 'bg-success',
+        badgeText: 'Fácil'
+    },
+    'medio': {
+        title: 'Análisis de Nivel Intermedio',
+        description: 'Sesgos moderados y sutiles',
+        badgeClass: 'bg-warning',
+        badgeText: 'Intermedio'
+    },
+    'dificil': {
+        title: 'Análisis de Nivel Avanzado',
+        description: 'Sesgos complejos y detallados',
+        badgeClass: 'bg-danger',
+        badgeText: 'Avanzado'
+    }
+};
+
+const VARIABLE_DESCRIPTIONS = {
+    'genero_nombre_propio_titular': 'Género periodista',
+    'genero_personas_mencionadas': 'Género de personas mencionadas',
+    'nombre_propio_titular': 'Nombre del periodista',
+    'personas_mencionadas': 'Personas mencionadas',
+    'androcentrismo': 'Androcentrismo',
+    'infantilizacion': 'Infantilización',
+    'lenguaje_sexista': 'Lenguaje sexista',
+    'masculino_generico': 'Masculino genérico',
+    'sexismo_social': 'Sexismo social',
+    'asimetria': 'Asimetría',
+    'cargos_mujeres': 'Cargos de mujeres',
+    'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+    'denominacion_dependiente': 'Denominación dependiente',
+    'denominacion_redundante': 'Denominación redundante',
+    'denominacion_sexualizada': 'Denominación sexualizada',
+    'dual_aparente': 'Dual aparente',
+    'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+    'hombre_humanidad': 'Hombre como humanidad',
+    'declaracion_fuente': 'Declaración de fuente',
+    'genero_fuente': 'Género de fuente',
+    'nombre_fuente': 'Nombre de fuente'
+};
+let isEditMode = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Log the current text data to see what fields are available
+    console.log('Current text data:', currentText);
+    console.log('Available fields:', Object.keys(currentText || {}));
+    
+    initializeChallengeAnalysis();
+    updateDifficultyInfo();
+});
+
+function updateDifficultyInfo() {
+    // Get difficulty from text data
+    let textDifficulty = currentText?.difficulty;
+    
+    console.log('Raw difficulty from database:', textDifficulty);
+    console.log('Current text title:', currentText?.title);
+    
+    // If no difficulty in text data, determine based on text title or content
+    if (!textDifficulty) {
+        // Check if this is the "Debate sobre paridad" text (which should be medium)
+        if (currentText?.title && currentText.title.includes('paridad')) {
+            textDifficulty = 'medio';
+        } else {
+            // Default to user difficulty
+            textDifficulty = localStorage.getItem('userDifficulty') || 'facil';
+        }
+    }
+    
+    let userDifficulty = localStorage.getItem('userDifficulty') || 'facil';
+    
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty values
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    userDifficulty = difficultyMapping[userDifficulty] || 'facil';
+    
+    // Use text difficulty as primary
+    let displayDifficulty = textDifficulty;
+    
+    console.log('Text difficulty:', textDifficulty);
+    console.log('User difficulty:', userDifficulty);
+    console.log('Display difficulty:', displayDifficulty);
+    
+    // Update difficulty badge and title
+    const difficultyInfo = DIFFICULTY_INFO[displayDifficulty];
+    
+    if (!difficultyInfo) {
+        console.error('Invalid difficulty level:', displayDifficulty);
+        displayDifficulty = 'facil'; // fallback
+        const fallbackInfo = DIFFICULTY_INFO[displayDifficulty];
+        updateDifficultyUI(fallbackInfo);
+        updateVariablesToAnnotate(displayDifficulty);
+        return;
+    }
+    
+    updateDifficultyUI(difficultyInfo);
+    updateVariablesToAnnotate(displayDifficulty);
+}
+
+function updateDifficultyUI(difficultyInfo) {
+    const badgeElement = document.getElementById('difficulty-level');
+    const titleElement = document.getElementById('difficulty-title');
+    const descriptionElement = document.getElementById('difficulty-description');
+    
+    if (badgeElement) {
+        badgeElement.textContent = difficultyInfo.badgeText;
+        badgeElement.className = `badge fs-6 px-3 py-2 ${difficultyInfo.badgeClass}`;
+    }
+    
+    if (titleElement) {
+        titleElement.textContent = difficultyInfo.title;
+    }
+    
+    if (descriptionElement) {
+        descriptionElement.textContent = difficultyInfo.description;
+    }
+}
+
+function updateVariablesToAnnotate(difficulty) {
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    const noAnnotationMessage = document.getElementById('no-annotation-message');
+    const variablesContainer = document.getElementById('variables-to-annotate');
+    const instructionsTitle = document.getElementById('instructions-title');
+    
+    // Check if this is the "Fácil" level (general bias annotation)
+    if (difficulty === 'facil' && !variables.contenido_general && !variables.lenguaje && !variables.fuentes) {
+        // Show general bias annotation message and hide specific variables
+        if (noAnnotationMessage) noAnnotationMessage.style.display = 'block';
+        if (variablesContainer) variablesContainer.style.display = 'none';
+        if (instructionsTitle) instructionsTitle.textContent = '{{ _("¿Qué debes anotar?") }}';
+        
+        // Update available variables for annotation form
+        updateAvailableVariablesForDifficulty(difficulty);
+        return;
+    }
+    
+    // Hide "no annotation" message and show variables
+    if (noAnnotationMessage) noAnnotationMessage.style.display = 'none';
+    if (variablesContainer) variablesContainer.style.display = 'block';
+    if (instructionsTitle) instructionsTitle.textContent = '{{ _("¿Qué debes anotar?") }}';
+    
+    // Update contenido general variables
+    const contenidoList = document.getElementById('contenido-variables');
+    if (contenidoList) {
+        if (variables.contenido_general) {
+            contenidoList.innerHTML = variables.contenido_general.map(variable => 
+                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+            ).join('');
+        } else {
+            contenidoList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
+        }
+    }
+    
+    // Update lenguaje variables
+    const lenguajeList = document.getElementById('lenguaje-variables');
+    if (lenguajeList) {
+        if (variables.lenguaje) {
+            lenguajeList.innerHTML = variables.lenguaje.map(variable => 
+                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+            ).join('');
+        } else {
+            lenguajeList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
+        }
+    }
+    
+    // Update fuentes variables
+    const fuentesList = document.getElementById('fuentes-variables');
+    if (fuentesList) {
+        if (variables.fuentes) {
+            fuentesList.innerHTML = variables.fuentes.map(variable => 
+                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+            ).join('');
+        } else {
+            fuentesList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
+        }
+    }
+    
+    // Update available variables for annotation form
+    updateAvailableVariablesForDifficulty(difficulty);
+}
+
+function updateAvailableVariablesForDifficulty(difficulty) {
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty value
+    difficulty = difficultyMapping[difficulty] || 'facil';
+    
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    
+    if (!categorySelect || !variableSelect) return;
+    
+    // Clear existing options
+    variableSelect.innerHTML = '<option value="">{{ _("Selecciona una variable") }}</option>';
+    
+    // For "Fácil" level, add general bias categories
+    if (difficulty === 'facil') {
+        // Add general bias options
+        const generalBiasOptions = [
+            { value: 'sesgo_genero_general', text: 'Sesgo de género general' },
+            { value: 'lenguaje_sexista_general', text: 'Lenguaje sexista general' },
+            { value: 'androcentrismo_general', text: 'Androcentrismo general' },
+            { value: 'otro_sesgo', text: 'Otro tipo de sesgo' }
+        ];
+        
+        generalBiasOptions.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            variableSelect.appendChild(optionElement);
+        });
+        return;
+    }
+    
+    // For other levels, populate with specific variables based on available categories
+    const allVariables = [];
+    
+    if (variables.contenido_general) {
+        variables.contenido_general.forEach(variable => {
+            allVariables.push({
+                value: variable,
+                text: VARIABLE_DESCRIPTIONS[variable] || variable,
+                category: 'contenido_general'
+            });
+        });
+    }
+    
+    if (variables.lenguaje) {
+        variables.lenguaje.forEach(variable => {
+            allVariables.push({
+                value: variable,
+                text: VARIABLE_DESCRIPTIONS[variable] || variable,
+                category: 'lenguaje'
+            });
+        });
+    }
+    
+    if (variables.fuentes) {
+        variables.fuentes.forEach(variable => {
+            allVariables.push({
+                value: variable,
+                text: VARIABLE_DESCRIPTIONS[variable] || variable,
+                category: 'fuentes'
+            });
+        });
+    }
+    
+    // Add variables to select
+    allVariables.forEach(variable => {
+        const optionElement = document.createElement('option');
+        optionElement.value = variable.value;
+        optionElement.textContent = variable.text;
+        optionElement.dataset.category = variable.category;
+        variableSelect.appendChild(optionElement);
+    });
+    
+    // Update category select to show only available categories
+    updateCategoryOptionsForDifficulty(difficulty);
+}
+
+function updateCategoryOptionsForDifficulty(difficulty) {
+    const categorySelect = document.getElementById('annotation-category');
+    if (!categorySelect) return;
+    
+    // Clear existing options
+    categorySelect.innerHTML = '<option value="">{{ _("Selecciona una categoría") }}</option>';
+    
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    
+    // For "Fácil" level, show general categories
+    if (difficulty === 'facil') {
+        const generalCategories = [
+            { value: 'sesgo_general', text: 'Sesgo General' }
+        ];
+        
+        generalCategories.forEach(category => {
+            const optionElement = document.createElement('option');
+            optionElement.value = category.value;
+            optionElement.textContent = category.text;
+            categorySelect.appendChild(optionElement);
+        });
+        return;
+    }
+    
+    // For other levels, show specific categories based on available variables
+    const availableCategories = [];
+    
+    if (variables.contenido_general) {
+        availableCategories.push({ value: 'contenido_general', text: 'Contenido General' });
+    }
+    
+    if (variables.lenguaje) {
+        availableCategories.push({ value: 'lenguaje', text: 'Lenguaje' });
+    }
+    
+    if (variables.fuentes) {
+        availableCategories.push({ value: 'fuentes', text: 'Fuentes' });
+    }
+    
+    availableCategories.forEach(category => {
+        const optionElement = document.createElement('option');
+        optionElement.value = category.value;
+        optionElement.textContent = category.text;
+        categorySelect.appendChild(optionElement);
+    });
+}
+
+function initializeChallengeAnalysis() {
+    setupTextSelection();
+    setupAnnotationForm();
+    setupActionButtons();
+    updateProgressSteps();
+}
+
+function setupTextSelection() {
+    const textElement = document.getElementById('analysis-text');
+    
+    textElement.addEventListener('mouseup', function(e) {
+        if (!isEditMode) return;
+        
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        
+        if (selectedText.length > 0) {
+            showAnnotationPanel(selectedText, selection.getRangeAt(0));
+        }
+    });
+}
+
+function setupAnnotationForm() {
+    const form = document.getElementById('annotation-form');
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    
+    // Manejar cambio de categoría
+    categorySelect.addEventListener('change', function() {
+        updateVariableOptions(this.value);
+    });
+    
+    // Manejar cambio de variable
+    variableSelect.addEventListener('change', function() {
+        updateValueOptions(categorySelect.value, this.value);
+    });
+    
+    // Manejar envío del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveAnnotation();
+    });
+    
+    // Manejar cancelar
+    document.getElementById('cancel-annotation').addEventListener('click', function() {
+        hideAnnotationPanel();
+    });
+    
+    // Initialize variables based on current text difficulty
+    const textDifficulty = currentText?.difficulty || currentText?.nivel_dificultad || 'facil';
+    updateAvailableVariablesForDifficulty(textDifficulty);
+    
+    // Manejar cerrar panel
+    document.getElementById('close-annotation-panel').addEventListener('click', function() {
+        hideAnnotationPanel();
+    });
+}
+
+function setupActionButtons() {
+    // Botón de modo edición
+    document.getElementById('edit-mode-btn').addEventListener('click', function() {
+        toggleEditMode();
+    });
+    
+    // Botón finalizar: guarda y compara automáticamente con IA
+    document.getElementById('save-analysis-btn').addEventListener('click', function() {
+        saveAnalysis();
+    });
+}
+
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const btn = document.getElementById('edit-mode-btn');
+    const textArea = document.getElementById('analysis-text');
+    
+    if (isEditMode) {
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> {{ _("Modo Edición Activo") }}';
+        btn.classList.remove('btn-outline-primary', 'btn-primary');
+        btn.classList.add('btn-warning');
+        textArea.style.cursor = 'text';
+        textArea.classList.add('edit-mode');
+    } else {
+        btn.innerHTML = '<i class="fas fa-pen me-1"></i> {{ _("Modo Edición") }}';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-primary');
+        textArea.style.cursor = 'default';
+        textArea.classList.remove('edit-mode');
+        hideAnnotationPanel();
+    }
+}
+
+function showAnnotationPanel(selectedText, range) {
+    const panel = document.getElementById('annotation-panel');
+    const preview = document.getElementById('selected-text-preview');
+    
+    preview.textContent = selectedText;
+    panel.style.display = 'block';
+    
+    // Guardar el rango para después
+    window.currentSelection = {
+        text: selectedText,
+        range: range
+    };
+    
+    // Initialize the annotation form with current text difficulty
+    initializeAnnotationFormForTextDifficulty();
+}
+
+function hideAnnotationPanel() {
+    const panel = document.getElementById('annotation-panel');
+    panel.style.display = 'none';
+    window.currentSelection = null;
+}
+
+function initializeAnnotationFormForTextDifficulty() {
+    // Get current difficulty level from text data
+    let textDifficulty = currentText?.difficulty || 'facil';
+    
+    console.log('Initializing annotation form for text difficulty:', textDifficulty);
+    
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty value
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    
+    // Get form elements
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    const formContainer = document.querySelector('#annotation-form .row');
+    
+    if (textDifficulty === 'facil') {
+        // For easy level, hide the form and show simple confirmation
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+        
+        // Remove required attributes for easy level
+        if (categorySelect) categorySelect.removeAttribute('required');
+        if (variableSelect) variableSelect.removeAttribute('required');
+        if (valueSelect) valueSelect.removeAttribute('required');
+        
+        // Show simple message for easy level
+        const simpleMessage = document.getElementById('simple-annotation-message');
+        if (simpleMessage) {
+            simpleMessage.style.display = 'block';
+        }
+    } else {
+        // For other levels, show the full form
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
+        
+        // Add required attributes back for other levels
+        if (categorySelect) categorySelect.setAttribute('required', 'required');
+        if (variableSelect) variableSelect.setAttribute('required', 'required');
+        if (valueSelect) valueSelect.setAttribute('required', 'required');
+        
+        // Hide simple message
+        const simpleMessage = document.getElementById('simple-annotation-message');
+        if (simpleMessage) {
+            simpleMessage.style.display = 'none';
+        }
+        
+        // Update category options based on text difficulty
+        updateCategoryOptionsForAnnotationForm(textDifficulty);
+        
+        // Clear and reset the form
+        if (categorySelect) categorySelect.value = '';
+        if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+        if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+        
+        // If there's a default category available, select it and load its variables
+        if (categorySelect && categorySelect.options.length > 1) {
+            const firstCategory = categorySelect.options[1].value;
+            categorySelect.value = firstCategory;
+            updateVariableOptions(firstCategory);
+        }
+    }
+}
+
+function updateCategoryOptionsForAnnotationForm(difficulty) {
+    const categorySelect = document.getElementById('annotation-category');
+    if (!categorySelect) return;
+    
+    // Clear existing options
+    categorySelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    const variables = DIFFICULTY_VARIABLES[difficulty];
+    
+    // Show categories based on available variables for this difficulty level
+    const availableCategories = [];
+    
+    if (variables.contenido_general) {
+        availableCategories.push({ value: 'contenido_general', text: 'Contenido General' });
+    }
+    
+    if (variables.lenguaje) {
+        availableCategories.push({ value: 'lenguaje', text: 'Lenguaje' });
+    }
+    
+    if (variables.fuentes) {
+        availableCategories.push({ value: 'fuentes', text: 'Fuentes' });
+    }
+    
+    availableCategories.forEach(category => {
+        const optionElement = document.createElement('option');
+        optionElement.value = category.value;
+        optionElement.textContent = category.text;
+        categorySelect.appendChild(optionElement);
+    });
+}
+
+function updateVariableOptions(category) {
+    const variableSelect = document.getElementById('annotation-variable');
+    variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    // Get current difficulty level from text data
+    let textDifficulty = currentText?.difficulty || 'facil';
+    
+    console.log('updateVariableOptions - Raw difficulty from database:', textDifficulty);
+    console.log('updateVariableOptions - Category:', category);
+    
+    // Map possible difficulty values to our internal keys
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    
+    // Normalize the difficulty value
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    
+    console.log('updateVariableOptions - Normalized difficulty:', textDifficulty);
+    
+    // Use text difficulty as primary
+    const variables = DIFFICULTY_VARIABLES[textDifficulty];
+    
+    console.log('updateVariableOptions - Variables for difficulty:', variables);
+    
+    // Show variables based on selected category and difficulty level
+    let availableVariables = [];
+    
+    if (category === 'contenido_general' && variables.contenido_general) {
+        availableVariables = variables.contenido_general;
+        console.log('updateVariableOptions - Using contenido_general variables:', availableVariables);
+    } else if (category === 'lenguaje' && variables.lenguaje) {
+        availableVariables = variables.lenguaje;
+        console.log('updateVariableOptions - Using lenguaje variables:', availableVariables);
+    } else if (category === 'fuentes' && variables.fuentes) {
+        availableVariables = variables.fuentes;
+        console.log('updateVariableOptions - Using fuentes variables:', availableVariables);
+    }
+    
+    console.log('updateVariableOptions - Final available variables:', availableVariables);
+    
+    availableVariables.forEach(variable => {
+        const option = document.createElement('option');
+        option.value = variable;
+        option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        variableSelect.appendChild(option);
+    });
+}
+
+function updateValueOptions(category, variable) {
+    const valueSelect = document.getElementById('annotation-value');
+    valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    
+    // Solo las variables de género necesitan valores específicos
+    const genderVariables = [
+        'genero_nombre_propio_titular',
+        'genero_personas_mencionadas', 
+        'genero_fuente'
+    ];
+    
+    if (genderVariables.includes(variable)) {
+        // Valores para variables de género
+        const genderValues = [
+            { value: '1', text: 'Hombre' },
+            { value: '2', text: 'Mujer' },
+            { value: '3', text: 'No especificado' }
+        ];
+        
+        genderValues.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            valueSelect.appendChild(optionElement);
+        });
+    } else {
+        // Para otras variables, solo pueden ser "Presente" (si no, no las marcarías)
+        const optionElement = document.createElement('option');
+        optionElement.value = '1';
+        optionElement.textContent = 'Presente';
+        optionElement.selected = true; // Seleccionar por defecto
+        valueSelect.appendChild(optionElement);
+    }
+}
+
+function saveAnnotation() {
+    const selectedText = window.currentSelection ? window.currentSelection.text : '';
+    
+    if (!selectedText) {
+        alert('{{ _("No hay texto seleccionado") }}');
+        return;
+    }
+    
+    // Get current difficulty level
+    let textDifficulty = currentText?.difficulty || 'facil';
+    const difficultyMapping = {
+        'facil': 'facil',
+        'fácil': 'facil',
+        'easy': 'facil',
+        'medio': 'medio',
+        'intermedio': 'medio',
+        'medium': 'medio',
+        'dificil': 'dificil',
+        'difícil': 'dificil',
+        'hard': 'dificil',
+        'avanzado': 'dificil',
+        'advanced': 'dificil'
+    };
+    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    
+    let annotation;
+    
+    if (textDifficulty === 'facil') {
+        // For easy level, create a simple annotation
+        annotation = {
+            id: Date.now(),
+            text: selectedText,
+            category: 'sesgo_general',
+            variable: 'sesgo_detectado',
+            value: '1',
+            timestamp: new Date().toISOString()
+        };
+    } else {
+        // For other levels, use the form values
+        const category = document.getElementById('annotation-category').value;
+        const variable = document.getElementById('annotation-variable').value;
+        const value = document.getElementById('annotation-value').value;
+        
+        if (!category || !variable || !value) {
+            alert('{{ _("Por favor completa todos los campos") }}');
+            return;
+        }
+        
+        annotation = {
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: variable,
+            value: value,
+            timestamp: new Date().toISOString()
+        };
+    }
+    
+    annotations.push(annotation);
+    updateAnnotationsList();
+    hideAnnotationPanel();
+    
+    // Habilitar botón
+    document.getElementById('save-analysis-btn').disabled = false;
+}
+
+function updateAnnotationsList() {
+    const container = document.getElementById('annotations-list');
+    
+    if (annotations.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("Selecciona texto para comenzar a anotar") }}</p>';
+        return;
+    }
+    
+    container.innerHTML = annotations.map(annotation => `
+        <div class="annotation-item">
+            <div class="annotation-text">"${annotation.text}"</div>
+            <div class="annotation-meta">
+                <strong>${annotation.category}</strong> → ${annotation.variable} = ${annotation.value}
+            </div>
+        </div>
+    `).join('');
+}
+
+function analyzeWithAI() {
+    if (annotations.length === 0) {
+        alert('{{ _("Por favor realiza al menos una anotación antes de analizar con IRIS") }}');
+        return;
+    }
+    
+    // Mostrar loading
+    const loadingBtn = document.getElementById('save-analysis-btn');
+    const originalText = loadingBtn.innerHTML;
+    loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Analizando...") }}';
+    loadingBtn.disabled = true;
+    
+    // Enviar datos al backend para análisis con IA
+    const analysisData = {
+        text_id: currentText.id,
+        manual_annotations: annotations,
+        text_data: currentText
+    };
+    
+    fetch('/challenge/analyze-ai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(analysisData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirigir a la página de resultados
+            window.location.href = data.redirect_url;
+        } else {
+            throw new Error(data.error || 'Error desconocido');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{ _("Error al analizar con IRIS. Inténtalo de nuevo.") }}');
+        loadingBtn.innerHTML = originalText;
+        loadingBtn.disabled = false;
+    });
+}
+
+
+function saveAnalysis() {
+    if (annotations.length === 0) {
+        alert('{{ _("Por favor realiza al menos una anotación antes de finalizar") }}');
+        return;
+    }
+    // Simular guardado del análisis
+    alert('{{ _("Análisis guardado correctamente") }}');
+    // Ejecutar automáticamente el análisis con IA y mostrar comparación
+    analyzeWithAI();
+}
+
+function updateProgressSteps() {
+    // Actualizar indicadores de progreso
+    if (annotations.length > 0) {
+        document.getElementById('step-manual').classList.add('completed');
+        document.getElementById('step-ai').classList.add('active');
+    }
+}
+</script>
+{% endblock %}
