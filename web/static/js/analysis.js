@@ -901,19 +901,24 @@ function setupCollapsiblePanels() {
                     icon.classList.remove('fa-chevron-down');
                     icon.classList.add('fa-chevron-up');
                     
-                    // Show text analysis panel when any category is expanded
-                    showTextAnalysisPanel();
-                    
-                    // Re-render content to include any new manual annotations
-                    renderContent();
-                    
-                    // Show corresponding highlight block for the category
-                    if (targetId === 'contenido-content') {
-                        showHighlightBlock('contenido');
-                    } else if (targetId === 'lenguaje-content') {
-                        showHighlightBlock('lenguaje');
-                    } else if (targetId === 'fuentes-content') {
-                        showHighlightBlock('fuentes');
+                    // Show text analysis panel only for analysis categories
+                    if (targetId === 'contenido-content' || targetId === 'lenguaje-content' || targetId === 'fuentes-content') {
+                        showTextAnalysisPanel();
+                        
+                        // Re-render content to include any new manual annotations
+                        renderContent();
+                        
+                        // Show corresponding highlight block for the category
+                        if (targetId === 'contenido-content') {
+                            showHighlightBlock('contenido');
+                        } else if (targetId === 'lenguaje-content') {
+                            showHighlightBlock('lenguaje');
+                        } else if (targetId === 'fuentes-content') {
+                            showHighlightBlock('fuentes');
+                        }
+                    } else {
+                        // For non-analysis categories, just re-render content
+                        renderContent();
                     }
                 } else {
                     // Closing panel
@@ -950,20 +955,21 @@ function showTextAnalysisPanel() {
     }
 }
 
-// Function to check if any panels are open and show instructions if none are
+// Function to check if any analysis category panels are open and show instructions if none are
 function checkAndShowInstructions() {
-    const collapsibleContents = document.querySelectorAll('.collapsible-content');
+    const analysisCategoryIds = ['contenido-content', 'lenguaje-content', 'fuentes-content'];
     const instructionsPanel = document.querySelector('.plain-text');
     const textAnalysisPanel = document.querySelector('.text-analysis-panel');
     
-    let anyPanelOpen = false;
-    collapsibleContents.forEach(content => {
-        if (content.style.display === 'block') {
-            anyPanelOpen = true;
+    let anyAnalysisPanelOpen = false;
+    analysisCategoryIds.forEach(id => {
+        const content = document.getElementById(id);
+        if (content && content.style.display === 'block') {
+            anyAnalysisPanelOpen = true;
         }
     });
     
-    if (!anyPanelOpen && instructionsPanel && textAnalysisPanel) {
+    if (!anyAnalysisPanelOpen && instructionsPanel && textAnalysisPanel) {
         instructionsPanel.style.display = 'block';
         textAnalysisPanel.style.display = 'none';
     }
