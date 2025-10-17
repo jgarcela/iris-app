@@ -80,12 +80,6 @@ def analyze_text(text_id):
                          text_data=text_data,
                          language=get_locale())
 
-@bp.route('/results')
-@challenge_required
-def results():
-    """Página de resultados y ranking"""
-    return render_template('challenge/challenge_results.html', 
-                         language=get_locale())
 
 
 
