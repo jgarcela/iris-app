@@ -599,23 +599,11 @@
 const currentText = JSON.parse(document.getElementById('current-text-data').textContent);
 let annotations = [];
 
-// Difficulty levels and their corresponding variables
-const DIFFICULTY_VARIABLES = {
-    'facil': {
-        'contenido_general': null,
-        'lenguaje': null,
-        'fuentes': null
-    },
-    'medio': {
-        'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas'],
-        'lenguaje': ['androcentrismo', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
-        'fuentes': null
-    },
-    'dificil': {
-        'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas'],
-        'lenguaje': ['androcentrismo', 'asimetria', 'cargos_mujeres', 'comparacion_mujeres_hombres', 'denominacion_dependiente', 'denominacion_redundante', 'denominacion_sexualizada', 'dual_aparente', 'excepcion_noticiabilidad', 'hombre_humanidad', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
-        'fuentes': ['declaracion_fuente', 'genero_fuente', 'nombre_fuente']
-    }
+// All difficulty levels use the same variables
+const CHALLENGE_VARIABLES = {
+    'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas', 'tema'],
+    'lenguaje': ['androcentrismo', 'asimetria', 'cargos_mujeres', 'comparacion_mujeres_hombres', 'denominacion_dependiente', 'denominacion_redundante', 'denominacion_sexualizada', 'dual_aparente', 'excepcion_noticiabilidad', 'hombre_humanidad', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
+    'fuentes': ['declaracion_fuente', 'genero_fuente', 'nombre_fuente', 'tipo_fuente']
 };
 
 const DIFFICULTY_INFO = {
@@ -680,18 +668,10 @@ function updateDifficultyInfo() {
     console.log('Raw difficulty from database:', textDifficulty);
     console.log('Current text title:', currentText?.title);
     
-    // If no difficulty in text data, determine based on text title or content
+    // If no difficulty in text data, default to 'facil'
     if (!textDifficulty) {
-        // Check if this is the "Debate sobre paridad" text (which should be medium)
-        if (currentText?.title && currentText.title.includes('paridad')) {
-            textDifficulty = 'medio';
-        } else {
-            // Default to user difficulty
-            textDifficulty = localStorage.getItem('userDifficulty') || 'facil';
-        }
+        textDifficulty = 'facil';
     }
-    
-    let userDifficulty = localStorage.getItem('userDifficulty') || 'facil';
     
     // Map possible difficulty values to our internal keys
     const difficultyMapping = {
@@ -708,31 +688,26 @@ function updateDifficultyInfo() {
         'advanced': 'dificil'
     };
     
-    // Normalize the difficulty values
+    // Normalize the difficulty value
     textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
-    userDifficulty = difficultyMapping[userDifficulty] || 'facil';
-    
-    // Use text difficulty as primary
-    let displayDifficulty = textDifficulty;
     
     console.log('Text difficulty:', textDifficulty);
-    console.log('User difficulty:', userDifficulty);
-    console.log('Display difficulty:', displayDifficulty);
+    console.log('Display difficulty:', textDifficulty);
     
     // Update difficulty badge and title
-    const difficultyInfo = DIFFICULTY_INFO[displayDifficulty];
+    const difficultyInfo = DIFFICULTY_INFO[textDifficulty];
     
     if (!difficultyInfo) {
-        console.error('Invalid difficulty level:', displayDifficulty);
-        displayDifficulty = 'facil'; // fallback
-        const fallbackInfo = DIFFICULTY_INFO[displayDifficulty];
+        console.error('Invalid difficulty level:', textDifficulty);
+        textDifficulty = 'facil'; // fallback
+        const fallbackInfo = DIFFICULTY_INFO[textDifficulty];
         updateDifficultyUI(fallbackInfo);
-        updateVariablesToAnnotate(displayDifficulty);
+        updateVariablesToAnnotate(textDifficulty);
         return;
     }
     
     updateDifficultyUI(difficultyInfo);
-    updateVariablesToAnnotate(displayDifficulty);
+    updateVariablesToAnnotate(textDifficulty);
 }
 
 function updateDifficultyUI(difficultyInfo) {
@@ -755,62 +730,38 @@ function updateDifficultyUI(difficultyInfo) {
 }
 
 function updateVariablesToAnnotate(difficulty) {
-    const variables = DIFFICULTY_VARIABLES[difficulty];
+    const variables = CHALLENGE_VARIABLES;
     const noAnnotationMessage = document.getElementById('no-annotation-message');
     const variablesContainer = document.getElementById('variables-to-annotate');
     const instructionsTitle = document.getElementById('instructions-title');
     
-    // Check if this is the "Fácil" level (general bias annotation)
-    if (difficulty === 'facil' && !variables.contenido_general && !variables.lenguaje && !variables.fuentes) {
-        // Show general bias annotation message and hide specific variables
-        if (noAnnotationMessage) noAnnotationMessage.style.display = 'block';
-        if (variablesContainer) variablesContainer.style.display = 'none';
-        if (instructionsTitle) instructionsTitle.textContent = '{{ _("¿Qué debes anotar?") }}';
-        
-        // Update available variables for annotation form
-        updateAvailableVariablesForDifficulty(difficulty);
-        return;
-    }
-    
-    // Hide "no annotation" message and show variables
+    // All difficulty levels now show the same variables
     if (noAnnotationMessage) noAnnotationMessage.style.display = 'none';
     if (variablesContainer) variablesContainer.style.display = 'block';
     if (instructionsTitle) instructionsTitle.textContent = '{{ _("¿Qué debes anotar?") }}';
     
     // Update contenido general variables
     const contenidoList = document.getElementById('contenido-variables');
-    if (contenidoList) {
-        if (variables.contenido_general) {
-            contenidoList.innerHTML = variables.contenido_general.map(variable => 
-                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
-            ).join('');
-        } else {
-            contenidoList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
-        }
+    if (contenidoList && variables.contenido_general) {
+        contenidoList.innerHTML = variables.contenido_general.map(variable => 
+            `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+        ).join('');
     }
     
     // Update lenguaje variables
     const lenguajeList = document.getElementById('lenguaje-variables');
-    if (lenguajeList) {
-        if (variables.lenguaje) {
-            lenguajeList.innerHTML = variables.lenguaje.map(variable => 
-                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
-            ).join('');
-        } else {
-            lenguajeList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
-        }
+    if (lenguajeList && variables.lenguaje) {
+        lenguajeList.innerHTML = variables.lenguaje.map(variable => 
+            `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+        ).join('');
     }
     
     // Update fuentes variables
     const fuentesList = document.getElementById('fuentes-variables');
-    if (fuentesList) {
-        if (variables.fuentes) {
-            fuentesList.innerHTML = variables.fuentes.map(variable => 
-                `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
-            ).join('');
-        } else {
-            fuentesList.innerHTML = '<li class="text-muted"><i class="fas fa-times me-1"></i> No se requiere anotación</li>';
-        }
+    if (fuentesList && variables.fuentes) {
+        fuentesList.innerHTML = variables.fuentes.map(variable => 
+            `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+        ).join('');
     }
     
     // Update available variables for annotation form
@@ -818,25 +769,8 @@ function updateVariablesToAnnotate(difficulty) {
 }
 
 function updateAvailableVariablesForDifficulty(difficulty) {
-    // Map possible difficulty values to our internal keys
-    const difficultyMapping = {
-        'facil': 'facil',
-        'fácil': 'facil',
-        'easy': 'facil',
-        'medio': 'medio',
-        'intermedio': 'medio',
-        'medium': 'medio',
-        'dificil': 'dificil',
-        'difícil': 'dificil',
-        'hard': 'dificil',
-        'avanzado': 'dificil',
-        'advanced': 'dificil'
-    };
-    
-    // Normalize the difficulty value
-    difficulty = difficultyMapping[difficulty] || 'facil';
-    
-    const variables = DIFFICULTY_VARIABLES[difficulty];
+    // All difficulty levels use the same variables now
+    const variables = CHALLENGE_VARIABLES;
     const categorySelect = document.getElementById('annotation-category');
     const variableSelect = document.getElementById('annotation-variable');
     
@@ -1188,38 +1122,14 @@ function updateVariableOptions(category) {
     const variableSelect = document.getElementById('annotation-variable');
     variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
     
-    // Get current difficulty level from text data
-    let textDifficulty = currentText?.difficulty || 'facil';
-    
-    console.log('updateVariableOptions - Raw difficulty from database:', textDifficulty);
     console.log('updateVariableOptions - Category:', category);
     
-    // Map possible difficulty values to our internal keys
-    const difficultyMapping = {
-        'facil': 'facil',
-        'fácil': 'facil',
-        'easy': 'facil',
-        'medio': 'medio',
-        'intermedio': 'medio',
-        'medium': 'medio',
-        'dificil': 'dificil',
-        'difícil': 'dificil',
-        'hard': 'dificil',
-        'avanzado': 'dificil',
-        'advanced': 'dificil'
-    };
+    // All difficulty levels use the same variables
+    const variables = CHALLENGE_VARIABLES;
     
-    // Normalize the difficulty value
-    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
+    console.log('updateVariableOptions - Variables for category:', variables);
     
-    console.log('updateVariableOptions - Normalized difficulty:', textDifficulty);
-    
-    // Use text difficulty as primary
-    const variables = DIFFICULTY_VARIABLES[textDifficulty];
-    
-    console.log('updateVariableOptions - Variables for difficulty:', variables);
-    
-    // Show variables based on selected category and difficulty level
+    // Show variables based on selected category
     let availableVariables = [];
     
     if (category === 'contenido_general' && variables.contenido_general) {
