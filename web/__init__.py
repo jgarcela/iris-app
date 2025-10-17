@@ -79,6 +79,13 @@ babel = Babel(app, locale_selector=get_locale)
 def inject_language():
     return {'current_language': session.get('language', app.config['BABEL_DEFAULT_LOCALE'])}
 
+@app.context_processor
+def inject_config():
+    """Inject configuration variables into templates"""
+    return {
+        'challenge_enabled': config.getboolean('CHALLENGE', 'ENABLED', fallback=False)
+    }
+
 
 # ----------------- CURRENT USER -----------------
 @app.context_processor
@@ -135,8 +142,15 @@ app.register_blueprint(table_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(contact_bp)
 app.register_blueprint(admin_bp)
-if challenge_bp:
+
+# Register challenge blueprint only if enabled in config
+CHALLENGE_ENABLED = config.getboolean('CHALLENGE', 'ENABLED', fallback=False)
+if challenge_bp and CHALLENGE_ENABLED:
     app.register_blueprint(challenge_bp)
+    print(f"[CONFIG] Challenge module ENABLED")
+else:
+    print(f"[CONFIG] Challenge module DISABLED")
+
 if glossary_bp:
     app.register_blueprint(glossary_bp)
 
