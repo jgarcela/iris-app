@@ -646,12 +646,40 @@
 const currentText = JSON.parse(document.getElementById('current-text-data').textContent);
 let annotations = [];
 
-// All difficulty levels use the same variables
+// Variables from config.ini - parse the string arrays
 const CHALLENGE_VARIABLES = {
-    'contenido_general': ['genero_nombre_propio_titular', 'genero_personas_mencionadas', 'nombre_propio_titular', 'personas_mencionadas', 'tema'],
-    'lenguaje': ['androcentrismo', 'asimetria', 'cargos_mujeres', 'comparacion_mujeres_hombres', 'denominacion_dependiente', 'denominacion_redundante', 'denominacion_sexualizada', 'dual_aparente', 'excepcion_noticiabilidad', 'hombre_humanidad', 'infantilizacion', 'lenguaje_sexista', 'masculino_generico', 'sexismo_social'],
-    'fuentes': ['declaracion_fuente', 'genero_fuente', 'nombre_fuente', 'tipo_fuente']
+    'contenido_general': {{ config.CONTENIDO_GENERAL.VARIABLES | tojson | safe }},
+    'lenguaje': {{ config.LENGUAJE.VARIABLES | tojson | safe }},
+    'fuentes': {{ config.FUENTES.VARIABLES | tojson | safe }}
 };
+
+// Debug: log the variables to see what we're getting
+console.log('CHALLENGE_VARIABLES:', CHALLENGE_VARIABLES);
+console.log('contenido_general type:', typeof CHALLENGE_VARIABLES.contenido_general);
+console.log('contenido_general value:', CHALLENGE_VARIABLES.contenido_general);
+
+// Ensure all variables are arrays
+function ensureArray(value) {
+    if (Array.isArray(value)) {
+        return value;
+    }
+    if (typeof value === 'string') {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            // If it's a string representation of a list, try to parse it
+            return value.replace(/[\[\]']/g, '').split(', ').map(item => item.trim().replace(/'/g, ''));
+        }
+    }
+    return [];
+}
+
+// Normalize the variables to ensure they are arrays
+CHALLENGE_VARIABLES.contenido_general = ensureArray(CHALLENGE_VARIABLES.contenido_general);
+CHALLENGE_VARIABLES.lenguaje = ensureArray(CHALLENGE_VARIABLES.lenguaje);
+CHALLENGE_VARIABLES.fuentes = ensureArray(CHALLENGE_VARIABLES.fuentes);
+
+console.log('Normalized CHALLENGE_VARIABLES:', CHALLENGE_VARIABLES);
 
 const DIFFICULTY_INFO = {
     'facil': {
@@ -674,28 +702,33 @@ const DIFFICULTY_INFO = {
     }
 };
 
+// Variable descriptions based on config.ini
 const VARIABLE_DESCRIPTIONS = {
-    'genero_nombre_propio_titular': 'Género periodista',
-    'genero_personas_mencionadas': 'Género de personas mencionadas',
-    'nombre_propio_titular': 'Nombre periodista',
+    'cita_textual_titular': 'Cita textual titular',
+    'genero_nombre_propio_titular': 'Género nombre propio titular',
+    'genero_periodista': 'Género periodista',
+    'genero_personas_mencionadas': 'Género personas mencionadas',
+    'nombre_propio_titular': 'Nombre propio titular',
     'personas_mencionadas': 'Personas mencionadas',
+    'tema': 'Tema',
     'androcentrismo': 'Androcentrismo',
-    'infantilizacion': 'Infantilización',
-    'lenguaje_sexista': 'Lenguaje sexista',
-    'masculino_generico': 'Masculino genérico',
-    'sexismo_social': 'Sexismo social',
     'asimetria': 'Asimetría',
-    'cargos_mujeres': 'Cargos de mujeres',
+    'cargos_mujeres': 'Cargos mujeres',
     'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
     'denominacion_dependiente': 'Denominación dependiente',
     'denominacion_redundante': 'Denominación redundante',
     'denominacion_sexualizada': 'Denominación sexualizada',
     'dual_aparente': 'Dual aparente',
     'excepcion_noticiabilidad': 'Excepción noticiabilidad',
-    'hombre_humanidad': 'Hombre como humanidad',
-    'declaracion_fuente': 'Declaración de fuente',
-    'genero_fuente': 'Género de fuente',
-    'nombre_fuente': 'Nombre de fuente'
+    'hombre_humanidad': 'Hombre humanidad',
+    'infantilizacion': 'Infantilización',
+    'lenguaje_sexista': 'Lenguaje sexista',
+    'masculino_generico': 'Masculino genérico',
+    'sexismo_social': 'Sexismo social',
+    'declaracion_fuente': 'Declaración fuente',
+    'genero_fuente': 'Género fuente',
+    'nombre_fuente': 'Nombre fuente',
+    'tipo_fuente': 'Tipo fuente'
 };
 let isEditMode = false;
 
@@ -722,6 +755,7 @@ function analyzeTextForProtagonist() {
     const genderAnnotations = annotations.filter(annotation => 
         annotation.variable === 'genero_personas_mencionadas' || 
         annotation.variable === 'genero_nombre_propio_titular' ||
+        annotation.variable === 'genero_periodista' ||
         annotation.variable === 'genero_fuente'
     );
     
@@ -740,12 +774,30 @@ function analyzeTextForProtagonist() {
     let unspecifiedCount = 0;
     
     genderAnnotations.forEach(annotation => {
-        if (annotation.value === '2') { // Mujer
-            femaleCount++;
-        } else if (annotation.value === '1') { // Hombre
-            maleCount++;
-        } else if (annotation.value === '3') { // No especificado
-            unspecifiedCount++;
+        if (annotation.variable === 'genero_periodista') {
+            // Lógica específica para género periodista
+            if (annotation.value === '2') { // Femenino
+                femaleCount++;
+            } else if (annotation.value === '1') { // Masculino
+                maleCount++;
+            } else if (annotation.value === '3') { // Mixto
+                maleCount++;
+                femaleCount++;
+            } else {
+                unspecifiedCount++;
+            }
+        } else {
+            // Lógica para otras variables de género
+            if (annotation.value === '3') { // Sí, mujer
+                femaleCount++;
+            } else if (annotation.value === '2') { // Sí, hombre
+                maleCount++;
+            } else if (annotation.value === '4') { // Sí, mujer y hombre
+                maleCount++;
+                femaleCount++;
+            } else {
+                unspecifiedCount++;
+            }
         }
     });
     
@@ -1278,17 +1330,35 @@ function updateValueOptions(category, variable) {
     // Solo las variables de género necesitan valores específicos
     const genderVariables = [
         'genero_nombre_propio_titular',
-        'genero_personas_mencionadas', 
+        'genero_personas_mencionadas',
+        'genero_periodista',
         'genero_fuente'
     ];
     
     if (genderVariables.includes(variable)) {
-        // Valores para variables de género
-        const genderValues = [
-            { value: '1', text: 'Hombre' },
-            { value: '2', text: 'Mujer' },
-            { value: '3', text: 'No especificado' }
-        ];
+        // Valores para variables de género basados en config.ini
+        let genderValues = [];
+        
+        if (variable === 'genero_periodista') {
+            // Valores específicos para género periodista del config.ini
+            genderValues = [
+                { value: '1', text: 'Masculino' },
+                { value: '2', text: 'Femenino' },
+                { value: '3', text: 'Mixto' },
+                { value: '4', text: 'Ns/Nc' },
+                { value: '5', text: 'Agencia/otros medios' },
+                { value: '6', text: 'Redacción' },
+                { value: '7', text: 'Corporativo' }
+            ];
+        } else {
+            // Valores estándar para otras variables de género
+            genderValues = [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ];
+        }
         
         genderValues.forEach(option => {
             const optionElement = document.createElement('option');
