@@ -98,6 +98,60 @@
                     </div>
                 </div>
 
+                    <!-- Panel de Anotación (aparece al seleccionar texto) - ahora inline en la columna izquierda, debajo de Modo de Análisis -->
+                    <div class="mb-4">
+                        <div class="annotation-panel" id="annotation-panel" style="display: none;">
+                            <div class="annotation-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tag me-2"></i>
+                                    {{ _('Anotar Texto Seleccionado') }}
+                                </h6>
+                                <button class="btn-close" id="close-annotation-panel"></button>
+                            </div>
+                            <div class="annotation-content">
+                                <div class="selected-text mb-3">
+                                    <strong>{{ _('Texto seleccionado:') }}</strong>
+                                    <span id="selected-text-preview" class="text-primary"></span>
+                                </div>
+                                <div id="simple-annotation-message" class="text-center py-4" style="display: none;"></div>
+                                <form id="annotation-form">
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <label class="form-label">{{ _('Categoría') }}</label>
+                                            <select class="form-select" id="annotation-category" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                                <option value="contenido_general">{{ _('Contenido General') }}</option>
+                                                <option value="lenguaje">{{ _('Lenguaje') }}</option>
+                                                <option value="fuentes">{{ _('Fuentes') }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">{{ _('Variable') }}</label>
+                                            <select class="form-select" id="annotation-variable" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">{{ _('Valor') }}</label>
+                                            <select class="form-select" id="annotation-value" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="fas fa-plus me-2"></i>
+                                            {{ _('Agregar Anotación') }}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" id="cancel-annotation">
+                                            {{ _('Cancelar') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Difficulty Information -->
                     <div class="difficulty-section mb-4">
                         <div class="card border-0 shadow-sm" id="difficulty-info-card">
@@ -174,6 +228,62 @@
                         </div>
                     </div>
 
+                    <!-- Panel de Anotación (aparece al seleccionar texto) - ahora inline en la columna izquierda -->
+                    <div class="mb-4">
+                        <div class="annotation-panel" id="annotation-panel" style="display: none;">
+                            <div class="annotation-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tag me-2"></i>
+                                    {{ _('Anotar Texto Seleccionado') }}
+                                </h6>
+                                <button class="btn-close" id="close-annotation-panel"></button>
+                            </div>
+                            <div class="annotation-content">
+                                <div class="selected-text mb-3">
+                                    <strong>{{ _('Texto seleccionado:') }}</strong>
+                                    <span id="selected-text-preview" class="text-primary"></span>
+                                </div>
+
+                                <div id="simple-annotation-message" class="text-center py-4" style="display: none;"></div>
+
+                                <form id="annotation-form">
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <label class="form-label">{{ _('Categoría') }}</label>
+                                            <select class="form-select" id="annotation-category" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                                <option value="contenido_general">{{ _('Contenido General') }}</option>
+                                                <option value="lenguaje">{{ _('Lenguaje') }}</option>
+                                                <option value="fuentes">{{ _('Fuentes') }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">{{ _('Variable') }}</label>
+                                            <select class="form-select" id="annotation-variable" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">{{ _('Valor') }}</label>
+                                            <select class="form-select" id="annotation-value" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="fas fa-plus me-2"></i>
+                                            {{ _('Agregar Anotación') }}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" id="cancel-annotation">
+                                            {{ _('Cancelar') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Análisis del Protagonista -->
                     <div class="protagonist-section mb-4">
                         <div class="card border-0 shadow-sm">
@@ -240,66 +350,7 @@
                     </div>
                 </div>
 
-                <!-- Panel de Anotación (aparece al seleccionar texto) -->
-                <div class="annotation-panel" id="annotation-panel" style="display: none;">
-                    <div class="annotation-header">
-                        <h6 class="mb-0">
-                            <i class="fas fa-tag me-2"></i>
-                            {{ _('Anotar Texto Seleccionado') }}
-                        </h6>
-                        <button class="btn-close" id="close-annotation-panel"></button>
-                    </div>
-                    <div class="annotation-content">
-                        <div class="selected-text mb-3">
-                            <strong>{{ _('Texto seleccionado:') }}</strong>
-                            <span id="selected-text-preview" class="text-primary"></span>
-                        </div>
-                        
-                        <!-- Simple message for easy level -->
-                        <div id="simple-annotation-message" class="text-center py-4" style="display: none;">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
-                                <h6>{{ _('Anotación General de Sesgo') }}</h6>
-                                <p class="mb-3">{{ _('Has seleccionado texto que contiene un sesgo de género. ¿Confirmas que quieres anotar este sesgo?') }}</p>
-                            </div>
-                        </div>
-                        
-                        <form id="annotation-form">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label class="form-label">{{ _('Categoría') }}</label>
-                                    <select class="form-select" id="annotation-category" required>
-                                        <option value="">{{ _('Seleccionar...') }}</option>
-                                        <option value="contenido_general">{{ _('Contenido General') }}</option>
-                                        <option value="lenguaje">{{ _('Lenguaje') }}</option>
-                                        <option value="fuentes">{{ _('Fuentes') }}</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">{{ _('Variable') }}</label>
-                                    <select class="form-select" id="annotation-variable" required>
-                                        <option value="">{{ _('Seleccionar...') }}</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">{{ _('Valor') }}</label>
-                                    <select class="form-select" id="annotation-value" required>
-                                        <option value="">{{ _('Seleccionar...') }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>
-                                    {{ _('Agregar Anotación') }}
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary ms-2" id="cancel-annotation">
-                                    {{ _('Cancelar') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <!-- Panel de Anotación eliminado: ahora está inline en la columna izquierda -->
             </div>
         </div>
     </div>
@@ -490,17 +541,14 @@
 }
 
 .annotation-panel {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
+    position: static; /* inline inside left column */
+    width: 100%;
+    max-width: 100%;
     background: white;
     border: 1px solid #e9ecef;
     border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-top: 0.5rem;
 }
 
 .annotation-header {
