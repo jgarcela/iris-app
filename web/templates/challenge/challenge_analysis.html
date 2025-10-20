@@ -97,6 +97,7 @@
                         </button>
                     </div>
                 </div>
+
                     <!-- Difficulty Information -->
                     <div class="difficulty-section mb-4">
                         <div class="card border-0 shadow-sm" id="difficulty-info-card">
@@ -637,6 +638,7 @@
     font-size: 0.9rem;
     line-height: 1.4;
 }
+
 </style>
 
 <script id="current-text-data" type="application/json">{{ text_data | tojson | safe }}</script>
@@ -1205,29 +1207,12 @@ function initializeAnnotationFormForTextDifficulty() {
     const valueSelect = document.getElementById('annotation-value');
     const formContainer = document.querySelector('#annotation-form .row');
     
-    if (textDifficulty === 'facil') {
-        // For easy level, hide the form and show simple confirmation
-        if (formContainer) {
-            formContainer.style.display = 'none';
-        }
-        
-        // Remove required attributes for easy level
-        if (categorySelect) categorySelect.removeAttribute('required');
-        if (variableSelect) variableSelect.removeAttribute('required');
-        if (valueSelect) valueSelect.removeAttribute('required');
-        
-        // Show simple message for easy level
-        const simpleMessage = document.getElementById('simple-annotation-message');
-        if (simpleMessage) {
-            simpleMessage.style.display = 'block';
-        }
-    } else {
-        // For other levels, show the full form
+    // Always show the full form for all difficulty levels
         if (formContainer) {
             formContainer.style.display = 'block';
         }
         
-        // Add required attributes back for other levels
+    // Add required attributes for all levels
         if (categorySelect) categorySelect.setAttribute('required', 'required');
         if (variableSelect) variableSelect.setAttribute('required', 'required');
         if (valueSelect) valueSelect.setAttribute('required', 'required');
@@ -1251,7 +1236,6 @@ function initializeAnnotationFormForTextDifficulty() {
             const firstCategory = categorySelect.options[1].value;
             categorySelect.value = firstCategory;
             updateVariableOptions(firstCategory);
-        }
     }
 }
 
@@ -1327,52 +1311,199 @@ function updateValueOptions(category, variable) {
     const valueSelect = document.getElementById('annotation-value');
     valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
     
-    // Solo las variables de género necesitan valores específicos
-    const genderVariables = [
-        'genero_nombre_propio_titular',
-        'genero_personas_mencionadas',
-        'genero_periodista',
-        'genero_fuente'
-    ];
+    // Mapeo de variables a sus valores del config.ini
+    const variableValues = {
+        // Contenido General
+        'genero_nombre_propio_titular': [
+            { value: '1', text: 'No hay' },
+            { value: '2', text: 'Sí, hombre' },
+            { value: '3', text: 'Sí, mujer' },
+            { value: '4', text: 'Sí, mujer y hombre' }
+        ],
+        'genero_personas_mencionadas': [
+            { value: '1', text: 'No hay' },
+            { value: '2', text: 'Sí, hombre' },
+            { value: '3', text: 'Sí, mujer' },
+            { value: '4', text: 'Sí, mujer y hombre' }
+        ],
+        'genero_periodista': [
+            { value: '1', text: 'Masculino' },
+            { value: '2', text: 'Femenino' },
+            { value: '3', text: 'Mixto' },
+            { value: '4', text: 'Ns/Nc' },
+            { value: '5', text: 'Agencia/otros medios' },
+            { value: '6', text: 'Redacción' },
+            { value: '7', text: 'Corporativo' }
+        ],
+        'tema': [
+            { value: '1', text: 'Científica/Investigación' },
+            { value: '2', text: 'Comunicación' },
+            { value: '3', text: 'De farándula o espectáculo' },
+            { value: '4', text: 'Deportiva' },
+            { value: '5', text: 'Economía (incluido: consumo; compras; viajes…)' },
+            { value: '6', text: 'Educación/cultura' },
+            { value: '7', text: 'Empleo/Trabajo' },
+            { value: '8', text: 'Empresa' },
+            { value: '9', text: 'Judicial' },
+            { value: '10', text: 'Medioambiente' },
+            { value: '11', text: 'Policial' },
+            { value: '12', text: 'Política' },
+            { value: '13', text: 'Salud' },
+            { value: '14', text: 'Social' },
+            { value: '15', text: 'Tecnología' },
+            { value: '16', text: 'Transporte' },
+            { value: '17', text: 'Otros' }
+        ],
+        'cita_textual_titular': [
+            { value: '0', text: 'No' },
+            { value: '1', text: 'Sí' }
+        ],
+        'menciona_ia': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'ia_tema_central': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'significado_ia': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'extension_noticia': [
+            { value: '0', text: 'Noticia Relevante' },
+            { value: '5000', text: 'Noticia de interés' },
+            { value: '8000', text: 'Noticia de Alta cobertura' }
+        ],
+        
+        // Lenguaje
+        'lenguaje_sexista': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' },
+            { value: '3', text: 'Sí, además se observa un salto semántico' }
+        ],
+        'androcentrismo': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'asimetria': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'cargos_mujeres': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'comparacion_mujeres_hombres': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'denominacion_dependiente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'denominacion_redundante': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'denominacion_sexualizada': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'dual_aparente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'excepcion_noticiabilidad': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'hombre_humanidad': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'infantilizacion': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'masculino_generico': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'sexismo_social': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        
+        // Fuentes
+        'tipo_fuente': [
+            { value: '1', text: 'Abogado/a' },
+            { value: '2', text: 'Activista' },
+            { value: '3', text: 'Actor/Actriz' },
+            { value: '4', text: 'Alto Cargo Directivo/a' },
+            { value: '5', text: 'Alumno/a' },
+            { value: '6', text: 'Analista' },
+            { value: '7', text: 'Arquitecto/a' },
+            { value: '8', text: 'Artista' },
+            { value: '9', text: 'Ciudadano/a' },
+            { value: '10', text: 'Corporativa' },
+            { value: '11', text: 'Deportista' },
+            { value: '12', text: 'Dir. Cine / guionista' },
+            { value: '13', text: 'Director/a o presidente/a' },
+            { value: '14', text: 'Economista' },
+            { value: '15', text: 'El Papa' },
+            { value: '16', text: 'Escritor/a' },
+            { value: '17', text: 'Experto/a' },
+            { value: '18', text: 'Famoso/a' },
+            { value: '19', text: 'Institucional' },
+            { value: '20', text: 'Investigador/a' },
+            { value: '21', text: 'Médico' },
+            { value: '22', text: 'Músico/a' },
+            { value: '23', text: 'Periodista' },
+            { value: '24', text: 'Personaje de Ficción' },
+            { value: '25', text: 'Político/a' },
+            { value: '26', text: 'Rey/Reina' },
+            { value: '27', text: 'Trabajador/a' }
+        ],
+        'genero_fuente': [
+            { value: '1', text: 'No hay' },
+            { value: '2', text: 'Sí, hombre' },
+            { value: '3', text: 'Sí, mujer' },
+            { value: '4', text: 'Sí, mujer y hombre' }
+        ],
+        'declaracion_fuente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'nombre_fuente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ]
+    };
     
-    if (genderVariables.includes(variable)) {
-        // Valores para variables de género basados en config.ini
-        let genderValues = [];
-        
-        if (variable === 'genero_periodista') {
-            // Valores específicos para género periodista del config.ini
-            genderValues = [
-                { value: '1', text: 'Masculino' },
-                { value: '2', text: 'Femenino' },
-                { value: '3', text: 'Mixto' },
-                { value: '4', text: 'Ns/Nc' },
-                { value: '5', text: 'Agencia/otros medios' },
-                { value: '6', text: 'Redacción' },
-                { value: '7', text: 'Corporativo' }
-            ];
-        } else {
-            // Valores estándar para otras variables de género
-            genderValues = [
-                { value: '1', text: 'No hay' },
-                { value: '2', text: 'Sí, hombre' },
-                { value: '3', text: 'Sí, mujer' },
-                { value: '4', text: 'Sí, mujer y hombre' }
-            ];
-        }
-        
-        genderValues.forEach(option => {
+    // Obtener valores para la variable específica
+    const values = variableValues[variable];
+    
+    if (values) {
+        values.forEach(option => {
             const optionElement = document.createElement('option');
             optionElement.value = option.value;
             optionElement.textContent = option.text;
             valueSelect.appendChild(optionElement);
         });
     } else {
-        // Para otras variables, solo pueden ser "Presente" (si no, no las marcarías)
+        // Valores por defecto para variables no definidas
+        const defaultValues = [
+            { value: '1', text: 'Presente' },
+            { value: '0', text: 'Ausente' }
+        ];
+        
+        defaultValues.forEach(option => {
         const optionElement = document.createElement('option');
-        optionElement.value = '1';
-        optionElement.textContent = 'Presente';
-        optionElement.selected = true; // Seleccionar por defecto
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
         valueSelect.appendChild(optionElement);
+        });
     }
 }
 
@@ -1384,37 +1515,7 @@ function saveAnnotation() {
         return;
     }
     
-    // Get current difficulty level
-    let textDifficulty = currentText?.difficulty || 'facil';
-    const difficultyMapping = {
-        'facil': 'facil',
-        'fácil': 'facil',
-        'easy': 'facil',
-        'medio': 'medio',
-        'intermedio': 'medio',
-        'medium': 'medio',
-        'dificil': 'dificil',
-        'difícil': 'dificil',
-        'hard': 'dificil',
-        'avanzado': 'dificil',
-        'advanced': 'dificil'
-    };
-    textDifficulty = difficultyMapping[textDifficulty?.toLowerCase()] || 'facil';
-    
-    let annotation;
-    
-    if (textDifficulty === 'facil') {
-        // For easy level, create a simple annotation
-        annotation = {
-            id: Date.now(),
-            text: selectedText,
-            category: 'sesgo_general',
-            variable: 'sesgo_detectado',
-            value: '1',
-            timestamp: new Date().toISOString()
-        };
-    } else {
-        // For other levels, use the form values
+    // Always use the form values for all difficulty levels
         const category = document.getElementById('annotation-category').value;
         const variable = document.getElementById('annotation-variable').value;
         const value = document.getElementById('annotation-value').value;
@@ -1424,7 +1525,7 @@ function saveAnnotation() {
             return;
         }
         
-        annotation = {
+    const annotation = {
             id: Date.now(),
             text: selectedText,
             category: category,
@@ -1432,7 +1533,6 @@ function saveAnnotation() {
             value: value,
             timestamp: new Date().toISOString()
         };
-    }
     
     annotations.push(annotation);
     updateAnnotationsList();
@@ -1547,5 +1647,6 @@ function updateProgressSteps() {
         document.getElementById('step-ai').classList.add('active');
     }
 }
+
 </script>
 {% endblock %}
