@@ -1569,25 +1569,32 @@ function updateValueOptions(category, variable) {
     const values = variableValues[variable];
     
     if (values) {
-        values.forEach(option => {
+        // Si es un binario (Sí/No o Presente/Ausente), no mostramos la opción negativa
+        const lower = values.map(v => (v.text || '').toLowerCase());
+        const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+        const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+        const isPresenteAusente = values.length === 2 && lower.includes('presente') && lower.includes('ausente');
+
+        let toRender = values;
+        if (isYesNo || isSiNo || isPresenteAusente) {
+            toRender = values.filter(v => /sí|si|presente/i.test(v.text || ''));
+        }
+
+        toRender.forEach((option, idx) => {
             const optionElement = document.createElement('option');
             optionElement.value = option.value;
             optionElement.textContent = option.text;
+            if (idx === 0) optionElement.selected = true; // seleccionar afirmativo por defecto
             valueSelect.appendChild(optionElement);
         });
     } else {
-        // Valores por defecto para variables no definidas
-        const defaultValues = [
-            { value: '1', text: 'Presente' },
-            { value: '0', text: 'Ausente' }
-        ];
-        
-        defaultValues.forEach(option => {
+        // Sin catálogo: ocultamos selector y fijamos afirmativo por defecto
+        if (valueSelect && valueSelect.parentElement) valueSelect.parentElement.style.display = 'none';
         const optionElement = document.createElement('option');
-            optionElement.value = option.value;
-            optionElement.textContent = option.text;
+        optionElement.value = '1';
+        optionElement.textContent = '';
+        optionElement.selected = true;
         valueSelect.appendChild(optionElement);
-        });
     }
 }
 
