@@ -688,6 +688,17 @@
     line-height: 1.4;
 }
 
+/* Inline highlight for user annotations */
+.annotation-mark {
+    background-color: #fff3cd;
+    box-shadow: inset 0 -6px 0 rgba(255, 235, 59, 0.6);
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.annotation-mark.mark-contenido_general { background-color: #e6f4ea; box-shadow: inset 0 -6px 0 rgba(76, 175, 80, 0.35); }
+.annotation-mark.mark-lenguaje { background-color: #fff0f0; box-shadow: inset 0 -6px 0 rgba(244, 67, 54, 0.35); }
+.annotation-mark.mark-fuentes { background-color: #eef7ff; box-shadow: inset 0 -6px 0 rgba(33, 150, 243, 0.35); }
+
 </style>
 
 <script id="current-text-data" type="application/json">{{ text_data | tojson | safe }}</script>
@@ -1638,6 +1649,7 @@ function saveAnnotation() {
             value: '1',
             timestamp: createdAt
         });
+        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
         // 2) género
         if (genderValue) {
             annotations.push({
@@ -1648,6 +1660,7 @@ function saveAnnotation() {
                 value: genderValue,
                 timestamp: createdAt
             });
+            try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
         }
     } else {
         // Anotación normal
@@ -1659,6 +1672,7 @@ function saveAnnotation() {
             value: value,
             timestamp: createdAt
         });
+        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
     }
     updateAnnotationsList();
     hideAnnotationPanel();
@@ -1771,6 +1785,35 @@ function updateProgressSteps() {
         document.getElementById('step-manual').classList.add('completed');
         document.getElementById('step-ai').classList.add('active');
     }
+}
+
+function applyInlineHighlight(selectionData, category, variable) {
+    if (!selectionData || !selectionData.range) return;
+    const range = selectionData.range.cloneRange();
+    if (range.collapsed) return;
+    const wrapper = document.createElement('mark');
+    wrapper.className = `annotation-mark mark-${category}`;
+    wrapper.setAttribute('data-variable', variable);
+    const catName = (category === 'contenido_general') ? 'Contenido General' : (category === 'lenguaje') ? 'Lenguaje' : (category === 'fuentes') ? 'Fuentes' : category;
+    const varLabel = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g,' ');
+    // Native tooltip + Bootstrap tooltip support
+    wrapper.setAttribute('title', `${catName} · ${varLabel}`);
+    wrapper.setAttribute('data-bs-toggle', 'tooltip');
+    try {
+        range.surroundContents(wrapper);
+    } catch (e) {
+        // Fallback: wrap text node by splitting
+        const text = document.createTextNode(range.toString());
+        wrapper.appendChild(text);
+        range.deleteContents();
+        range.insertNode(wrapper);
+    }
+    // Initialize Bootstrap tooltip if available
+    try {
+        if (window.bootstrap && window.bootstrap.Tooltip) {
+            new window.bootstrap.Tooltip(wrapper);
+        }
+    } catch (_) {}
 }
 
 </script>
