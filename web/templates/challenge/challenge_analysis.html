@@ -138,6 +138,7 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div id="composite-controls" style="display:none" class="mt-2"></div>
                                     <div class="mt-3 d-flex gap-2">
                                         <button type="submit" class="btn btn-primary flex-fill">
                                             <i class="fas fa-plus me-2"></i>
@@ -1346,6 +1347,9 @@ function updateVariableOptions(category) {
     }
     
     console.log('updateVariableOptions - Final available variables:', availableVariables);
+    // Hide gender-only variables that are driven by a paired presence variable
+    const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
+    availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
     
     availableVariables.forEach(variable => {
         const option = document.createElement('option');
@@ -1358,6 +1362,8 @@ function updateVariableOptions(category) {
 function updateValueOptions(category, variable) {
     const valueSelect = document.getElementById('annotation-value');
     valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    const compositeControls = document.getElementById('composite-controls');
+    if (compositeControls) compositeControls.style.display = 'none', compositeControls.innerHTML = '';
     
     // Mapeo de variables a sus valores del config.ini
     const variableValues = {
@@ -1529,6 +1535,36 @@ function updateValueOptions(category, variable) {
         ]
     };
     
+    // Compuestos: pares variable-presencia + variable-detalle
+    const compositePairs = {
+        personas_mencionadas: 'genero_personas_mencionadas',
+        nombre_propio_titular: 'genero_nombre_propio_titular',
+        nombre_fuente: 'genero_fuente'
+    };
+
+    // Si la variable seleccionada es parte de un compuesto (solo se muestra la base), mostrar control de género
+    const compositeDetail = compositePairs[variable];
+    if (compositeDetail) {
+        const baseVar = compositePairs[variable] ? variable : Object.keys(compositePairs).find(k => compositePairs[k] === variable);
+        const detailVar = compositePairs[baseVar];
+        // UI: mostrar selector de género cuando se trate del par de personas
+        if (compositeControls) {
+            compositeControls.style.display = 'block';
+            // Para pares de género, usar variableValues del detailVar
+            const genderValues = variableValues[detailVar] || [];
+            const label = (detailVar === 'genero_personas_mencionadas') ? '{{ _("Género de la persona") }}' : (detailVar === 'genero_nombre_propio_titular') ? '{{ _("Género del periodista") }}' : '{{ _("Género de la fuente") }}';
+            compositeControls.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">${label}</label>
+                        <select class="form-select" id="composite-gender">
+                            ${genderValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+        }
+    }
+
     // Obtener valores para la variable específica
     const values = variableValues[variable];
     
@@ -1573,16 +1609,51 @@ function saveAnnotation() {
             return;
         }
         
-    const annotation = {
+    const createdAt = new Date().toISOString();
+    
+    // Manejo de variables compuestas: crear dos anotaciones sincronizadas
+    const compositePairs = {
+        personas_mencionadas: 'genero_personas_mencionadas',
+        nombre_propio_titular: 'genero_nombre_propio_titular',
+        nombre_fuente: 'genero_fuente'
+    };
+    const reverseComposite = Object.fromEntries(Object.entries(compositePairs).map(([k,v]) => [v,k]));
+    const compositeControls = document.getElementById('composite-gender');
+    
+    if (compositePairs[variable]) {
+        // Usuario anotó la presencia: set presente y género seleccionado
+        const genderValue = compositeControls ? compositeControls.value : null;
+        // 1) presencia
+        annotations.push({
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: variable,
+            value: '1',
+            timestamp: createdAt
+        });
+        // 2) género
+        if (genderValue) {
+            annotations.push({
+                id: Date.now()+1,
+                text: selectedText,
+                category: category,
+                variable: compositePairs[variable],
+                value: genderValue,
+                timestamp: createdAt
+            });
+        }
+    } else {
+        // Anotación normal
+        annotations.push({
             id: Date.now(),
             text: selectedText,
             category: category,
             variable: variable,
             value: value,
-            timestamp: new Date().toISOString()
-        };
-    
-    annotations.push(annotation);
+            timestamp: createdAt
+        });
+    }
     updateAnnotationsList();
     hideAnnotationPanel();
     
