@@ -173,6 +173,24 @@
                         </div>
                     </div>
 
+                    <!-- Análisis del Protagonista -->
+                    <div class="protagonist-section mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">
+                                    <i class="fas fa-user-star me-2 text-primary"></i>
+                                    {{ _('Protagonista de la Noticia') }}
+                                </h6>
+                                <div id="protagonist-analysis" class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                                    </div>
+                                    <p class="text-muted mt-2">{{ _('Analizando protagonista...') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Resumen de Anotaciones -->
                     <div class="annotations-summary">
                         <h6 class="section-title">
@@ -590,6 +608,35 @@
     padding-top: 1rem;
     border-top: 1px solid #e9ecef;
 }
+
+/* Protagonist Analysis Styles */
+.protagonist-section .card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-left: 4px solid #667eea;
+}
+
+.protagonist-result {
+    text-align: center;
+}
+
+.protagonist-gender .badge {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.protagonist-details h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.protagonist-details p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
 </style>
 
 <script id="current-text-data" type="application/json">{{ text_data | tojson | safe }}</script>
@@ -659,7 +706,76 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initializeChallengeAnalysis();
     updateDifficultyInfo();
+    analyzeProtagonist();
 });
+
+function analyzeProtagonist() {
+    const protagonistContainer = document.getElementById('protagonist-analysis');
+    if (!protagonistContainer) return;
+    
+    // Show initial state immediately
+    updateProtagonistAnalysis();
+}
+
+function analyzeTextForProtagonist() {
+    // Check if there are any annotations with gender information
+    const genderAnnotations = annotations.filter(annotation => 
+        annotation.variable === 'genero_personas_mencionadas' || 
+        annotation.variable === 'genero_nombre_propio_titular' ||
+        annotation.variable === 'genero_fuente'
+    );
+    
+    // If no gender annotations, show neutral message
+    if (genderAnnotations.length === 0) {
+        return {
+            gender: 'No disponible',
+            title: 'Sin datos de género',
+            description: 'No se han anotado personas con información de género aún. Realiza anotaciones para ver el análisis del protagonista.'
+        };
+    }
+    
+    // Count gender values from annotations
+    let femaleCount = 0;
+    let maleCount = 0;
+    let unspecifiedCount = 0;
+    
+    genderAnnotations.forEach(annotation => {
+        if (annotation.value === '2') { // Mujer
+            femaleCount++;
+        } else if (annotation.value === '1') { // Hombre
+            maleCount++;
+        } else if (annotation.value === '3') { // No especificado
+            unspecifiedCount++;
+        }
+    });
+    
+    // Determine protagonist based on annotation counts
+    if (femaleCount > maleCount && femaleCount > unspecifiedCount) {
+        return {
+            gender: 'Mujer',
+            title: 'Protagonista Femenina',
+            description: `Basado en ${femaleCount} anotación(es) de género femenino.`
+        };
+    } else if (maleCount > femaleCount && maleCount > unspecifiedCount) {
+        return {
+            gender: 'Hombre',
+            title: 'Protagonista Masculino',
+            description: `Basado en ${maleCount} anotación(es) de género masculino.`
+        };
+    } else if (unspecifiedCount > 0 && femaleCount === 0 && maleCount === 0) {
+        return {
+            gender: 'No especificado',
+            title: 'Protagonista sin género definido',
+            description: `Basado en ${unspecifiedCount} anotación(es) sin género especificado.`
+        };
+    } else {
+        return {
+            gender: 'Mixto',
+            title: 'Protagonista Mixto',
+            description: `Equilibrio entre géneros: ${maleCount} masculino, ${femaleCount} femenino.`
+        };
+    }
+}
 
 function updateDifficultyInfo() {
     // Get difficulty from text data
@@ -1272,6 +1388,31 @@ function updateAnnotationsList() {
             </div>
         </div>
     `).join('');
+    
+    // Update protagonist analysis when annotations change
+    updateProtagonistAnalysis();
+}
+
+function updateProtagonistAnalysis() {
+    const protagonistContainer = document.getElementById('protagonist-analysis');
+    if (!protagonistContainer) return;
+    
+    const protagonistInfo = analyzeTextForProtagonist();
+    
+    protagonistContainer.innerHTML = `
+        <div class="protagonist-result">
+            <div class="protagonist-gender mb-2">
+                <span class="badge ${protagonistInfo.gender === 'Mujer' ? 'bg-success' : protagonistInfo.gender === 'Hombre' ? 'bg-primary' : protagonistInfo.gender === 'No disponible' ? 'bg-secondary' : 'bg-info'} fs-6 px-3 py-2">
+                    <i class="fas ${protagonistInfo.gender === 'Mujer' ? 'fa-venus' : protagonistInfo.gender === 'Hombre' ? 'fa-mars' : protagonistInfo.gender === 'No disponible' ? 'fa-question' : 'fa-balance-scale'} me-2"></i>
+                    ${protagonistInfo.gender}
+                </span>
+            </div>
+            <div class="protagonist-details">
+                <h6 class="mb-1">${protagonistInfo.title}</h6>
+                <p class="text-muted small mb-0">${protagonistInfo.description}</p>
+            </div>
+        </div>
+    `;
 }
 
 function analyzeWithAI() {
