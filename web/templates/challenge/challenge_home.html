@@ -1554,14 +1554,19 @@ function updateHelpText(level) {
             title: 'Consejos para el nivel medio',
             content: 'Los sesgos son más sutiles. Presta atención a diferencias en el tratamiento del lenguaje, desbalances moderados y términos técnicos.'
         },
-        'dificil': {
-            title: 'Consejos para el nivel difícil',
-            content: 'Los sesgos son muy sutiles. Requiere análisis profundo del contexto, lenguaje sofisticado y conocimiento especializado.'
-        }
+        // For difficult level, do not show tips
+        'dificil': null
     };
     
     const help = helpTexts[level];
-    if (!help) return;
+    if (!help) {
+        // Remove help section if present
+        const existing = document.getElementById('difficulty-help');
+        if (existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
+        }
+        return;
+    }
     
     // Create or update help section
     let helpSection = document.getElementById('difficulty-help');
@@ -1591,7 +1596,7 @@ function adjustInterfaceComplexity(level) {
             button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar Análisis';
         } else if (level === 'dificil') {
             button.classList.remove('btn-lg');
-            button.innerHTML = '<i class="fas fa-microscope me-2"></i>Análisis Avanzado';
+            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar análisis';
         }
     });
     
