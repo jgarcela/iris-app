@@ -1103,9 +1103,14 @@ function setupAssessmentModal() {
     const assessmentSection = document.getElementById('difficultyAssessmentSection');
     const confirmBtn = document.getElementById('confirmAssessment');
     const skipBtn = document.getElementById('skipAssessment');
-    
+
+    // If assessment UI is not present on this page, safely exit
+    if (!assessmentSection || !confirmBtn || !skipBtn) {
+        return;
+    }
+
     let selectedOption = null;
-    
+
     // Handle option selection (both level and challenge in one click)
     document.querySelectorAll('.option-card').forEach(card => {
         card.addEventListener('click', function() {
@@ -1118,58 +1123,58 @@ function setupAssessmentModal() {
             confirmBtn.disabled = false;
         });
     });
-    
+
     // Confirm assessment
     confirmBtn.addEventListener('click', function() {
         if (selectedOption) {
             userDifficulty.level = selectedOption.level;
             userDifficulty.challenge = selectedOption.challenge;
-            
+
             // Set initial unlocked texts based on assessment
             setInitialUnlockedTexts(selectedOption.level, selectedOption.challenge);
-            
+
             // Save to localStorage so it persists after redirect
             localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
             localStorage.setItem('challenge_assessed', '1');
-            
+
             // Hide assessment section and show other sections
             assessmentSection.style.display = 'none';
             document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
                 section.style.display = 'block';
             });
-            
+
             // Update UI
             updateUserLevelDisplay();
             updateDifficultyControls();
             updateTextCards();
-            
+
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
-    
+
     // Skip assessment
     skipBtn.addEventListener('click', function() {
         // Use default settings
         userDifficulty.level = 'principiante';
         userDifficulty.challenge = 'facil';
         setInitialUnlockedTexts('principiante', 'facil');
-        
+
         // Save to localStorage so it persists after redirect
         localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
         localStorage.setItem('challenge_assessed', '1');
-        
+
         // Hide assessment section and show other sections
         assessmentSection.style.display = 'none';
         document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
             section.style.display = 'block';
         });
-        
+
         // Update UI
         updateUserLevelDisplay();
         updateDifficultyControls();
         updateTextCards();
-        
+
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -1193,44 +1198,59 @@ function setInitialUnlockedTexts(level, challenge) {
 }
 
 function setupDifficultyControls() {
-    // Unlock all button
-    document.getElementById('unlockAllBtn').addEventListener('click', function() {
-        userDifficulty.unlockedTexts.facil = 10;
-        userDifficulty.unlockedTexts.medio = 10;
-        userDifficulty.unlockedTexts.dificil = 10;
-        updateDifficultyControls();
-        updateTextCards();
-        saveUserDifficulty();
-    });
-    
-    // Adjust level button
-    document.getElementById('adjustLevelBtn').addEventListener('click', function() {
-        // Show assessment section
-        document.getElementById('difficultyAssessmentSection').style.display = 'block';
-        // Hide other sections temporarily
-        document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
-            section.style.display = 'none';
+    // Unlock all button (optional in page)
+    const unlockAllBtn = document.getElementById('unlockAllBtn');
+    if (unlockAllBtn) {
+        unlockAllBtn.addEventListener('click', function() {
+            userDifficulty.unlockedTexts.facil = 10;
+            userDifficulty.unlockedTexts.medio = 10;
+            userDifficulty.unlockedTexts.dificil = 10;
+            updateDifficultyControls();
+            updateTextCards();
+            saveUserDifficulty();
         });
-        // Scroll to assessment
-        document.getElementById('difficultyAssessmentSection').scrollIntoView({ behavior: 'smooth' });
-    });
+    }
+    
+    // Adjust level button (optional in page)
+    const adjustLevelBtn = document.getElementById('adjustLevelBtn');
+    const assessmentSection = document.getElementById('difficultyAssessmentSection');
+    if (adjustLevelBtn && assessmentSection) {
+        adjustLevelBtn.addEventListener('click', function() {
+            // Show assessment section
+            assessmentSection.style.display = 'block';
+            // Hide other sections temporarily
+            document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
+                section.style.display = 'none';
+            });
+            // Scroll to assessment
+            assessmentSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 }
 
 function updateUserLevelDisplay() {
-    document.getElementById('currentLevel').textContent = getLevelDisplayName(userDifficulty.level);
-    document.getElementById('levelDescription').textContent = getLevelDescription(userDifficulty.level);
+    const currentLevelEl = document.getElementById('currentLevel');
+    const levelDescriptionEl = document.getElementById('levelDescription');
+    if (currentLevelEl) currentLevelEl.textContent = getLevelDisplayName(userDifficulty.level);
+    if (levelDescriptionEl) levelDescriptionEl.textContent = getLevelDescription(userDifficulty.level);
 }
 
 function updateDifficultyControls() {
-    // Update counts display in difficulty management section
-    document.getElementById('facilCount').textContent = userDifficulty.unlockedTexts.facil;
-    document.getElementById('medioCount').textContent = userDifficulty.unlockedTexts.medio;
-    document.getElementById('dificilCount').textContent = userDifficulty.unlockedTexts.dificil;
+    // Update counts display in difficulty management section (optional)
+    const facilCountEl = document.getElementById('facilCount');
+    const medioCountEl = document.getElementById('medioCount');
+    const dificilCountEl = document.getElementById('dificilCount');
+    if (facilCountEl) facilCountEl.textContent = userDifficulty.unlockedTexts.facil;
+    if (medioCountEl) medioCountEl.textContent = userDifficulty.unlockedTexts.medio;
+    if (dificilCountEl) dificilCountEl.textContent = userDifficulty.unlockedTexts.dificil;
     
-    // Update counts display in section headers
-    document.getElementById('facilCountHeader').textContent = userDifficulty.unlockedTexts.facil;
-    document.getElementById('medioCountHeader').textContent = userDifficulty.unlockedTexts.medio;
-    document.getElementById('dificilCountHeader').textContent = userDifficulty.unlockedTexts.dificil;
+    // Update counts display in section headers (present)
+    const facilHdr = document.getElementById('facilCountHeader');
+    const medioHdr = document.getElementById('medioCountHeader');
+    const dificilHdr = document.getElementById('dificilCountHeader');
+    if (facilHdr) facilHdr.textContent = userDifficulty.unlockedTexts.facil;
+    if (medioHdr) medioHdr.textContent = userDifficulty.unlockedTexts.medio;
+    if (dificilHdr) dificilHdr.textContent = userDifficulty.unlockedTexts.dificil;
 }
 
 function updateTextCards() {
@@ -1362,14 +1382,12 @@ function selectDifficultyLevel(level) {
     // Show feedback
     showDifficultyFeedback(level);
     
-    // Scroll to texts section
+    // Scroll to texts section (fallback compatible without :has selector)
     setTimeout(() => {
-        const textSection = document.querySelector('.row:has(.text-card)');
+        const sections = Array.from(document.querySelectorAll('.row'));
+        const textSection = sections.find(sec => sec.querySelector('.text-card'));
         if (textSection) {
-            textSection.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
+            textSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }, 500);
 }
@@ -1495,20 +1513,20 @@ function getLevelDescription(level) {
 
 // Adaptive UI functions
 function adaptInterfaceToDifficulty(level) {
-    // Hide/show sections based on difficulty
-    const textSections = document.querySelectorAll('.row:has(.text-card)');
+    // Hide/show sections based on difficulty (without :has)
+    const sections = Array.from(document.querySelectorAll('.row'));
+    const textSections = sections.filter(sec => sec.querySelector('.text-card'));
     
     textSections.forEach(section => {
-        const difficultyClass = section.querySelector('.text-card')?.classList.contains;
+        const hasEasy = !!section.querySelector('.badge.bg-success');
+        const hasMedium = !!section.querySelector('.badge.bg-warning');
+        const hasHard = !!section.querySelector('.badge.bg-danger');
         
         if (level === 'facil') {
-            // Show only easy texts, hide others
-            section.style.display = section.querySelector('.difficulty-facil') ? 'block' : 'none';
+            section.style.display = hasEasy ? 'block' : 'none';
         } else if (level === 'medio') {
-            // Show easy and medium texts
-            section.style.display = (section.querySelector('.difficulty-facil') || section.querySelector('.difficulty-medio')) ? 'block' : 'none';
-        } else if (level === 'dificil') {
-            // Show all texts
+            section.style.display = (hasEasy || hasMedium) ? 'block' : 'none';
+        } else {
             section.style.display = 'block';
         }
     });
