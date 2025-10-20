@@ -1073,19 +1073,25 @@ function initializeDifficultySystem() {
 function checkFirstTimeUser() {
     // Check if user has difficulty level set (from server-side data)
     const container = document.querySelector('.container-fluid');
-    const userHasDifficulty = container.getAttribute('data-user-difficulty');
+    const userHasDifficulty = container ? container.getAttribute('data-user-difficulty') : null;
     const assessedFlag = localStorage.getItem('challenge_assessed');
+    const assessmentSection = document.getElementById('difficultyAssessmentSection');
+    
+    // If assessment section doesn't exist, skip this logic
+    if (!assessmentSection) {
+        return;
+    }
     
     if ((!userHasDifficulty || userHasDifficulty === 'null') && !assessedFlag) {
         // Show only assessment section for new users
-        document.getElementById('difficultyAssessmentSection').style.display = 'block';
+        assessmentSection.style.display = 'block';
         // Hide all other content
         document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
             section.style.display = 'none';
         });
     } else {
         // Hide assessment section completely if user already has difficulty set
-        document.getElementById('difficultyAssessmentSection').style.display = 'none';
+        assessmentSection.style.display = 'none';
         // Load user's difficulty from server data
         if (userHasDifficulty && userHasDifficulty !== 'null') {
             const serverDifficulty = JSON.parse(userHasDifficulty);
