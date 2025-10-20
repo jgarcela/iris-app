@@ -1811,11 +1811,7 @@ function applyInlineHighlight(selectionData, category, variable) {
     const wrapper = document.createElement('mark');
     wrapper.className = `annotation-mark mark-${category}`;
     wrapper.setAttribute('data-variable', variable);
-    const catName = (category === 'contenido_general') ? 'Contenido General' : (category === 'lenguaje') ? 'Lenguaje' : (category === 'fuentes') ? 'Fuentes' : category;
-    const varLabel = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g,' ');
-    // Native tooltip + Bootstrap tooltip support
-    wrapper.setAttribute('title', `${catName} · ${varLabel}`);
-    wrapper.setAttribute('data-bs-toggle', 'tooltip');
+    // No title attribute to avoid native tooltip; we render a custom floating tooltip
     try {
         range.surroundContents(wrapper);
     } catch (e) {
