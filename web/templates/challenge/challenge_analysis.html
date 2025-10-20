@@ -352,8 +352,8 @@
                 </div>
 
                 <!-- Panel de Anotación eliminado: ahora está inline en la columna izquierda -->
-            </div>
-        </div>
+                    </div>
+                        </div>
     </div>
 </div>
 
@@ -699,6 +699,21 @@
 .annotation-mark.mark-lenguaje { background-color: #fff0f0; box-shadow: inset 0 -6px 0 rgba(244, 67, 54, 0.35); }
 .annotation-mark.mark-fuentes { background-color: #eef7ff; box-shadow: inset 0 -6px 0 rgba(33, 150, 243, 0.35); }
 
+/* Lightweight tooltip for annotations */
+.annotation-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    max-width: 280px;
+    line-height: 1.3;
+    display: none;
+}
+
 </style>
 
 <script id="current-text-data" type="application/json">{{ text_data | tojson | safe }}</script>
@@ -714,6 +729,9 @@ const CHALLENGE_VARIABLES = {
     'lenguaje': {{ config.LENGUAJE.VARIABLES | tojson | safe }},
     'fuentes': {{ config.FUENTES.VARIABLES | tojson | safe }}
 };
+
+// Raw mapping strings from config.ini (may arrive as strings)
+const CONFIG_TIPO_FUENTE_RAW = {{ config.FUENTES.TIPO_FUENTE | tojson | safe }};
 
 // Debug: log the variables to see what we're getting
 console.log('CHALLENGE_VARIABLES:', CHALLENGE_VARIABLES);
@@ -734,6 +752,31 @@ function ensureArray(value) {
         }
     }
     return [];
+}
+
+// Parse config maps that may come as stringified Python dicts
+function parseConfigMap(raw) {
+    if (!raw) return {};
+    if (typeof raw === 'object' && !Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+        // Try JSON first
+        try { return JSON.parse(raw); } catch (_) {}
+        // Replace single quotes and attempt again
+        try { return JSON.parse(raw.replace(/'/g, '"')); } catch (_) {}
+        // Fallback: naive parse of entries like {'1': 'A', '2': 'B'}
+        const obj = {};
+        const m = raw.replace(/[{}]/g,'').split(',').map(s=>s.trim()).filter(Boolean);
+        m.forEach(pair => {
+            const parts = pair.split(':');
+            if (parts.length >= 2) {
+                const k = parts[0].trim().replace(/^['"]|['"]$/g,'');
+                const v = parts.slice(1).join(':').trim().replace(/^['"]|['"]$/g,'');
+                obj[k] = v;
+            }
+        });
+        return obj;
+    }
+    return {};
 }
 
 // Normalize the variables to ensure they are arrays
@@ -802,6 +845,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeChallengeAnalysis();
     updateDifficultyInfo();
     analyzeProtagonist();
+    initMultiLabelTooltips();
 });
 
 function analyzeProtagonist() {
@@ -973,7 +1017,8 @@ function updateVariablesToAnnotate(difficulty) {
     // Update contenido general variables
     const contenidoList = document.getElementById('contenido-variables');
     if (contenidoList && variables.contenido_general) {
-        contenidoList.innerHTML = variables.contenido_general.map(variable => 
+        const cgVars = variables.contenido_general.filter(v => v !== 'tema');
+        contenidoList.innerHTML = cgVars.map(variable => 
             `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
         ).join('');
     }
@@ -1347,7 +1392,7 @@ function updateVariableOptions(category) {
     let availableVariables = [];
     
     if (category === 'contenido_general' && variables.contenido_general) {
-        availableVariables = variables.contenido_general;
+        availableVariables = variables.contenido_general.filter(v => v !== 'tema');
         console.log('updateVariableOptions - Using contenido_general variables:', availableVariables);
     } else if (category === 'lenguaje' && variables.lenguaje) {
         availableVariables = variables.lenguaje;
@@ -1501,35 +1546,7 @@ function updateValueOptions(category, variable) {
         ],
         
         // Fuentes
-        'tipo_fuente': [
-            { value: '1', text: 'Abogado/a' },
-            { value: '2', text: 'Activista' },
-            { value: '3', text: 'Actor/Actriz' },
-            { value: '4', text: 'Alto Cargo Directivo/a' },
-            { value: '5', text: 'Alumno/a' },
-            { value: '6', text: 'Analista' },
-            { value: '7', text: 'Arquitecto/a' },
-            { value: '8', text: 'Artista' },
-            { value: '9', text: 'Ciudadano/a' },
-            { value: '10', text: 'Corporativa' },
-            { value: '11', text: 'Deportista' },
-            { value: '12', text: 'Dir. Cine / guionista' },
-            { value: '13', text: 'Director/a o presidente/a' },
-            { value: '14', text: 'Economista' },
-            { value: '15', text: 'El Papa' },
-            { value: '16', text: 'Escritor/a' },
-            { value: '17', text: 'Experto/a' },
-            { value: '18', text: 'Famoso/a' },
-            { value: '19', text: 'Institucional' },
-            { value: '20', text: 'Investigador/a' },
-            { value: '21', text: 'Médico' },
-            { value: '22', text: 'Músico/a' },
-            { value: '23', text: 'Periodista' },
-            { value: '24', text: 'Personaje de Ficción' },
-            { value: '25', text: 'Político/a' },
-            { value: '26', text: 'Rey/Reina' },
-            { value: '27', text: 'Trabajador/a' }
-        ],
+        'tipo_fuente': Object.entries(parseConfigMap(CONFIG_TIPO_FUENTE_RAW)).map(([value, text]) => ({ value, text })),
         'genero_fuente': [
             { value: '1', text: 'No hay' },
             { value: '2', text: 'Sí, hombre' },
@@ -1814,6 +1831,44 @@ function applyInlineHighlight(selectionData, category, variable) {
             new window.bootstrap.Tooltip(wrapper);
         }
     } catch (_) {}
+}
+
+// Multi-etiqueta: al pasar el ratón, si hay varias marcas superpuestas,
+// mostrar en el tooltip todas las variables implicadas
+function initMultiLabelTooltips() {
+    let tooltip = null;
+    const ensureTooltip = () => {
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'annotation-tooltip';
+            document.body.appendChild(tooltip);
+        }
+        return tooltip;
+    };
+
+    document.addEventListener('mousemove', function(e) {
+        const tip = ensureTooltip();
+        const underPointer = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []);
+        const marks = underPointer.filter(el => el && el.classList && el.classList.contains('annotation-mark'));
+        if (!marks || marks.length === 0) { tip.style.display = 'none'; return; }
+
+        const variables = Array.from(new Set(marks.map(m => m.getAttribute('data-variable')).filter(Boolean)));
+        const categories = Array.from(new Set(marks.map(m => {
+            if (m.classList.contains('mark-contenido_general')) return 'Contenido General';
+            if (m.classList.contains('mark-lenguaje')) return 'Lenguaje';
+            if (m.classList.contains('mark-fuentes')) return 'Fuentes';
+            return '';
+        }).filter(Boolean)));
+        const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
+        const catLabel = categories.join(', ');
+        tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+        tip.style.left = (e.clientX + 12) + 'px';
+        tip.style.top = (e.clientY + 12) + 'px';
+        tip.style.display = 'block';
+    });
+
+    document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
+    document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
 }
 
 </script>
