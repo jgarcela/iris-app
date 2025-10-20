@@ -851,7 +851,8 @@ function updateCategoryOptionsForDifficulty(difficulty) {
     // Clear existing options
     categorySelect.innerHTML = '<option value="">{{ _("Selecciona una categoría") }}</option>';
     
-    const variables = DIFFICULTY_VARIABLES[difficulty];
+    // Use unified variables regardless of difficulty
+    const variables = CHALLENGE_VARIABLES;
     
     // For "Fácil" level, show general categories
     if (difficulty === 'facil') {
@@ -1093,7 +1094,8 @@ function updateCategoryOptionsForAnnotationForm(difficulty) {
     // Clear existing options
     categorySelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
     
-    const variables = DIFFICULTY_VARIABLES[difficulty];
+    // Use unified variables regardless of difficulty
+    const variables = CHALLENGE_VARIABLES;
     
     // Show categories based on available variables for this difficulty level
     const availableCategories = [];
