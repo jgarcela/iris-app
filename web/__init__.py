@@ -83,7 +83,8 @@ def inject_language():
 def inject_config():
     """Inject configuration variables into templates"""
     return {
-        'challenge_enabled': config.getboolean('CHALLENGE', 'ENABLED', fallback=False)
+        'challenge_enabled': config.getboolean('CHALLENGE', 'ENABLED', fallback=False),
+        'config': config
     }
 
 

@@ -15,8 +15,6 @@
         </div>
         <div class="challenge-mini-nav mt-4">
             <a class="mini-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}" href="{{ url_for('challenge.challenge_home') }}">{{ _('Inicio') }}</a>
-            <span class="mx-2 text-secondary">•</span>
-            <a class="mini-link {% if request.endpoint == 'challenge.results' %}active{% endif %}" href="{{ url_for('challenge.results') }}">{{ _('Resultados') }}</a>
         </div>
     </div>
 </section>

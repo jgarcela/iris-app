@@ -2,64 +2,14 @@
 
 {% block title %}{{ _('Desafío de Análisis IRIS - Semana de la Ciencia') }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/difficulty_enhancements.css') }}">
+{% endblock %}
+
 {% block challenge_content %}
 <div class="container-fluid py-4" data-user-difficulty="{{ user_difficulty|tojson if user_difficulty else 'null' }}">
 
-    <!-- Difficulty Assessment Section -->
-    <div class="row mb-4" id="difficultyAssessmentSection">
-        <div class="col-lg-8 mx-auto">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <h4 class="card-title mb-2">
-                            <i class="fas fa-user-check me-2 text-primary"></i>
-                            {{ _('¿Cuál es tu nivel?') }}
-                        </h4>
-                        <p class="text-muted small">{{ _('Personaliza tu experiencia') }}</p>
-                    </div>
-                    
-                    <div class="assessment-container">
-                        <!-- Combined Selection -->
-                        <div class="question-section mb-4">
-                            <h5 class="question-title text-center mb-3">
-                                <i class="fas fa-graduation-cap me-2"></i>
-                                {{ _('Selecciona tu nivel de experiencia') }}
-                            </h5>
-                            <div class="options-grid">
-                                <div class="option-card" data-level="principiante" data-challenge="facil">
-                                    <div class="option-icon">🟢</div>
-                                    <div class="option-title">{{ _('Principiante') }}</div>
-                                    <div class="option-desc">{{ _('Nunca he hecho esto') }}</div>
-                                </div>
-                                <div class="option-card" data-level="intermedio" data-challenge="medio">
-                                    <div class="option-icon">🟡</div>
-                                    <div class="option-title">{{ _('Intermedio') }}</div>
-                                    <div class="option-desc">{{ _('He analizado algunos textos') }}</div>
-                                </div>
-                                <div class="option-card" data-level="avanzado" data-challenge="dificil">
-                                    <div class="option-icon">🔴</div>
-                                    <div class="option-title">{{ _('Avanzado') }}</div>
-                                    <div class="option-desc">{{ _('Tengo experiencia regular') }}</div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Action Buttons -->
-                        <div class="text-center mt-3">
-                            <button type="button" class="btn btn-outline-secondary me-2" id="skipAssessment">
-                                <i class="fas fa-forward me-1"></i>
-                                {{ _('Saltar') }}
-                            </button>
-                            <button type="button" class="btn btn-primary" id="confirmAssessment" disabled>
-                                <i class="fas fa-play me-1"></i>
-                                {{ _('Comenzar') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Instrucciones -->
     <div class="row mb-4">
@@ -76,6 +26,22 @@
                                 <i class="fas fa-mouse-pointer fa-2x text-primary mb-2"></i>
                                 <h5>{{ _('1. Selecciona un texto') }}</h5>
                                 <p class="text-muted small">{{ _('Elige uno de los textos disponibles') }}</p>
+                                
+                                <!-- Niveles de Dificultad integrados -->
+                                <div class="difficulty-selector mt-3">
+                                    <h6 class="mb-2">{{ _('Nivel de dificultad:') }}</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-success btn-sm select-difficulty-btn" data-level="facil">
+                                            <i class="fas fa-seedling me-1"></i>{{ _('Fácil') }}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning btn-sm select-difficulty-btn" data-level="medio">
+                                            <i class="fas fa-balance-scale me-1"></i>{{ _('Medio') }}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm select-difficulty-btn" data-level="dificil">
+                                            <i class="fas fa-microscope me-1"></i>{{ _('Difícil') }}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-center mb-3">
@@ -99,71 +65,6 @@
     </div>
 
     <!-- User Control Panel -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-user-graduate me-2 text-primary"></i>
-                    <span class="badge bg-primary me-2" id="currentLevel">Principiante</span>
-                    <small class="text-muted" id="levelDescription">Nunca has hecho esto</small>
-                </div>
-                <button class="btn btn-outline-primary btn-sm" id="adjustLevelBtn">
-                    <i class="fas fa-cog me-1"></i>
-                    {{ _('Ajustar') }}
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Difficulty Management -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-3">
-                    <h5 class="card-title mb-3 text-center">
-                        <i class="fas fa-sliders-h me-2"></i>
-                        {{ _('Textos Disponibles por Dificultad') }}
-                    </h5>
-                    <div class="row text-center">
-                        <div class="col-md-3 mb-2">
-                            <div class="difficulty-item">
-                                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                                <h6 class="text-success">{{ _('Fáciles') }}</h6>
-                                <span class="badge bg-success fs-6" id="facilCount">3</span>
-                                <small class="d-block text-muted">{{ _('Sesgos evidentes') }}</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="difficulty-item">
-                                <i class="fas fa-exclamation-triangle text-warning fa-2x mb-2"></i>
-                                <h6 class="text-warning">{{ _('Medios') }}</h6>
-                                <span class="badge bg-warning fs-6" id="medioCount">0</span>
-                                <small class="d-block text-muted">{{ _('Sesgos sutiles') }}</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="difficulty-item">
-                                <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
-                                <h6 class="text-danger">{{ _('Difíciles') }}</h6>
-                                <span class="badge bg-danger fs-6" id="dificilCount">0</span>
-                                <small class="d-block text-muted">{{ _('Sesgos complejos') }}</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <div class="difficulty-item">
-                                <i class="fas fa-unlock text-primary fa-2x mb-2"></i>
-                                <h6 class="text-primary">{{ _('Acciones') }}</h6>
-                                <button class="btn btn-outline-primary btn-sm" id="unlockAllBtn">
-                                    <i class="fas fa-unlock me-1"></i>
-                                    {{ _('Ver Todo') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Lista de Textos -->
     <div class="row">
@@ -320,6 +221,262 @@
 body {
     background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
     min-height: 100vh;
+}
+
+/* Difficulty System Styling */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.difficulty-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.difficulty-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.difficulty-card[data-level="facil"]:hover {
+    border-color: #28a745;
+}
+
+.difficulty-card[data-level="medio"]:hover {
+    border-color: #ffc107;
+}
+
+.difficulty-card[data-level="dificil"]:hover {
+    border-color: #dc3545;
+}
+
+.difficulty-icon {
+    transition: transform 0.3s ease;
+}
+
+.difficulty-card:hover .difficulty-icon {
+    transform: scale(1.1);
+}
+
+.difficulty-icon-large {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    backdrop-filter: blur(10px);
+}
+
+.difficulty-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.difficulty-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.difficulty-features-preview {
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    border-left: 3px solid;
+}
+
+.difficulty-facil .difficulty-features-preview {
+    border-left-color: #28a745;
+}
+
+.difficulty-medio .difficulty-features-preview {
+    border-left-color: #ffc107;
+}
+
+.difficulty-dificil .difficulty-features-preview {
+    border-left-color: #dc3545;
+}
+
+.difficulty-section-header {
+    background: rgba(255,255,255,0.8);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Progress Circle */
+.progress-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(#4CAF50 0deg, #4CAF50 0deg, #e0e0e0 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-circle::before {
+    content: '';
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    position: absolute;
+    backdrop-filter: blur(10px);
+}
+
+.progress-circle-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.progress-text {
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+}
+
+/* Level Badge */
+.level-badge .badge {
+    background: rgba(255,255,255,0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Text Cards Enhanced */
+.text-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.text-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.difficulty-facil:hover {
+    border-color: #28a745;
+}
+
+.difficulty-medio:hover {
+    border-color: #ffc107;
+}
+
+.difficulty-dificil:hover {
+    border-color: #dc3545;
+}
+
+/* Button Enhancements */
+.select-difficulty-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.select-difficulty-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.select-difficulty-btn:hover::before {
+    left: 100%;
+}
+
+/* Animation for difficulty selection */
+@keyframes difficultySelect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.difficulty-card.selected {
+    animation: difficultySelect 0.3s ease;
+    border-color: currentColor;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* Difficulty Selector in Step Icon */
+.difficulty-selector {
+    margin-top: 1rem;
+}
+
+.difficulty-selector .btn-group .btn {
+    border-radius: 0;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.difficulty-selector .btn-group .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.difficulty-selector .btn-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.difficulty-selector .btn-group .btn.active {
+    color: white;
+}
+
+.difficulty-selector .btn-group .btn[data-level="facil"].active {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.difficulty-selector .btn-group .btn[data-level="medio"].active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.difficulty-selector .btn-group .btn[data-level="dificil"].active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .difficulty-icon-large {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .progress-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .progress-circle::before {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .difficulty-selector .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .difficulty-selector .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 0.25rem;
+    }
 }
 
 .step-icon {
@@ -866,11 +1023,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Handle difficulty selection buttons
+    document.querySelectorAll('.select-difficulty-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const level = this.getAttribute('data-level');
+            selectDifficultyLevel(level);
+        });
+    });
+
     // Load challenge statistics
     loadChallengeStats();
     
     // Show assessment modal if first time
     checkFirstTimeUser();
+    
+    // Initialize progress circle
+    updateProgressCircle();
 });
 
 function initializeDifficultySystem() {
@@ -905,19 +1073,25 @@ function initializeDifficultySystem() {
 function checkFirstTimeUser() {
     // Check if user has difficulty level set (from server-side data)
     const container = document.querySelector('.container-fluid');
-    const userHasDifficulty = container.getAttribute('data-user-difficulty');
+    const userHasDifficulty = container ? container.getAttribute('data-user-difficulty') : null;
     const assessedFlag = localStorage.getItem('challenge_assessed');
+    const assessmentSection = document.getElementById('difficultyAssessmentSection');
+    
+    // If assessment section doesn't exist, skip this logic
+    if (!assessmentSection) {
+        return;
+    }
     
     if ((!userHasDifficulty || userHasDifficulty === 'null') && !assessedFlag) {
         // Show only assessment section for new users
-        document.getElementById('difficultyAssessmentSection').style.display = 'block';
+        assessmentSection.style.display = 'block';
         // Hide all other content
         document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
             section.style.display = 'none';
         });
     } else {
         // Hide assessment section completely if user already has difficulty set
-        document.getElementById('difficultyAssessmentSection').style.display = 'none';
+        assessmentSection.style.display = 'none';
         // Load user's difficulty from server data
         if (userHasDifficulty && userHasDifficulty !== 'null') {
             const serverDifficulty = JSON.parse(userHasDifficulty);
@@ -935,9 +1109,14 @@ function setupAssessmentModal() {
     const assessmentSection = document.getElementById('difficultyAssessmentSection');
     const confirmBtn = document.getElementById('confirmAssessment');
     const skipBtn = document.getElementById('skipAssessment');
-    
+
+    // If assessment UI is not present on this page, safely exit
+    if (!assessmentSection || !confirmBtn || !skipBtn) {
+        return;
+    }
+
     let selectedOption = null;
-    
+
     // Handle option selection (both level and challenge in one click)
     document.querySelectorAll('.option-card').forEach(card => {
         card.addEventListener('click', function() {
@@ -950,58 +1129,58 @@ function setupAssessmentModal() {
             confirmBtn.disabled = false;
         });
     });
-    
+
     // Confirm assessment
     confirmBtn.addEventListener('click', function() {
         if (selectedOption) {
             userDifficulty.level = selectedOption.level;
             userDifficulty.challenge = selectedOption.challenge;
-            
+
             // Set initial unlocked texts based on assessment
             setInitialUnlockedTexts(selectedOption.level, selectedOption.challenge);
-            
+
             // Save to localStorage so it persists after redirect
             localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
             localStorage.setItem('challenge_assessed', '1');
-            
+
             // Hide assessment section and show other sections
             assessmentSection.style.display = 'none';
             document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
                 section.style.display = 'block';
             });
-            
+
             // Update UI
             updateUserLevelDisplay();
             updateDifficultyControls();
             updateTextCards();
-            
+
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
-    
+
     // Skip assessment
     skipBtn.addEventListener('click', function() {
         // Use default settings
         userDifficulty.level = 'principiante';
         userDifficulty.challenge = 'facil';
         setInitialUnlockedTexts('principiante', 'facil');
-        
+
         // Save to localStorage so it persists after redirect
         localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
         localStorage.setItem('challenge_assessed', '1');
-        
+
         // Hide assessment section and show other sections
         assessmentSection.style.display = 'none';
         document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
             section.style.display = 'block';
         });
-        
+
         // Update UI
         updateUserLevelDisplay();
         updateDifficultyControls();
         updateTextCards();
-        
+
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -1025,44 +1204,59 @@ function setInitialUnlockedTexts(level, challenge) {
 }
 
 function setupDifficultyControls() {
-    // Unlock all button
-    document.getElementById('unlockAllBtn').addEventListener('click', function() {
-        userDifficulty.unlockedTexts.facil = 10;
-        userDifficulty.unlockedTexts.medio = 10;
-        userDifficulty.unlockedTexts.dificil = 10;
-        updateDifficultyControls();
-        updateTextCards();
-        saveUserDifficulty();
-    });
-    
-    // Adjust level button
-    document.getElementById('adjustLevelBtn').addEventListener('click', function() {
-        // Show assessment section
-        document.getElementById('difficultyAssessmentSection').style.display = 'block';
-        // Hide other sections temporarily
-        document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
-            section.style.display = 'none';
+    // Unlock all button (optional in page)
+    const unlockAllBtn = document.getElementById('unlockAllBtn');
+    if (unlockAllBtn) {
+        unlockAllBtn.addEventListener('click', function() {
+            userDifficulty.unlockedTexts.facil = 10;
+            userDifficulty.unlockedTexts.medio = 10;
+            userDifficulty.unlockedTexts.dificil = 10;
+            updateDifficultyControls();
+            updateTextCards();
+            saveUserDifficulty();
         });
-        // Scroll to assessment
-        document.getElementById('difficultyAssessmentSection').scrollIntoView({ behavior: 'smooth' });
-    });
+    }
+    
+    // Adjust level button (optional in page)
+    const adjustLevelBtn = document.getElementById('adjustLevelBtn');
+    const assessmentSection = document.getElementById('difficultyAssessmentSection');
+    if (adjustLevelBtn && assessmentSection) {
+        adjustLevelBtn.addEventListener('click', function() {
+            // Show assessment section
+            assessmentSection.style.display = 'block';
+            // Hide other sections temporarily
+            document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
+                section.style.display = 'none';
+            });
+            // Scroll to assessment
+            assessmentSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 }
 
 function updateUserLevelDisplay() {
-    document.getElementById('currentLevel').textContent = getLevelDisplayName(userDifficulty.level);
-    document.getElementById('levelDescription').textContent = getLevelDescription(userDifficulty.level);
+    const currentLevelEl = document.getElementById('currentLevel');
+    const levelDescriptionEl = document.getElementById('levelDescription');
+    if (currentLevelEl) currentLevelEl.textContent = getLevelDisplayName(userDifficulty.level);
+    if (levelDescriptionEl) levelDescriptionEl.textContent = getLevelDescription(userDifficulty.level);
 }
 
 function updateDifficultyControls() {
-    // Update counts display in difficulty management section
-    document.getElementById('facilCount').textContent = userDifficulty.unlockedTexts.facil;
-    document.getElementById('medioCount').textContent = userDifficulty.unlockedTexts.medio;
-    document.getElementById('dificilCount').textContent = userDifficulty.unlockedTexts.dificil;
+    // Update counts display in difficulty management section (optional)
+    const facilCountEl = document.getElementById('facilCount');
+    const medioCountEl = document.getElementById('medioCount');
+    const dificilCountEl = document.getElementById('dificilCount');
+    if (facilCountEl) facilCountEl.textContent = userDifficulty.unlockedTexts.facil;
+    if (medioCountEl) medioCountEl.textContent = userDifficulty.unlockedTexts.medio;
+    if (dificilCountEl) dificilCountEl.textContent = userDifficulty.unlockedTexts.dificil;
     
-    // Update counts display in section headers
-    document.getElementById('facilCountHeader').textContent = userDifficulty.unlockedTexts.facil;
-    document.getElementById('medioCountHeader').textContent = userDifficulty.unlockedTexts.medio;
-    document.getElementById('dificilCountHeader').textContent = userDifficulty.unlockedTexts.dificil;
+    // Update counts display in section headers (present)
+    const facilHdr = document.getElementById('facilCountHeader');
+    const medioHdr = document.getElementById('medioCountHeader');
+    const dificilHdr = document.getElementById('dificilCountHeader');
+    if (facilHdr) facilHdr.textContent = userDifficulty.unlockedTexts.facil;
+    if (medioHdr) medioHdr.textContent = userDifficulty.unlockedTexts.medio;
+    if (dificilHdr) dificilHdr.textContent = userDifficulty.unlockedTexts.dificil;
 }
 
 function updateTextCards() {
@@ -1169,5 +1363,305 @@ function getSelectionDescription(level, challenge) {
 function loadChallengeStats() {
     // No longer needed - removed statistics section
 }
+
+// New functions for enhanced difficulty system
+function selectDifficultyLevel(level) {
+    // Update user difficulty
+    userDifficulty.challenge = level;
+    
+    // Update UI to show selection in the integrated buttons
+    document.querySelectorAll('.select-difficulty-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const selectedBtn = document.querySelector(`[data-level="${level}"]`);
+    if (selectedBtn) {
+        selectedBtn.classList.add('active');
+    }
+    
+    // Update progress and unlock texts based on level
+    updateUnlockedTexts(level);
+    
+    // Save to localStorage
+    saveUserDifficulty();
+    
+    // Show feedback
+    showDifficultyFeedback(level);
+    
+    // Scroll to texts section (fallback compatible without :has selector)
+    setTimeout(() => {
+        const sections = Array.from(document.querySelectorAll('.row'));
+        const textSection = sections.find(sec => sec.querySelector('.text-card'));
+        if (textSection) {
+            textSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 500);
+}
+
+function updateUnlockedTexts(level) {
+    // Unlock texts based on difficulty level
+    switch(level) {
+        case 'facil':
+            userDifficulty.unlockedTexts.facil = 10;
+            userDifficulty.unlockedTexts.medio = 0;
+            userDifficulty.unlockedTexts.dificil = 0;
+            break;
+        case 'medio':
+            userDifficulty.unlockedTexts.facil = 10;
+            userDifficulty.unlockedTexts.medio = 10;
+            userDifficulty.unlockedTexts.dificil = 0;
+            break;
+        case 'dificil':
+            userDifficulty.unlockedTexts.facil = 10;
+            userDifficulty.unlockedTexts.medio = 10;
+            userDifficulty.unlockedTexts.dificil = 10;
+            break;
+    }
+    
+    updateDifficultyControls();
+    updateTextCards();
+}
+
+function updateProgressCircle() {
+    const progressCircle = document.getElementById('difficultyProgress');
+    const progressText = document.getElementById('progressText');
+    
+    if (!progressCircle || !progressText) return;
+    
+    // Calculate progress based on completed texts
+    const totalCompleted = userDifficulty.completedTexts.facil + 
+                          userDifficulty.completedTexts.medio + 
+                          userDifficulty.completedTexts.dificil;
+    
+    const totalAvailable = userDifficulty.unlockedTexts.facil + 
+                          userDifficulty.unlockedTexts.medio + 
+                          userDifficulty.unlockedTexts.dificil;
+    
+    const progressPercentage = totalAvailable > 0 ? (totalCompleted / totalAvailable) * 100 : 0;
+    
+    // Update progress circle
+    progressCircle.style.background = `conic-gradient(#4CAF50 ${progressPercentage * 3.6}deg, #e0e0e0 ${progressPercentage * 3.6}deg)`;
+    progressText.textContent = `${Math.round(progressPercentage)}%`;
+}
+
+function showDifficultyFeedback(level) {
+    const feedbackMessages = {
+        'facil': {
+            title: '¡Perfecto para empezar!',
+            message: 'Has seleccionado textos fáciles. Los sesgos serán evidentes y fáciles de identificar.',
+            type: 'success'
+        },
+        'medio': {
+            title: '¡Nivel intermedio seleccionado!',
+            message: 'Has seleccionado textos de nivel medio. Los sesgos serán más sutiles pero detectables. ¡Perfecto para desarrollar tus habilidades!',
+            type: 'warning'
+        },
+        'dificil': {
+            title: '¡Desafío avanzado!',
+            message: 'Has seleccionado textos difíciles. Los sesgos serán muy sutiles y complejos. ¡Prepárate para un análisis profundo!',
+            type: 'danger'
+        }
+    };
+    
+    const feedback = feedbackMessages[level];
+    if (!feedback) return;
+    
+    // Create and show feedback toast
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${feedback.type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        <strong>${feedback.title}</strong><br>
+        ${feedback.message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 5000);
+}
+
+function updateUserLevelDisplay() {
+    const currentLevelElement = document.getElementById('currentLevel');
+    const levelDescriptionElement = document.getElementById('levelDescription');
+    
+    if (currentLevelElement) {
+        currentLevelElement.textContent = getLevelDisplayName(userDifficulty.level);
+    }
+    
+    if (levelDescriptionElement) {
+        levelDescriptionElement.textContent = getLevelDescription(userDifficulty.level);
+    }
+}
+
+function getLevelDisplayName(level) {
+    const names = {
+        'principiante': 'Principiante',
+        'intermedio': 'Intermedio',
+        'avanzado': 'Avanzado'
+    };
+    return names[level] || 'Principiante';
+}
+
+function getLevelDescription(level) {
+    const descriptions = {
+        'principiante': 'Nunca has hecho esto',
+        'intermedio': 'He analizado algunos textos',
+        'avanzado': 'Tengo experiencia regular'
+    };
+    return descriptions[level] || 'Nunca has hecho esto';
+}
+
+// Adaptive UI functions
+function adaptInterfaceToDifficulty(level) {
+    // Hide/show sections based on difficulty (without :has)
+    const sections = Array.from(document.querySelectorAll('.row'));
+    const textSections = sections.filter(sec => sec.querySelector('.text-card'));
+    
+    textSections.forEach(section => {
+        const hasEasy = !!section.querySelector('.badge.bg-success');
+        const hasMedium = !!section.querySelector('.badge.bg-warning');
+        const hasHard = !!section.querySelector('.badge.bg-danger');
+        
+        if (level === 'facil') {
+            section.style.display = hasEasy ? 'block' : 'none';
+        } else if (level === 'medio') {
+            section.style.display = (hasEasy || hasMedium) ? 'block' : 'none';
+        } else {
+            section.style.display = 'block';
+        }
+    });
+    
+    // Update help text based on difficulty
+    updateHelpText(level);
+    
+    // Adjust interface complexity
+    adjustInterfaceComplexity(level);
+}
+
+function updateHelpText(level) {
+    const helpTexts = {
+        'facil': {
+            title: 'Consejos para el nivel fácil',
+            content: 'Los sesgos en este nivel son evidentes. Busca frases como "primera mujer", "exclusivamente por mérito" o desbalances claros en las fuentes.'
+        },
+        'medio': {
+            title: 'Consejos para el nivel medio',
+            content: 'Los sesgos son más sutiles. Presta atención a diferencias en el tratamiento del lenguaje, desbalances moderados y términos técnicos.'
+        },
+        // For difficult level, do not show tips
+        'dificil': null
+    };
+    
+    const help = helpTexts[level];
+    if (!help) {
+        // Remove help section if present
+        const existing = document.getElementById('difficulty-help');
+        if (existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
+        }
+        return;
+    }
+    
+    // Create or update help section
+    let helpSection = document.getElementById('difficulty-help');
+    if (!helpSection) {
+        helpSection = document.createElement('div');
+        helpSection.id = 'difficulty-help';
+        helpSection.className = 'alert alert-info mt-4';
+        document.querySelector('.container-fluid').appendChild(helpSection);
+    }
+    
+    helpSection.innerHTML = `
+        <h5><i class="fas fa-lightbulb me-2"></i>${help.title}</h5>
+        <p class="mb-0">${help.content}</p>
+    `;
+}
+
+function adjustInterfaceComplexity(level) {
+    // Adjust button sizes and complexity based on level
+    const buttons = document.querySelectorAll('.start-analysis-btn');
+    
+    buttons.forEach(button => {
+        if (level === 'facil') {
+            button.classList.add('btn-lg');
+            button.innerHTML = '<i class="fas fa-play me-2"></i>¡Empezar Análisis!';
+        } else if (level === 'medio') {
+            button.classList.remove('btn-lg');
+            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar Análisis';
+        } else if (level === 'dificil') {
+            button.classList.remove('btn-lg');
+            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar análisis';
+        }
+    });
+    
+    // Adjust card complexity
+    const cards = document.querySelectorAll('.text-card');
+    cards.forEach(card => {
+        if (level === 'facil') {
+            card.classList.add('simplified');
+        } else {
+            card.classList.remove('simplified');
+        }
+    });
+}
+
+// Enhanced initialization
+function initializeEnhancedDifficultySystem() {
+    // Set up difficulty selection handlers
+    document.querySelectorAll('.select-difficulty-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const level = this.getAttribute('data-level');
+            selectDifficultyLevel(level);
+            adaptInterfaceToDifficulty(level);
+        });
+    });
+    
+    // Initialize with current difficulty
+    const currentLevel = userDifficulty.challenge || 'facil';
+    selectDifficultyLevel(currentLevel);
+    adaptInterfaceToDifficulty(currentLevel);
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key >= '1' && e.key <= '3') {
+            const levels = ['facil', 'medio', 'dificil'];
+            const level = levels[parseInt(e.key) - 1];
+            if (level) {
+                selectDifficultyLevel(level);
+                adaptInterfaceToDifficulty(level);
+            }
+        }
+    });
+}
+
+// Update the main initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the difficulty system
+    initializeDifficultySystem();
+    initializeEnhancedDifficultySystem();
+    
+    // Handle analysis button clicks
+    document.querySelectorAll('.start-analysis-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const textId = this.getAttribute('data-text-id');
+            window.location.href = `/challenge/analyze/${textId}`;
+        });
+    });
+
+    // Load challenge statistics
+    loadChallengeStats();
+    
+    // Show assessment modal if first time
+    checkFirstTimeUser();
+    
+    // Initialize progress circle
+    updateProgressCircle();
+});
 </script>
 {% endblock %}
