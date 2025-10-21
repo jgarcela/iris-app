@@ -206,6 +206,66 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Protagonismo Section -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-list-ul me-2"></i>
+                        {{ _('PROTAGONISMO') }}
+                    </h6>
+                </div>
+                
+                 <!-- Protagonist Analysis Dropdown -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="protagonist-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-user-star me-2"></i>
+                            {{ _('Protagonista de la Noticia') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="protagonist-content" class="collapsible-content">
+                        <div id="protagonist-analysis" class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                            </div>
+                            <p class="text-muted mt-2">{{ _('Analizando protagonista...') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           
+            <!-- Tema Section -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-list-ul me-2"></i>
+                        {{ _('TEMA') }}
+                    </h6>
+                </div>
+
+                <!-- Topic Analysis Dropdown -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="topic-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-tag me-2"></i>
+                            {{ _('Tema de la Noticia') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="topic-content" class="collapsible-content">
+                        <div id="topic-analysis" class="text-center py-3">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                            </div>
+                            <p class="text-muted mt-2">{{ _('Analizando tema...') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
 
         <!-- Right Column - Instructions -->
@@ -341,6 +401,99 @@
     window.highlight_color_map = {{ highlight_map | safe }};
     window.api_url_edit = {{ api_url_edit | tojson | safe }};
     window.api_url_save_annotations = {{ api_url_save_annotations | tojson | safe }};
+    
+    // Initialize protagonist and topic analysis
+    document.addEventListener('DOMContentLoaded', function() {
+        updateProtagonistAnalysis();
+        updateTopicAnalysis();
+    });
+    
+    function updateProtagonistAnalysis() {
+        const protagonistDiv = document.getElementById('protagonist-analysis');
+        if (!protagonistDiv || !window.data) return;
+        
+        // Get protagonist analysis from data
+        const protagonistData = window.data.protagonist_analysis || {};
+        const protagonist = protagonistData.protagonist || 'No identificado';
+        const confidence = protagonistData.confidence || 0;
+        
+        // Create protagonist display
+        const confidencePercentage = Math.round(confidence * 100);
+        const confidenceClass = confidence > 0.7 ? 'text-success' : confidence > 0.4 ? 'text-warning' : 'text-danger';
+        
+        protagonistDiv.innerHTML = `
+            <div class="protagonist-result">
+                <div class="protagonist-badge mb-3">
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="fas fa-user me-2"></i>
+                        ${protagonist}
+                    </span>
+                </div>
+                <div class="confidence-indicator">
+                    <small class="text-muted">Confianza: </small>
+                    <span class="${confidenceClass} fw-bold">${confidencePercentage}%</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    function updateTopicAnalysis() {
+        const topicDiv = document.getElementById('topic-analysis');
+        if (!topicDiv || !window.data) return;
+        
+        // Get topic from data
+        const analysis = window.data.analysis || {};
+        const original = analysis.original || {};
+        const contenidoGeneral = original.contenido_general || {};
+        const tema = contenidoGeneral.tema;
+        
+        const topicNames = {
+            '1': 'Científica/Investigación',
+            '2': 'Comunicación',
+            '3': 'De farándula o espectáculo',
+            '4': 'Deportiva',
+            '5': 'Economía',
+            '6': 'Educación/cultura',
+            '7': 'Empleo/Trabajo',
+            '8': 'Empresa',
+            '9': 'Judicial',
+            '10': 'Medioambiente',
+            '11': 'Policial',
+            '12': 'Política',
+            '13': 'Salud',
+            '14': 'Social',
+            '15': 'Tecnología',
+            '16': 'Transporte',
+            '17': 'Otros'
+        };
+        
+        if (tema) {
+            const topicName = topicNames[tema] || 'Tema no identificado';
+            
+            topicDiv.innerHTML = `
+                <div class="topic-result">
+                    <div class="topic-badge mb-3">
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            <i class="fas fa-tag me-2"></i>
+                            ${topicName}
+                        </span>
+                    </div>
+                    <div class="topic-code">
+                        <small class="text-muted">Código: ${tema}</small>
+                    </div>
+                </div>
+            `;
+        } else {
+            topicDiv.innerHTML = `
+                <div class="topic-result">
+                    <div class="no-topic">
+                        <i class="fas fa-question-circle text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Tema no identificado</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
 </script>
 
 <!-- External Scripts -->
@@ -351,5 +504,6 @@
 <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">
+
 
 {% endblock %}
