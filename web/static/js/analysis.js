@@ -1124,6 +1124,9 @@ function enableTextSelection() {
         
         // Add annotation mode class to body
         document.body.classList.add('annotation-mode');
+        
+        // Detach highlight selection handler to prevent modal
+        detachHighlightSelectionHandler();
     }
 }
 
@@ -1137,6 +1140,9 @@ function disableTextSelection() {
         
         // Remove annotation mode class from body
         document.body.classList.remove('annotation-mode');
+        
+        // Reattach highlight selection handler
+        attachHighlightSelectionHandler();
     }
 }
 
@@ -1672,6 +1678,12 @@ function setupEditModalHelpers() {
 }
 
 function openSingleInputModal(title, label, initialValue, onSave) {
+    // Don't open modal if we're in annotation mode
+    if (document.body.classList.contains('annotation-mode')) {
+        console.log('Modal blocked - in annotation mode');
+        return;
+    }
+    
     const titleEl = document.getElementById('editModalTitle');
     const singleGroup = document.getElementById('singleInputGroup');
     const selectGroup = document.getElementById('selectInputGroup');
@@ -1697,6 +1709,12 @@ function openSingleInputModal(title, label, initialValue, onSave) {
 }
 
 function openFuenteFormModal(initial, onSave) {
+    // Don't open modal if we're in annotation mode
+    if (document.body.classList.contains('annotation-mode')) {
+        console.log('Modal blocked - in annotation mode');
+        return;
+    }
+    
     const titleEl = document.getElementById('editModalTitle');
     const singleGroup = document.getElementById('singleInputGroup');
     const selectGroup = document.getElementById('selectInputGroup');
@@ -1731,6 +1749,12 @@ function openFuenteFormModal(initial, onSave) {
 }
 
 function openSelectModal({ title, label, options, multiple = false, initial = [], onSave }) {
+    // Don't open modal if we're in annotation mode
+    if (document.body.classList.contains('annotation-mode')) {
+        console.log('Modal blocked - in annotation mode');
+        return;
+    }
+    
     const titleEl = document.getElementById('editModalTitle');
     const singleGroup = document.getElementById('singleInputGroup');
     const selectGroup = document.getElementById('selectInputGroup');
@@ -1781,59 +1805,69 @@ function attachHighlightSelectionHandler() {
     if (highlightSelectionHandlerBound) return;
     const area = document.querySelector('.highlight-text .highlight-block[style*="display: block"] .markup-area') || document.querySelector('.highlight-text .markup-area');
     if (!area) return;
+    
+    // Don't attach if we're in annotation mode
+    if (document.body.classList.contains('annotation-mode')) return;
     const handler = function(e) {
         const sel = window.getSelection();
         if (!sel || sel.isCollapsed) return;
         if (!area.contains(sel.anchorNode)) return;
         const text = sel.toString().trim();
         if (!text) return;
-        // Determine current category from visible block
-        const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
-        let currentCategory = null;
-        if (visibleBlock) {
-            if (visibleBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
-            else if (visibleBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
-            else if (visibleBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
-        }
-        // Step 1: pick variable for category
-        const variableOptions = getVariablesForCategory(currentCategory).map(v => ({ value: v, label: v.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) }));
-        openSelectModal({
-            title: 'Nueva anotación',
-            label: 'Variable',
-            options: variableOptions,
-            multiple: false,
-            initial: [],
-            onSave: (variable) => {
-                if (!variable) return;
-                // Step 2: pick value for variable
-                const valueOptions = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
-                openSelectModal({
-                    title: 'Selecciona valor',
-                    label: 'Valor',
-                    options: valueOptions,
-                    multiple: false,
-                    initial: [],
-                    onSave: (value) => {
-                        if (!value) return;
-                        // Integrate into data
-                        const annotation = { text, category: currentCategory, variable, value };
-                        integrateAnnotationIntoAnalysis(annotation);
-                        // Wrap selection in mark with default styling
-                        const range = sel.getRangeAt(0);
-                        const mark = document.createElement('mark');
-                        mark.setAttribute('data-variable', variable);
-                        mark.textContent = text;
-                        try {
-                            range.deleteContents();
-                            range.insertNode(mark);
-                        } catch (_) {}
-                        window.getSelection().removeAllRanges();
-                        // Re-run highlight processing
-                        processHighlights();
-                    }
-                });
+        
+        // Use the new manual annotation panel system
+        if (typeof showAnnotationPanel === 'function') {
+            showAnnotationPanel(text, sel.getRangeAt(0));
+        } else {
+            // Fallback to old system if new system not available
+            // Determine current category from visible block
+            const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
+            let currentCategory = null;
+            if (visibleBlock) {
+                if (visibleBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
+                else if (visibleBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
+                else if (visibleBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
             }
-        });
+            // Step 1: pick variable for category
+            const variableOptions = getVariablesForCategory(currentCategory).map(v => ({ value: v, label: v.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) }));
+            openSelectModal({
+                title: 'Nueva anotación',
+                label: 'Variable',
+                options: variableOptions,
+                multiple: false,
+                initial: [],
+                onSave: (variable) => {
+                    if (!variable) return;
+                    // Step 2: pick value for variable
+                    const valueOptions = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
+                    openSelectModal({
+                        title: 'Selecciona valor',
+                        label: 'Valor',
+                        options: valueOptions,
+                        multiple: false,
+                        initial: [],
+                        onSave: (value) => {
+                            if (!value) return;
+                            // Integrate into data
+                            const annotation = { text, category: currentCategory, variable, value };
+                            integrateAnnotationIntoAnalysis(annotation);
+                            // Wrap selection in mark with default styling
+                            const range = sel.getRangeAt(0);
+                            const mark = document.createElement('mark');
+                            mark.setAttribute('data-variable', variable);
+                            mark.textContent = text;
+                            try {
+                                range.deleteContents();
+                                range.insertNode(mark);
+                            } catch (_) {}
+                            window.getSelection().removeAllRanges();
+                            // Re-run highlight processing
+                            processHighlights();
+                        }
+                    });
+                }
+            });
+        }
     };
     area.addEventListener('mouseup', handler);
     area.dataset.highlightSelectionHandler = 'true';

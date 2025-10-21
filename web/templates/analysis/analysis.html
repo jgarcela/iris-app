@@ -149,6 +149,59 @@
                 </div>
             </div>
 
+            <!-- Annotation Panel -->
+            <div class="annotation-panel" id="annotation-panel" style="display: none;">
+                <div class="annotation-header">
+                    <h6 class="annotation-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Anotar Texto Seleccionado
+                    </h6>
+                    <button type="button" class="btn-close" id="close-annotation-panel" aria-label="Close"></button>
+                </div>
+                <div class="annotation-content">
+                    <div class="mb-3">
+                        <label class="form-label">Texto seleccionado:</label>
+                        <div class="selected-text-preview bg-light p-2 rounded" id="selected-text-preview" style="font-style: italic; color: #6c757d; border: 1px solid #dee2e6;"></div>
+                    </div>
+                    
+                    <form id="annotation-form">
+                        <div class="mb-3">
+                            <label class="form-label" for="annotation-category">Categoría</label>
+                            <select class="form-select" id="annotation-category" required>
+                                <option value="">Seleccionar categoría...</option>
+                                <option value="contenido_general">Contenido General</option>
+                                <option value="lenguaje">Lenguaje y Análisis del discurso</option>
+                                <option value="fuentes">Fuentes de información</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="annotation-variable">Variable</label>
+                            <select class="form-select" id="annotation-variable" required>
+                                <option value="">Seleccionar variable...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="annotation-value">Valor</label>
+                            <select class="form-select" id="annotation-value" required>
+                                <option value="">Seleccionar valor...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Controles compuestos (para variables que requieren género) -->
+                        <div id="composite-controls" style="display:none;">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </form>
+                    
+                    <div class="annotation-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-annotation">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="add-annotation">Agregar</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Categories Section -->
             <div class="categories-section">
                 <div class="categories-header">
@@ -349,52 +402,6 @@
     <div class="tooltip-description"></div>
 </div>
 
-<!-- Generic Modal for edits -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editModalTitle">Editar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editModalForm">
-          <div class="mb-3" id="singleInputGroup" style="display:none;">
-            <label class="form-label" id="singleInputLabel">Valor</label>
-            <input type="text" class="form-control" id="singleInput" />
-          </div>
-          <div class="mb-3" id="selectInputGroup" style="display:none;">
-            <label class="form-label" id="selectInputLabel">Selecciona</label>
-            <select class="form-select" id="selectInput"></select>
-            <div class="form-text" id="selectHelp" style="display:none;">Puedes seleccionar múltiples valores manteniendo Ctrl/⌘.</div>
-          </div>
-          <div id="fuenteForm" style="display:none;">
-            <div class="mb-2">
-              <label class="form-label">Nombre de la fuente</label>
-              <input type="text" class="form-control" id="fuenteNombre" />
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Declaración</label>
-              <textarea class="form-control" id="fuenteDeclaracion" rows="3"></textarea>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Tipo (clave)</label>
-              <input type="text" class="form-control" id="fuenteTipo" />
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Género (clave)</label>
-              <input type="text" class="form-control" id="fuenteGenero" />
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="editModalSave">Guardar</button>
-      </div>
-    </div>
-  </div>
-  </div>
 
 <script>
     window.data = {{ data | tojson | safe }};
@@ -576,6 +583,493 @@
             `;
         }
     }
+    
+    // ================================
+    // Manual Annotation System Integration
+    // ================================
+    
+    // Variables from config.ini - same as manual analysis
+    const CHALLENGE_VARIABLES = {
+        'contenido_general': ["cita_textual_titular", "genero_nombre_propio_titular", "genero_periodista", "genero_personas_mencionadas", "nombre_propio_titular", "personas_mencionadas", "tema"],
+        'lenguaje': ["androcentrismo", "asimetria", "cargos_mujeres", "comparacion_mujeres_hombres", "denominacion_dependiente", "denominacion_redundante", "denominacion_sexualizada", "dual_aparente", "excepcion_noticiabilidad", "hombre_humanidad", "infantilizacion", "lenguaje_sexista", "masculino_generico", "sexismo_social"],
+        'fuentes': ["declaracion_fuente", "genero_fuente", "nombre_fuente", "tipo_fuente"]
+    };
+    
+    // Variable descriptions - same as manual analysis
+    const VARIABLE_DESCRIPTIONS = {
+        'cita_textual_titular': 'Cita textual titular',
+        'genero_nombre_propio_titular': 'Género nombre propio titular',
+        'genero_periodista': 'Género periodista',
+        'genero_personas_mencionadas': 'Género personas mencionadas',
+        'nombre_propio_titular': 'Nombre propio titular',
+        'personas_mencionadas': 'Personas mencionadas',
+        'tema': 'Tema',
+        'androcentrismo': 'Androcentrismo',
+        'asimetria': 'Asimetría',
+        'cargos_mujeres': 'Cargos mujeres',
+        'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+        'denominacion_dependiente': 'Denominación dependiente',
+        'denominacion_redundante': 'Denominación redundante',
+        'denominacion_sexualizada': 'Denominación sexualizada',
+        'dual_aparente': 'Dual aparente',
+        'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+        'hombre_humanidad': 'Hombre humanidad',
+        'infantilizacion': 'Infantilización',
+        'lenguaje_sexista': 'Lenguaje sexista',
+        'masculino_generico': 'Masculino genérico',
+        'sexismo_social': 'Sexismo social',
+        'declaracion_fuente': 'Declaración fuente',
+        'genero_fuente': 'Género fuente',
+        'nombre_fuente': 'Nombre fuente',
+        'tipo_fuente': 'Tipo fuente'
+    };
+    
+    // Current selection for annotation
+    let currentAnnotationSelection = null;
+    
+    // Initialize manual annotation system
+    document.addEventListener('DOMContentLoaded', function() {
+        setupAnnotationPanel();
+        initMultiLabelTooltips();
+    });
+    
+    function setupAnnotationPanel() {
+        const categorySelect = document.getElementById('annotation-category');
+        const variableSelect = document.getElementById('annotation-variable');
+        const valueSelect = document.getElementById('annotation-value');
+        const addBtn = document.getElementById('add-annotation');
+        const cancelBtn = document.getElementById('cancel-annotation');
+        const closeBtn = document.getElementById('close-annotation-panel');
+        
+        if (!categorySelect || !variableSelect || !valueSelect || !addBtn) return;
+        
+        // Handle category change
+        categorySelect.addEventListener('change', function() {
+            updateVariableOptions(this.value);
+        });
+        
+        // Handle variable change
+        variableSelect.addEventListener('change', function() {
+            updateValueOptions(categorySelect.value, this.value);
+        });
+        
+        // Handle add annotation
+        addBtn.addEventListener('click', function() {
+            saveAnnotation();
+        });
+        
+        // Handle cancel
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                hideAnnotationPanel();
+            });
+        }
+        
+        // Handle close
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                hideAnnotationPanel();
+            });
+        }
+    }
+    
+    function updateVariableOptions(category) {
+        const variableSelect = document.getElementById('annotation-variable');
+        if (!variableSelect) return;
+        
+        variableSelect.innerHTML = '<option value="">Seleccionar variable...</option>';
+        
+        const variables = CHALLENGE_VARIABLES;
+        let availableVariables = [];
+        
+        if (category === 'contenido_general' && variables.contenido_general) {
+            availableVariables = variables.contenido_general.filter(v => v !== 'tema');
+        } else if (category === 'lenguaje' && variables.lenguaje) {
+            availableVariables = variables.lenguaje;
+        } else if (category === 'fuentes' && variables.fuentes) {
+            availableVariables = variables.fuentes;
+        }
+        
+        // Hide gender-only variables that are driven by a paired presence variable
+        const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
+        availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
+        
+        availableVariables.forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable;
+            option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            variableSelect.appendChild(option);
+        });
+    }
+    
+    function updateValueOptions(category, variable) {
+        const valueSelect = document.getElementById('annotation-value');
+        const compositeControls = document.getElementById('composite-controls');
+        
+        if (!valueSelect) return;
+        
+        valueSelect.innerHTML = '<option value="">Seleccionar valor...</option>';
+        if (compositeControls) {
+            compositeControls.style.display = 'none';
+            compositeControls.innerHTML = '';
+        }
+        
+        // Variable values mapping - same as manual analysis
+        const variableValues = {
+            // Contenido General
+            'genero_nombre_propio_titular': [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ],
+            'genero_personas_mencionadas': [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ],
+            'genero_periodista': [
+                { value: '1', text: 'Masculino' },
+                { value: '2', text: 'Femenino' },
+                { value: '3', text: 'Mixto' },
+                { value: '4', text: 'Ns/Nc' },
+                { value: '5', text: 'Agencia/otros medios' },
+                { value: '6', text: 'Redacción' },
+                { value: '7', text: 'Corporativo' }
+            ],
+            'cita_textual_titular': [
+                { value: '0', text: 'No' },
+                { value: '1', text: 'Sí' }
+            ],
+            
+            // Lenguaje
+            'lenguaje_sexista': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' },
+                { value: '3', text: 'Sí, además se observa un salto semántico' }
+            ],
+            'androcentrismo': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'asimetria': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'cargos_mujeres': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'comparacion_mujeres_hombres': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'denominacion_dependiente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'denominacion_redundante': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'denominacion_sexualizada': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'dual_aparente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'excepcion_noticiabilidad': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'hombre_humanidad': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'infantilizacion': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'masculino_generico': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'sexismo_social': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            
+            // Fuentes
+            'tipo_fuente': [
+                { value: '1', text: 'Personal' },
+                { value: '2', text: 'Institucional' },
+                { value: '3', text: 'Mixta' }
+            ],
+            'genero_fuente': [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ],
+            'declaracion_fuente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'nombre_fuente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ]
+        };
+        
+        // Compuestos: pares variable-presencia + variable-detalle
+        const compositePairs = {
+            personas_mencionadas: 'genero_personas_mencionadas',
+            nombre_propio_titular: 'genero_nombre_propio_titular',
+            nombre_fuente: 'genero_fuente'
+        };
+
+        // Si la variable seleccionada es parte de un compuesto, mostrar control de género
+        const compositeDetail = compositePairs[variable];
+        if (compositeDetail) {
+            const baseVar = compositePairs[variable] ? variable : Object.keys(compositePairs).find(k => compositePairs[k] === variable);
+            const detailVar = compositePairs[baseVar];
+            if (compositeControls) {
+                compositeControls.style.display = 'block';
+                const genderValues = variableValues[detailVar] || [];
+                let label;
+                if (detailVar === 'genero_personas_mencionadas') {
+                    label = 'Género de la persona';
+                } else if (detailVar === 'genero_nombre_propio_titular') {
+                    label = 'Género nombre propio titular';
+                } else {
+                    label = 'Género de la fuente';
+                }
+                compositeControls.innerHTML = `
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label">${label}</label>
+                            <select class="form-select" id="composite-gender">
+                                ${genderValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // Obtener valores para la variable específica
+        const values = variableValues[variable];
+        
+        if (values) {
+            // Si es un binario (Sí/No), no mostramos la opción negativa
+            const lower = values.map(v => (v.text || '').toLowerCase());
+            const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+            const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+
+            let toRender = values;
+            if (isYesNo || isSiNo) {
+                toRender = values.filter(v => /sí|si/i.test(v.text || ''));
+            }
+
+            toRender.forEach((option, idx) => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.text;
+                if (idx === 0) optionElement.selected = true;
+                valueSelect.appendChild(optionElement);
+            });
+        } else {
+            // Sin catálogo: ocultamos selector y fijamos afirmativo por defecto
+            if (valueSelect && valueSelect.parentElement) valueSelect.parentElement.style.display = 'none';
+            const optionElement = document.createElement('option');
+            optionElement.value = '1';
+            optionElement.textContent = '';
+            optionElement.selected = true;
+            valueSelect.appendChild(optionElement);
+        }
+    }
+    
+    function saveAnnotation() {
+        if (!currentAnnotationSelection) {
+            alert('No hay texto seleccionado');
+            return;
+        }
+        
+        const category = document.getElementById('annotation-category').value;
+        const variable = document.getElementById('annotation-variable').value;
+        const value = document.getElementById('annotation-value').value;
+        
+        if (!category || !variable || !value) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+        
+        const createdAt = new Date().toISOString();
+        
+        // Manejo de variables compuestas: crear dos anotaciones sincronizadas
+        const compositePairs = {
+            personas_mencionadas: 'genero_personas_mencionadas',
+            nombre_propio_titular: 'genero_nombre_propio_titular',
+            nombre_fuente: 'genero_fuente'
+        };
+        const compositeControls = document.getElementById('composite-gender');
+        
+        if (compositePairs[variable]) {
+            // Usuario anotó la presencia: set presente y género seleccionado
+            const genderValue = compositeControls ? compositeControls.value : null;
+            // 1) presencia
+            const presenceAnnotation = {
+                id: Date.now(),
+                text: currentAnnotationSelection.text,
+                category: category,
+                variable: variable,
+                value: '1',
+                timestamp: createdAt
+            };
+            applyInlineHighlight(currentAnnotationSelection, category, variable);
+            // Integrate into existing analysis system
+            if (typeof integrateAnnotationIntoAnalysis === 'function') {
+                integrateAnnotationIntoAnalysis(presenceAnnotation);
+            }
+            // 2) género
+            if (genderValue) {
+                const genderAnnotation = {
+                    id: Date.now()+1,
+                    text: currentAnnotationSelection.text,
+                    category: category,
+                    variable: compositePairs[variable],
+                    value: genderValue,
+                    timestamp: createdAt
+                };
+                applyInlineHighlight(currentAnnotationSelection, category, compositePairs[variable]);
+                // Integrate into existing analysis system
+                if (typeof integrateAnnotationIntoAnalysis === 'function') {
+                    integrateAnnotationIntoAnalysis(genderAnnotation);
+                }
+            }
+        } else {
+            // Anotación normal
+            const annotation = {
+                id: Date.now(),
+                text: currentAnnotationSelection.text,
+                category: category,
+                variable: variable,
+                value: value,
+                timestamp: createdAt
+            };
+            applyInlineHighlight(currentAnnotationSelection, category, variable);
+            // Integrate into existing analysis system
+            if (typeof integrateAnnotationIntoAnalysis === 'function') {
+                integrateAnnotationIntoAnalysis(annotation);
+            }
+        }
+        
+        // Re-run highlight processing to update the display
+        if (typeof processHighlights === 'function') {
+            processHighlights();
+        }
+        
+        // Hide panel
+        hideAnnotationPanel();
+        
+        // Clear selection
+        currentAnnotationSelection = null;
+    }
+    
+    function applyInlineHighlight(selectionData, category, variable) {
+        if (!selectionData || !selectionData.range) return;
+        const range = selectionData.range.cloneRange();
+        if (range.collapsed) return;
+        const wrapper = document.createElement('mark');
+        wrapper.className = `annotation-mark mark-${category}`;
+        wrapper.setAttribute('data-variable', variable);
+        try {
+            range.surroundContents(wrapper);
+        } catch (e) {
+            // Fallback: wrap text node by splitting
+            const text = document.createTextNode(range.toString());
+            wrapper.appendChild(text);
+            range.deleteContents();
+            range.insertNode(wrapper);
+        }
+    }
+    
+    function showAnnotationPanel(selectedText, range) {
+        currentAnnotationSelection = {
+            text: selectedText,
+            range: range
+        };
+        
+        // Set the selected text preview
+        const preview = document.getElementById('selected-text-preview');
+        if (preview) {
+            preview.textContent = selectedText;
+        }
+        
+        // Reset form
+        document.getElementById('annotation-category').value = '';
+        document.getElementById('annotation-variable').innerHTML = '<option value="">Seleccionar variable...</option>';
+        document.getElementById('annotation-value').innerHTML = '<option value="">Seleccionar valor...</option>';
+        const compositeControls = document.getElementById('composite-controls');
+        if (compositeControls) {
+            compositeControls.style.display = 'none';
+            compositeControls.innerHTML = '';
+        }
+        
+        // Show panel
+        const panel = document.getElementById('annotation-panel');
+        if (panel) {
+            panel.style.display = 'block';
+        }
+    }
+    
+    function hideAnnotationPanel() {
+        const panel = document.getElementById('annotation-panel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+        currentAnnotationSelection = null;
+    }
+    
+    // Multi-etiqueta: al pasar el ratón, si hay varias marcas superpuestas,
+    // mostrar en el tooltip todas las variables implicadas
+    function initMultiLabelTooltips() {
+        let tooltip = null;
+        const ensureTooltip = () => {
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'annotation-tooltip';
+                document.body.appendChild(tooltip);
+            }
+            return tooltip;
+        };
+
+        document.addEventListener('mousemove', function(e) {
+            const tip = ensureTooltip();
+            const underPointer = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []);
+            const marks = underPointer.filter(el => el && el.classList && el.classList.contains('annotation-mark'));
+            if (!marks || marks.length === 0) { tip.style.display = 'none'; return; }
+
+            const variables = Array.from(new Set(marks.map(m => m.getAttribute('data-variable')).filter(Boolean)));
+            const categories = Array.from(new Set(marks.map(m => {
+                if (m.classList.contains('mark-contenido_general')) return 'Contenido General';
+                if (m.classList.contains('mark-lenguaje')) return 'Lenguaje';
+                if (m.classList.contains('mark-fuentes')) return 'Fuentes';
+                return '';
+            }).filter(Boolean)));
+            const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
+            const catLabel = categories.join(', ');
+            tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+            tip.style.left = (e.clientX + 12) + 'px';
+            tip.style.top = (e.clientY + 12) + 'px';
+            tip.style.display = 'block';
+        });
+
+        document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
+        document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
+    }
 </script>
 
 <!-- External Scripts -->
@@ -649,6 +1143,157 @@
 #edit-mode-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Manual Annotation Styles - Same as manual analysis */
+.annotation-mark {
+    background-color: #fff3cd;
+    box-shadow: inset 0 -6px 0 rgba(255, 235, 59, 0.6);
+    border-radius: 2px;
+    padding: 0 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.annotation-mark:hover {
+    background-color: #ffeaa7;
+    box-shadow: inset 0 -6px 0 rgba(255, 193, 7, 0.8);
+}
+
+.annotation-mark.mark-contenido_general { 
+    background-color: rgba(13, 110, 253, 0.1); 
+    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4);
+    color: #0d6efd;
+}
+
+.annotation-mark.mark-contenido_general:hover {
+    background-color: rgba(13, 110, 253, 0.2);
+    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.6);
+}
+
+.annotation-mark.mark-lenguaje { 
+    background-color: rgba(111, 66, 193, 0.1); 
+    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
+    color: #6f42c1;
+}
+
+.annotation-mark.mark-lenguaje:hover {
+    background-color: rgba(111, 66, 193, 0.2);
+    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.6);
+}
+
+.annotation-mark.mark-fuentes { 
+    background-color: rgba(13, 202, 240, 0.1); 
+    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4);
+    color: #0dcaf0;
+}
+
+.annotation-mark.mark-fuentes:hover {
+    background-color: rgba(13, 202, 240, 0.2);
+    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.6);
+}
+
+/* Lightweight tooltip for annotations */
+.annotation-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    max-width: 280px;
+    line-height: 1.3;
+    display: none;
+}
+
+/* Modal improvements */
+.modal-body .form-control-plaintext {
+    border: 1px solid #dee2e6;
+    background-color: #f8f9fa !important;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+#compositeControls {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+#compositeControls .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Annotation Panel Styles */
+.annotation-panel {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.annotation-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 10px 10px 0 0;
+}
+
+.annotation-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.annotation-content {
+    padding: 1rem;
+}
+
+.selected-text-preview {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.annotation-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.annotation-actions .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+#composite-controls {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+#composite-controls .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
 }
 </style>
 
