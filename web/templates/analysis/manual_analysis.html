@@ -8,7 +8,7 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-  <!-- Header Section (match automatic analysis style) -->
+  <!-- Header Section -->
   <div class="history-header mb-4">
     <h1 class="display-6 mb-3">
       <i class="fas fa-user-edit me-3 text-primary"></i>
@@ -19,143 +19,190 @@
     </p>
   </div>
 
-  <div class="card-principal h-100 p-4" style="border-radius: var(--border-radius-xl); box-shadow: var(--shadow-lg);">
-  <div class="row g-4">
-    <!-- Left Panel: Analysis Tools -->
-    <div class="col-md-4">
-      <!-- Panel 1: Action Buttons -->
-      <div class="analysis-tools-panel mb-3">
-        <h4 class="panel-title">
-          <i class="fas fa-tools me-2"></i>{{ _('Herramientas de Análisis') }}
-        </h4>
-        <div class="action-buttons">
-          <button type="button" class="btn btn-outline-secondary w-100 mb-2" id="clear-selections">
-            <i class="fas fa-eraser me-2"></i>{{ _('Limpiar Selecciones') }}
-          </button>
-          <a href="{{ url_for('glossary.glossary_home') }}" class="btn btn-outline-info w-100 mb-2">
-            <i class="fas fa-book me-2"></i>{{ _('Glosario de variables') }}
-          </a>
-          <button type="button" class="btn btn-success w-100" id="save-analysis">
-            <i class="fas fa-save me-2"></i>{{ _('Guardar Análisis') }}
-          </button>
+  <!-- Contenido Principal -->
+  <div class="row">
+    <!-- Panel de Herramientas (Izquierda) -->
+    <div class="col-lg-4">
+      <div class="analysis-panel" id="manual-panel">
+        <div class="panel-header">
+          <h5 class="panel-title">
+            <i class="fas fa-edit me-2"></i>
+            {{ _('Análisis Manual') }}
+          </h5>
         </div>
         
-        <!-- Inline Annotation Panel -->
+        <div class="panel-content">
+          <!-- Modo Edición -->
+          <div class="edit-mode-section mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">{{ _('Modo de Análisis') }}</h6>
+                <small class="text-muted">{{ _('Activa el modo edición para marcar sesgos') }}</small>
+              </div>
+              <button class="btn btn-primary" id="edit-mode-btn">
+                <i class="fas fa-pen me-2"></i>
+                {{ _('Modo Edición') }}
+              </button>
+            </div>
+          </div>
+                    <!-- Panel de Anotación (aparece al seleccionar texto) -->
+                    <div class="mb-4">
         <div class="annotation-panel" id="annotation-panel" style="display: none;">
           <div class="annotation-header">
-            <div class="selected-text-preview">
-              <i class="fas fa-highlighter text-white me-2"></i>
-              <span class="selected-text-label">Texto seleccionado:</span>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tag me-2"></i>
+                                    {{ _('Anotar Texto Seleccionado') }}
+                                </h6>
+                                <button class="btn-close" id="close-annotation-panel"></button>
             </div>
-            <button type="button" class="btn-close-annotation" id="close-annotation">
-              <i class="fas fa-times"></i>
-            </button>
+                            <div class="annotation-content">
+                                <div class="selected-text mb-3">
+                                    <strong>{{ _('Texto seleccionado:') }}</strong>
+                                    <span id="selected-text-preview" class="text-primary"></span>
           </div>
-          
-          <div class="selected-text-content-preview" id="selected-text-preview"></div>
-          
-          <div class="annotation-form-inline">
+                                <div id="simple-annotation-message" class="text-center py-4" style="display: none;"></div>
+                                <form id="annotation-form">
             <div class="row g-2">
               <div class="col-12">
-                <label class="form-label small">Categoría</label>
-                <select class="form-select form-select-sm" id="annotation-category">
-                  <option value="">Selecciona categoría</option>
-                  <option value="contenido_general">Contenido General</option>
-                  <option value="lenguaje">Lenguaje</option>
-                  <option value="fuentes">Fuentes</option>
+                                            <label class="form-label">{{ _('Categoría') }}</label>
+                                            <select class="form-select" id="annotation-category" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                                <option value="contenido_general">{{ _('Contenido General') }}</option>
+                                                <option value="lenguaje">{{ _('Lenguaje') }}</option>
+                                                <option value="fuentes">{{ _('Fuentes') }}</option>
                 </select>
               </div>
               <div class="col-12">
-                <label class="form-label small">Variable</label>
-                <select class="form-select form-select-sm" id="annotation-variable">
-                  <option value="">Selecciona variable</option>
+                                            <label class="form-label">{{ _('Variable') }}</label>
+                                            <select class="form-select" id="annotation-variable" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
                 </select>
               </div>
               <div class="col-12">
-                <label class="form-label small">Valor</label>
-                <select class="form-select form-select-sm" id="annotation-value">
-                  <option value="">Selecciona valor</option>
+                                            <label class="form-label">{{ _('Valor') }}</label>
+                                            <select class="form-select" id="annotation-value" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
                 </select>
               </div>
             </div>
-            <div class="annotation-actions mt-2">
-              <button type="button" class="btn btn-primary btn-sm w-100" id="save-annotation">
-                <i class="fas fa-save me-1"></i>Guardar
+                                    <div id="composite-controls" style="display:none" class="mt-2"></div>
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="fas fa-plus me-2"></i>
+                                            {{ _('Agregar Anotación') }}
               </button>
-              <button type="button" class="btn btn-outline-secondary btn-sm w-100 mt-1" id="cancel-annotation">
-                <i class="fas fa-times me-1"></i>Cancelar
+                                        <button type="button" class="btn btn-outline-secondary" id="cancel-annotation">
+                                            {{ _('Cancelar') }}
               </button>
             </div>
+                                </form>
           </div>
         </div>
       </div>
 
-      <!-- Panel 2: Variables Info -->
-      <div class="analysis-tools-panel mb-3">
-        <h4 class="panel-title collapsible-header" data-target="variables-content">
-          <i class="fas fa-list me-2"></i>{{ _('Variables Cargadas') }}
-          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-        </h4>
-        <div class="collapsible-content" id="variables-content">
-          <!-- Analysis Categories (hidden: all variables are preloaded) -->
-          <div class="analysis-categories" style="display: none;"></div>
-          <div class="loaded-info" id="loaded-info">
-            <!-- Filled dynamically with selected variables per block -->
+          <!-- Variables Disponibles -->
+          <div class="variables-section mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title mb-3">
+                  <i class="fas fa-list me-2 text-primary"></i>
+                  {{ _('Variables Disponibles') }}
+                </h6>
+                <div class="variables-info">
+                  <div class="row g-2">
+                    <div class="col-12">
+                      <div class="variable-category-info">
+                        <h6 class="text-primary small">
+                          <i class="fas fa-file-text me-1"></i>
+                          {{ _('Contenido General') }}
+                        </h6>
+                        <ul class="list-unstyled small" id="contenido-variables">
+                          <!-- Variables se cargan dinámicamente desde config -->
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="variable-category-info">
+                        <h6 class="text-warning small">
+                          <i class="fas fa-language me-1"></i>
+                          {{ _('Lenguaje') }}
+                        </h6>
+                        <ul class="list-unstyled small" id="lenguaje-variables">
+                          <!-- Variables se cargan dinámicamente desde config -->
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="variable-category-info">
+                        <h6 class="text-info small">
+                          <i class="fas fa-quote-left me-1"></i>
+                          {{ _('Fuentes') }}
+                        </h6>
+                        <ul class="list-unstyled small" id="fuentes-variables">
+                          <!-- Variables se cargan dinámicamente desde config -->
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
           </div>
         </div>
       </div>
 
-      <!-- Panel 3: Annotations Summary -->
-      <div class="analysis-tools-panel">
-        <h4 class="panel-title collapsible-header" data-target="annotations-content">
-          <i class="fas fa-clipboard-list me-2"></i>{{ _('Resumen de Anotaciones') }}
-          <i class="fas fa-chevron-down toggle-icon ms-auto"></i>
-        </h4>
-        <div class="collapsible-content" id="annotations-content">
-          <div class="annotations-summary" id="annotations-summary">
-            <div class="no-annotations text-muted text-center py-3">
+          <!-- Resumen de Anotaciones -->
+          <div class="annotations-summary">
+            <h6 class="section-title">
+              <i class="fas fa-sticky-note me-2"></i>
+              {{ _('Mis Anotaciones') }}
+            </h6>
+            <div id="annotations-list" class="annotations-list">
+              <p class="text-muted text-center py-3">
               <i class="fas fa-info-circle me-2"></i>
-              {{ _('No hay anotaciones aún') }}
+                {{ _('Selecciona texto para comenzar a anotar') }}
+              </p>
             </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="action-buttons">
+            <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
+              <i class="fas fa-check me-2"></i>
+              {{ _('Finalizar Análisis') }}
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Panel: Text Analysis (match automatic analysis) -->
-    <div class="col-md-8 analysis-right-panel">
-      <div class="content-input-section">
-        <div class="text-input-header">
-          <h5 class="text-input-title">
-            <i class="fas fa-align-left me-2"></i>{{ _('Texto para Analizar') }}
-          </h5>
-          <p class="text-input-subtitle">{{ _('Pega o edita el contenido que quieres analizar') }}</p>
+    <!-- Área de Texto (Derecha) -->
+    <div class="col-lg-8">
+      <div class="text-analysis-area">
+        <div class="text-header">
+          <h5 class="text-title">{{ data.title if data and data.title else _('Texto para Analizar') }}</h5>
+          <div class="text-meta">
+            <span class="badge bg-light text-dark me-2">
+              <i class="fas fa-clock me-1"></i>
+              {{ _('Tiempo estimado: 15 min') }}
+            </span>
+            <span class="badge bg-light text-dark">
+              <i class="fas fa-target me-1"></i>
+              {{ _('Objetivo: Identificar todos los sesgos') }}
+            </span>
+          </div>
         </div>
 
-        <div class="text-input-container">
-          <div id="analysis-text" class="analysis-text">
-            {% if data and data.text %}{% if data.title %}<div class="article-title-section"><h2 class="article-title">{{ data.title }}</h2></div>{% endif %}{% if data.authors %}<div class="article-authors-section"><p class="article-authors">{{ data.authors }}</p></div>{% endif %}<div class="article-content">{{ data.text }}</div>
+        <div class="text-content" id="analysis-text">
+          <div class="text-body">
+            {% if data and data.text %}
+              {% if data.title %}<h2 class="article-title">{{ data.title }}</h2>{% endif %}
+              {% if data.authors %}<p class="article-authors">{{ data.authors }}</p>{% endif %}
+              <div class="article-content">{{ data.text | replace('\n\n', '</p><p>') | replace('\n', '<br>') | safe }}</div>
             {% else %}
               <p class="text-muted text-center py-5">
                 <i class="fas fa-info-circle me-2"></i>
                 {{ _('No hay texto disponible para analizar') }}
               </p>
             {% endif %}
-          </div>
-          <div class="text-input-footer">
-            <div class="text-input-tip">
-              <i class="fas fa-lightbulb me-1"></i>
-              {{ _('Contenido periodístico funciona mejor') }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Analysis Results -->
-        <div class="analysis-results" id="analysis-results" style="display: none;">
-          <h5>{{ _('Resultados del Análisis') }}</h5>
-          <div id="results-content">
-            <!-- Results will be populated here -->
-          </div>
         </div>
       </div>
     </div>
@@ -165,371 +212,911 @@
 
 
 <style>
-.analysis-tools-panel,
-.text-analysis-panel {
-  background: var(--secondary-color);
-  border-radius: var(--border-radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--medium-gray);
+.analysis-panel {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: between;
+    align-items: center;
 }
 
 .panel-title {
-  color: var(--primary-color);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--light-gray);
+    margin: 0;
+    color: #495057;
 }
 
-.analysis-categories {
-  margin-bottom: 2rem;
+.panel-content {
+    padding: 1rem;
 }
 
-.category-section {
-  margin-bottom: 1.5rem;
+.edit-mode-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
 }
 
-.category-section h5 {
-  color: var(--primary-color);
-  font-size: 1rem;
-  font-weight: var(--font-weight-semibold);
+.edit-mode-section h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.edit-mode-section .btn {
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.edit-mode-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.section-title {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
   margin-bottom: 0.75rem;
 }
 
-.category-options {
+.text-analysis-area {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.text-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.text-title {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+.text-content {
+    padding: 1.5rem;
+}
+
+.text-body {
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.annotation-panel {
+    position: static; /* inline inside left column */
+    width: 100%;
+    max-width: 100%;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-top: 0.5rem;
+}
+
+.annotation-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.annotation-content {
+    padding: 1rem;
+}
+
+.progress-steps {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
 }
 
-.form-check {
-  padding-left: 0;
+.step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    position: relative;
 }
 
-.form-check-input {
-  margin-right: 0.5rem;
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
 }
 
-.form-check-label {
-  font-size: 0.9rem;
-  color: var(--dark-gray);
-  cursor: pointer;
+.step.active .step-number {
+    background: #007bff;
+    color: white;
 }
 
-.analysis-text {
-  min-height: 400px;
-  padding: 1.5rem;
-  background: var(--secondary-color);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--medium-gray);
-  line-height: 1.6;
-  font-size: 1rem;
-  color: var(--text-black-color);
-  white-space: pre-wrap; /* preserve original paragraph spacing */
+.step.completed .step-number {
+    background: #28a745;
+    color: white;
 }
 
-.text-info {
-  display: flex;
-  gap: 0.5rem;
+.step-content h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
-.badge {
+.step-content p {
+    margin: 0;
   font-size: 0.8rem;
-  padding: 0.4rem 0.8rem;
 }
 
-.analysis-results {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: var(--light-gray);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--medium-gray);
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 60px;
+    right: -50%;
+    height: 2px;
+    background: #e9ecef;
+    z-index: -1;
+}
+
+.step.completed:not(:last-child)::after {
+    background: #28a745;
+}
+
+.annotations-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.annotation-item {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #007bff;
+}
+
+.annotation-text {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.annotation-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
 }
 
 .action-buttons {
-  margin-top: 1.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
 }
 
-.btn {
-  border-radius: var(--border-radius-md);
-  font-weight: var(--font-weight-semibold);
-  transition: all var(--transition-speed) ease;
+/* Variables Section Styles */
+.variables-section .card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #007bff;
 }
 
-.btn:hover {
+.variables-section .variable-category-info {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.variables-section .variable-category-info:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Text selection highlighting */
-.analysis-text .highlight {
-  background-color: rgba(93, 224, 230, 0.3);
-  padding: 2px 4px;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all var(--transition-speed) ease;
+.variables-section .variable-category-info h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
 }
 
-.analysis-text .highlight:hover {
-  background-color: rgba(93, 224, 230, 0.5);
+.variables-section .variable-category-info ul li {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
 }
 
-.analysis-text .highlight.selected {
-  background-color: rgba(160, 44, 147, 0.3);
-  border: 2px solid var(--violet-iris-color);
+.variables-section .variable-category-info ul li i {
+    width: 10px;
+}
+
+/* Inline highlight for user annotations */
+.annotation-mark {
+    background-color: #fff3cd;
+    box-shadow: inset 0 -6px 0 rgba(255, 235, 59, 0.6);
+    border-radius: 2px;
+    padding: 0 1px;
+}
+.annotation-mark.mark-contenido_general { background-color: #e6f4ea; box-shadow: inset 0 -6px 0 rgba(76, 175, 80, 0.35); }
+.annotation-mark.mark-lenguaje { background-color: #fff0f0; box-shadow: inset 0 -6px 0 rgba(244, 67, 54, 0.35); }
+.annotation-mark.mark-fuentes { background-color: #eef7ff; box-shadow: inset 0 -6px 0 rgba(33, 150, 243, 0.35); }
+
+/* Lightweight tooltip for annotations */
+.annotation-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    max-width: 280px;
+    line-height: 1.3;
+    display: none;
 }
 
 /* Article title and authors within text */
-.article-title-section {
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid var(--light-gray);
-}
-
 .article-title {
   font-size: 1.75rem;
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-color);
+  font-weight: 700;
+  color: #495057;
   line-height: 1.2;
-  margin: 0 !important;
-  text-align: left;
-}
-
-.article-authors-section {
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem 0;
   text-align: left;
 }
 
 .article-authors {
   font-size: 1.1rem;
-  color: var(--dark-gray);
+  color: #6c757d;
   font-style: italic;
-  margin: 0 !important;
-  font-weight: var(--font-weight-medium);
+  margin: 0 0 1rem 0;
+  font-weight: 500;
 }
 
 .article-content {
   margin-top: 0.5rem;
   text-align: justify;
 }
-
-/* Inline Annotation Panel */
-.annotation-panel {
-  background: #fff;
-  border: 1px solid var(--primary-color);
-  border-radius: var(--border-radius-md);
-  margin-top: 1rem;
-  box-shadow: var(--shadow-md);
-  animation: slideDown 0.3s ease-out;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.annotation-header {
-  background: var(--primary-color);
-  color: #fff;
-  padding: 0.75rem 1rem;
-  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.selected-text-preview {
-  display: flex;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.selected-text-label {
-  font-weight: var(--font-weight-semibold);
-  margin-right: 0.5rem;
-}
-
-.selected-text-content-preview {
-  background: var(--light-gray);
-  border: 1px solid var(--medium-gray);
-  border-radius: var(--border-radius-md);
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  font-size: 0.85rem;
-  font-style: italic;
-  max-height: 80px;
-  overflow-y: auto;
-  color: var(--text-black-color);
-}
-
-.btn-close-annotation {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-}
-
-.btn-close-annotation:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.annotation-form-inline {
-  padding: 1rem;
-}
-
-.annotation-form-inline .form-label {
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-black-color);
-  font-size: 0.85rem;
-  margin-bottom: 0.25rem;
-}
-
-.annotation-form-inline .form-select {
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--medium-gray);
-  background-color: #fff;
-  font-size: 0.9rem;
-}
-
-.annotation-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* Annotations Summary */
-.annotations-summary {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.annotation-item {
-  background: var(--light-gray);
-  border: 1px solid var(--medium-gray);
-  border-radius: var(--border-radius-md);
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.85rem;
-}
-
-.annotation-item:last-child {
-  margin-bottom: 0;
-}
-
-.annotation-text {
-  font-weight: var(--font-weight-semibold);
-  color: var(--primary-color);
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
-}
-
-.annotation-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.annotation-detail {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.annotation-detail-label {
-  font-weight: var(--font-weight-medium);
-  color: var(--dark-gray);
-  font-size: 0.8rem;
-}
-
-.annotation-detail-value {
-  background: var(--primary-color);
-  color: #fff;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--border-radius-sm);
-  font-size: 0.75rem;
-  font-weight: var(--font-weight-semibold);
-}
-
-.no-annotations {
-  font-size: 0.9rem;
-}
-
-/* Collapsible Panels */
-.collapsible-header {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.collapsible-header:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: var(--border-radius-md);
-}
-
-.toggle-icon {
-  transition: transform 0.3s ease;
-  font-size: 0.9rem;
-  color: var(--primary-color);
-}
-
-.collapsible-header.collapsed .toggle-icon {
-  transform: rotate(-90deg);
-}
-
-.collapsible-content {
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.collapsible-content.collapsed {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .analysis-tools-panel,
-  .text-analysis-panel {
-    margin-bottom: 1rem;
-  }
-  
-  .text-info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
 </style>
 
 <script>
-  window.MANUAL_VARIABLES = {
-    contenido_general: {{ contenido_general_variables | tojson }},
-    lenguaje: {{ lenguaje_variables | tojson }},
-    fuentes: {{ fuentes_variables | tojson }}
-  };
+// Datos del texto actual
+const currentText = {
+    id: 'manual-analysis',
+    title: '{{ data.title if data and data.title else "" }}',
+    text: '{{ data.text if data and data.text else "" }}',
+    authors: '{{ data.authors if data and data.authors else "" }}'
+};
+
+let annotations = [];
+
+// Variables from config.ini - parse the string arrays
+const CHALLENGE_VARIABLES = {
+    'contenido_general': {{ contenido_general_variables | tojson | safe }},
+    'lenguaje': {{ lenguaje_variables | tojson | safe }},
+    'fuentes': {{ fuentes_variables | tojson | safe }}
+};
+
+// Variables loaded from config.ini
+
+// Variable descriptions
+const VARIABLE_DESCRIPTIONS = {
+    'cita_textual_titular': 'Cita textual titular',
+    'genero_nombre_propio_titular': 'Género nombre propio titular',
+    'genero_periodista': 'Género periodista',
+    'genero_personas_mencionadas': 'Género personas mencionadas',
+    'nombre_propio_titular': 'Nombre propio titular',
+    'personas_mencionadas': 'Personas mencionadas',
+    'tema': 'Tema',
+    'androcentrismo': 'Androcentrismo',
+    'asimetria': 'Asimetría',
+    'cargos_mujeres': 'Cargos mujeres',
+    'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+    'denominacion_dependiente': 'Denominación dependiente',
+    'denominacion_redundante': 'Denominación redundante',
+    'denominacion_sexualizada': 'Denominación sexualizada',
+    'dual_aparente': 'Dual aparente',
+    'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+    'hombre_humanidad': 'Hombre humanidad',
+    'infantilizacion': 'Infantilización',
+    'lenguaje_sexista': 'Lenguaje sexista',
+    'masculino_generico': 'Masculino genérico',
+    'sexismo_social': 'Sexismo social',
+    'declaracion_fuente': 'Declaración fuente',
+    'genero_fuente': 'Género fuente',
+    'nombre_fuente': 'Nombre fuente',
+    'tipo_fuente': 'Tipo fuente'
+};
+
+let isEditMode = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeManualAnalysis();
+    initMultiLabelTooltips();
+    updateVariablesDisplay();
+});
+
+function initializeManualAnalysis() {
+    setupTextSelection();
+    setupAnnotationForm();
+    setupActionButtons();
+    updateProgressSteps();
+}
+
+function setupTextSelection() {
+    const textElement = document.getElementById('analysis-text');
+    
+    textElement.addEventListener('mouseup', function(e) {
+        if (!isEditMode) return;
+        
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        
+        if (selectedText.length > 0) {
+            showAnnotationPanel(selectedText, selection.getRangeAt(0));
+        }
+    });
+}
+
+function setupAnnotationForm() {
+    const form = document.getElementById('annotation-form');
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    
+    // Manejar cambio de categoría
+    categorySelect.addEventListener('change', function() {
+        updateVariableOptions(this.value);
+    });
+    
+    // Manejar cambio de variable
+    variableSelect.addEventListener('change', function() {
+        updateValueOptions(categorySelect.value, this.value);
+    });
+    
+    // Manejar envío del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveAnnotation();
+    });
+    
+    // Manejar cancelar
+    document.getElementById('cancel-annotation').addEventListener('click', function() {
+        hideAnnotationPanel();
+    });
+    
+    // Manejar cerrar panel
+    document.getElementById('close-annotation-panel').addEventListener('click', function() {
+        hideAnnotationPanel();
+    });
+}
+
+function setupActionButtons() {
+    // Botón de modo edición
+    document.getElementById('edit-mode-btn').addEventListener('click', function() {
+        toggleEditMode();
+    });
+    
+    // Botón finalizar
+    document.getElementById('save-analysis-btn').addEventListener('click', function() {
+        saveAnalysis();
+    });
+}
+
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const btn = document.getElementById('edit-mode-btn');
+    const textArea = document.getElementById('analysis-text');
+    
+    if (isEditMode) {
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> Modo Edición Activo';
+        btn.classList.remove('btn-outline-primary', 'btn-primary');
+        btn.classList.add('btn-warning');
+        textArea.style.cursor = 'text';
+        textArea.classList.add('edit-mode');
+    } else {
+        btn.innerHTML = '<i class="fas fa-pen me-1"></i> Modo Edición';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-primary');
+        textArea.style.cursor = 'default';
+        textArea.classList.remove('edit-mode');
+        hideAnnotationPanel();
+    }
+}
+
+function showAnnotationPanel(selectedText, range) {
+    const panel = document.getElementById('annotation-panel');
+    const preview = document.getElementById('selected-text-preview');
+    
+    preview.textContent = selectedText;
+    panel.style.display = 'block';
+    
+    // Guardar el rango para después
+    window.currentSelection = {
+        text: selectedText,
+        range: range
+    };
+    
+    // Initialize the annotation form
+    initializeAnnotationForm();
+}
+
+function hideAnnotationPanel() {
+    const panel = document.getElementById('annotation-panel');
+    panel.style.display = 'none';
+    window.currentSelection = null;
+}
+
+function initializeAnnotationForm() {
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    
+    // Clear and reset the form
+    if (categorySelect) categorySelect.value = '';
+    if (variableSelect) variableSelect.innerHTML = '<option value="">Seleccionar...</option>';
+    if (valueSelect) valueSelect.innerHTML = '<option value="">Seleccionar...</option>';
+    
+    // If there's a default category available, select it and load its variables
+    if (categorySelect && categorySelect.options.length > 1) {
+        const firstCategory = categorySelect.options[1].value;
+        categorySelect.value = firstCategory;
+        updateVariableOptions(firstCategory);
+    }
+}
+
+function updateVariableOptions(category) {
+    const variableSelect = document.getElementById('annotation-variable');
+    variableSelect.innerHTML = '<option value="">Seleccionar...</option>';
+    
+    const variables = CHALLENGE_VARIABLES;
+    let availableVariables = [];
+    
+    if (category === 'contenido_general' && variables.contenido_general) {
+        availableVariables = variables.contenido_general.filter(v => v !== 'tema');
+    } else if (category === 'lenguaje' && variables.lenguaje) {
+        availableVariables = variables.lenguaje;
+    } else if (category === 'fuentes' && variables.fuentes) {
+        availableVariables = variables.fuentes;
+    }
+    
+    // Hide gender-only variables that are driven by a paired presence variable
+    const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
+    availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
+    
+    availableVariables.forEach(variable => {
+        const option = document.createElement('option');
+        option.value = variable;
+        option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        variableSelect.appendChild(option);
+    });
+}
+
+function updateValueOptions(category, variable) {
+    const valueSelect = document.getElementById('annotation-value');
+    valueSelect.innerHTML = '<option value="">Seleccionar...</option>';
+    const compositeControls = document.getElementById('composite-controls');
+    if (compositeControls) compositeControls.style.display = 'none', compositeControls.innerHTML = '';
+    
+    // Mapeo de variables a sus valores
+    const variableValues = {
+        // Contenido General
+        'genero_nombre_propio_titular': [
+            { value: '1', text: 'No hay' },
+            { value: '2', text: 'Sí, hombre' },
+            { value: '3', text: 'Sí, mujer' },
+            { value: '4', text: 'Sí, mujer y hombre' }
+        ],
+        'genero_personas_mencionadas': [
+            { value: '1', text: 'No hay' },
+            { value: '2', text: 'Sí, hombre' },
+            { value: '3', text: 'Sí, mujer' },
+            { value: '4', text: 'Sí, mujer y hombre' }
+        ],
+        'genero_periodista': [
+            { value: '1', text: 'Masculino' },
+            { value: '2', text: 'Femenino' },
+            { value: '3', text: 'Mixto' },
+            { value: '4', text: 'Ns/Nc' },
+            { value: '5', text: 'Agencia/otros medios' },
+            { value: '6', text: 'Redacción' },
+            { value: '7', text: 'Corporativo' }
+        ],
+        'tema': [
+            { value: '1', text: 'Científica/Investigación' },
+            { value: '2', text: 'Comunicación' },
+            { value: '3', text: 'De farándula o espectáculo' },
+            { value: '4', text: 'Deportiva' },
+            { value: '5', text: 'Economía (incluido: consumo; compras; viajes…)' },
+            { value: '6', text: 'Educación/cultura' },
+            { value: '7', text: 'Empleo/Trabajo' },
+            { value: '8', text: 'Empresa' },
+            { value: '9', text: 'Judicial' },
+            { value: '10', text: 'Medioambiente' },
+            { value: '11', text: 'Policial' },
+            { value: '12', text: 'Política' },
+            { value: '13', text: 'Salud' },
+            { value: '14', text: 'Social' },
+            { value: '15', text: 'Tecnología' },
+            { value: '16', text: 'Transporte' },
+            { value: '17', text: 'Otros' }
+        ],
+        'cita_textual_titular': [
+            { value: '0', text: 'No' },
+            { value: '1', text: 'Sí' }
+        ],
+        
+        // Lenguaje
+        'lenguaje_sexista': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' },
+            { value: '3', text: 'Sí, además se observa un salto semántico' }
+        ],
+        'androcentrismo': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'asimetria': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'cargos_mujeres': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'comparacion_mujeres_hombres': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'denominacion_dependiente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'denominacion_redundante': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'denominacion_sexualizada': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'dual_aparente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'excepcion_noticiabilidad': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'hombre_humanidad': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'infantilizacion': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'masculino_generico': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'sexismo_social': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        
+        // Fuentes
+        'tipo_fuente': [
+            { value: '1', text: 'Personal' },
+            { value: '2', text: 'Institucional' },
+            { value: '3', text: 'Mixta' }
+        ],
+        'genero_fuente': [
+            { value: '1', text: 'No hay' },
+            { value: '2', text: 'Sí, hombre' },
+            { value: '3', text: 'Sí, mujer' },
+            { value: '4', text: 'Sí, mujer y hombre' }
+        ],
+        'declaracion_fuente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ],
+        'nombre_fuente': [
+            { value: '1', text: 'No' },
+            { value: '2', text: 'Sí' }
+        ]
+    };
+    
+    // Compuestos: pares variable-presencia + variable-detalle
+    const compositePairs = {
+        personas_mencionadas: 'genero_personas_mencionadas',
+        nombre_propio_titular: 'genero_nombre_propio_titular',
+        nombre_fuente: 'genero_fuente'
+    };
+
+    // Si la variable seleccionada es parte de un compuesto, mostrar control de género
+    const compositeDetail = compositePairs[variable];
+    if (compositeDetail) {
+        const baseVar = compositePairs[variable] ? variable : Object.keys(compositePairs).find(k => compositePairs[k] === variable);
+        const detailVar = compositePairs[baseVar];
+        if (compositeControls) {
+            compositeControls.style.display = 'block';
+            const genderValues = variableValues[detailVar] || [];
+            let label;
+            if (detailVar === 'genero_personas_mencionadas') {
+                label = 'Género de la persona';
+            } else if (detailVar === 'genero_nombre_propio_titular') {
+                label = 'Género nombre propio titular';
+            } else {
+                label = 'Género de la fuente';
+            }
+            compositeControls.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">${label}</label>
+                        <select class="form-select" id="composite-gender">
+                            ${genderValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+        }
+    }
+
+    // Obtener valores para la variable específica
+    const values = variableValues[variable];
+    
+    if (values) {
+        // Si es un binario (Sí/No), no mostramos la opción negativa
+        const lower = values.map(v => (v.text || '').toLowerCase());
+        const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+        const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+
+        let toRender = values;
+        if (isYesNo || isSiNo) {
+            toRender = values.filter(v => /sí|si/i.test(v.text || ''));
+        }
+
+        toRender.forEach((option, idx) => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            if (idx === 0) optionElement.selected = true;
+            valueSelect.appendChild(optionElement);
+        });
+    } else {
+        // Sin catálogo: ocultamos selector y fijamos afirmativo por defecto
+        if (valueSelect && valueSelect.parentElement) valueSelect.parentElement.style.display = 'none';
+        const optionElement = document.createElement('option');
+        optionElement.value = '1';
+        optionElement.textContent = '';
+        optionElement.selected = true;
+        valueSelect.appendChild(optionElement);
+    }
+}
+
+function saveAnnotation() {
+    const selectedText = window.currentSelection ? window.currentSelection.text : '';
+    
+    if (!selectedText) {
+        alert('No hay texto seleccionado');
+        return;
+    }
+    
+    const category = document.getElementById('annotation-category').value;
+    const variable = document.getElementById('annotation-variable').value;
+    const value = document.getElementById('annotation-value').value;
+    
+    if (!category || !variable || !value) {
+        alert('Por favor completa todos los campos');
+        return;
+    }
+    
+    const createdAt = new Date().toISOString();
+    
+    // Manejo de variables compuestas: crear dos anotaciones sincronizadas
+    const compositePairs = {
+        personas_mencionadas: 'genero_personas_mencionadas',
+        nombre_propio_titular: 'genero_nombre_propio_titular',
+        nombre_fuente: 'genero_fuente'
+    };
+    const compositeControls = document.getElementById('composite-gender');
+    
+    if (compositePairs[variable]) {
+        // Usuario anotó la presencia: set presente y género seleccionado
+        const genderValue = compositeControls ? compositeControls.value : null;
+        // 1) presencia
+        annotations.push({
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: variable,
+            value: '1',
+            timestamp: createdAt
+        });
+        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+        // 2) género
+        if (genderValue) {
+            annotations.push({
+                id: Date.now()+1,
+                text: selectedText,
+                category: category,
+                variable: compositePairs[variable],
+                value: genderValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+        }
+    } else {
+        // Anotación normal
+        annotations.push({
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: variable,
+            value: value,
+            timestamp: createdAt
+        });
+        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+    }
+    updateAnnotationsList();
+    hideAnnotationPanel();
+    
+    // Habilitar botón
+    document.getElementById('save-analysis-btn').disabled = false;
+}
+
+function updateAnnotationsList() {
+    const container = document.getElementById('annotations-list');
+    
+    if (annotations.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>Selecciona texto para comenzar a anotar</p>';
+        return;
+    }
+    
+    container.innerHTML = annotations.map(annotation => `
+        <div class="annotation-item">
+            <div class="annotation-text">"${annotation.text}"</div>
+            <div class="annotation-meta">
+                <strong>${annotation.category}</strong> → ${annotation.variable} = ${annotation.value}
+            </div>
+        </div>
+    `).join('');
+}
+
+function saveAnalysis() {
+    if (annotations.length === 0) {
+        alert('Por favor realiza al menos una anotación antes de finalizar');
+        return;
+    }
+    
+    // Mostrar loading
+    const loadingBtn = document.getElementById('save-analysis-btn');
+    const originalText = loadingBtn.innerHTML;
+    loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+    loadingBtn.disabled = true;
+    
+    // Simular guardado del análisis
+    setTimeout(() => {
+        alert('Análisis guardado correctamente');
+        loadingBtn.innerHTML = originalText;
+        loadingBtn.disabled = false;
+    }, 1000);
+}
+
+function updateProgressSteps() {
+    // Actualizar indicadores de progreso
+    if (annotations.length > 0) {
+        document.getElementById('step-manual').classList.add('completed');
+        document.getElementById('step-results').classList.add('active');
+    }
+}
+
+function updateVariablesDisplay() {
+    const variables = CHALLENGE_VARIABLES;
+    
+    // Update contenido general variables - show ALL variables
+    const contenidoList = document.getElementById('contenido-variables');
+    if (contenidoList && variables.contenido_general) {
+        contenidoList.innerHTML = variables.contenido_general.map(variable => 
+            `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+        ).join('');
+    }
+    
+    // Update lenguaje variables - show ALL variables
+    const lenguajeList = document.getElementById('lenguaje-variables');
+    if (lenguajeList && variables.lenguaje) {
+        lenguajeList.innerHTML = variables.lenguaje.map(variable => 
+            `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+        ).join('');
+    }
+    
+    // Update fuentes variables - show ALL variables
+    const fuentesList = document.getElementById('fuentes-variables');
+    if (fuentesList && variables.fuentes) {
+        fuentesList.innerHTML = variables.fuentes.map(variable => 
+            `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+        ).join('');
+    }
+}
+
+function applyInlineHighlight(selectionData, category, variable) {
+    if (!selectionData || !selectionData.range) return;
+    const range = selectionData.range.cloneRange();
+    if (range.collapsed) return;
+    const wrapper = document.createElement('mark');
+    wrapper.className = `annotation-mark mark-${category}`;
+    wrapper.setAttribute('data-variable', variable);
+    try {
+        range.surroundContents(wrapper);
+    } catch (e) {
+        // Fallback: wrap text node by splitting
+        const text = document.createTextNode(range.toString());
+        wrapper.appendChild(text);
+        range.deleteContents();
+        range.insertNode(wrapper);
+    }
+}
+
+// Multi-etiqueta: al pasar el ratón, si hay varias marcas superpuestas,
+// mostrar en el tooltip todas las variables implicadas
+function initMultiLabelTooltips() {
+    let tooltip = null;
+    const ensureTooltip = () => {
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'annotation-tooltip';
+            document.body.appendChild(tooltip);
+        }
+        return tooltip;
+    };
+
+    document.addEventListener('mousemove', function(e) {
+        const tip = ensureTooltip();
+        const underPointer = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []);
+        const marks = underPointer.filter(el => el && el.classList && el.classList.contains('annotation-mark'));
+        if (!marks || marks.length === 0) { tip.style.display = 'none'; return; }
+
+        const variables = Array.from(new Set(marks.map(m => m.getAttribute('data-variable')).filter(Boolean)));
+        const categories = Array.from(new Set(marks.map(m => {
+            if (m.classList.contains('mark-contenido_general')) return 'Contenido General';
+            if (m.classList.contains('mark-lenguaje')) return 'Lenguaje';
+            if (m.classList.contains('mark-fuentes')) return 'Fuentes';
+            return '';
+        }).filter(Boolean)));
+        const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
+        const catLabel = categories.join(', ');
+        tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+        tip.style.left = (e.clientX + 12) + 'px';
+        tip.style.top = (e.clientY + 12) + 'px';
+        tip.style.display = 'block';
+    });
+
+    document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
+    document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
+}
 </script>
-<script src="{{ url_for('static', filename='js/manual_analysis_enhanced.js') }}"></script>
 {% endblock %}

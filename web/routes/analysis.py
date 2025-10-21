@@ -278,7 +278,15 @@ def analyze_manual():
 
     if request.method == 'GET':
         # Render manual analysis page
-        return render_template('analysis/manual_analysis.html')
+        return render_template(
+            'analysis/manual_analysis.html',
+            language=get_locale(),
+            highlight_map=HIGHLIGHT_COLOR_MAP,
+            contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
+            lenguaje_variables=LENGUAJE_VARIABLES,
+            fuentes_variables=FUENTES_VARIABLES,
+            config=config
+        )
     
     # POST method - process manual analysis
     text = request.form.get('text', '')
@@ -307,7 +315,8 @@ def analyze_manual():
         highlight_map=HIGHLIGHT_COLOR_MAP,
         contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
         lenguaje_variables=LENGUAJE_VARIABLES,
-        fuentes_variables=FUENTES_VARIABLES
+        fuentes_variables=FUENTES_VARIABLES,
+        config=config
     )
 
 
