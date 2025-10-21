@@ -363,6 +363,31 @@
       border: 1px solid #e9ecef;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      position: relative;
+  }
+  
+  /* Edit mode indicator */
+  .text-analysis-area.edit-mode {
+      border: 3px solid #ffc107;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+      background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+  }
+  
+  .text-analysis-area.edit-mode::before {
+      content: "MODO EDICIÓN ACTIVO";
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      background: #ffc107;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 10;
   }
   
   .text-header {
@@ -987,6 +1012,7 @@ document.addEventListener('DOMContentLoaded', function() {
       isEditMode = !isEditMode;
       const btn = document.getElementById('edit-mode-btn');
       const textArea = document.getElementById('analysis-text');
+      const textAnalysisArea = document.querySelector('.text-analysis-area');
       
       if (isEditMode) {
           btn.innerHTML = '<i class="fas fa-check me-1"></i> Modo Edición Activo';
@@ -994,12 +1020,14 @@ document.addEventListener('DOMContentLoaded', function() {
           btn.classList.add('btn-warning');
           textArea.style.cursor = 'text';
           textArea.classList.add('edit-mode');
+          textAnalysisArea.classList.add('edit-mode');
       } else {
           btn.innerHTML = '<i class="fas fa-pen me-1"></i> Modo Edición';
           btn.classList.remove('btn-warning');
           btn.classList.add('btn-primary');
           textArea.style.cursor = 'default';
           textArea.classList.remove('edit-mode');
+          textAnalysisArea.classList.remove('edit-mode');
           hideAnnotationPanel();
       }
   }
