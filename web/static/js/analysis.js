@@ -1049,15 +1049,6 @@ function editAnalysis() {
 
 // Function to show annotation controls
 function showAnnotationControls() {
-    // Add annotation mode indicator
-    const annotationIndicator = document.createElement('div');
-    annotationIndicator.id = 'annotation-indicator';
-    annotationIndicator.className = 'alert alert-info mb-3';
-    annotationIndicator.innerHTML = '<i class="fas fa-highlighter me-2"></i>Modo de anotación activo - Selecciona texto para anotar';
-    
-    const leftPanel = document.querySelector('.col-md-4');
-    leftPanel.insertBefore(annotationIndicator, leftPanel.firstChild);
-    
     // Add annotation panel
     const annotationPanel = document.createElement('div');
     annotationPanel.id = 'annotation-panel';
@@ -1109,6 +1100,7 @@ function showAnnotationControls() {
         </div>
     `;
     
+    const leftPanel = document.querySelector('.col-md-4');
     leftPanel.insertBefore(annotationPanel, leftPanel.children[2]);
     
     // Setup annotation form handlers
@@ -1117,10 +1109,8 @@ function showAnnotationControls() {
 
 // Function to hide annotation controls
 function hideAnnotationControls() {
-    const annotationIndicator = document.getElementById('annotation-indicator');
     const annotationPanel = document.getElementById('annotation-panel');
     
-    if (annotationIndicator) annotationIndicator.remove();
     if (annotationPanel) annotationPanel.remove();
 }
 
