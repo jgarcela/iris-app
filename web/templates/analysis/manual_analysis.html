@@ -1702,14 +1702,74 @@ function addTopicAnnotation(value, text) {
       loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
       loadingBtn.disabled = true;
       
-      // Simular guardado del análisis
-      setTimeout(() => {
+      // Preparar datos para enviar
+      const analysisData = {
+          text: document.getElementById('analysis-text').innerText || document.getElementById('analysis-text').textContent,
+          title: document.querySelector('.text-title').textContent,
+          authors: document.querySelector('.text-authors').textContent,
+          url: document.querySelector('.text-url').textContent,
+          annotations: annotations,
+          selected_topic: selectedTopic,
+          protagonist_analysis: getProtagonistAnalysis(),
+          analysis_mode: 'manual',
+          timestamp: new Date().toISOString()
+      };
+      
+      // Enviar datos al servidor
+      fetch(window.location.href, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify(analysisData)
+      })
+      .then(response => {
+          if (response.ok) {
+              return response.json();
+          }
+          throw new Error('Error al guardar el análisis');
+      })
+      .then(data => {
           alert('Análisis guardado correctamente');
+          // Redirigir a la página de resultados o historial
+          window.location.href = '/analysis/history';
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Error al guardar el análisis: ' + error.message);
           loadingBtn.innerHTML = originalText;
           loadingBtn.disabled = false;
-      }, 1000);
+      });
   }
   
+  function getProtagonistAnalysis() {
+      // Obtener análisis del protagonista basado en las anotaciones
+      const genderAnnotations = annotations.filter(ann => 
+          ann.variable === 'genero_personas_mencionadas' || 
+          ann.variable === 'genero_nombre_propio_titular'
+      );
+      
+      if (genderAnnotations.length === 0) {
+          return { protagonist: 'No identificado', confidence: 0 };
+      }
+      
+      // Lógica simple para determinar protagonista
+      const maleCount = genderAnnotations.filter(ann => ann.value === '2').length;
+      const femaleCount = genderAnnotations.filter(ann => ann.value === '3').length;
+      const mixedCount = genderAnnotations.filter(ann => ann.value === '4').length;
+      
+      if (maleCount > femaleCount && maleCount > mixedCount) {
+          return { protagonist: 'Masculino', confidence: maleCount / genderAnnotations.length };
+      } else if (femaleCount > maleCount && femaleCount > mixedCount) {
+          return { protagonist: 'Femenino', confidence: femaleCount / genderAnnotations.length };
+      } else if (mixedCount > 0) {
+          return { protagonist: 'Mixto', confidence: mixedCount / genderAnnotations.length };
+      }
+      
+      return { protagonist: 'No identificado', confidence: 0 };
+  }
+
   function updateProgressSteps() {
       // Actualizar indicadores de progreso
       if (annotations.length > 0) {
