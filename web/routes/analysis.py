@@ -63,6 +63,116 @@ URL_API_ENDPOINT_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}"
 URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GET_DOCUMENT}"
 
 #  ----------------- HELPER FUNCTIONS -----------------
+def create_analysis_document(api_data, text, title, authors, url, model, analysis_mode):
+    """Create analysis document for database storage"""
+    timestamp = datetime.now().isoformat()
+    
+    # Extract analysis data from API response
+    analysis = api_data.get('analysis', {})
+    original = analysis.get('original', {})
+    edited = analysis.get('edited', {})
+    
+    # Convert API format to database format
+    annotations = []
+    
+    # Process contenido_general
+    if original.get('contenido_general'):
+        cg_data = original['contenido_general']
+        for variable, value in cg_data.items():
+            if value is not None:
+                annotations.append({
+                    'id': f"{timestamp}_{variable}",
+                    'text': text[:100] + "..." if len(text) > 100 else text,  # Sample text
+                    'category': 'contenido_general',
+                    'variable': variable,
+                    'value': str(value),
+                    'timestamp': timestamp,
+                    'source': 'ai_analysis'
+                })
+    
+    # Process lenguaje
+    if original.get('lenguaje'):
+        lang_data = original['lenguaje']
+        for variable, value in lang_data.items():
+            if value is not None:
+                annotations.append({
+                    'id': f"{timestamp}_{variable}",
+                    'text': text[:100] + "..." if len(text) > 100 else text,
+                    'category': 'lenguaje',
+                    'variable': variable,
+                    'value': str(value),
+                    'timestamp': timestamp,
+                    'source': 'ai_analysis'
+                })
+    
+    # Process fuentes
+    if original.get('fuentes'):
+        fuentes_data = original['fuentes']
+        if 'fuentes' in fuentes_data:
+            for i, fuente in enumerate(fuentes_data['fuentes']):
+                for variable, value in fuente.items():
+                    if value is not None:
+                        annotations.append({
+                            'id': f"{timestamp}_fuente_{i}_{variable}",
+                            'text': fuente.get('declaracion_fuente', ''),
+                            'category': 'fuentes',
+                            'variable': variable,
+                            'value': str(value),
+                            'timestamp': timestamp,
+                            'source': 'ai_analysis'
+                        })
+    
+    # Determine protagonist analysis
+    protagonist_analysis = analyze_protagonist_from_annotations(annotations)
+    
+    # Create document
+    analysis_doc = {
+        'user_id': session.get('user_id'),
+        'text': text,
+        'title': title,
+        'authors': authors,
+        'url': url,
+        'analysis_mode': analysis_mode,
+        'model': model,
+        'status': 'completed',
+        'annotations': annotations,
+        'ai_analysis': original,
+        'human_edits': edited,
+        'protagonist_analysis': protagonist_analysis,
+        'created_at': timestamp,
+        'updated_at': timestamp,
+        'metadata': {
+            'total_annotations': len(annotations),
+            'categories': list(set([ann.get('category', '') for ann in annotations])),
+            'variables': list(set([ann.get('variable', '') for ann in annotations])),
+            'ai_model': model,
+            'has_human_edits': bool(edited and any(edited.values()))
+        }
+    }
+    
+    return analysis_doc
+
+def analyze_protagonist_from_annotations(annotations):
+    """Analyze protagonist from annotations"""
+    gender_annotations = [ann for ann in annotations 
+                         if ann.get('variable') in ['genero_personas_mencionadas', 'genero_nombre_propio_titular']]
+    
+    if not gender_annotations:
+        return {'protagonist': 'No identificado', 'confidence': 0}
+    
+    male_count = sum(1 for ann in gender_annotations if ann.get('value') == '2')
+    female_count = sum(1 for ann in gender_annotations if ann.get('value') == '3')
+    mixed_count = sum(1 for ann in gender_annotations if ann.get('value') == '4')
+    
+    if male_count > female_count and male_count > mixed_count:
+        return {'protagonist': 'Masculino', 'confidence': male_count / len(gender_annotations)}
+    elif female_count > male_count and female_count > mixed_count:
+        return {'protagonist': 'Femenino', 'confidence': female_count / len(gender_annotations)}
+    elif mixed_count > 0:
+        return {'protagonist': 'Mixto', 'confidence': mixed_count / len(gender_annotations)}
+    
+    return {'protagonist': 'No identificado', 'confidence': 0}
+
 def get_user_info():
     """Get current user information from context processor"""
     # The current_user is injected by the context processor in __init__.py
@@ -256,6 +366,21 @@ def analyze():
     if resp.status_code == 200:
         data = resp.json()
         logger.info(f"[/ANALYSIS/ANALYZE] Received response from API: {data}")
+        
+        # Save analysis to database
+        try:
+            analysis_doc = create_analysis_document(data, text, title, authors, url, model, analysis_mode)
+            result = db.DB_ANALYSIS.insert_one(analysis_doc)
+            analysis_id = str(result.inserted_id)
+            logger.info(f"Automatic analysis saved with ID: {analysis_id}")
+            
+            # Add analysis_id to data for frontend
+            data['local_analysis_id'] = analysis_id
+            
+        except Exception as e:
+            logger.error(f"Error saving automatic analysis: {str(e)}")
+            # Continue with rendering even if save fails
+        
         logger.info("[/ANALYSIS/ANALYZE] Rendering analysis template...")
         return render_template(
             'analysis/analysis.html',
