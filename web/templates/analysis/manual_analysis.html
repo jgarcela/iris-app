@@ -114,9 +114,9 @@
                   </div>
                   <p class="text-muted mt-2">{{ _('Analizando protagonista...') }}</p>
                 </div>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
 
           <!-- Tema de la Noticia -->
           <div class="topic-section mb-4">
@@ -153,11 +153,11 @@
                       <i class="fas fa-check me-1"></i>
                       <span id="selected-topic-text"></span>
                     </span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
 
           <!-- Variables Disponibles -->
           <div class="variables-section mb-4">
@@ -167,45 +167,46 @@
                   <i class="fas fa-list me-2 text-primary"></i>
                   {{ _('Variables Disponibles') }}
                 </h6>
-                <div class="variables-info">
-                  <div class="row g-2">
-                    <div class="col-12">
-                      <div class="variable-category-info">
-                        <h6 class="text-primary small">
-                          <i class="fas fa-file-text me-1"></i>
+                <div class="variables-collapsible">
+                  <button class="btn btn-outline-primary btn-sm w-100" type="button" id="variablesToggle" data-bs-toggle="collapse" data-bs-target="#variablesCollapse" aria-expanded="false" aria-controls="variablesCollapse">
+                    <i class="fas fa-eye me-2"></i>
+                    <span id="variablesToggleText">{{ _('Ver Variables por Categoría') }}</span>
+                    <i class="fas fa-chevron-down ms-auto" id="variablesChevron"></i>
+                  </button>
+                  <div class="collapse" id="variablesCollapse">
+                    <div class="variables-content mt-2">
+                      <div class="variables-category">
+                        <h6 class="text-primary small mb-2">
+                          <i class="fas fa-file-text me-2"></i>
                           {{ _('Contenido General') }}
                         </h6>
-                        <ul class="list-unstyled small" id="contenido-variables">
-                          <!-- Variables se cargan dinámicamente desde config -->
-                        </ul>
-            </div>
-          </div>
-                    <div class="col-12">
-                      <div class="variable-category-info">
-                        <h6 class="text-warning small">
-                          <i class="fas fa-language me-1"></i>
+                        <div id="contenido-variables-collapse" class="variables-list">
+                          <!-- Variables se cargan dinámicamente -->
+                        </div>
+                      </div>
+                      <div class="variables-category mt-3">
+                        <h6 class="text-warning small mb-2">
+                          <i class="fas fa-language me-2"></i>
                           {{ _('Lenguaje') }}
                         </h6>
-                        <ul class="list-unstyled small" id="lenguaje-variables">
-                          <!-- Variables se cargan dinámicamente desde config -->
-                        </ul>
-        </div>
-      </div>
-                    <div class="col-12">
-                      <div class="variable-category-info">
-                        <h6 class="text-info small">
-                          <i class="fas fa-quote-left me-1"></i>
+                        <div id="lenguaje-variables-collapse" class="variables-list">
+                          <!-- Variables se cargan dinámicamente -->
+                        </div>
+                      </div>
+                      <div class="variables-category mt-3">
+                        <h6 class="text-info small mb-2">
+                          <i class="fas fa-quote-left me-2"></i>
                           {{ _('Fuentes') }}
                         </h6>
-                        <ul class="list-unstyled small" id="fuentes-variables">
-                          <!-- Variables se cargan dinámicamente desde config -->
-                        </ul>
-    </div>
+                        <div id="fuentes-variables-collapse" class="variables-list">
+                          <!-- Variables se cargan dinámicamente -->
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-          </div>
-        </div>
+              </div>
+            </div>
         </div>
 
           <!-- Resumen de Anotaciones -->
@@ -241,7 +242,7 @@
                 <i class="fas fa-info-circle me-2"></i>
                 {{ _('Selecciona texto para comenzar a anotar') }}
               </p>
-            </div>
+          </div>
             <div id="annotations-stats" class="annotations-stats mt-2" style="display: none;">
               <small class="text-muted">
                 <span id="filtered-count">0</span> de <span id="total-count">0</span> anotaciones
@@ -475,7 +476,7 @@
   
 .annotations-list {
     max-height: 200px;
-    overflow-y: auto;
+  overflow-y: auto;
 }
 
 /* Annotation Filters Styles */
@@ -531,7 +532,7 @@
     transition: all 0.3s ease;
     opacity: 1;
     transform: translateY(0);
-}
+  }
 
 .annotation-item.filtered-out {
     opacity: 0;
@@ -556,9 +557,9 @@
     border-radius: 6px;
     margin-bottom: 0.5rem;
     border-left: 4px solid #007bff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
     transition: all 0.3s ease;
 }
 
@@ -589,8 +590,8 @@
 }
 
 .annotation-actions {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
     gap: 0.25rem;
 }
 
@@ -610,9 +611,9 @@
   .annotation-text {
       font-size: 0.9rem;
       color: #495057;
-      margin-bottom: 0.25rem;
-  }
-  
+  margin-bottom: 0.25rem;
+}
+
   .annotation-meta {
       font-size: 0.8rem;
       color: #6c757d;
@@ -639,7 +640,7 @@
 .topic-section .topic-selection {
     background: white;
     border-radius: 0.5rem;
-    padding: 0.75rem;
+  padding: 0.75rem;
     border: 1px solid #e9ecef;
     transition: all 0.3s ease;
 }
@@ -652,7 +653,7 @@
 .topic-section .form-label {
     font-weight: 500;
     color: #495057;
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .topic-section .form-select-sm {
@@ -688,7 +689,7 @@
 }
 
 .protagonist-details p {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
     line-height: 1.4;
 }
 
@@ -697,6 +698,70 @@
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-left: 4px solid #007bff;
 }
+
+.variables-collapsible .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.variables-collapsible .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.variables-collapsible .btn i.fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.variables-collapsible .btn[aria-expanded="true"] i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.variables-content {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.variables-category h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.variables-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.variables-list .variable-item {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #495057;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.variables-list .variable-item:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+}
+
+.variables-list .variable-item i {
+    width: 12px;
+    margin-right: 0.5rem;
+    color: #28a745;
+}
   
   .variables-section .variable-category-info {
       background: white;
@@ -704,7 +769,7 @@
       padding: 0.75rem;
   margin-bottom: 0.5rem;
       border: 1px solid #e9ecef;
-      transition: all 0.3s ease;
+  transition: all 0.3s ease;
   }
   
   .variables-section .variable-category-info:hover {
@@ -788,9 +853,9 @@
   margin-top: 0.5rem;
   text-align: justify;
 }
-  </style>
-  
-  <script>
+</style>
+
+<script>
   // Datos del texto actual
   const currentText = {
       id: 'manual-analysis',
@@ -1628,27 +1693,36 @@ function addTopicAnnotation(value, text) {
   function updateVariablesDisplay() {
       const variables = CHALLENGE_VARIABLES;
       
-      // Update contenido general variables - show ALL variables
-      const contenidoList = document.getElementById('contenido-variables');
-      if (contenidoList && variables.contenido_general) {
-          contenidoList.innerHTML = variables.contenido_general.map(variable => 
-              `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+      // Update contenido general variables in collapse
+      const contenidoCollapse = document.getElementById('contenido-variables-collapse');
+      if (contenidoCollapse && variables.contenido_general) {
+          contenidoCollapse.innerHTML = variables.contenido_general.map(variable => 
+              `<div class="variable-item">
+                  <i class="fas fa-check"></i>
+                  <span>${VARIABLE_DESCRIPTIONS[variable] || variable}</span>
+              </div>`
           ).join('');
       }
       
-      // Update lenguaje variables - show ALL variables
-      const lenguajeList = document.getElementById('lenguaje-variables');
-      if (lenguajeList && variables.lenguaje) {
-          lenguajeList.innerHTML = variables.lenguaje.map(variable => 
-              `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+      // Update lenguaje variables in collapse
+      const lenguajeCollapse = document.getElementById('lenguaje-variables-collapse');
+      if (lenguajeCollapse && variables.lenguaje) {
+          lenguajeCollapse.innerHTML = variables.lenguaje.map(variable => 
+              `<div class="variable-item">
+                  <i class="fas fa-check"></i>
+                  <span>${VARIABLE_DESCRIPTIONS[variable] || variable}</span>
+              </div>`
           ).join('');
       }
       
-      // Update fuentes variables - show ALL variables
-      const fuentesList = document.getElementById('fuentes-variables');
-      if (fuentesList && variables.fuentes) {
-          fuentesList.innerHTML = variables.fuentes.map(variable => 
-              `<li><i class="fas fa-check text-success me-1"></i> ${VARIABLE_DESCRIPTIONS[variable] || variable}</li>`
+      // Update fuentes variables in collapse
+      const fuentesCollapse = document.getElementById('fuentes-variables-collapse');
+      if (fuentesCollapse && variables.fuentes) {
+          fuentesCollapse.innerHTML = variables.fuentes.map(variable => 
+              `<div class="variable-item">
+                  <i class="fas fa-check"></i>
+                  <span>${VARIABLE_DESCRIPTIONS[variable] || variable}</span>
+              </div>`
           ).join('');
       }
   }
