@@ -437,6 +437,8 @@
                 btn.innerHTML = '<i class="fas fa-check me-1"></i> Modo Edición Activo';
                 btn.classList.remove('btn-edit-mode');
                 btn.classList.add('btn-warning');
+                // Add edit-mode class to body for annotation panel detection
+                document.body.classList.add('edit-mode');
                 if (textArea) {
                     textArea.style.cursor = 'text';
                     textArea.classList.add('edit-mode');
@@ -451,6 +453,8 @@
                 btn.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Análisis';
                 btn.classList.remove('btn-warning');
                 btn.classList.add('btn-edit-mode');
+                // Remove edit-mode class from body
+                document.body.classList.remove('edit-mode');
                 if (textArea) {
                     textArea.style.cursor = 'default';
                     textArea.classList.remove('edit-mode');
@@ -461,6 +465,7 @@
                 if (textAnalysisPanel) {
                     textAnalysisPanel.classList.remove('edit-mode');
                 }
+                hideAnnotationPanel();
             }
         }
     });
@@ -821,6 +826,14 @@
             'nombre_fuente': [
                 { value: '1', text: 'No' },
                 { value: '2', text: 'Sí' }
+            ],
+            'personas_mencionadas': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'nombre_propio_titular': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
             ]
         };
         
@@ -870,6 +883,7 @@
 
             let toRender = values;
             if (isYesNo || isSiNo) {
+                // Para variables binarias, mostrar solo las opciones afirmativas
                 toRender = values.filter(v => /sí|si/i.test(v.text || ''));
             }
 

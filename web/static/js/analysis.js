@@ -1815,8 +1815,8 @@ function attachHighlightSelectionHandler() {
         const text = sel.toString().trim();
         if (!text) return;
         
-        // Use the new manual annotation panel system
-        if (typeof showAnnotationPanel === 'function') {
+        // Use the new manual annotation panel system only if in edit mode
+        if (typeof showAnnotationPanel === 'function' && document.body.classList.contains('edit-mode')) {
             showAnnotationPanel(text, sel.getRangeAt(0));
         } else {
             // Fallback to old system if new system not available
