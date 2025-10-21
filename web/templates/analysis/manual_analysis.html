@@ -184,11 +184,11 @@
                           <!-- Variables se cargan dinámicamente -->
                         </div>
                       </div>
-                      <div class="variables-category mt-3">
-                        <h6 class="text-warning small mb-2">
-                          <i class="fas fa-language me-2"></i>
-                          {{ _('Lenguaje') }}
-                        </h6>
+                        <div class="variables-category mt-3">
+                          <h6 class="small mb-2" style="color: #6f42c1;">
+                            <i class="fas fa-language me-2"></i>
+                            {{ _('Lenguaje') }}
+                          </h6>
                         <div id="lenguaje-variables-collapse" class="variables-list">
                           <!-- Variables se cargan dinámicamente -->
                         </div>
@@ -226,10 +226,10 @@
                     <i class="fas fa-file-text me-1"></i>
                     {{ _('General') }}
                   </button>
-                  <button type="button" class="btn btn-outline-warning btn-sm filter-btn" data-filter="lenguaje">
-                    <i class="fas fa-language me-1"></i>
-                    {{ _('Lenguaje') }}
-                  </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-filter="lenguaje" style="border-color: #6f42c1; color: #6f42c1;">
+                  <i class="fas fa-language me-1"></i>
+                  {{ _('Lenguaje') }}
+                </button>
                   <button type="button" class="btn btn-outline-info btn-sm filter-btn" data-filter="fuentes">
                     <i class="fas fa-quote-left me-1"></i>
                     {{ _('Fuentes') }}
@@ -402,7 +402,7 @@
   }
   
   .text-content {
-      padding: 1.5rem;
+  padding: 1.5rem;
   }
   
   .text-body {
@@ -423,7 +423,7 @@
   }
   
   .annotation-header {
-      padding: 1rem;
+  padding: 1rem;
       border-bottom: 1px solid #e9ecef;
   display: flex;
       justify-content: space-between;
@@ -600,8 +600,8 @@
 }
 
 .annotation-item.annotation-lenguaje {
-    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.1) 100%);
-    border-left: 4px solid #ffc107;
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(111, 66, 193, 0.1) 100%);
+    border-left: 4px solid #6f42c1;
 }
 
 .annotation-item.annotation-fuentes {
@@ -728,8 +728,8 @@
     border-radius: 6px;
     font-weight: 500;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
     justify-content: space-between;
 }
 
@@ -739,7 +739,7 @@
 }
 
 .variables-collapsible .btn i.fa-chevron-down {
-    transition: transform 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .variables-collapsible .btn[aria-expanded="true"] i.fa-chevron-down {
@@ -831,9 +831,9 @@
       color: #0d6efd;
   }
   .annotation-mark.mark-lenguaje { 
-      background-color: rgba(255, 193, 7, 0.1); 
-      box-shadow: inset 0 -6px 0 rgba(255, 193, 7, 0.4);
-      color: #ffc107;
+      background-color: rgba(111, 66, 193, 0.1); 
+      box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
+      color: #6f42c1;
   }
   .annotation-mark.mark-fuentes { 
       background-color: rgba(13, 202, 240, 0.1); 
