@@ -268,7 +268,7 @@
             
         </div>
 
-        <!-- Right Column - Instructions -->
+        <!-- Right Column - Text Analysis -->
         <div class="col-md-8">
             <!-- Instructions Panel (shown by default) -->
             <div class="plain-text">
@@ -406,6 +406,56 @@
     document.addEventListener('DOMContentLoaded', function() {
         updateProtagonistAnalysis();
         updateTopicAnalysis();
+        
+        // Initialize edit mode
+        let isEditMode = false;
+        
+        // Override the existing editAnalysis function to add visual feedback
+        const originalEditAnalysis = window.editAnalysis;
+        window.editAnalysis = function() {
+            if (originalEditAnalysis) {
+                originalEditAnalysis();
+            }
+            toggleEditMode();
+        };
+        
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('edit-analysis-btn');
+            const textArea = document.getElementById('analysis-text');
+            const textAnalysisArea = document.querySelector('.text-analysis-area');
+            const textAnalysisPanel = document.querySelector('.text-analysis-panel');
+            
+            if (isEditMode) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> Modo Edición Activo';
+                btn.classList.remove('btn-edit-mode');
+                btn.classList.add('btn-warning');
+                if (textArea) {
+                    textArea.style.cursor = 'text';
+                    textArea.classList.add('edit-mode');
+                }
+                if (textAnalysisArea) {
+                    textAnalysisArea.classList.add('edit-mode');
+                }
+                if (textAnalysisPanel) {
+                    textAnalysisPanel.classList.add('edit-mode');
+                }
+            } else {
+                btn.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Análisis';
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-edit-mode');
+                if (textArea) {
+                    textArea.style.cursor = 'default';
+                    textArea.classList.remove('edit-mode');
+                }
+                if (textAnalysisArea) {
+                    textAnalysisArea.classList.remove('edit-mode');
+                }
+                if (textAnalysisPanel) {
+                    textAnalysisPanel.classList.remove('edit-mode');
+                }
+            }
+        }
     });
     
     function updateProtagonistAnalysis() {
@@ -537,5 +587,69 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">
 
+<style>
+/* Edit Mode Styles */
+.text-analysis-panel.edit-mode {
+    border: 3px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    position: relative;
+}
+
+.text-analysis-panel.edit-mode::before {
+    content: "MODO EDICIÓN ACTIVO";
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: #ffc107;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.text-analysis-area.edit-mode {
+    border: 3px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    position: relative;
+}
+
+.text-analysis-area.edit-mode::before {
+    content: "MODO EDICIÓN ACTIVO";
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: #ffc107;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.edit-mode-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+}
+
+#edit-mode-btn {
+    transition: all 0.3s ease;
+}
+
+#edit-mode-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+</style>
 
 {% endblock %}
