@@ -16,6 +16,8 @@ import io
 
 from web.utils.logger import logger
 from web.utils.decorators import login_required
+import database.db as db
+from bson import ObjectId
 
 from flask import render_template, make_response, current_app, request
 from weasyprint import HTML
@@ -289,16 +291,72 @@ def analyze_manual():
         )
     
     # POST method - process manual analysis
-    text = request.form.get('text', '')
-    title = request.form.get('title', '')
-    authors = request.form.get('authors', '')
-    url = request.form.get('url', '')
+    if request.is_json:
+        # Handle JSON data from frontend
+        data = request.get_json()
+        text = data.get('text', '')
+        title = data.get('title', '')
+        authors = data.get('authors', '')
+        url = data.get('url', '')
+        annotations = data.get('annotations', [])
+        selected_topic = data.get('selected_topic', '')
+        protagonist_analysis = data.get('protagonist_analysis', {})
+        timestamp = data.get('timestamp', datetime.now().isoformat())
+    else:
+        # Handle form data
+        text = request.form.get('text', '')
+        title = request.form.get('title', '')
+        authors = request.form.get('authors', '')
+        url = request.form.get('url', '')
+        annotations = []
+        selected_topic = ''
+        protagonist_analysis = {}
+        timestamp = datetime.now().isoformat()
 
     if not text and not url:
         return jsonify({"error": "Se requiere texto o URL para el análisis"}), 400
 
-    # For manual analysis, we'll create a basic structure
-    # and let the user manually select and annotate
+    # If we have annotations, save the analysis
+    if annotations:
+        try:
+            # Create analysis document
+            analysis_doc = {
+                'user_id': session.get('user_id'),
+                'text': text,
+                'title': title,
+                'authors': authors,
+                'url': url,
+                'analysis_mode': 'manual',
+                'status': 'completed',
+                'annotations': annotations,
+                'selected_topic': selected_topic,
+                'protagonist_analysis': protagonist_analysis,
+                'created_at': timestamp,
+                'updated_at': timestamp,
+                'metadata': {
+                    'total_annotations': len(annotations),
+                    'categories': list(set([ann.get('category', '') for ann in annotations])),
+                    'variables': list(set([ann.get('variable', '') for ann in annotations]))
+                }
+            }
+            
+            # Save to database
+            result = db.DB_ANALYSIS.insert_one(analysis_doc)
+            analysis_id = str(result.inserted_id)
+            
+            logger.info(f"Manual analysis saved with ID: {analysis_id}")
+            
+            return jsonify({
+                "success": True,
+                "analysis_id": analysis_id,
+                "message": "Análisis guardado correctamente"
+            })
+            
+        except Exception as e:
+            logger.error(f"Error saving manual analysis: {str(e)}")
+            return jsonify({"error": "Error al guardar el análisis"}), 500
+
+    # For initial manual analysis setup
     manual_data = {
         'text': text,
         'title': title,
