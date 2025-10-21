@@ -100,6 +100,24 @@
         </div>
       </div>
 
+          <!-- Análisis del Protagonista -->
+          <div class="protagonist-section mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title mb-3">
+                  <i class="fas fa-user-star me-2 text-primary"></i>
+                  {{ _('Protagonista de la Noticia') }}
+                </h6>
+                <div id="protagonist-analysis" class="text-center py-3">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                  </div>
+                  <p class="text-muted mt-2">{{ _('Analizando protagonista...') }}</p>
+                </div>
+          </div>
+        </div>
+      </div>
+
           <!-- Variables Disponibles -->
           <div class="variables-section mb-4">
             <div class="card border-0 shadow-sm">
@@ -119,8 +137,8 @@
                         <ul class="list-unstyled small" id="contenido-variables">
                           <!-- Variables se cargan dinámicamente desde config -->
                         </ul>
-                      </div>
-                    </div>
+            </div>
+          </div>
                     <div class="col-12">
                       <div class="variable-category-info">
                         <h6 class="text-warning small">
@@ -130,8 +148,8 @@
                         <ul class="list-unstyled small" id="lenguaje-variables">
                           <!-- Variables se cargan dinámicamente desde config -->
                         </ul>
-                      </div>
-                    </div>
+        </div>
+      </div>
                     <div class="col-12">
                       <div class="variable-category-info">
                         <h6 class="text-info small">
@@ -141,13 +159,13 @@
                         <ul class="list-unstyled small" id="fuentes-variables">
                           <!-- Variables se cargan dinámicamente desde config -->
                         </ul>
-                      </div>
+    </div>
                     </div>
                   </div>
                 </div>
           </div>
         </div>
-      </div>
+        </div>
 
           <!-- Resumen de Anotaciones -->
           <div class="annotations-summary">
@@ -157,10 +175,10 @@
             </h6>
             <div id="annotations-list" class="annotations-list">
               <p class="text-muted text-center py-3">
-              <i class="fas fa-info-circle me-2"></i>
+                <i class="fas fa-info-circle me-2"></i>
                 {{ _('Selecciona texto para comenzar a anotar') }}
               </p>
-            </div>
+          </div>
           </div>
 
           <!-- Botones de Acción -->
@@ -170,9 +188,9 @@
               {{ _('Finalizar Análisis') }}
             </button>
           </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
     <!-- Área de Texto (Derecha) -->
     <div class="col-lg-8">
@@ -217,7 +235,7 @@
       border: 1px solid #e9ecef;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    height: fit-content;
+  height: fit-content;
       position: sticky;
       top: 20px;
   }
@@ -228,9 +246,9 @@
       display: flex;
       justify-content: between;
       align-items: center;
-  }
-  
-  .panel-title {
+}
+
+.panel-title {
       margin: 0;
       color: #495057;
   }
@@ -266,11 +284,11 @@
   
   .section-title {
       color: #6c757d;
-      font-size: 0.9rem;
+  font-size: 0.9rem;
       font-weight: 600;
-    margin-bottom: 0.75rem;
-  }
-  
+  margin-bottom: 0.75rem;
+}
+
   .text-analysis-area {
       background: white;
       border: 1px solid #e9ecef;
@@ -279,7 +297,7 @@
   }
   
   .text-header {
-      padding: 1.5rem;
+  padding: 1.5rem;
       border-bottom: 1px solid #e9ecef;
       background: #f8f9fa;
   }
@@ -313,7 +331,7 @@
   .annotation-header {
       padding: 1rem;
       border-bottom: 1px solid #e9ecef;
-      display: flex;
+  display: flex;
       justify-content: space-between;
       align-items: center;
       background: #f8f9fa;
@@ -343,7 +361,7 @@
       border-radius: 50%;
       background: #e9ecef;
       color: #6c757d;
-      display: flex;
+  display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 600;
@@ -363,13 +381,13 @@
   
   .step-content h6 {
       margin: 0;
-      font-size: 0.9rem;
+  font-size: 0.9rem;
       font-weight: 600;
   }
   
   .step-content p {
       margin: 0;
-    font-size: 0.8rem;
+  font-size: 0.8rem;
   }
   
   .step:not(:last-child)::after {
@@ -409,31 +427,60 @@
   .annotation-meta {
       font-size: 0.8rem;
       color: #6c757d;
-  }
-  
-  .action-buttons {
+}
+
+.action-buttons {
       margin-top: 1rem;
       padding-top: 1rem;
       border-top: 1px solid #e9ecef;
   }
   
-  /* Variables Section Styles */
-  .variables-section .card {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-left: 4px solid #007bff;
-  }
+/* Protagonist Analysis Styles */
+.protagonist-section .card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-left: 4px solid #667eea;
+}
+
+.protagonist-result {
+    text-align: center;
+}
+
+.protagonist-gender .badge {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.protagonist-details h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.protagonist-details p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Variables Section Styles */
+.variables-section .card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #007bff;
+}
   
   .variables-section .variable-category-info {
       background: white;
       border-radius: 0.5rem;
       padding: 0.75rem;
-      margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
       border: 1px solid #e9ecef;
       transition: all 0.3s ease;
   }
   
   .variables-section .variable-category-info:hover {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
@@ -477,30 +524,30 @@
       max-width: 280px;
       line-height: 1.3;
       display: none;
-  }
-  
-  /* Article title and authors within text */
-  .article-title {
-    font-size: 1.75rem;
+}
+
+/* Article title and authors within text */
+.article-title {
+  font-size: 1.75rem;
     font-weight: 700;
     color: #495057;
-    line-height: 1.2;
+  line-height: 1.2;
     margin: 0 0 0.5rem 0;
-    text-align: left;
-  }
-  
-  .article-authors {
-    font-size: 1.1rem;
+  text-align: left;
+}
+
+.article-authors {
+  font-size: 1.1rem;
     color: #6c757d;
-    font-style: italic;
+  font-style: italic;
     margin: 0 0 1rem 0;
     font-weight: 500;
-  }
-  
-  .article-content {
-    margin-top: 0.5rem;
-    text-align: justify;
-  }
+}
+
+.article-content {
+  margin-top: 0.5rem;
+  text-align: justify;
+}
   </style>
   
   <script>
@@ -554,11 +601,12 @@
   
   let isEditMode = false;
   
-  document.addEventListener('DOMContentLoaded', function() {
-      initializeManualAnalysis();
-      initMultiLabelTooltips();
-      updateVariablesDisplay();
-  });
+document.addEventListener('DOMContentLoaded', function() {
+    initializeManualAnalysis();
+    initMultiLabelTooltips();
+    updateVariablesDisplay();
+    analyzeProtagonist();
+});
   
   function initializeManualAnalysis() {
       setupTextSelection();
@@ -989,23 +1037,135 @@
       document.getElementById('save-analysis-btn').disabled = false;
   }
   
-  function updateAnnotationsList() {
-      const container = document.getElementById('annotations-list');
-      
-      if (annotations.length === 0) {
-          container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>Selecciona texto para comenzar a anotar</p>';
-          return;
-      }
-      
-      container.innerHTML = annotations.map(annotation => `
-          <div class="annotation-item">
-              <div class="annotation-text">"${annotation.text}"</div>
-              <div class="annotation-meta">
-                  <strong>${annotation.category}</strong> → ${annotation.variable} = ${annotation.value}
-              </div>
-          </div>
-      `).join('');
-  }
+function updateAnnotationsList() {
+    const container = document.getElementById('annotations-list');
+    
+    if (annotations.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>Selecciona texto para comenzar a anotar</p>';
+        return;
+    }
+    
+    container.innerHTML = annotations.map(annotation => `
+        <div class="annotation-item">
+            <div class="annotation-text">"${annotation.text}"</div>
+            <div class="annotation-meta">
+                <strong>${annotation.category}</strong> → ${annotation.variable} = ${annotation.value}
+            </div>
+        </div>
+    `).join('');
+    
+    // Update protagonist analysis when annotations change
+    updateProtagonistAnalysis();
+}
+
+function analyzeProtagonist() {
+    const protagonistContainer = document.getElementById('protagonist-analysis');
+    if (!protagonistContainer) return;
+    
+    // Show initial state immediately
+    updateProtagonistAnalysis();
+}
+
+function analyzeTextForProtagonist() {
+    // Check if there are any annotations with gender information
+    const genderAnnotations = annotations.filter(annotation => 
+        annotation.variable === 'genero_personas_mencionadas' || 
+        annotation.variable === 'genero_nombre_propio_titular' ||
+        annotation.variable === 'genero_periodista' ||
+        annotation.variable === 'genero_fuente'
+    );
+    
+    // If no gender annotations, show neutral message
+    if (genderAnnotations.length === 0) {
+        return {
+            gender: 'No disponible',
+            title: 'Sin datos de género',
+            description: 'No se han anotado personas con información de género aún. Realiza anotaciones para ver el análisis del protagonista.'
+        };
+    }
+    
+    // Count gender values from annotations
+    let femaleCount = 0;
+    let maleCount = 0;
+    let unspecifiedCount = 0;
+    
+    genderAnnotations.forEach(annotation => {
+        if (annotation.variable === 'genero_periodista') {
+            // Lógica específica para género periodista
+            if (annotation.value === '2') { // Femenino
+                femaleCount++;
+            } else if (annotation.value === '1') { // Masculino
+                maleCount++;
+            } else if (annotation.value === '3') { // Mixto
+                maleCount++;
+                femaleCount++;
+            } else {
+                unspecifiedCount++;
+            }
+        } else {
+            // Lógica para otras variables de género
+            if (annotation.value === '3') { // Sí, mujer
+                femaleCount++;
+            } else if (annotation.value === '2') { // Sí, hombre
+                maleCount++;
+            } else if (annotation.value === '4') { // Sí, mujer y hombre
+                maleCount++;
+                femaleCount++;
+            } else {
+                unspecifiedCount++;
+            }
+        }
+    });
+    
+    // Determine protagonist based on annotation counts
+    if (femaleCount > maleCount && femaleCount > unspecifiedCount) {
+        return {
+            gender: 'Mujer',
+            title: 'Protagonista Femenina',
+            description: `Basado en ${femaleCount} anotación(es) de género femenino.`
+        };
+    } else if (maleCount > femaleCount && maleCount > unspecifiedCount) {
+        return {
+            gender: 'Hombre',
+            title: 'Protagonista Masculino',
+            description: `Basado en ${maleCount} anotación(es) de género masculino.`
+        };
+    } else if (unspecifiedCount > 0 && femaleCount === 0 && maleCount === 0) {
+        return {
+            gender: 'No especificado',
+            title: 'Protagonista sin género definido',
+            description: `Basado en ${unspecifiedCount} anotación(es) sin género especificado.`
+        };
+    } else {
+        return {
+            gender: 'Mixto',
+            title: 'Protagonista Mixto',
+            description: `Equilibrio entre géneros: ${maleCount} masculino, ${femaleCount} femenino.`
+        };
+    }
+}
+
+function updateProtagonistAnalysis() {
+    const protagonistContainer = document.getElementById('protagonist-analysis');
+    if (!protagonistContainer) return;
+    
+    const protagonistInfo = analyzeTextForProtagonist();
+    
+    protagonistContainer.innerHTML = `
+        <div class="protagonist-result">
+            <div class="protagonist-gender mb-2">
+                <span class="badge ${protagonistInfo.gender === 'Mujer' ? 'bg-success' : protagonistInfo.gender === 'Hombre' ? 'bg-primary' : protagonistInfo.gender === 'No disponible' ? 'bg-secondary' : 'bg-info'} fs-6 px-3 py-2">
+                    <i class="fas ${protagonistInfo.gender === 'Mujer' ? 'fa-venus' : protagonistInfo.gender === 'Hombre' ? 'fa-mars' : protagonistInfo.gender === 'No disponible' ? 'fa-question' : 'fa-balance-scale'} me-2"></i>
+                    ${protagonistInfo.gender}
+                </span>
+            </div>
+            <div class="protagonist-details">
+                <h6 class="mb-1">${protagonistInfo.title}</h6>
+                <p class="text-muted small mb-0">${protagonistInfo.description}</p>
+            </div>
+        </div>
+    `;
+}
   
   function saveAnalysis() {
       if (annotations.length === 0) {
@@ -1118,7 +1278,7 @@
       document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
       document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
   }
-  </script>
+</script>
   
   
 {% endblock %}
