@@ -410,12 +410,25 @@
     
     function updateProtagonistAnalysis() {
         const protagonistDiv = document.getElementById('protagonist-analysis');
-        if (!protagonistDiv || !window.data) return;
+        if (!protagonistDiv) return;
+        
+        if (!window.data) {
+            protagonistDiv.innerHTML = `
+                <div class="protagonist-result">
+                    <div class="no-data">
+                        <i class="fas fa-exclamation-triangle text-warning mb-2"></i>
+                        <p class="text-muted mb-0">No hay datos disponibles</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
         
         // Get protagonist analysis from data
         const protagonistData = window.data.protagonist_analysis || {};
         const protagonist = protagonistData.protagonist || 'No identificado';
         const confidence = protagonistData.confidence || 0;
+        const counts = protagonistData.counts || { masculino: 0, femenino: 0, mixto: 0 };
         
         // Create protagonist display
         const confidencePercentage = Math.round(confidence * 100);
@@ -429,9 +442,28 @@
                         ${protagonist}
                     </span>
                 </div>
-                <div class="confidence-indicator">
-                    <small class="text-muted">Confianza: </small>
-                    <span class="${confidenceClass} fw-bold">${confidencePercentage}%</span>
+                
+                <div class="gender-counts">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="count-item">
+                                <div class="count-number text-primary fw-bold">${counts.masculino}</div>
+                                <div class="count-label small text-muted">Masculino</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="count-item">
+                                <div class="count-number text-success fw-bold">${counts.femenino}</div>
+                                <div class="count-label small text-muted">Femenino</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="count-item">
+                                <div class="count-number text-info fw-bold">${counts.mixto}</div>
+                                <div class="count-label small text-muted">Mixto</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;

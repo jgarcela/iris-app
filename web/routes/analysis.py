@@ -123,7 +123,7 @@ def create_analysis_document(api_data, text, title, authors, url, model, analysi
                         })
     
     # Determine protagonist analysis
-    protagonist_analysis = analyze_protagonist_from_annotations(annotations)
+    protagonist_analysis = analyze_protagonist_from_api_data(api_data)
     
     # Create document
     analysis_doc = {
@@ -152,26 +152,109 @@ def create_analysis_document(api_data, text, title, authors, url, model, analysi
     
     return analysis_doc
 
-def analyze_protagonist_from_annotations(annotations):
-    """Analyze protagonist from annotations"""
-    gender_annotations = [ann for ann in annotations 
-                         if ann.get('variable') in ['genero_personas_mencionadas', 'genero_nombre_propio_titular']]
+def analyze_protagonist_from_api_data(api_data):
+    """Analyze protagonist from API response data"""
+    # Extract analysis data from API response
+    analysis = api_data.get('analysis', {})
+    original = analysis.get('original', {})
     
-    if not gender_annotations:
-        return {'protagonist': 'No identificado', 'confidence': 0}
+    # Count gender mentions from all sources
+    male_count = 0
+    female_count = 0
+    mixed_count = 0
     
-    male_count = sum(1 for ann in gender_annotations if ann.get('value') == '2')
-    female_count = sum(1 for ann in gender_annotations if ann.get('value') == '3')
-    mixed_count = sum(1 for ann in gender_annotations if ann.get('value') == '4')
+    # 1. Check genero_personas_mencionadas (array)
+    if original.get('contenido_general', {}).get('genero_personas_mencionadas'):
+        genero_personas = original['contenido_general']['genero_personas_mencionadas']
+        if isinstance(genero_personas, list):
+            for val in genero_personas:
+                if val == 1:
+                    male_count += 1
+                elif val == 2:
+                    male_count += 1
+                elif val == 3:
+                    female_count += 1
+                elif val == 4:
+                    mixed_count += 1
     
-    if male_count > female_count and male_count > mixed_count:
-        return {'protagonist': 'Masculino', 'confidence': male_count / len(gender_annotations)}
-    elif female_count > male_count and female_count > mixed_count:
-        return {'protagonist': 'Femenino', 'confidence': female_count / len(gender_annotations)}
+    # 2. Check genero_periodista
+    genero_periodista = original.get('contenido_general', {}).get('genero_periodista')
+    if genero_periodista == 1:
+        male_count += 1
+    elif genero_periodista == 2:
+        female_count += 1
+    elif genero_periodista == 3:
+        male_count += 1
+        female_count += 1
+    
+    # 3. Check fuentes
+    fuentes = original.get('fuentes', {}).get('fuentes', [])
+    for fuente in fuentes:
+        genero_fuente = fuente.get('genero_fuente')
+        if genero_fuente == 1:
+            male_count += 1
+        elif genero_fuente == 2:
+            male_count += 1
+        elif genero_fuente == 3:
+            female_count += 1
+        elif genero_fuente == 4:
+            mixed_count += 1
+    
+    total_mentions = male_count + female_count + mixed_count
+    if total_mentions == 0:
+        return {
+            'protagonist': 'No identificado', 
+            'confidence': 0,
+            'counts': {
+                'masculino': 0,
+                'femenino': 0,
+                'mixto': 0
+            }
+        }
+    
+    # Determine protagonist
+    if female_count > male_count and female_count > mixed_count:
+        result = {
+            'protagonist': 'Femenino', 
+            'confidence': female_count / total_mentions,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
+    elif male_count > female_count and male_count > mixed_count:
+        result = {
+            'protagonist': 'Masculino', 
+            'confidence': male_count / total_mentions,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
     elif mixed_count > 0:
-        return {'protagonist': 'Mixto', 'confidence': mixed_count / len(gender_annotations)}
+        result = {
+            'protagonist': 'Mixto', 
+            'confidence': mixed_count / total_mentions,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
+    else:
+        result = {
+            'protagonist': 'No identificado', 
+            'confidence': 0,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
     
-    return {'protagonist': 'No identificado', 'confidence': 0}
+    return result
 
 def get_user_info():
     """Get current user information from context processor"""
@@ -374,8 +457,11 @@ def analyze():
             analysis_id = str(result.inserted_id)
             logger.info(f"Automatic analysis saved with ID: {analysis_id}")
             
-            # Add analysis_id to data for frontend
+            # Add analysis_id and protagonist_analysis to data for frontend
             data['local_analysis_id'] = analysis_id
+            protagonist_analysis = analysis_doc.get('protagonist_analysis', {})
+            data['protagonist_analysis'] = protagonist_analysis
+            logger.info(f"Added protagonist_analysis to data: {protagonist_analysis}")
             
         except Exception as e:
             logger.error(f"Error saving automatic analysis: {str(e)}")
