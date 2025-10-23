@@ -59,22 +59,22 @@
                     <h2 class="mb-4">
                         <i class="fas fa-microscope me-2"></i>
                         {{ _('¡Únete al Desafío!') }}
-                    </h2>
+            </h2>
                     <p class="lead text-muted mb-4">
                         {{ _('Analiza el texto que aparece a continuación e identifica los sesgos de género.') }}
                     </p>
                     <button id="startChallengeBtn" class="btn btn-primary btn-lg">
-                        <i class="fas fa-play me-2"></i>
-                        {{ _('Comenzar Análisis') }}
-                    </button>
-                </div>
+                                <i class="fas fa-play me-2"></i>
+                                {{ _('Comenzar Análisis') }}
+                            </button>
+    </div>
 
                 <!-- Text Display (hidden initially) -->
                 <div id="textSection" style="display: none;">
                     <div id="currentTextContainer">
                         <!-- Text will be loaded here -->
-                    </div>
                 </div>
+                                </div>
             </div>
         </div>
     </div>
@@ -1022,7 +1022,7 @@ function startAnalysis(textId) {
     }
     
     // Redirect to analysis page with selected text
-    window.location.href = `/challenge/analysis/${textId}`;
+    window.location.href = `/challenge/analyze/${textId}`;
 }
 
 // Function to get next text in sequence
