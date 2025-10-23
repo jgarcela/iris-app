@@ -257,7 +257,7 @@ def get_analysis_history():
         search_query = request.args.get('search', '').strip()
         date_from = request.args.get('date_from', '').strip()
         date_to = request.args.get('date_to', '').strip()
-        model_filter = request.args.get('model', '').strip()
+        analysis_mode_filter = request.args.get('analysis_mode', '').strip()
         limit = int(request.args.get('limit', 50))
         offset = int(request.args.get('offset', 0))
         
@@ -265,29 +265,43 @@ def get_analysis_history():
         print(f"  - search: {search_query}")
         print(f"  - date_from: {date_from}")
         print(f"  - date_to: {date_to}")
-        print(f"  - model: {model_filter}")
+        print(f"  - analysis_mode: {analysis_mode_filter}")
         print(f"  - limit: {limit}, offset: {offset}")
         
         # Get user information from request headers
         user_id = request.headers.get('X-User-ID', 'anonymous')
         
-        # Build MongoDB query
-        query = {'user_id': user_id}  # Only show analyses for the current user
+        # Build MongoDB query - handle both ObjectId and string user_id formats
+        try:
+            # Try to convert to ObjectId if it's a valid ObjectId string
+            from bson import ObjectId
+            if user_id != 'anonymous' and len(user_id) == 24:
+                user_id_obj = ObjectId(user_id)
+                query = {'user_id': {'$in': [user_id, user_id_obj]}}  # Support both formats
+            else:
+                query = {'user_id': user_id}
+        except:
+            # Fallback to string matching
+            query = {'user_id': user_id}
         
         # Search in title, text, and authors
         if search_query:
-            query['$and'] = [
-                {'user_id': user_id},
-                {'$or': [
-                    {'title': {'$regex': search_query, '$options': 'i'}},
-                    {'text': {'$regex': search_query, '$options': 'i'}},
-                    {'authors': {'$regex': search_query, '$options': 'i'}}
-                ]}
-            ]
+            # Preserve the existing user_id filter and add search conditions
+            user_filter = query['user_id'] if 'user_id' in query else {'user_id': user_id}
+            query = {
+                '$and': [
+                    user_filter,
+                    {'$or': [
+                        {'title': {'$regex': search_query, '$options': 'i'}},
+                        {'text': {'$regex': search_query, '$options': 'i'}},
+                        {'authors': {'$regex': search_query, '$options': 'i'}}
+                    ]}
+                ]
+            }
         
-        # Filter by model
-        if model_filter:
-            query['model'] = model_filter
+        # Filter by analysis mode
+        if analysis_mode_filter:
+            query['analysis_mode'] = analysis_mode_filter
         
         # Filter by date range
         if date_from or date_to:
@@ -318,11 +332,14 @@ def get_analysis_history():
         # Convert ObjectId to string and format timestamps
         for analysis in analyses:
             analysis['_id'] = str(analysis['_id'])
-            if 'timestamp' in analysis:
+            # Convert any ObjectId fields to strings
+            if 'user_id' in analysis and hasattr(analysis['user_id'], '__str__'):
+                analysis['user_id'] = str(analysis['user_id'])
+            if 'timestamp' in analysis and hasattr(analysis['timestamp'], 'isoformat'):
                 analysis['timestamp'] = analysis['timestamp'].isoformat()
-            if 'created_at' in analysis:
+            if 'created_at' in analysis and hasattr(analysis['created_at'], 'isoformat'):
                 analysis['created_at'] = analysis['created_at'].isoformat()
-            if 'updated_at' in analysis:
+            if 'updated_at' in analysis and hasattr(analysis['updated_at'], 'isoformat'):
                 analysis['updated_at'] = analysis['updated_at'].isoformat()
         
         # Get total count for pagination

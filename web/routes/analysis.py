@@ -257,23 +257,32 @@ def analyze_protagonist_from_api_data(api_data):
     return result
 
 def get_user_info():
-    """Get current user information from context processor"""
-    # The current_user is injected by the context processor in __init__.py
-    # We need to get it from the template context
-    from flask import has_request_context
-    if has_request_context():
-        # Try to get user info from the request context
-        # This is a workaround since current_user is only available in templates
-        token = request.cookies.get('access_token_cookie')
-        if token:
-            try:
-                headers = {'Authorization': f'Bearer {token}'}
-                resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
-                if resp.ok:
-                    user = resp.json().get('user')
-                    return user
-            except Exception:
-                pass
+    """Get current user information from session"""
+    # Get user info from session (set by inject_user context processor)
+    user_id = session.get('user_id')
+    user_email = session.get('user_email')
+    
+    if user_id:
+        return {
+            'id': user_id,
+            'email': user_email or 'anonymous@example.com'
+        }
+    
+    # Fallback: try to get from API if not in session
+    token = request.cookies.get('access_token_cookie')
+    if token:
+        try:
+            headers = {'Authorization': f'Bearer {token}'}
+            resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
+            if resp.ok:
+                user = resp.json().get('user')
+                if user and user.get('_id'):
+                    # Store in session for next time
+                    session['user_id'] = str(user['_id'])
+                    session['user_email'] = user.get('email', '')
+                return user
+        except Exception:
+            pass
     return None
 
 #  ----------------- ENDPOINTS -----------------
@@ -632,7 +641,7 @@ def analysis_history():
     search_query = request.args.get('search', '').strip()
     date_from = request.args.get('date_from', '').strip()
     date_to = request.args.get('date_to', '').strip()
-    model_filter = request.args.get('model', '').strip()
+    analysis_mode_filter = request.args.get('analysis_mode', '').strip()
     
     # Prepare API call to get analysis history
     api_url = f"http://{API_HOST}:{API_PORT}/analysis/history"
@@ -645,8 +654,8 @@ def analysis_history():
         api_params['date_from'] = date_from
     if date_to:
         api_params['date_to'] = date_to
-    if model_filter:
-        api_params['model'] = model_filter
+    if analysis_mode_filter:
+        api_params['analysis_mode'] = analysis_mode_filter
     
     # Add user information to headers
     headers = API_HEADERS.copy()
@@ -670,9 +679,9 @@ def analysis_history():
         analyses = []
         logger.warning(f"Failed to fetch analysis history: {e}")
     
-    # Get unique models for filter dropdown
-    models = list(set([analysis.get('model', '') for analysis in analyses if analysis.get('model')]))
-    models.sort()
+    # Get unique analysis modes for filter dropdown
+    analysis_modes = list(set([analysis.get('analysis_mode', '') for analysis in analyses if analysis.get('analysis_mode')]))
+    analysis_modes.sort()
     
     return render_template(
         'analysis/analysis_history.html',
@@ -680,8 +689,8 @@ def analysis_history():
         search_query=search_query,
         date_from=date_from,
         date_to=date_to,
-        model_filter=model_filter,
-        models=models,
+        analysis_mode_filter=analysis_mode_filter,
+        analysis_modes=analysis_modes,
         total_count=len(analyses)
     )
 

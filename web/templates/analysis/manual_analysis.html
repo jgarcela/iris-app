@@ -1702,12 +1702,17 @@ function addTopicAnnotation(value, text) {
       loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
       loadingBtn.disabled = true;
       
-      // Preparar datos para enviar
+      // Preparar datos para enviar (usar selectores seguros y valores por defecto)
+      const analysisTextEl = document.getElementById('analysis-text');
+      const titleEl = document.querySelector('.text-title') || document.querySelector('.article-title');
+      const authorsEl = document.querySelector('.text-authors') || document.querySelector('.article-authors');
+      const urlEl = document.querySelector('.text-url');
+
       const analysisData = {
-          text: document.getElementById('analysis-text').innerText || document.getElementById('analysis-text').textContent,
-          title: document.querySelector('.text-title').textContent,
-          authors: document.querySelector('.text-authors').textContent,
-          url: document.querySelector('.text-url').textContent,
+          text: (analysisTextEl && (analysisTextEl.innerText || analysisTextEl.textContent)) || '',
+          title: (titleEl && titleEl.textContent ? titleEl.textContent.trim() : ''),
+          authors: (authorsEl && authorsEl.textContent ? authorsEl.textContent.trim() : ''),
+          url: (urlEl && urlEl.textContent ? urlEl.textContent.trim() : ''),
           annotations: annotations,
           selected_topic: selectedTopic,
           protagonist_analysis: getProtagonistAnalysis(),
@@ -1731,7 +1736,7 @@ function addTopicAnnotation(value, text) {
           throw new Error('Error al guardar el análisis');
       })
       .then(data => {
-          alert('Análisis guardado correctamente');
+          alert(`Análisis guardado correctamente. ID: ${data.analysis_id}`);
           // Redirigir a la página de resultados o historial
           window.location.href = '/analysis/history';
       })
@@ -1861,10 +1866,12 @@ function addTopicAnnotation(value, text) {
           }).filter(Boolean)));
           const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
           const catLabel = categories.join(', ');
-          tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
-          tip.style.left = (e.clientX + 12) + 'px';
-          tip.style.top = (e.clientY + 12) + 'px';
-          tip.style.display = 'block';
+          if (tip) {
+              tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+              tip.style.left = (e.clientX + 12) + 'px';
+              tip.style.top = (e.clientY + 12) + 'px';
+              tip.style.display = 'block';
+          }
       });
   
       document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);

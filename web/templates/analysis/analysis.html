@@ -408,6 +408,7 @@
     window.highlight_color_map = {{ highlight_map | safe }};
     window.api_url_edit = {{ api_url_edit | tojson | safe }};
     window.api_url_save_annotations = {{ api_url_save_annotations | tojson | safe }};
+    window.current_user = {{ current_user | tojson | safe if current_user else 'null' }};
     
     // Initialize protagonist and topic analysis
     document.addEventListener('DOMContentLoaded', function() {
