@@ -319,10 +319,20 @@
 
                     <!-- Botones de Acción -->
                     <div class="action-buttons">
-                        <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
-                            <i class="fas fa-check me-2"></i>
-                            {{ _('Finalizar y comparar con IRIS') }}
-                        </button>
+                        <div class="row">
+                            <div class="col-6">
+                                <button class="btn btn-success w-100" id="next-text-btn" style="display: none;">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    {{ _('Siguiente Texto') }}
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
+                                    <i class="fas fa-check me-2"></i>
+                                    {{ _('Finalizar y comparar con IRIS') }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -843,6 +853,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Available fields:', Object.keys(currentText || {}));
     
     initializeChallengeAnalysis();
+    
+    // Setup next text button
+    setupNextTextButton();
     updateDifficultyInfo();
     analyzeProtagonist();
     initMultiLabelTooltips();
@@ -1865,6 +1878,51 @@ function initMultiLabelTooltips() {
 
     document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
     document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
+}
+
+// Setup next text button functionality
+function setupNextTextButton() {
+    const nextTextBtn = document.getElementById('next-text-btn');
+    if (!nextTextBtn) return;
+    
+    // Check if there are more texts in the sequence
+    // This would need to be passed from the challenge home page
+    // For now, we'll show the button and handle the logic
+    nextTextBtn.style.display = 'block';
+    
+    nextTextBtn.addEventListener('click', function() {
+        // Get the next text ID from the sequence
+        // This would need to be implemented with proper state management
+        const currentTextId = currentText._id;
+        const nextTextId = getNextTextInSequence(currentTextId);
+        
+        if (nextTextId) {
+            // Redirect to next text analysis
+            window.location.href = `/challenge/analysis/${nextTextId}`;
+        } else {
+            // No more texts, redirect back to challenge home
+            window.location.href = '/challenge/';
+        }
+    });
+}
+
+// Function to get next text in sequence
+function getNextTextInSequence(currentId) {
+    // Define the sequence order (same as in challenge_home.html)
+    const sequence = [
+        '68f9e5a22e476535f8a73ec4', // Paloma Lago
+        '68f9e5a22e476535f8a73ec2', // Paula Badosa
+        '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+        '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+        '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+        '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+    ];
+    
+    const currentIndex = sequence.indexOf(currentId);
+    if (currentIndex !== -1 && currentIndex < sequence.length - 1) {
+        return sequence[currentIndex + 1];
+    }
+    return null;
 }
 
 </script>

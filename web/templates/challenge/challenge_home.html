@@ -898,8 +898,8 @@ async function startChallenge() {
         // Load texts from API
         await loadTextsFromAPI();
         
-        // Show first text in sequence
-        showSequentialText();
+        // Go directly to analysis of first text
+        startAnalysis(challengeState.texts[0].id);
     } catch (error) {
         console.error('Error loading texts:', error);
         container.innerHTML = `
@@ -1015,8 +1015,28 @@ function nextText() {
 }
 
 function startAnalysis(textId) {
+    // Store current text index for navigation
+    const currentIndex = challengeState.texts.findIndex(text => text.id === textId);
+    if (currentIndex !== -1) {
+        challengeState.currentTextIndex = currentIndex;
+    }
+    
     // Redirect to analysis page with selected text
     window.location.href = `/challenge/analysis/${textId}`;
+}
+
+// Function to get next text in sequence
+function getNextTextId() {
+    const nextIndex = challengeState.currentTextIndex + 1;
+    if (nextIndex < challengeState.texts.length) {
+        return challengeState.texts[nextIndex].id;
+    }
+    return null;
+}
+
+// Function to check if there are more texts
+function hasNextText() {
+    return challengeState.currentTextIndex + 1 < challengeState.texts.length;
 }
 
 </script>
