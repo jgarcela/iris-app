@@ -3,11 +3,10 @@
 {% block title %}{{ _('Desafío de Análisis IRIS - Semana de la Ciencia') }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/difficulty_enhancements.css') }}">
 {% endblock %}
 
 {% block challenge_content %}
-<div class="container-fluid py-4" data-user-difficulty="{{ user_difficulty|tojson if user_difficulty else 'null' }}">
+<div class="container-fluid py-4">
 
 
 
@@ -24,24 +23,9 @@
                         <div class="col-md-4 text-center mb-3">
                             <div class="step-icon">
                                 <i class="fas fa-mouse-pointer fa-2x text-primary mb-2"></i>
-                                <h5>{{ _('1. Selecciona un texto') }}</h5>
-                                <p class="text-muted small">{{ _('Elige uno de los textos disponibles') }}</p>
+                                <h5>{{ _('1. Recibe un texto') }}</h5>
+                                <p class="text-muted small">{{ _('Se te proporcionará uno de los textos disponibles') }}</p>
                                 
-                                <!-- Niveles de Dificultad integrados -->
-                                <div class="difficulty-selector mt-3">
-                                    <h6 class="mb-2">{{ _('Nivel de dificultad:') }}</h6>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-outline-success btn-sm select-difficulty-btn" data-level="facil">
-                                            <i class="fas fa-seedling me-1"></i>{{ _('Fácil') }}
-                                        </button>
-                                        <button type="button" class="btn btn-outline-warning btn-sm select-difficulty-btn" data-level="medio">
-                                            <i class="fas fa-balance-scale me-1"></i>{{ _('Medio') }}
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm select-difficulty-btn" data-level="dificil">
-                                            <i class="fas fa-microscope me-1"></i>{{ _('Difícil') }}
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-center mb-3">
@@ -66,154 +50,6 @@
 
     <!-- User Control Panel -->
 
-    <!-- Lista de Textos -->
-    <div class="row">
-        <div class="col-12">
-            <h2 class="text-center mb-4">
-                <i class="fas fa-list-alt me-2"></i>
-                {{ _('Textos del Desafío') }}
-            </h2>
-            
-            <!-- Textos Fáciles -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-success mb-3">
-                        <i class="fas fa-check-circle me-2"></i>
-                        {{ _('Textos Fáciles') }}
-                        <span class="badge bg-success ms-2" id="facilCountHeader">3</span>
-                    </h4>
-                </div>
-                <div class="col-12">
-                    <div class="row g-3">
-                {% for text in texts %}
-                        {% if text.difficulty == 'Fácil' %}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="card h-100 text-card" data-text-id="{{ text.id }}">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
-                                    <span class="badge bg-success" title="Sesgos evidentes y obvios">
-                                {{ text.difficulty }}
-                            </span>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text text-muted small">
-                                        {{ text.text[:120] }}{% if text.text|length > 120 %}...{% endif %}
-                            </p>
-                            <div class="categories mb-3">
-                                {% for category in text.categories %}
-                                <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <button class="btn btn-primary w-100 start-analysis-btn" 
-                                    data-text-id="{{ text.id }}">
-                                <i class="fas fa-play me-2"></i>
-                                {{ _('Comenzar Análisis') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                        {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-            <!-- Textos Medios -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-warning mb-3">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ _('Textos Medios') }}
-                        <span class="badge bg-warning ms-2" id="medioCountHeader">0</span>
-                    </h4>
-                </div>
-        <div class="col-12">
-                    <div class="row g-3">
-                    {% for text in texts %}
-                        {% if text.difficulty == 'Medio' %}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="card h-100 text-card" data-text-id="{{ text.id }}">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
-                                    <span class="badge bg-warning" title="Sesgos sutiles pero detectables">
-                                        {{ text.difficulty }}
-                                    </span>
-                                </div>
-                                <div class="card-body">
-                                    <p class="card-text text-muted small">
-                                        {{ text.text[:120] }}{% if text.text|length > 120 %}...{% endif %}
-                                    </p>
-                                    <div class="categories mb-3">
-                                        {% for category in text.categories %}
-                                        <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                <div class="card-footer bg-transparent">
-                                    <button class="btn btn-primary w-100 start-analysis-btn" 
-                                            data-text-id="{{ text.id }}">
-                                        <i class="fas fa-play me-2"></i>
-                                        {{ _('Comenzar Análisis') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-                            </div>
-                        </div>
-
-            <!-- Textos Difíciles -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-danger mb-3">
-                        <i class="fas fa-times-circle me-2"></i>
-                        {{ _('Textos Difíciles') }}
-                        <span class="badge bg-danger ms-2" id="dificilCountHeader">0</span>
-                    </h4>
-                </div>
-                <div class="col-12">
-                    <div class="row g-3">
-                    {% for text in texts %}
-                        {% if text.difficulty == 'Difícil' %}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="card h-100 text-card" data-text-id="{{ text.id }}">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
-                                    <span class="badge bg-danger" title="Sesgos muy sutiles o complejos">
-                                        {{ text.difficulty }}
-                                    </span>
-                                </div>
-                                <div class="card-body">
-                                    <p class="card-text text-muted small">
-                                        {{ text.text[:120] }}{% if text.text|length > 120 %}...{% endif %}
-                                    </p>
-                                    <div class="categories mb-3">
-                                        {% for category in text.categories %}
-                                        <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
-                                        {% endfor %}
-                            </div>
-                        </div>
-                                <div class="card-footer bg-transparent">
-                                    <button class="btn btn-primary w-100 start-analysis-btn" 
-                                            data-text-id="{{ text.id }}">
-                                        <i class="fas fa-play me-2"></i>
-                                        {{ _('Comenzar Análisis') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <style>
@@ -223,10 +59,6 @@ body {
     min-height: 100vh;
 }
 
-/* Difficulty System Styling */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
 
 .difficulty-card {
     transition: all 0.3s ease;
@@ -1385,8 +1217,6 @@ function selectDifficultyLevel(level) {
     // Save to localStorage
     saveUserDifficulty();
     
-    // Show feedback
-    showDifficultyFeedback(level);
     
     // Scroll to texts section (fallback compatible without :has selector)
     setTimeout(() => {
@@ -1444,47 +1274,6 @@ function updateProgressCircle() {
     progressText.textContent = `${Math.round(progressPercentage)}%`;
 }
 
-function showDifficultyFeedback(level) {
-    const feedbackMessages = {
-        'facil': {
-            title: '¡Perfecto para empezar!',
-            message: 'Has seleccionado textos fáciles. Los sesgos serán evidentes y fáciles de identificar.',
-            type: 'success'
-        },
-        'medio': {
-            title: '¡Nivel intermedio seleccionado!',
-            message: 'Has seleccionado textos de nivel medio. Los sesgos serán más sutiles pero detectables. ¡Perfecto para desarrollar tus habilidades!',
-            type: 'warning'
-        },
-        'dificil': {
-            title: '¡Desafío avanzado!',
-            message: 'Has seleccionado textos difíciles. Los sesgos serán muy sutiles y complejos. ¡Prepárate para un análisis profundo!',
-            type: 'danger'
-        }
-    };
-    
-    const feedback = feedbackMessages[level];
-    if (!feedback) return;
-    
-    // Create and show feedback toast
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${feedback.type} alert-dismissible fade show position-fixed`;
-    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    toast.innerHTML = `
-        <strong>${feedback.title}</strong><br>
-        ${feedback.message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.parentNode.removeChild(toast);
-        }
-    }, 5000);
-}
 
 function updateUserLevelDisplay() {
     const currentLevelElement = document.getElementById('currentLevel');
@@ -1537,79 +1326,9 @@ function adaptInterfaceToDifficulty(level) {
         }
     });
     
-    // Update help text based on difficulty
-    updateHelpText(level);
-    
-    // Adjust interface complexity
-    adjustInterfaceComplexity(level);
 }
 
-function updateHelpText(level) {
-    const helpTexts = {
-        'facil': {
-            title: 'Consejos para el nivel fácil',
-            content: 'Los sesgos en este nivel son evidentes. Busca frases como "primera mujer", "exclusivamente por mérito" o desbalances claros en las fuentes.'
-        },
-        'medio': {
-            title: 'Consejos para el nivel medio',
-            content: 'Los sesgos son más sutiles. Presta atención a diferencias en el tratamiento del lenguaje, desbalances moderados y términos técnicos.'
-        },
-        // For difficult level, do not show tips
-        'dificil': null
-    };
-    
-    const help = helpTexts[level];
-    if (!help) {
-        // Remove help section if present
-        const existing = document.getElementById('difficulty-help');
-        if (existing && existing.parentNode) {
-            existing.parentNode.removeChild(existing);
-        }
-        return;
-    }
-    
-    // Create or update help section
-    let helpSection = document.getElementById('difficulty-help');
-    if (!helpSection) {
-        helpSection = document.createElement('div');
-        helpSection.id = 'difficulty-help';
-        helpSection.className = 'alert alert-info mt-4';
-        document.querySelector('.container-fluid').appendChild(helpSection);
-    }
-    
-    helpSection.innerHTML = `
-        <h5><i class="fas fa-lightbulb me-2"></i>${help.title}</h5>
-        <p class="mb-0">${help.content}</p>
-    `;
-}
 
-function adjustInterfaceComplexity(level) {
-    // Adjust button sizes and complexity based on level
-    const buttons = document.querySelectorAll('.start-analysis-btn');
-    
-    buttons.forEach(button => {
-        if (level === 'facil') {
-            button.classList.add('btn-lg');
-            button.innerHTML = '<i class="fas fa-play me-2"></i>¡Empezar Análisis!';
-        } else if (level === 'medio') {
-            button.classList.remove('btn-lg');
-            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar Análisis';
-        } else if (level === 'dificil') {
-            button.classList.remove('btn-lg');
-            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar análisis';
-        }
-    });
-    
-    // Adjust card complexity
-    const cards = document.querySelectorAll('.text-card');
-    cards.forEach(card => {
-        if (level === 'facil') {
-            card.classList.add('simplified');
-        } else {
-            card.classList.remove('simplified');
-        }
-    });
-}
 
 // Enhanced initialization
 function initializeEnhancedDifficultySystem() {
