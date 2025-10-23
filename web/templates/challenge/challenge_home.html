@@ -856,47 +856,12 @@ h2, h3, h4, h5 {
 </style>
 
 <script>
-// Simple Challenge System
+// Sequential Challenge System for Semana de la Ciencia 2025
 let challengeState = {
     isStarted: false,
-    texts: [
-        {
-            id: 1,
-            title: "Artículo de Investigación Científica",
-            content: "El Dr. Martínez lideró un equipo de investigación que descubrió un nuevo método para el tratamiento del cáncer. Su trabajo, desarrollado junto con la Dra. García y otros colegas, representa un avance significativo en la medicina moderna. Los resultados fueron publicados en la prestigiosa revista Nature Medicine.",
-            categories: ["Científico", "Medicina"]
-        },
-        {
-            id: 2,
-            title: "Noticia Tecnológica",
-            content: "La nueva startup fundada por María López ha revolucionado el sector tecnológico con su innovadora aplicación. La joven emprendedora, de 28 años, ha logrado recaudar 5 millones de euros en su primera ronda de financiación. Su equipo, compuesto principalmente por ingenieros jóvenes, está desarrollando la próxima generación de herramientas digitales.",
-            categories: ["Tecnología", "Emprendimiento"]
-        },
-        {
-            id: 3,
-            title: "Reportaje Deportivo",
-            content: "La selección femenina de fútbol ha logrado una victoria histórica en el campeonato europeo. Las jugadoras, lideradas por su capitana Ana Ruiz, han demostrado una técnica excepcional y un espíritu de equipo admirable. El entrenador, Carlos Mendez, ha destacado la dedicación y el talento natural de estas atletas.",
-            categories: ["Deporte", "Logros"]
-        },
-        {
-            id: 4,
-            title: "Artículo Académico",
-            content: "La profesora Elena Fernández ha sido galardonada con el Premio Nobel de Física por sus contribuciones al campo de la mecánica cuántica. Su investigación, desarrollada durante más de 20 años, ha abierto nuevas perspectivas en la comprensión del universo. La científica, madre de dos hijos, ha logrado equilibrar su carrera profesional con su vida familiar.",
-            categories: ["Académico", "Premios"]
-        },
-        {
-            id: 5,
-            title: "Noticia Política",
-            content: "La nueva ministra de Educación, Carmen Rodríguez, ha anunciado una serie de reformas educativas que buscan mejorar la igualdad de oportunidades. La política, con una amplia experiencia en el sector público, ha prometido trabajar incansablemente para garantizar que todos los estudiantes tengan acceso a una educación de calidad.",
-            categories: ["Política", "Educación"]
-        },
-        {
-            id: 6,
-            title: "Reportaje Cultural",
-            content: "La escritora Isabel Moreno ha presentado su última novela en la Feria del Libro de Madrid. La autora, conocida por sus historias que exploran la condición femenina, ha logrado un éxito de ventas sin precedentes. Su obra, que combina elementos de realismo mágico con crítica social, ha sido elogiada por la crítica especializada.",
-            categories: ["Cultura", "Literatura"]
-        }
-    ]
+    currentTextIndex: 0,
+    texts: [],
+    loading: false
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -910,21 +875,91 @@ function setupEventListeners() {
     });
 }
 
-function startChallenge() {
-    // Hide start section
-    document.getElementById('startSection').style.display = 'none';
+async function startChallenge() {
+    if (challengeState.loading) return;
     
-    // Show text section
+    challengeState.loading = true;
+    
+    // Show loading state
+    document.getElementById('startSection').style.display = 'none';
     document.getElementById('textSection').style.display = 'block';
     
-    // Show random text
-    showRandomText();
+    const container = document.getElementById('currentTextContainer');
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando textos...</span>
+            </div>
+            <p class="mt-3">Cargando textos del desafío...</p>
+        </div>
+    `;
+    
+    try {
+        // Load texts from API
+        await loadTextsFromAPI();
+        
+        // Show first text in sequence
+        showSequentialText();
+    } catch (error) {
+        console.error('Error loading texts:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger text-center">
+                <h5>Error al cargar los textos</h5>
+                <p>No se pudieron cargar los textos del desafío. Por favor, inténtalo de nuevo.</p>
+                <button class="btn btn-primary" onclick="location.reload()">Reintentar</button>
+            </div>
+        `;
+    } finally {
+        challengeState.loading = false;
+    }
 }
 
-function showRandomText() {
-    // Get random text from the array
-    const randomIndex = Math.floor(Math.random() * challengeState.texts.length);
-    const selectedText = challengeState.texts[randomIndex];
+async function loadTextsFromAPI() {
+    try {
+        const response = await fetch('/api/semana-ciencia/texts');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // Define the specific order we want
+        const orderedIds = [
+            '68f9e5a22e476535f8a73ec4', // Paloma Lago
+            '68f9e5a22e476535f8a73ec2', // Paula Badosa
+            '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+            '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+            '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+            '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+        ];
+        
+        // Reorder texts according to our sequence
+        challengeState.texts = orderedIds.map(id => {
+            const text = data.texts.find(t => t._id === id);
+            if (!text) {
+                console.warn(`Text with ID ${id} not found`);
+                return null;
+            }
+            return {
+                id: text._id,
+                title: text.title || 'Texto para Analizar',
+                content: text.text,
+                categories: ['Semana de la Ciencia 2025']
+            };
+        }).filter(text => text !== null);
+        
+        if (challengeState.texts.length === 0) {
+            throw new Error('No se encontraron textos para el desafío');
+        }
+        
+    } catch (error) {
+        console.error('Error loading texts from API:', error);
+        throw error;
+    }
+}
+
+function showSequentialText() {
+    // Get current text in sequence
+    const selectedText = challengeState.texts[challengeState.currentTextIndex];
     
     const container = document.getElementById('currentTextContainer');
     container.innerHTML = `
@@ -944,6 +979,12 @@ function showRandomText() {
                 </div>
             </div>
             <div class="card-footer bg-light text-center">
+                ${challengeState.currentTextIndex < challengeState.texts.length - 1 ? 
+                    `<button class="btn btn-primary btn-lg me-3" onclick="nextText()">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        Siguiente Texto
+                    </button>` : ''
+                }
                 <button class="btn btn-success btn-lg" onclick="startAnalysis(${selectedText.id})">
                     <i class="fas fa-microscope me-2"></i>
                     Analizar este Texto
@@ -951,6 +992,14 @@ function showRandomText() {
             </div>
         </div>
     `;
+}
+
+function nextText() {
+    // Move to next text in sequence
+    if (challengeState.currentTextIndex < challengeState.texts.length - 1) {
+        challengeState.currentTextIndex++;
+        showSequentialText();
+    }
 }
 
 function startAnalysis(textId) {

@@ -398,3 +398,46 @@ def get_analysis_by_id(analysis_id):
             'error': f'Error interno: {str(e)}'
         }), 500
 
+
+@analysis_bp.route('/semana-ciencia/texts', methods=['GET'])
+def get_semana_ciencia_texts():
+    """Get all texts from iris_semana_ciencia_2025 collection for the challenge"""
+    try:
+        # Connect to MongoDB
+        client = MongoClient('mongodb://localhost:27017')
+        db = client['iris']
+        collection = db['iris_semana_ciencia_2025']
+        
+        # Get all texts from the collection
+        texts = list(collection.find({}, {
+            '_id': 1,
+            'title': 1,
+            'text': 1,
+            'authors': 1,
+            'url': 1,
+            'analysis_mode': 1,
+            'status': 1,
+            'created_at': 1
+        }))
+        
+        # Convert ObjectId to string for JSON serialization
+        for text in texts:
+            text['_id'] = str(text['_id'])
+            if 'created_at' in text and hasattr(text['created_at'], 'isoformat'):
+                text['created_at'] = text['created_at'].isoformat()
+        
+        client.close()
+        
+        return jsonify({
+            'success': True,
+            'texts': texts,
+            'count': len(texts)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error getting Semana de la Ciencia texts: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error interno: {str(e)}'
+        }), 500
+
