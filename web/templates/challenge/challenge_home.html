@@ -916,11 +916,18 @@ async function startChallenge() {
 
 async function loadTextsFromAPI() {
     try {
-        const response = await fetch('/analysis/semana-ciencia/texts');
+        console.log('Loading texts from API...');
+        const response = await fetch('http://localhost:8000/analysis/semana-ciencia/texts');
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
         const data = await response.json();
+        console.log('API response:', data);
         
         // Define the specific order we want
         const orderedIds = [
@@ -953,6 +960,11 @@ async function loadTextsFromAPI() {
         
     } catch (error) {
         console.error('Error loading texts from API:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
         throw error;
     }
 }
