@@ -67,18 +67,43 @@ def challenge_home():
                          texts=texts,
                          language=get_locale())
 
-@bp.route('/analyze/<int:text_id>')
+@bp.route('/analyze/<text_id>')
 @challenge_required
 def analyze_text(text_id):
     """Página de análisis individual"""
-    texts = get_challenge_texts()
-    text_data = next((text for text in texts if text['id'] == text_id), None)
-    if not text_data:
+    try:
+        # Try to find text by _id (ObjectId string) first
+        from bson import ObjectId
+        text_doc = DB_SEMANA_CIENCIA.find_one({'_id': ObjectId(text_id)})
+        
+        if text_doc:
+            # Convert ObjectId to string for JSON serialization
+            text_doc['_id'] = str(text_doc['_id'])
+            # Also convert any other ObjectId fields that might exist
+            for key, value in text_doc.items():
+                if hasattr(value, '__class__') and value.__class__.__name__ == 'ObjectId':
+                    text_doc[key] = str(value)
+            return render_template('challenge/challenge_analysis.html', 
+                                 text_data=text_doc,
+                                 language=get_locale())
+        
+        # Fallback: try to find by integer id
+        try:
+            int_id = int(text_id)
+            texts = get_challenge_texts()
+            text_data = next((text for text in texts if text.get('id') == int_id), None)
+            if text_data:
+                return render_template('challenge/challenge_analysis.html', 
+                                     text_data=text_data,
+                                     language=get_locale())
+        except ValueError:
+            pass
+            
         return "Texto no encontrado", 404
-    
-    return render_template('challenge/challenge_analysis.html', 
-                         text_data=text_data,
-                         language=get_locale())
+        
+    except Exception as e:
+        print(f"Error in analyze_text: {e}")
+        return f"Error: {str(e)}", 500
 
 
 
@@ -100,7 +125,7 @@ def analyze_ai():
         payload = request.get_json(force=True)
         print(f"[CHALLENGE/ANALYZE-AI] Payload: {payload}")
         
-        text_id = int(payload.get('text_id'))
+        text_id = payload.get('text_id')
         manual_annotations = payload.get('manual_annotations', [])
         
         print(f"[CHALLENGE/ANALYZE-AI] Processing text_id: {text_id}, annotations: {len(manual_annotations)}")
@@ -111,7 +136,17 @@ def analyze_ai():
             'updated_at': datetime.now(timezone.utc)
         }
         
-        result = DB_SEMANA_CIENCIA.update_one({'id': text_id}, { '$set': update_fields })
+        # Try to update by _id (ObjectId) first
+        from bson import ObjectId
+        result = DB_SEMANA_CIENCIA.update_one({'_id': ObjectId(text_id)}, { '$set': update_fields })
+        
+        # If no document was updated, try by integer id
+        if result.matched_count == 0:
+            try:
+                int_id = int(text_id)
+                result = DB_SEMANA_CIENCIA.update_one({'id': int_id}, { '$set': update_fields })
+            except ValueError:
+                pass
         print(f"[CHALLENGE/ANALYZE-AI] Database update result: {result.modified_count} documents modified")
 
         # Redirect to comparison page
@@ -127,18 +162,35 @@ def analyze_ai():
         return jsonify(success=False, error=str(e)), 500
 
 
-@bp.route('/ai-results/<int:text_id>', methods=['GET'])
+@bp.route('/ai-results/<text_id>', methods=['GET'])
 @challenge_required
-def ai_results(text_id: int):
+def ai_results(text_id):
     """Render comparison page: manual vs AI analysis for a given text."""
     try:
         print(f"[CHALLENGE/AI-RESULTS] Fetching text_id: {text_id}")
         
-        # Fetch text document
-        text_doc = DB_SEMANA_CIENCIA.find_one({'id': text_id})
+        # Try to find by _id (ObjectId) first
+        from bson import ObjectId
+        text_doc = DB_SEMANA_CIENCIA.find_one({'_id': ObjectId(text_id)})
+        
+        if not text_doc:
+            # Fallback: try to find by integer id
+            try:
+                int_id = int(text_id)
+                text_doc = DB_SEMANA_CIENCIA.find_one({'id': int_id})
+            except ValueError:
+                pass
+                
         if not text_doc:
             print(f"[CHALLENGE/AI-RESULTS] Text not found for id: {text_id}")
             return "Texto no encontrado", 404
+        
+        # Convert ObjectId to string for JSON serialization
+        text_doc['_id'] = str(text_doc['_id'])
+        # Also convert any other ObjectId fields that might exist
+        for key, value in text_doc.items():
+            if hasattr(value, '__class__') and value.__class__.__name__ == 'ObjectId':
+                text_doc[key] = str(value)
             
         print(f"[CHALLENGE/AI-RESULTS] Found text: {text_doc.get('title', 'No title')}")
     except Exception as e:
