@@ -7,6 +7,7 @@ from flask import Blueprint, abort, request, jsonify
 from datetime import datetime, timezone
 from newspaper import Article
 from bson import ObjectId
+from pymongo import MongoClient
 
 import database.db as db
 from api.utils.logger import logger
@@ -399,7 +400,7 @@ def get_analysis_by_id(analysis_id):
         }), 500
 
 
-@analysis_bp.route('/semana-ciencia/texts', methods=['GET'])
+@bp.route('/semana-ciencia/texts', methods=['GET'])
 def get_semana_ciencia_texts():
     """Get all texts from iris_semana_ciencia_2025 collection for the challenge"""
     try:
