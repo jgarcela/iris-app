@@ -103,6 +103,10 @@ def inject_user():
         if resp.ok:
             user = resp.json().get('user')
             print(f"{user=}")
+            # Store user_id in session for analysis routes
+            if user and user.get('_id'):
+                session['user_id'] = str(user['_id'])
+                session['user_email'] = user.get('email', '')
             return dict(current_user=user)
     except Exception:
         pass

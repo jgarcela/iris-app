@@ -16,6 +16,8 @@ import io
 
 from web.utils.logger import logger
 from web.utils.decorators import login_required, challenge_restricted
+import database.db as db
+from bson import ObjectId
 
 from flask import render_template, make_response, current_app, request
 from weasyprint import HTML
@@ -61,24 +63,226 @@ URL_API_ENDPOINT_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}"
 URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GET_DOCUMENT}"
 
 #  ----------------- HELPER FUNCTIONS -----------------
+def create_analysis_document(api_data, text, title, authors, url, model, analysis_mode):
+    """Create analysis document for database storage"""
+    timestamp = datetime.now().isoformat()
+    
+    # Extract analysis data from API response
+    analysis = api_data.get('analysis', {})
+    original = analysis.get('original', {})
+    edited = analysis.get('edited', {})
+    
+    # Convert API format to database format
+    annotations = []
+    
+    # Process contenido_general
+    if original.get('contenido_general'):
+        cg_data = original['contenido_general']
+        for variable, value in cg_data.items():
+            if value is not None:
+                annotations.append({
+                    'id': f"{timestamp}_{variable}",
+                    'text': text[:100] + "..." if len(text) > 100 else text,  # Sample text
+                    'category': 'contenido_general',
+                    'variable': variable,
+                    'value': str(value),
+                    'timestamp': timestamp,
+                    'source': 'ai_analysis'
+                })
+    
+    # Process lenguaje
+    if original.get('lenguaje'):
+        lang_data = original['lenguaje']
+        for variable, value in lang_data.items():
+            if value is not None:
+                annotations.append({
+                    'id': f"{timestamp}_{variable}",
+                    'text': text[:100] + "..." if len(text) > 100 else text,
+                    'category': 'lenguaje',
+                    'variable': variable,
+                    'value': str(value),
+                    'timestamp': timestamp,
+                    'source': 'ai_analysis'
+                })
+    
+    # Process fuentes
+    if original.get('fuentes'):
+        fuentes_data = original['fuentes']
+        if 'fuentes' in fuentes_data:
+            for i, fuente in enumerate(fuentes_data['fuentes']):
+                for variable, value in fuente.items():
+                    if value is not None:
+                        annotations.append({
+                            'id': f"{timestamp}_fuente_{i}_{variable}",
+                            'text': fuente.get('declaracion_fuente', ''),
+                            'category': 'fuentes',
+                            'variable': variable,
+                            'value': str(value),
+                            'timestamp': timestamp,
+                            'source': 'ai_analysis'
+                        })
+    
+    # Determine protagonist analysis
+    protagonist_analysis = analyze_protagonist_from_api_data(api_data)
+    
+    # Create document
+    analysis_doc = {
+        'user_id': session.get('user_id'),
+        'text': text,
+        'title': title,
+        'authors': authors,
+        'url': url,
+        'analysis_mode': analysis_mode,
+        'model': model,
+        'status': 'completed',
+        'annotations': annotations,
+        'ai_analysis': original,
+        'human_edits': edited,
+        'protagonist_analysis': protagonist_analysis,
+        'created_at': timestamp,
+        'updated_at': timestamp,
+        'metadata': {
+            'total_annotations': len(annotations),
+            'categories': list(set([ann.get('category', '') for ann in annotations])),
+            'variables': list(set([ann.get('variable', '') for ann in annotations])),
+            'ai_model': model,
+            'has_human_edits': bool(edited and any(edited.values()))
+        }
+    }
+    
+    return analysis_doc
+
+def analyze_protagonist_from_api_data(api_data):
+    """Analyze protagonist from API response data"""
+    # Extract analysis data from API response
+    analysis = api_data.get('analysis', {})
+    original = analysis.get('original', {})
+    
+    # Count gender mentions from all sources
+    male_count = 0
+    female_count = 0
+    mixed_count = 0
+    
+    # 1. Check genero_personas_mencionadas (array)
+    if original.get('contenido_general', {}).get('genero_personas_mencionadas'):
+        genero_personas = original['contenido_general']['genero_personas_mencionadas']
+        if isinstance(genero_personas, list):
+            for val in genero_personas:
+                if val == 1:
+                    male_count += 1
+                elif val == 2:
+                    male_count += 1
+                elif val == 3:
+                    female_count += 1
+                elif val == 4:
+                    mixed_count += 1
+    
+    # 2. Check genero_periodista
+    genero_periodista = original.get('contenido_general', {}).get('genero_periodista')
+    if genero_periodista == 1:
+        male_count += 1
+    elif genero_periodista == 2:
+        female_count += 1
+    elif genero_periodista == 3:
+        male_count += 1
+        female_count += 1
+    
+    # 3. Check fuentes
+    fuentes = original.get('fuentes', {}).get('fuentes', [])
+    for fuente in fuentes:
+        genero_fuente = fuente.get('genero_fuente')
+        if genero_fuente == 1:
+            male_count += 1
+        elif genero_fuente == 2:
+            male_count += 1
+        elif genero_fuente == 3:
+            female_count += 1
+        elif genero_fuente == 4:
+            mixed_count += 1
+    
+    total_mentions = male_count + female_count + mixed_count
+    if total_mentions == 0:
+        return {
+            'protagonist': 'No identificado', 
+            'confidence': 0,
+            'counts': {
+                'masculino': 0,
+                'femenino': 0,
+                'mixto': 0
+            }
+        }
+    
+    # Determine protagonist
+    if female_count > male_count and female_count > mixed_count:
+        result = {
+            'protagonist': 'Femenino', 
+            'confidence': female_count / total_mentions,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
+    elif male_count > female_count and male_count > mixed_count:
+        result = {
+            'protagonist': 'Masculino', 
+            'confidence': male_count / total_mentions,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
+    elif mixed_count > 0:
+        result = {
+            'protagonist': 'Mixto', 
+            'confidence': mixed_count / total_mentions,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
+    else:
+        result = {
+            'protagonist': 'No identificado', 
+            'confidence': 0,
+            'counts': {
+                'masculino': male_count,
+                'femenino': female_count,
+                'mixto': mixed_count
+            }
+        }
+    
+    return result
+
 def get_user_info():
-    """Get current user information from context processor"""
-    # The current_user is injected by the context processor in __init__.py
-    # We need to get it from the template context
-    from flask import has_request_context
-    if has_request_context():
-        # Try to get user info from the request context
-        # This is a workaround since current_user is only available in templates
-        token = request.cookies.get('access_token_cookie')
-        if token:
-            try:
-                headers = {'Authorization': f'Bearer {token}'}
-                resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
-                if resp.ok:
-                    user = resp.json().get('user')
-                    return user
-            except Exception:
-                pass
+    """Get current user information from session"""
+    # Get user info from session (set by inject_user context processor)
+    user_id = session.get('user_id')
+    user_email = session.get('user_email')
+    
+    if user_id:
+        return {
+            'id': user_id,
+            'email': user_email or 'anonymous@example.com'
+        }
+    
+    # Fallback: try to get from API if not in session
+    token = request.cookies.get('access_token_cookie')
+    if token:
+        try:
+            headers = {'Authorization': f'Bearer {token}'}
+            resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
+            if resp.ok:
+                user = resp.json().get('user')
+                if user and user.get('_id'):
+                    # Store in session for next time
+                    session['user_id'] = str(user['_id'])
+                    session['user_email'] = user.get('email', '')
+                return user
+        except Exception:
+            pass
     return None
 
 #  ----------------- ENDPOINTS -----------------
@@ -255,6 +459,24 @@ def analyze():
     if resp.status_code == 200:
         data = resp.json()
         logger.info(f"[/ANALYSIS/ANALYZE] Received response from API: {data}")
+        
+        # Save analysis to database
+        try:
+            analysis_doc = create_analysis_document(data, text, title, authors, url, model, analysis_mode)
+            result = db.DB_ANALYSIS.insert_one(analysis_doc)
+            analysis_id = str(result.inserted_id)
+            logger.info(f"Automatic analysis saved with ID: {analysis_id}")
+            
+            # Add analysis_id and protagonist_analysis to data for frontend
+            data['local_analysis_id'] = analysis_id
+            protagonist_analysis = analysis_doc.get('protagonist_analysis', {})
+            data['protagonist_analysis'] = protagonist_analysis
+            logger.info(f"Added protagonist_analysis to data: {protagonist_analysis}")
+            
+        except Exception as e:
+            logger.error(f"Error saving automatic analysis: {str(e)}")
+            # Continue with rendering even if save fails
+        
         logger.info("[/ANALYSIS/ANALYZE] Rendering analysis template...")
         return render_template(
             'analysis/analysis.html',
@@ -279,19 +501,83 @@ def analyze_manual():
 
     if request.method == 'GET':
         # Render manual analysis page
-        return render_template('analysis/manual_analysis.html')
+        return render_template(
+            'analysis/manual_analysis.html',
+            language=get_locale(),
+            highlight_map=HIGHLIGHT_COLOR_MAP,
+            contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
+            lenguaje_variables=LENGUAJE_VARIABLES,
+            fuentes_variables=FUENTES_VARIABLES,
+            config=config
+        )
     
     # POST method - process manual analysis
-    text = request.form.get('text', '')
-    title = request.form.get('title', '')
-    authors = request.form.get('authors', '')
-    url = request.form.get('url', '')
+    if request.is_json:
+        # Handle JSON data from frontend
+        data = request.get_json()
+        text = data.get('text', '')
+        title = data.get('title', '')
+        authors = data.get('authors', '')
+        url = data.get('url', '')
+        annotations = data.get('annotations', [])
+        selected_topic = data.get('selected_topic', '')
+        protagonist_analysis = data.get('protagonist_analysis', {})
+        timestamp = data.get('timestamp', datetime.now().isoformat())
+    else:
+        # Handle form data
+        text = request.form.get('text', '')
+        title = request.form.get('title', '')
+        authors = request.form.get('authors', '')
+        url = request.form.get('url', '')
+        annotations = []
+        selected_topic = ''
+        protagonist_analysis = {}
+        timestamp = datetime.now().isoformat()
 
     if not text and not url:
         return jsonify({"error": "Se requiere texto o URL para el análisis"}), 400
 
-    # For manual analysis, we'll create a basic structure
-    # and let the user manually select and annotate
+    # If we have annotations, save the analysis
+    if annotations:
+        try:
+            # Create analysis document
+            analysis_doc = {
+                'user_id': session.get('user_id'),
+                'text': text,
+                'title': title,
+                'authors': authors,
+                'url': url,
+                'analysis_mode': 'manual',
+                'status': 'completed',
+                'annotations': annotations,
+                'selected_topic': selected_topic,
+                'protagonist_analysis': protagonist_analysis,
+                'created_at': timestamp,
+                'updated_at': timestamp,
+                'metadata': {
+                    'total_annotations': len(annotations),
+                    'categories': list(set([ann.get('category', '') for ann in annotations])),
+                    'variables': list(set([ann.get('variable', '') for ann in annotations]))
+                }
+            }
+            
+            # Save to database
+            result = db.DB_ANALYSIS.insert_one(analysis_doc)
+            analysis_id = str(result.inserted_id)
+            
+            logger.info(f"Manual analysis saved with ID: {analysis_id}")
+            
+            return jsonify({
+                "success": True,
+                "analysis_id": analysis_id,
+                "message": "Análisis guardado correctamente"
+            })
+            
+        except Exception as e:
+            logger.error(f"Error saving manual analysis: {str(e)}")
+            return jsonify({"error": "Error al guardar el análisis"}), 500
+
+    # For initial manual analysis setup
     manual_data = {
         'text': text,
         'title': title,
@@ -308,7 +594,8 @@ def analyze_manual():
         highlight_map=HIGHLIGHT_COLOR_MAP,
         contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
         lenguaje_variables=LENGUAJE_VARIABLES,
-        fuentes_variables=FUENTES_VARIABLES
+        fuentes_variables=FUENTES_VARIABLES,
+        config=config
     )
 
 
@@ -355,7 +642,7 @@ def analysis_history():
     search_query = request.args.get('search', '').strip()
     date_from = request.args.get('date_from', '').strip()
     date_to = request.args.get('date_to', '').strip()
-    model_filter = request.args.get('model', '').strip()
+    analysis_mode_filter = request.args.get('analysis_mode', '').strip()
     
     # Prepare API call to get analysis history
     api_url = f"http://{API_HOST}:{API_PORT}/analysis/history"
@@ -368,8 +655,8 @@ def analysis_history():
         api_params['date_from'] = date_from
     if date_to:
         api_params['date_to'] = date_to
-    if model_filter:
-        api_params['model'] = model_filter
+    if analysis_mode_filter:
+        api_params['analysis_mode'] = analysis_mode_filter
     
     # Add user information to headers
     headers = API_HEADERS.copy()
@@ -393,9 +680,9 @@ def analysis_history():
         analyses = []
         logger.warning(f"Failed to fetch analysis history: {e}")
     
-    # Get unique models for filter dropdown
-    models = list(set([analysis.get('model', '') for analysis in analyses if analysis.get('model')]))
-    models.sort()
+    # Get unique analysis modes for filter dropdown
+    analysis_modes = list(set([analysis.get('analysis_mode', '') for analysis in analyses if analysis.get('analysis_mode')]))
+    analysis_modes.sort()
     
     return render_template(
         'analysis/analysis_history.html',
@@ -403,8 +690,8 @@ def analysis_history():
         search_query=search_query,
         date_from=date_from,
         date_to=date_to,
-        model_filter=model_filter,
-        models=models,
+        analysis_mode_filter=analysis_mode_filter,
+        analysis_modes=analysis_modes,
         total_count=len(analyses)
     )
 

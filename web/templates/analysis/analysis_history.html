@@ -68,17 +68,17 @@
                                        value="{{ date_to }}">
                             </div>
 
-                            <!-- Model Filter -->
+                            <!-- Analysis Mode Filter -->
                             <div class="col-md-2">
-                                <label for="model" class="form-label">
-                                    <i class="fas fa-cog me-1"></i>
-                                    {{ _('Modelo') }}
+                                <label for="analysis_mode" class="form-label">
+                                    <i class="fas fa-tasks me-1"></i>
+                                    {{ _('Modo de Análisis') }}
                                 </label>
-                                <select class="form-select" id="model" name="model">
-                                    <option value="">{{ _('Todos los modelos') }}</option>
-                                    {% for model in models %}
-                                        <option value="{{ model }}" {% if model == model_filter %}selected{% endif %}>
-                                            {{ model|title }}
+                                <select class="form-select" id="analysis_mode" name="analysis_mode">
+                                    <option value="">{{ _('Todos los modos') }}</option>
+                                    {% for mode in analysis_modes %}
+                                        <option value="{{ mode }}" {% if mode == analysis_mode_filter %}selected{% endif %}>
+                                            {% if mode == 'manual' %}{{ _('Manual') }}{% elif mode == 'automatic' %}{{ _('Automático') }}{% else %}{{ mode|title }}{% endif %}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -132,8 +132,8 @@
                                 <div class="card analysis-card h-100">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <div class="analysis-meta">
-                                            <span class="badge bg-secondary me-2">
-                                                {{ analysis.model|title if analysis.model else _('Sin modelo') }}
+                                            <span class="badge {% if analysis.analysis_mode == 'manual' %}bg-success{% elif analysis.analysis_mode == 'automatic' %}bg-primary{% else %}bg-secondary{% endif %} me-2">
+                                                {% if analysis.analysis_mode == 'manual' %}{{ _('Manual') }}{% elif analysis.analysis_mode == 'automatic' %}{{ _('Automático') }}{% else %}{{ _('Legacy') }}{% endif %}
                                             </span>
                                             <small class="text-muted">
                                                 <i class="fas fa-calendar me-1"></i>
