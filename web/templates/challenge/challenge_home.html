@@ -916,7 +916,7 @@ async function startChallenge() {
 
 async function loadTextsFromAPI() {
     try {
-        const response = await fetch('/api/semana-ciencia/texts');
+        const response = await fetch('/analysis/semana-ciencia/texts');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
