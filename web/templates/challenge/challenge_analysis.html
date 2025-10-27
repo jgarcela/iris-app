@@ -1855,6 +1855,8 @@ function saveAnnotation() {
     
     // Process each selected variable
     let idCounter = 0;
+    let appliedHighlight = false;
+    
     selectedVariables.forEach(variable => {
         if (compositePairs[variable]) {
             // Usuario anotó la presencia: set presente y género seleccionado
@@ -1868,18 +1870,21 @@ function saveAnnotation() {
                 value: '1',
                 timestamp: createdAt
             });
-            try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+            // Apply highlight only once for all variables
+            if (!appliedHighlight) {
+                try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {}
+                appliedHighlight = true;
+            }
             // 2) género
             if (genderValue) {
                 annotations.push({
-                    id: Date.now() + idCounter++,
+                id: Date.now() + idCounter++,
                     text: selectedText,
                     category: category,
                     variable: compositePairs[variable],
                     value: genderValue,
                     timestamp: createdAt
                 });
-                try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
             }
         } else {
             // Anotación normal
@@ -1891,7 +1896,11 @@ function saveAnnotation() {
                 value: value,
                 timestamp: createdAt
             });
-            try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+            // Apply highlight only once for all variables with comma-separated list
+            if (!appliedHighlight) {
+                try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {}
+                appliedHighlight = true;
+            }
         }
     });
     updateAnnotationsList();
