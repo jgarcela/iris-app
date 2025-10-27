@@ -1,5 +1,5 @@
 # web/routes/challenge.py
-from flask import Blueprint, render_template, request, jsonify, url_for
+from flask import Blueprint, render_template, request, jsonify, url_for, redirect
 from flask_babel import get_locale, _
 from web.utils.challenge_decorators import challenge_required
 from database.db import DB_SEMANA_CIENCIA
@@ -190,7 +190,7 @@ def analyze_ai():
         print(f"[CHALLENGE/ANALYZE-AI] New analysis created with ID: {result.inserted_id}")
 
         # Redirect to comparison page
-        redirect_url = url_for('challenge.ai_results', text_id=text_id)
+        redirect_url = url_for('challenge.iris_results', text_id=text_id)
         print(f"[CHALLENGE/ANALYZE-AI] Redirect URL: {redirect_url}")
         
         return jsonify(success=True, redirect_url=redirect_url)
@@ -202,12 +202,12 @@ def analyze_ai():
         return jsonify(success=False, error=str(e)), 500
 
 
-@bp.route('/ai-results/<text_id>', methods=['GET'])
+@bp.route('/iris-results/<text_id>', methods=['GET'])
 @challenge_required
-def ai_results(text_id):
+def iris_results(text_id):
     """Render comparison page: manual vs AI analysis for a given text."""
     try:
-        print(f"[CHALLENGE/AI-RESULTS] Fetching text_id: {text_id}")
+        print(f"[CHALLENGE/IRIS-RESULTS] Fetching text_id: {text_id}")
         
         # Try to find by _id (ObjectId) first
         from bson import ObjectId
@@ -222,7 +222,7 @@ def ai_results(text_id):
                 pass
                 
         if not text_doc:
-            print(f"[CHALLENGE/AI-RESULTS] Text not found for id: {text_id}")
+            print(f"[CHALLENGE/IRIS-RESULTS] Text not found for id: {text_id}")
             return "Texto no encontrado", 404
         
         # Convert ObjectId to string for JSON serialization
@@ -232,33 +232,16 @@ def ai_results(text_id):
             if hasattr(value, '__class__') and value.__class__.__name__ == 'ObjectId':
                 text_doc[key] = str(value)
             
-        print(f"[CHALLENGE/AI-RESULTS] Found text: {text_doc.get('title', 'No title')}")
+        print(f"[CHALLENGE/IRIS-RESULTS] Found text: {text_doc.get('title', 'No title')}")
     except Exception as e:
-        print(f"[CHALLENGE/AI-RESULTS] Error: {str(e)}")
+        print(f"[CHALLENGE/IRIS-RESULTS] Error: {str(e)}")
         import traceback
         traceback.print_exc()
         return f"Error: {str(e)}", 500
 
-    # Map difficulty to key to pick AI analysis
-    difficulty_label = text_doc.get('difficulty', '').strip()
-    difficulty_map = {
-        'Fácil': 'easy',
-        'Medio': 'medium',
-        'Difícil': 'hard'
-    }
-    difficulty_key = difficulty_map.get(difficulty_label, 'medium')
-
-    # Get all AI analyses from the existing analysis structure
-    # The AI analysis is stored in analysis.easy/medium/hard depending on difficulty
-    analysis_data = text_doc.get('analysis', {})
-    ai_analysis_easy = analysis_data.get('easy', {})
-    ai_analysis_medium = analysis_data.get('medium', {})
-    ai_analysis_hard = analysis_data.get('hard', {})
-
-    print(f"[CHALLENGE/AI-RESULTS] AI analysis: {ai_analysis_easy}, {ai_analysis_medium}, {ai_analysis_hard}")
-    
-    # Get the main comparison analysis (matches text difficulty)
-    main_ai_analysis = analysis_data.get(difficulty_key, {})
+    # Get analysis data if it exists (not used for comparison anymore)
+    analysis_data = text_doc.get('analysis', {}) or {}
+    main_iris_analysis = {}
     
     # Get manual annotations from challenge analyses collection (user-specific)
     from database.db import DB_ANALYSIS_SEMANA_CIENCIA
@@ -266,7 +249,7 @@ def ai_results(text_id):
     current_user = get_current_user()
     user_id = current_user.get('id') if current_user else None
     
-    # Find the user's analysis for this text
+    # Find the user's analysis for this text - user must have their own analysis
     manual_annotations = []
     if user_id:
         user_analysis = DB_ANALYSIS_SEMANA_CIENCIA.find_one({
@@ -275,13 +258,25 @@ def ai_results(text_id):
         })
         if user_analysis:
             manual_annotations = user_analysis.get('manual_annotations', [])
-            print(f"[CHALLENGE/AI-RESULTS] Found user analysis with {len(manual_annotations)} annotations")
-    
-    # Fallback: try to get from original document if no user analysis found (for backwards compatibility)
-    if not manual_annotations:
-        manual_annotations = text_doc.get('manual_annotations', [])
+            print(f"[CHALLENGE/IRIS-RESULTS] Found user analysis with {len(manual_annotations)} annotations")
+        else:
+            # User hasn't analyzed this text yet - redirect to analysis page
+            print(f"[CHALLENGE/IRIS-RESULTS] No analysis found for user_id={user_id}, redirecting to analyze page")
+            from flask import flash
+            flash(_('Debes completar el análisis de este texto antes de ver los resultados'), 'info')
+            return redirect(url_for('challenge.analyze_text', text_id=text_id))
+    else:
+        # No user logged in
+        print(f"[CHALLENGE/IRIS-RESULTS] No user logged in")
+        from flask import flash
+        flash(_('Debes iniciar sesión para ver los resultados'), 'warning')
+        return redirect(url_for('challenge.challenge_home'))
 
-    print(f"[CHALLENGE/AI-RESULTS] Manual analysis: {manual_annotations}")
+    print(f"[CHALLENGE/IRIS-RESULTS] Manual analysis: {manual_annotations}")
+
+    # Get the original annotations from text_doc (ground truth manual annotations)
+    original_annotations = text_doc.get('annotations', [])
+    print(f"[CHALLENGE/IRIS-RESULTS] Original annotations count: {len(original_annotations)}")
 
     print(analysis_data)
 
@@ -296,17 +291,10 @@ def ai_results(text_id):
     }
 
     return render_template(
-        'challenge/challenge_ai_results.html',
+        'challenge/challenge_iris_results.html',
         text_data=text_data,
-        main_ai_analysis=main_ai_analysis,
-        # Back-compat for current template variables
-        analysis_data=analysis_data,
-        ai_analysis=main_ai_analysis,
-        ai_analysis_easy=ai_analysis_easy,
-        ai_analysis_medium=ai_analysis_medium,
-        ai_analysis_hard=ai_analysis_hard,
-        current_difficulty=difficulty_key,
         manual_annotations=manual_annotations,
+        original_annotations=original_annotations,  # Ground truth annotations
         language=get_locale()
     )
 

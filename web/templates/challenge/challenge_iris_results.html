@@ -1,0 +1,393 @@
+{% extends "challenge/challenge_base.html" %}
+
+{% block title %}{{ _('Resultados del Análisis con IRIS') }} - {{ text_data.title }}{% endblock %}
+
+{% block challenge_content %}
+<div class="container-fluid py-4">
+    <!-- Header de Resultados -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-robot me-2 text-primary"></i>
+                        {{ _('Resultados del Análisis con IRIS') }}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        {{ text_data.title }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        {{ _('Volver al Desafío') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparación de Análisis -->
+    <div class="row">
+        <!-- Análisis Manual -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>
+                        {{ _('Tu Análisis Manual') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="analysis-summary">
+                        <p><strong>{{ _('Anotaciones realizadas:') }}</strong> <span id="manual-annotations-count">0</span></p>
+                        <div id="manual-annotations-list" class="annotations-list">
+                            <!-- Anotaciones manuales se cargan aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Análisis de IA -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        {{ _('Anotaciones Originales') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                   
+                    <div class="ai-summary">
+                        <p><strong>{{ _('Anotaciones de referencia:') }}</strong> <span id="original-annotations-count">0</span></p>
+                        <div id="original-annotations-list" class="annotations-list">
+                            <!-- Anotaciones originales se cargan aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas de Comparación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        {{ _('Métricas de Comparación') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="metric-item">
+                                <div class="metric-value" id="precision-score">0%</div>
+                                <div class="metric-label">{{ _('Precisión') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="metric-item">
+                                <div class="metric-value" id="recall-score">0%</div>
+                                <div class="metric-label">{{ _('Cobertura') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="metric-item">
+                                <div class="metric-value score-highlight" id="total-score">0%</div>
+                                <div class="metric-label">{{ _('Puntuación Total') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalles del Texto Analizado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        {{ _('Texto Analizado') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-content" id="analyzed-text">
+                        <p>{{ text_data.text }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="action-buttons">
+                <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-redo me-2"></i>
+                    {{ _('Analizar Otro Texto') }}
+                </a>
+                <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-trophy me-2"></i>
+                    {{ _('Ver Ranking') }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.analysis-summary, .ai-summary {
+    min-height: 200px;
+}
+
+.annotations-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.annotation-item {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #007bff;
+}
+
+.annotation-text {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.annotation-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.metric-item {
+    padding: 1rem;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.score-highlight {
+    color: #28a745 !important;
+}
+
+.ai-category {
+    margin-bottom: 1rem;
+}
+
+.ai-category h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.ai-category ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.ai-category li {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.text-content {
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.action-buttons {
+    margin-top: 2rem;
+}
+</style>
+
+<script>
+// Datos desde el backend
+const manualAnnotations = {{ manual_annotations | tojson | safe }};
+const originalAnnotations = {{ original_annotations | tojson | safe }};
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadAnalysisResults();
+});
+
+function loadAnalysisResults() {
+  loadManualAnnotations();
+  loadOriginalAnnotations();
+  calculateMetrics();
+}
+
+function loadOriginalAnnotations() {
+  const container = document.getElementById('original-annotations-list');
+  const countElement = document.getElementById('original-annotations-count');
+  
+  if (!originalAnnotations || originalAnnotations.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("No hay anotaciones originales disponibles") }}</p>';
+    countElement.textContent = '0';
+    return;
+  }
+  
+  countElement.textContent = originalAnnotations.length;
+  
+  container.innerHTML = originalAnnotations.map(annotation => `
+    <div class="annotation-item">
+      <div class="annotation-text">"${annotation.text}"</div>
+      <div class="annotation-meta">
+        <strong>${annotation.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong> → 
+        ${annotation.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} = ${annotation.value}
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadManualAnnotations() {
+  const container = document.getElementById('manual-annotations-list');
+  const countElement = document.getElementById('manual-annotations-count');
+  countElement.textContent = manualAnnotations.length;
+  if (manualAnnotations.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("No se realizaron anotaciones manuales") }}</p>';
+    return;
+  }
+  container.innerHTML = manualAnnotations.map(annotation => `
+    <div class="annotation-item">
+      <div class="annotation-text">"${annotation.text}"</div>
+      <div class="annotation-meta">
+        <strong>${annotation.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong> → 
+        ${annotation.variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} = ${annotation.value}
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadAIAnalysis() {
+  const container = document.getElementById('ai-analysis-details');
+  const countElement = document.getElementById('ai-variables-count');
+
+  // Render según dificultad
+  if (currentDifficulty === 'easy' && Array.isArray(aiAnalysis.sesgos)) {
+    countElement.textContent = aiAnalysis.sesgos.length;
+    container.innerHTML = `
+      <div class="ai-category">
+        <h6>{{ _("Sesgos detectados") }}</h6>
+        <ul>
+          ${aiAnalysis.sesgos.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+    return;
+  }
+
+  // Medium / Hard (categorías)
+  let totalVariables = 0;
+  const cg = aiAnalysis.contenido_general || {};
+  const lg = aiAnalysis.lenguaje || {};
+  const ft = aiAnalysis.fuentes || {};
+
+  // Contador básico (número de campos con valor no vacío)
+  [cg, lg, ft].forEach(group => {
+    if (!group) return;
+    Object.values(group).forEach(v => { if (v && (Array.isArray(v) ? v.length : String(v).length)) totalVariables++; });
+  });
+  countElement.textContent = totalVariables;
+
+  container.innerHTML = `
+    <div class="ai-category">
+      <h6>{{ _("Contenido General") }}</h6>
+      <ul>
+        <li>{{ _("Personas mencionadas:") }} ${cg.personas_mencionadas ?? 'N/A'}</li>
+        <li>{{ _("Género periodista:") }} ${cg.genero_periodista ?? 'N/A'}</li>
+        <li>{{ _("Tema:") }} ${cg.tema ?? 'N/A'}</li>
+      </ul>
+    </div>
+    <div class="ai-category">
+      <h6>{{ _("Lenguaje") }}</h6>
+      <ul>
+        <li>{{ _("Lenguaje sexista:") }} ${lg.lenguaje_sexista ?? 'N/A'}</li>
+        <li>{{ _("Androcentrismo:") }} ${lg.androcentrismo ?? 'N/A'}</li>
+        <li>{{ _("Asimetría:") }} ${lg.asimetria ?? 'N/A'}</li>
+        <li>{{ _("Infantilización:") }} ${lg.infantilizacion ?? 'N/A'}</li>
+        <li>{{ _("Masculino genérico:") }} ${lg.masculino_generico ?? 'N/A'}</li>
+      </ul>
+    </div>
+    <div class="ai-category">
+      <h6>{{ _("Fuentes") }}</h6>
+      <ul>
+        <li>{{ _("Nombre fuente:") }} ${ft.nombre_fuente ?? 'N/A'}</li>
+        <li>{{ _("Género fuente:") }} ${ft.genero_fuente ?? 'N/A'}</li>
+        <li>{{ _("Tipo fuente:") }} ${ft.tipo_fuente ?? 'N/A'}</li>
+      </ul>
+    </div>
+  `;
+}
+
+function calculateMetrics() {
+  // Comparar anotaciones manuales con anotaciones originales
+  const originalCount = originalAnnotations ? originalAnnotations.length : 0;
+  
+  if (originalCount === 0) {
+    document.getElementById('precision-score').textContent ='N/A';
+    document.getElementById('recall-score').textContent = 'N/A';
+    document.getElementById('total-score').textContent = 'N/A';
+    return;
+  }
+  
+  // Crear sets de identificadores únicos para comparar
+  const manualSet = new Set(manualAnnotations.map(a => `${a.category}_${a.variable}_${a.text}`));
+  const originalSet = new Set(originalAnnotations.map(a => `${a.category}_${a.variable}_${a.text}`));
+  
+  // TP (True Positives): anotaciones en ambos sets
+  let truePositives = 0;
+  manualSet.forEach(item => {
+    if (originalSet.has(item)) {
+      truePositives++;
+    }
+  });
+  
+  // FP (False Positives): anotaciones en manual pero no en original
+  let falsePositives = manualSet.size - truePositives;
+  
+  // FN (False Negatives): anotaciones en original pero no en manual
+  let falseNegatives = originalSet.size - truePositives;
+  
+  // Calcular Precisión: TP / (TP + FP)
+  const precision = truePositives + falsePositives > 0 
+    ? (truePositives / (truePositives + falsePositives)) * 100 
+    : 0;
+  
+  // Calcular Recall: TP / (TP + FN)
+  const recall = truePositives + falseNegatives > 0 
+    ? (truePositives / (truePositives + falseNegatives)) * 100 
+    : 0;
+  
+  // F1 Score (armonic mean)
+  const f1Score = precision + recall > 0 
+    ? (2 * precision * recall) / (precision + recall) 
+    : 0;
+  
+  document.getElementById('precision-score').textContent = Math.round(precision) + '%';
+  document.getElementById('recall-score').textContent = Math.round(recall) + '%';
+  document.getElementById('total-score').textContent = Math.round(f1Score) + '%';
+}
+</script>
+{% endblock %}
