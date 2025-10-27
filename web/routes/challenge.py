@@ -294,25 +294,34 @@ def iris_results(text_id):
         'categories': text_doc.get('categories', [])
     }
     
-    # Get the next text id - simple approach: get next by _id
+    # Get the next text id using the defined sequence order
     current_object_id = text_doc.get('_id')  # Already converted to string
     next_text = None
     
     print(f"[CHALLENGE/IRIS-RESULTS] Current text _id: {current_object_id}")
     
-    # Convert back to ObjectId for query
-    from bson import ObjectId
+    # Define the same order as in the frontend
+    ordered_ids = [
+        '68f9e5a22e476535f8a73ec4', # Paloma Lago
+        '68f9e5a22e476535f8a73ec2', # Paula Badosa
+        '68f9e5a22e476535f8a73ec3', # Ariarne Titmus
+        '68f9e5a22e476535f8a73ec1', # Begoña Aramendía
+        '68f9e5a22e476535f8a73ec6', # Michelle Jenner
+        '68f9e5a22e476535f8a73ec5'  # Álvaro Bilbao
+    ]
+    
     try:
-        current_obj_id = ObjectId(current_object_id)
+        # Find current index in sequence
+        current_index = ordered_ids.index(current_object_id)
         
-        # Find next document by _id (MongoDB's natural order)
-        next_text_doc = DB_SEMANA_CIENCIA.find_one({'_id': {'$gt': current_obj_id}}, sort=[('_id', 1)])
-        
-        if next_text_doc:
-            next_text = str(next_text_doc['_id'])
+        # Get next text if exists
+        if current_index != -1 and current_index + 1 < len(ordered_ids):
+            next_text = ordered_ids[current_index + 1]
             print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
         else:
             print(f"[CHALLENGE/IRIS-RESULTS] No next text found (last text)")
+    except ValueError:
+        print(f"[CHALLENGE/IRIS-RESULTS] Current text not in sequence")
     except Exception as e:
         print(f"[CHALLENGE/IRIS-RESULTS] Error getting next text: {e}")
 
