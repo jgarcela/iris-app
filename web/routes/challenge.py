@@ -314,12 +314,30 @@ def iris_results(text_id):
         # Find current index in sequence
         current_index = ordered_ids.index(current_object_id)
         
-        # Get next text if exists
-        if current_index != -1 and current_index + 1 < len(ordered_ids):
-            next_text = ordered_ids[current_index + 1]
-            print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
-        else:
-            print(f"[CHALLENGE/IRIS-RESULTS] No next text found (last text)")
+        # Check each remaining text in order to find the first incomplete one
+        for i in range(current_index + 1, len(ordered_ids)):
+            text_id_to_check = ordered_ids[i]
+            # Check if user has completed this text
+            existing_analysis = DB_ANALYSIS_SEMANA_CIENCIA.find_one(
+                {
+                    'text_id': text_id_to_check,
+                    'user_id': user_id
+                },
+                sort=[('created_at', -1)]
+            )
+            
+            # If no analysis exists for this text, this is our next text
+            if not existing_analysis:
+                next_text = text_id_to_check
+                print(f"[CHALLENGE/IRIS-RESULTS] Found next incomplete text at index {i}: {next_text}")
+                break
+        
+        # If all remaining texts are complete, check if current is last
+        if next_text is None:
+            if current_index + 1 >= len(ordered_ids):
+                print(f"[CHALLENGE/IRIS-RESULTS] Last text in sequence")
+            else:
+                print(f"[CHALLENGE/IRIS-RESULTS] All remaining texts are complete")
     except ValueError:
         print(f"[CHALLENGE/IRIS-RESULTS] Current text not in sequence")
     except Exception as e:
