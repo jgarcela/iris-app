@@ -1405,6 +1405,16 @@ function updateVariableOptions(category) {
     const variableSelect = document.getElementById('annotation-variable');
     variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
     
+    
+    // Enable multiple selection only for Lenguaje category
+    if (category === 'lenguaje') {
+        variableSelect.setAttribute('multiple', 'true');
+        variableSelect.style.minHeight = '120px';
+    } else {
+        variableSelect.removeAttribute('multiple');
+        variableSelect.style.minHeight = 'auto';
+    }
+
     console.log('updateVariableOptions - Category:', category);
     
     // All difficulty levels use the same variables
@@ -1694,10 +1704,22 @@ function saveAnnotation() {
     
     // Always use the form values for all difficulty levels
         const category = document.getElementById('annotation-category').value;
-        const variable = document.getElementById('annotation-variable').value;
+        const variableSelect = document.getElementById('annotation-variable');
         const value = document.getElementById('annotation-value').value;
         
-        if (!category || !variable || !value) {
+        // Handle multiple selection for lenguaje category
+        let selectedVariables = [];
+        if (category === 'lenguaje' && variableSelect.hasAttribute('multiple')) {
+            selectedVariables = Array.from(variableSelect.selectedOptions).map(option => option.value);
+            if (selectedVariables.length === 0) {
+                alert('{{ _("Por favor selecciona al menos una variable") }}');
+                return;
+            }
+        } else {
+            selectedVariables = [variableSelect.value];
+        }
+        
+        if (!category || !value || selectedVariables.length === 0) {
             alert('{{ _("Por favor completa todos los campos") }}');
             return;
         }
@@ -1705,7 +1727,8 @@ function saveAnnotation() {
     const createdAt = new Date().toISOString();
     
     // Manejo especial para declaracion_fuente: guardar todas las anotaciones de fuentes
-    if (variable === 'declaracion_fuente') {
+    const firstVariable = selectedVariables[0]; // Get first variable for special cases
+    if (firstVariable === 'declaracion_fuente') {
         const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
         const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
         const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
@@ -1715,11 +1738,11 @@ function saveAnnotation() {
             id: Date.now(),
             text: selectedText,
             category: category,
-            variable: variable,
+            variable: firstVariable,
             value: value,
             timestamp: createdAt
         });
-        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+        try { applyInlineHighlight(window.currentSelection, category, firstVariable); } catch(e) {}
         
         // 2) nombre_fuente
         if (nombreFuenteValue) {
@@ -1776,43 +1799,47 @@ function saveAnnotation() {
     };
     const compositeControls = document.getElementById('composite-gender');
     
-    if (compositePairs[variable]) {
-        // Usuario anotó la presencia: set presente y género seleccionado
-        const genderValue = compositeControls ? compositeControls.value : null;
-        // 1) presencia
-        annotations.push({
-            id: Date.now(),
-            text: selectedText,
-            category: category,
-            variable: variable,
-            value: '1',
-            timestamp: createdAt
-        });
-        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-        // 2) género
-        if (genderValue) {
+    // Process each selected variable
+    let idCounter = 0;
+    selectedVariables.forEach(variable => {
+        if (compositePairs[variable]) {
+            // Usuario anotó la presencia: set presente y género seleccionado
+            const genderValue = compositeControls ? compositeControls.value : null;
+            // 1) presencia
             annotations.push({
-                id: Date.now()+1,
+                id: Date.now() + idCounter++,
                 text: selectedText,
                 category: category,
-                variable: compositePairs[variable],
-                value: genderValue,
+                variable: variable,
+                value: '1',
                 timestamp: createdAt
             });
-            try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+            try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+            // 2) género
+            if (genderValue) {
+                annotations.push({
+                    id: Date.now() + idCounter++,
+                    text: selectedText,
+                    category: category,
+                    variable: compositePairs[variable],
+                    value: genderValue,
+                    timestamp: createdAt
+                });
+                try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+            }
+        } else {
+            // Anotación normal
+            annotations.push({
+                id: Date.now() + idCounter++,
+                text: selectedText,
+                category: category,
+                variable: variable,
+                value: value,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
         }
-    } else {
-        // Anotación normal
-        annotations.push({
-            id: Date.now(),
-            text: selectedText,
-            category: category,
-            variable: variable,
-            value: value,
-            timestamp: createdAt
-        });
-        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-    }
+    });
     updateAnnotationsList();
     hideAnnotationPanel();
     
