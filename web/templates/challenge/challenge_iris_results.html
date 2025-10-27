@@ -34,49 +34,6 @@
         </div>
     </div>
 
-    <!-- Comparación de Análisis -->
-    <div class="row">
-        <!-- Análisis Manual -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user-edit me-2"></i>
-                        {{ _('Tu Análisis Manual') }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="text-visualization">
-                        <p><strong>{{ _('Texto con tus anotaciones:') }}</strong> <span id="manual-annotations-count" class="badge bg-primary">0</span></p>
-                        <div id="manual-text-highlights" class="highlighted-text" style="max-height: 400px; overflow-y: auto; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
-                            <!-- Texto con highlights se carga aquí -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Análisis de IA -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-check me-2"></i>
-                        {{ _('Anotaciones IRIS') }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="text-visualization">
-                        <p><strong>{{ _('Texto con anotaciones IRIS:') }}</strong> <span id="original-annotations-count" class="badge bg-success">0</span></p>
-                        <div id="original-text-highlights" class="highlighted-text" style="max-height: 400px; overflow-y: auto; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
-                            <!-- Texto con highlights se carga aquí -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Métricas de Comparación -->
     <div class="row mb-4">
         <div class="col-12">
@@ -113,24 +70,49 @@
         </div>
     </div>
 
-    <!-- Detalles del Texto Analizado -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header">
+    <!-- Comparación de Análisis -->
+    <div class="row">
+        <!-- Análisis Manual -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header text-white" style="background-color: #5de0e6;">
                     <h5 class="mb-0">
-                        <i class="fas fa-file-alt me-2"></i>
-                        {{ _('Texto Analizado') }}
+                        <i class="fas fa-user-edit me-2"></i>
+                        {{ _('Tu Análisis Manual') }}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="text-content" id="analyzed-text">
-                        <p>{{ text_data.text }}</p>
+                    <div class="text-visualization">
+                        <p><strong>{{ _('Texto con tus anotaciones:') }}</strong> <span id="manual-annotations-count" class="badge" style="background-color: #5de0e6;">0</span></p>
+                        <div id="manual-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
+                            <!-- Texto con highlights se carga aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Análisis de IA -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header text-white" style="background-color: #8e44ad;">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        {{ _('Anotaciones IRIS') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-visualization">
+                        <p><strong>{{ _('Texto con anotaciones IRIS:') }}</strong> <span id="original-annotations-count" class="badge" style="background-color: #8e44ad;">0</span></p>
+                        <div id="original-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
+                            <!-- Texto con highlights se carga aquí -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 
 </div>
 
