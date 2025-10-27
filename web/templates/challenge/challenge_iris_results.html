@@ -182,6 +182,15 @@
     padding: 2px 4px;
     border-radius: 3px;
     font-weight: 500;
+    cursor: help;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.highlighted-text mark:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .mark-contenido_general {
@@ -189,14 +198,41 @@
     border-bottom: 3px solid #28a745;
 }
 
+.mark-contenido_general:hover {
+    background-color: #b8dfc0;
+}
+
 .mark-lenguaje {
     background-color: #ffe6e6;
     border-bottom: 3px solid #dc3545;
 }
 
+.mark-lenguaje:hover {
+    background-color: #ffd6d6;
+}
+
 .mark-fuentes {
     background-color: #e6f3ff;
     border-bottom: 3px solid #007bff;
+}
+
+.mark-fuentes:hover {
+    background-color: #cce7ff;
+}
+
+/* Lightweight tooltip for annotations */
+.annotation-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    max-width: 280px;
+    line-height: 1.3;
+    display: none;
 }
 
 .ai-category h6 {
@@ -268,6 +304,43 @@ function loadAnalysisResults() {
   loadManualAnnotations();
   loadOriginalAnnotations();
   calculateMetrics();
+  initMultiLabelTooltips();
+}
+
+function initMultiLabelTooltips() {
+  let tooltip = null;
+  const ensureTooltip = () => {
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.className = 'annotation-tooltip';
+      document.body.appendChild(tooltip);
+    }
+    return tooltip;
+  };
+
+  document.addEventListener('mousemove', function(e) {
+    const tip = ensureTooltip();
+    const underPointer = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []);
+    const marks = underPointer.filter(el => el && el.classList && el.classList.contains('annotation-mark'));
+    if (!marks || marks.length === 0) { tip.style.display = 'none'; return; }
+
+    const variables = Array.from(new Set(marks.map(m => m.getAttribute('data-variable')).filter(Boolean)));
+    const categories = Array.from(new Set(marks.map(m => {
+      if (m.classList.contains('mark-contenido_general')) return 'Contenido General';
+      if (m.classList.contains('mark-lenguaje')) return 'Lenguaje';
+      if (m.classList.contains('mark-fuentes')) return 'Fuentes';
+      return '';
+    }).filter(Boolean)));
+    const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
+    const catLabel = categories.join(', ');
+    tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+    tip.style.left = (e.clientX + 12) + 'px';
+    tip.style.top = (e.clientY + 12) + 'px';
+    tip.style.display = 'block';
+  });
+
+  document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
+  document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
 }
 
 function loadOriginalAnnotations() {
@@ -354,7 +427,7 @@ function applyAnnotationsToText(text, annotations) {
     let searchPos = result.indexOf(searchEscaped, 0);
     if (searchPos !== -1) {
       const before = result.substring(0, searchPos);
-      const highlighted = `<mark class="annotation-mark mark-${range.category}" data-variable="${escapeHtml(range.variables)}" title="${escapeHtml(range.category.replace('_', ' '))} · ${escapeHtml(range.varDescriptions)}">${searchEscaped}</mark>`;
+      const highlighted = `<mark class="annotation-mark mark-${range.category}" data-variable="${escapeHtml(range.variables)}">${searchEscaped}</mark>`;
       const after = result.substring(searchPos + searchEscaped.length);
       result = before + highlighted + after;
     }
