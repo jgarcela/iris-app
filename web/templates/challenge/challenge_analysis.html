@@ -1422,8 +1422,9 @@ function updateVariableOptions(category) {
         availableVariables = variables.lenguaje;
         console.log('updateVariableOptions - Using lenguaje variables:', availableVariables);
     } else if (category === 'fuentes' && variables.fuentes) {
-        availableVariables = variables.fuentes;
-        console.log('updateVariableOptions - Using fuentes variables:', availableVariables);
+        // Solo mostrar declaracion_fuente, las otras se muestran como controles adicionales
+        availableVariables = ['declaracion_fuente'];
+        console.log('updateVariableOptions - Using fuentes variables (only declaracion_fuente):', availableVariables);
     }
     
     console.log('updateVariableOptions - Final available variables:', availableVariables);
@@ -1594,6 +1595,39 @@ function updateValueOptions(category, variable) {
         nombre_fuente: 'genero_fuente'
     };
 
+    // Manejo especial para declaracion_fuente: mostrar controles adicionales para fuentes
+    if (variable === 'declaracion_fuente') {
+        if (compositeControls) {
+            compositeControls.style.display = 'block';
+            const nombreFuenteValues = variableValues['nombre_fuente'] || [];
+            const generoFuenteValues = variableValues['genero_fuente'] || [];
+            const tipoFuenteValues = variableValues['tipo_fuente'] || [];
+            
+            compositeControls.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">Nombre de la fuente</label>
+                        <select class="form-select" id="composite-nombre-fuente">
+                            ${nombreFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Género de la fuente</label>
+                        <select class="form-select" id="composite-genero-fuente">
+                            ${generoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Tipo de fuente</label>
+                        <select class="form-select" id="composite-tipo-fuente">
+                            <option value="">Seleccionar tipo...</option>
+                            ${tipoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+        }
+    }
+
     // Si la variable seleccionada es parte de un compuesto (solo se muestra la base), mostrar control de género
     const compositeDetail = compositePairs[variable];
     if (compositeDetail) {
@@ -1669,6 +1703,70 @@ function saveAnnotation() {
         }
         
     const createdAt = new Date().toISOString();
+    
+    // Manejo especial para declaracion_fuente: guardar todas las anotaciones de fuentes
+    if (variable === 'declaracion_fuente') {
+        const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+        const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+        const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+        
+        // 1) declaracion_fuente
+        annotations.push({
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: variable,
+            value: value,
+            timestamp: createdAt
+        });
+        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+        
+        // 2) nombre_fuente
+        if (nombreFuenteValue) {
+            annotations.push({
+                id: Date.now() + 1,
+                text: selectedText,
+                category: category,
+                variable: 'nombre_fuente',
+                value: nombreFuenteValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, 'nombre_fuente'); } catch(e) {}
+        }
+        
+        // 3) genero_fuente
+        if (generoFuenteValue) {
+            annotations.push({
+                id: Date.now() + 2,
+                text: selectedText,
+                category: category,
+                variable: 'genero_fuente',
+                value: generoFuenteValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, 'genero_fuente'); } catch(e) {}
+        }
+        
+        // 4) tipo_fuente
+        if (tipoFuenteValue) {
+            annotations.push({
+                id: Date.now() + 3,
+                text: selectedText,
+                category: category,
+                variable: 'tipo_fuente',
+                value: tipoFuenteValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, 'tipo_fuente'); } catch(e) {}
+        }
+        
+        updateAnnotationsList();
+        hideAnnotationPanel();
+        
+        // Habilitar botón
+        document.getElementById('save-analysis-btn').disabled = false;
+        return;
+    }
     
     // Manejo de variables compuestas: crear dos anotaciones sincronizadas
     const compositePairs = {
