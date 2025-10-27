@@ -130,6 +130,7 @@
                                             <select class="form-select" id="annotation-variable" required>
                                                 <option value="">{{ _('Seleccionar...') }}</option>
                                             </select>
+                                            <div id="variable-checkboxes-container" style="display: none;" class="mt-2"></div>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">{{ _('Valor') }}</label>
@@ -260,6 +261,7 @@
                                             <select class="form-select" id="annotation-variable" required>
                                                 <option value="">{{ _('Seleccionar...') }}</option>
                                             </select>
+                                            <div id="variable-checkboxes-container" style="display: none;" class="mt-2"></div>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">{{ _('Valor') }}</label>
@@ -1403,16 +1405,42 @@ function updateCategoryOptionsForAnnotationForm(difficulty) {
 
 function updateVariableOptions(category) {
     const variableSelect = document.getElementById('annotation-variable');
+    const checkboxContainer = document.getElementById('variable-checkboxes-container');
+    
+    // Clear both containers
     variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    if (checkboxContainer) {
+        checkboxContainer.innerHTML = '';
+    }
     
+    // Show checkboxes for Lenguaje category, select for others
+    const valueSelect = document.getElementById('annotation-value');
+    const valueLabel = valueSelect?.parentElement?.querySelector('label');
     
-    // Enable multiple selection only for Lenguaje category
     if (category === 'lenguaje') {
-        variableSelect.setAttribute('multiple', 'true');
-        variableSelect.style.minHeight = '120px';
+        variableSelect.style.display = 'none';
+        variableSelect.removeAttribute('required'); // Remove required when hidden
+        if (checkboxContainer) {
+            checkboxContainer.style.display = 'block';
+        }
+        // Hide value selector for lenguaje (will use "Sí" automatically)
+        if (valueSelect) {
+            valueSelect.style.display = 'none';
+            valueSelect.removeAttribute('required'); // Remove required when hidden
+        }
+        if (valueLabel) valueLabel.style.display = 'none';
     } else {
-        variableSelect.removeAttribute('multiple');
-        variableSelect.style.minHeight = 'auto';
+        variableSelect.style.display = 'block';
+        variableSelect.setAttribute('required', 'required');
+        if (checkboxContainer) {
+            checkboxContainer.style.display = 'none';
+        }
+        // Show value selector for other categories
+        if (valueSelect) {
+            valueSelect.style.display = 'block';
+            valueSelect.setAttribute('required', 'required');
+        }
+        if (valueLabel) valueLabel.style.display = 'block';
     }
 
     console.log('updateVariableOptions - Category:', category);
@@ -1442,12 +1470,33 @@ function updateVariableOptions(category) {
     const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
     availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
     
-    availableVariables.forEach(variable => {
-        const option = document.createElement('option');
-        option.value = variable;
-        option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        variableSelect.appendChild(option);
-    });
+    // Create checkboxes for lenguaje category, options for others
+    if (category === 'lenguaje' && checkboxContainer) {
+        availableVariables.forEach(variable => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'form-check';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input';
+            checkbox.id = `variable-checkbox-${variable}`;
+            checkbox.value = variable;
+            checkbox.name = 'variable-checkbox';
+            const label = document.createElement('label');
+            label.className = 'form-check-label';
+            label.htmlFor = `variable-checkbox-${variable}`;
+            label.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+            checkboxContainer.appendChild(checkboxDiv);
+        });
+    } else {
+        availableVariables.forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable;
+            option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            variableSelect.appendChild(option);
+        });
+    }
 }
 
 function updateValueOptions(category, variable) {
@@ -1705,12 +1754,15 @@ function saveAnnotation() {
     // Always use the form values for all difficulty levels
         const category = document.getElementById('annotation-category').value;
         const variableSelect = document.getElementById('annotation-variable');
-        const value = document.getElementById('annotation-value').value;
+        const valueSelect = document.getElementById('annotation-value');
+        const value = category === 'lenguaje' ? '2' : valueSelect.value;
         
-        // Handle multiple selection for lenguaje category
+        // Handle multiple selection for lenguaje category using checkboxes
         let selectedVariables = [];
-        if (category === 'lenguaje' && variableSelect.hasAttribute('multiple')) {
-            selectedVariables = Array.from(variableSelect.selectedOptions).map(option => option.value);
+        if (category === 'lenguaje') {
+            const checkboxes = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+            selectedVariables = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log('Lenguaje checkboxes checked:', selectedVariables);
             if (selectedVariables.length === 0) {
                 alert('{{ _("Por favor selecciona al menos una variable") }}');
                 return;
@@ -1718,6 +1770,8 @@ function saveAnnotation() {
         } else {
             selectedVariables = [variableSelect.value];
         }
+
+        console.log('Category:', category, 'Value:', value, 'SelectedVariables:', selectedVariables);
         
         if (!category || !value || selectedVariables.length === 0) {
             alert('{{ _("Por favor completa todos los campos") }}');
