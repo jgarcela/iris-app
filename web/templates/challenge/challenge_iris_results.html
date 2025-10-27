@@ -249,6 +249,35 @@
 const manualAnnotations = {{ manual_annotations | tojson | safe }};
 const originalAnnotations = {{ original_annotations | tojson | safe }};
 
+// Variable descriptions for tooltips
+const VARIABLE_DESCRIPTIONS = {
+  'cita_textual_titular': 'Cita textual titular',
+  'genero_nombre_propio_titular': 'Género nombre propio titular',
+  'genero_periodista': 'Género periodista',
+  'genero_personas_mencionadas': 'Género personas mencionadas',
+  'nombre_propio_titular': 'Nombre propio titular',
+  'personas_mencionadas': 'Personas mencionadas',
+  'tema': 'Tema',
+  'androcentrismo': 'Androcentrismo',
+  'asimetria': 'Asimetría',
+  'cargos_mujeres': 'Cargos mujeres',
+  'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+  'denominacion_dependiente': 'Denominación dependiente',
+  'denominacion_redundante': 'Denominación redundante',
+  'denominacion_sexualizada': 'Denominación sexualizada',
+  'dual_aparente': 'Dual aparente',
+  'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+  'hombre_humanidad': 'Hombre humanidad',
+  'infantilizacion': 'Infantilización',
+  'lenguaje_sexista': 'Lenguaje sexista',
+  'masculino_generico': 'Masculino genérico',
+  'sexismo_social': 'Sexismo social',
+  'declaracion_fuente': 'Declaración fuente',
+  'genero_fuente': 'Género fuente',
+  'nombre_fuente': 'Nombre fuente',
+  'tipo_fuente': 'Tipo fuente'
+};
+
 document.addEventListener('DOMContentLoaded', function() {
   loadAnalysisResults();
 });
@@ -298,34 +327,49 @@ function loadManualAnnotations() {
 }
 
 function applyAnnotationsToText(text, annotations) {
-  const ranges = [];
+  if (!annotations || annotations.length === 0) return escapeHtml(text);
   
+  // Group annotations by their text and category to avoid duplicates
+  const annotationMap = new Map();
   annotations.forEach(annotation => {
-    const searchText = annotation.text;
+    const key = `${annotation.text}|${annotation.category}`;
+    if (!annotationMap.has(key)) {
+      annotationMap.set(key, []);
+    }
+    annotationMap.get(key).push(annotation);
+  });
+  
+  // Create sorted ranges (go backwards to avoid position shifting)
+  const ranges = [];
+  annotationMap.forEach((annotationList, key) => {
+    const searchText = annotationList[0].text;
     let pos = text.indexOf(searchText);
     
     while (pos !== -1) {
-      const category = annotation.category;
-      const className = `mark-${category}`;
+      const category = annotationList[0].category;
+      const variables = [...new Set(annotationList.map(a => a.variable))];
+      const varDescriptions = variables.map(v => VARIABLE_DESCRIPTIONS[v] || v.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
       
       ranges.push({
         start: pos,
         end: pos + searchText.length,
-        className: className,
+        category: category,
+        variables: variables.join(', '),
+        varDescriptions: varDescriptions.join(', '),
         text: searchText
       });
       
-      pos = text.indexOf(searchText, pos + 1);
+      pos = text.indexOf(searchText, pos + searchText.length);
     }
   });
   
-  // Build highlighted text by going backwards to avoid position shifting
+  // Sort from end to beginning
   ranges.sort((a, b) => b.start - a.start);
   
   let result = text;
   ranges.forEach(range => {
     const before = result.substring(0, range.start);
-    const highlighted = `<mark class="${range.className}">${escapeHtml(range.text)}</mark>`;
+    const highlighted = `<mark class="annotation-mark mark-${range.category}" data-variable="${range.variables}" title="${range.category.replace('_', ' ')} · ${range.varDescriptions}">${escapeHtml(range.text)}</mark>`;
     const after = result.substring(range.end);
     result = before + highlighted + after;
   });
