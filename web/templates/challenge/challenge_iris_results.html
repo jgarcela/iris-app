@@ -438,6 +438,51 @@ function loadAnalysisResults() {
   loadOriginalSummary();
   calculateMetrics();
   initMultiLabelTooltips();
+  synchronizeTabs();
+}
+
+function synchronizeTabs() {
+  let isSyncing = false; // Flag to prevent infinite loop
+
+  // Get all tab links
+  const manualTextTab = document.getElementById('manual-text-tab');
+  const manualSummaryTab = document.getElementById('manual-summary-tab');
+  const originalTextTab = document.getElementById('original-text-tab');
+  const originalSummaryTab = document.getElementById('original-summary-tab');
+
+  // Manual tabs event listeners
+  manualTextTab.addEventListener('shown.bs.tab', function() {
+    if (!isSyncing) {
+      isSyncing = true;
+      originalTextTab.click();
+      setTimeout(() => { isSyncing = false; }, 100);
+    }
+  });
+
+  manualSummaryTab.addEventListener('shown.bs.tab', function() {
+    if (!isSyncing) {
+      isSyncing = true;
+      originalSummaryTab.click();
+      setTimeout(() => { isSyncing = false; }, 100);
+    }
+  });
+
+  // Original tabs event listeners
+  originalTextTab.addEventListener('shown.bs.tab', function() {
+    if (!isSyncing) {
+      isSyncing = true;
+      manualTextTab.click();
+      setTimeout(() => { isSyncing = false; }, 100);
+    }
+  });
+
+  originalSummaryTab.addEventListener('shown.bs.tab', function() {
+    if (!isSyncing) {
+      isSyncing = true;
+      manualSummaryTab.click();
+      setTimeout(() => { isSyncing = false; }, 100);
+    }
+  });
 }
 
 function initMultiLabelTooltips() {
