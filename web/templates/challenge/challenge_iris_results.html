@@ -348,12 +348,16 @@ function applyAnnotationsToText(text, annotations) {
   // Sort from end to beginning
   ranges.sort((a, b) => b.start - a.start);
   
-  let result = text;
+  let result = escapeHtml(text);
   ranges.forEach(range => {
-    const before = result.substring(0, range.start);
-    const highlighted = `<mark class="annotation-mark mark-${range.category}" data-variable="${range.variables}" title="${range.category.replace('_', ' ')} · ${range.varDescriptions}">${escapeHtml(range.text)}</mark>`;
-    const after = result.substring(range.end);
-    result = before + highlighted + after;
+    let searchEscaped = escapeHtml(range.text);
+    let searchPos = result.indexOf(searchEscaped, 0);
+    if (searchPos !== -1) {
+      const before = result.substring(0, searchPos);
+      const highlighted = `<mark class="annotation-mark mark-${range.category}" data-variable="${escapeHtml(range.variables)}" title="${escapeHtml(range.category.replace('_', ' '))} · ${escapeHtml(range.varDescriptions)}">${searchEscaped}</mark>`;
+      const after = result.substring(searchPos + searchEscaped.length);
+      result = before + highlighted + after;
+    }
   });
   
   return result;
