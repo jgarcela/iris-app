@@ -3,11 +3,10 @@
 {% block title %}{{ _('Desafío de Análisis IRIS - Semana de la Ciencia') }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/difficulty_enhancements.css') }}">
 {% endblock %}
 
 {% block challenge_content %}
-<div class="container-fluid py-4" data-user-difficulty="{{ user_difficulty|tojson if user_difficulty else 'null' }}">
+<div class="container-fluid py-4">
 
 
 
@@ -24,24 +23,9 @@
                         <div class="col-md-4 text-center mb-3">
                             <div class="step-icon">
                                 <i class="fas fa-mouse-pointer fa-2x text-primary mb-2"></i>
-                                <h5>{{ _('1. Selecciona un texto') }}</h5>
-                                <p class="text-muted small">{{ _('Elige uno de los textos disponibles') }}</p>
+                                <h5>{{ _('1. Recibe un texto') }}</h5>
+                                <p class="text-muted small">{{ _('Se te proporcionará uno de los textos disponibles') }}</p>
                                 
-                                <!-- Niveles de Dificultad integrados -->
-                                <div class="difficulty-selector mt-3">
-                                    <h6 class="mb-2">{{ _('Nivel de dificultad:') }}</h6>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-outline-success btn-sm select-difficulty-btn" data-level="facil">
-                                            <i class="fas fa-seedling me-1"></i>{{ _('Fácil') }}
-                                        </button>
-                                        <button type="button" class="btn btn-outline-warning btn-sm select-difficulty-btn" data-level="medio">
-                                            <i class="fas fa-balance-scale me-1"></i>{{ _('Medio') }}
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm select-difficulty-btn" data-level="dificil">
-                                            <i class="fas fa-microscope me-1"></i>{{ _('Difícil') }}
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-center mb-3">
@@ -66,150 +50,31 @@
 
     <!-- User Control Panel -->
 
-    <!-- Lista de Textos -->
+    <!-- Simple Challenge Interface -->
     <div class="row">
         <div class="col-12">
-            <h2 class="text-center mb-4">
-                <i class="fas fa-list-alt me-2"></i>
-                {{ _('Textos del Desafío') }}
+            <div id="challengeInterface" class="text-center">
+                <!-- Start Button -->
+                <div id="startSection">
+                    <h2 class="mb-4">
+                        <i class="fas fa-microscope me-2"></i>
+                        {{ _('¡Únete al Desafío!') }}
             </h2>
-            
-            <!-- Textos Fáciles -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-success mb-3">
-                        <i class="fas fa-check-circle me-2"></i>
-                        {{ _('Textos Fáciles') }}
-                        <span class="badge bg-success ms-2" id="facilCountHeader">3</span>
-                    </h4>
-                </div>
-                <div class="col-12">
-                    <div class="row g-3">
-                {% for text in texts %}
-                        {% if text.difficulty == 'Fácil' %}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="card h-100 text-card" data-text-id="{{ text.id }}">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
-                                    <span class="badge bg-success" title="Sesgos evidentes y obvios">
-                                {{ text.difficulty }}
-                            </span>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text text-muted small">
-                                        {{ text.text[:120] }}{% if text.text|length > 120 %}...{% endif %}
-                            </p>
-                            <div class="categories mb-3">
-                                {% for category in text.categories %}
-                                <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <button class="btn btn-primary w-100 start-analysis-btn" 
-                                    data-text-id="{{ text.id }}">
+                    <p class="lead text-muted mb-4">
+                        {{ _('Analiza el texto que aparece a continuación e identifica los sesgos de género.') }}
+                    </p>
+                    <button id="startChallengeBtn" class="btn btn-primary btn-lg">
                                 <i class="fas fa-play me-2"></i>
                                 {{ _('Comenzar Análisis') }}
                             </button>
-                        </div>
-                    </div>
-                </div>
-                        {% endif %}
-                {% endfor %}
-            </div>
-        </div>
     </div>
 
-            <!-- Textos Medios -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-warning mb-3">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ _('Textos Medios') }}
-                        <span class="badge bg-warning ms-2" id="medioCountHeader">0</span>
-                    </h4>
+                <!-- Text Display (hidden initially) -->
+                <div id="textSection" style="display: none;">
+                    <div id="currentTextContainer">
+                        <!-- Text will be loaded here -->
                 </div>
-        <div class="col-12">
-                    <div class="row g-3">
-                    {% for text in texts %}
-                        {% if text.difficulty == 'Medio' %}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="card h-100 text-card" data-text-id="{{ text.id }}">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
-                                    <span class="badge bg-warning" title="Sesgos sutiles pero detectables">
-                                        {{ text.difficulty }}
-                                    </span>
                                 </div>
-                                <div class="card-body">
-                                    <p class="card-text text-muted small">
-                                        {{ text.text[:120] }}{% if text.text|length > 120 %}...{% endif %}
-                                    </p>
-                                    <div class="categories mb-3">
-                                        {% for category in text.categories %}
-                                        <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                <div class="card-footer bg-transparent">
-                                    <button class="btn btn-primary w-100 start-analysis-btn" 
-                                            data-text-id="{{ text.id }}">
-                                        <i class="fas fa-play me-2"></i>
-                                        {{ _('Comenzar Análisis') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-                            </div>
-                        </div>
-
-            <!-- Textos Difíciles -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-danger mb-3">
-                        <i class="fas fa-times-circle me-2"></i>
-                        {{ _('Textos Difíciles') }}
-                        <span class="badge bg-danger ms-2" id="dificilCountHeader">0</span>
-                    </h4>
-                </div>
-                <div class="col-12">
-                    <div class="row g-3">
-                    {% for text in texts %}
-                        {% if text.difficulty == 'Difícil' %}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <div class="card h-100 text-card" data-text-id="{{ text.id }}">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold">{{ text.title }}</h6>
-                                    <span class="badge bg-danger" title="Sesgos muy sutiles o complejos">
-                                        {{ text.difficulty }}
-                                    </span>
-                                </div>
-                                <div class="card-body">
-                                    <p class="card-text text-muted small">
-                                        {{ text.text[:120] }}{% if text.text|length > 120 %}...{% endif %}
-                                    </p>
-                                    <div class="categories mb-3">
-                                        {% for category in text.categories %}
-                                        <span class="badge bg-light text-dark me-1 mb-1">{{ category }}</span>
-                                        {% endfor %}
-                            </div>
-                        </div>
-                                <div class="card-footer bg-transparent">
-                                    <button class="btn btn-primary w-100 start-analysis-btn" 
-                                            data-text-id="{{ text.id }}">
-                                        <i class="fas fa-play me-2"></i>
-                                        {{ _('Comenzar Análisis') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -223,10 +88,6 @@ body {
     min-height: 100vh;
 }
 
-/* Difficulty System Styling */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
 
 .difficulty-card {
     transition: all 0.3s ease;
@@ -995,673 +856,188 @@ h2, h3, h4, h5 {
 </style>
 
 <script>
-// Global state for difficulty management
-let userDifficulty = {
-    level: 'principiante',
-    challenge: 'facil',
-    unlockedTexts: {
-        facil: 3,
-        medio: 0,
-        dificil: 0
-    },
-    completedTexts: {
-        facil: 0,
-        medio: 0,
-        dificil: 0
-    }
+// Sequential Challenge System for Semana de la Ciencia 2025
+let challengeState = {
+    isStarted: false,
+    currentTextIndex: 0,
+    texts: [],
+    loading: false
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the difficulty system
-    initializeDifficultySystem();
-    
-    // Handle analysis button clicks
-    document.querySelectorAll('.start-analysis-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const textId = this.getAttribute('data-text-id');
-            window.location.href = `/challenge/analyze/${textId}`;
-        });
-    });
-
-    // Handle difficulty selection buttons
-    document.querySelectorAll('.select-difficulty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const level = this.getAttribute('data-level');
-            selectDifficultyLevel(level);
-        });
-    });
-
-    // Load challenge statistics
-    loadChallengeStats();
-    
-    // Show assessment modal if first time
-    checkFirstTimeUser();
-    
-    // Initialize progress circle
-    updateProgressCircle();
+    setupEventListeners();
 });
 
-function initializeDifficultySystem() {
-    // Check if user has difficulty level set (from server-side data)
-    const container = document.querySelector('.container-fluid');
-    const userHasDifficulty = container.getAttribute('data-user-difficulty');
-    
-    if (userHasDifficulty && userHasDifficulty !== 'null') {
-        // Load user's difficulty from server data
-        const serverDifficulty = JSON.parse(userHasDifficulty);
-        if (serverDifficulty) {
-            userDifficulty = serverDifficulty;
-        }
-    } else {
-        // Fallback to localStorage if no server data
-        const savedDifficulty = localStorage.getItem('userDifficulty');
-        if (savedDifficulty) {
-            userDifficulty = JSON.parse(savedDifficulty);
-        }
-    }
-    
-    // Update UI based on current state
-    updateUserLevelDisplay();
-    updateDifficultyControls();
-    updateTextCards();
-    
-    // Setup event listeners
-    setupAssessmentModal();
-    setupDifficultyControls();
+function setupEventListeners() {
+    // Start challenge button
+    document.getElementById('startChallengeBtn').addEventListener('click', function() {
+        startChallenge();
+    });
 }
 
-function checkFirstTimeUser() {
-    // Check if user has difficulty level set (from server-side data)
-    const container = document.querySelector('.container-fluid');
-    const userHasDifficulty = container ? container.getAttribute('data-user-difficulty') : null;
-    const assessedFlag = localStorage.getItem('challenge_assessed');
-    const assessmentSection = document.getElementById('difficultyAssessmentSection');
+async function startChallenge() {
+    if (challengeState.loading) return;
     
-    // If assessment section doesn't exist, skip this logic
-    if (!assessmentSection) {
-        return;
+    challengeState.loading = true;
+    
+    // Show loading state
+    document.getElementById('startSection').style.display = 'none';
+    document.getElementById('textSection').style.display = 'block';
+    
+    const container = document.getElementById('currentTextContainer');
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando textos...</span>
+            </div>
+            <p class="mt-3">Cargando textos del desafío...</p>
+        </div>
+    `;
+    
+    try {
+        // Load texts from API
+        await loadTextsFromAPI();
+        
+        // Go directly to analysis of first text
+        startAnalysis(challengeState.texts[0].id);
+    } catch (error) {
+        console.error('Error loading texts:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger text-center">
+                <h5>Error al cargar los textos</h5>
+                <p>No se pudieron cargar los textos del desafío. Por favor, inténtalo de nuevo.</p>
+                <button class="btn btn-primary" onclick="location.reload()">Reintentar</button>
+            </div>
+        `;
+    } finally {
+        challengeState.loading = false;
     }
-    
-    if ((!userHasDifficulty || userHasDifficulty === 'null') && !assessedFlag) {
-        // Show only assessment section for new users
-        assessmentSection.style.display = 'block';
-        // Hide all other content
-        document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
-            section.style.display = 'none';
-        });
-    } else {
-        // Hide assessment section completely if user already has difficulty set
-        assessmentSection.style.display = 'none';
-        // Load user's difficulty from server data
-        if (userHasDifficulty && userHasDifficulty !== 'null') {
-            const serverDifficulty = JSON.parse(userHasDifficulty);
-            if (serverDifficulty) {
-                userDifficulty = serverDifficulty;
-                updateUserLevelDisplay();
-                updateDifficultyControls();
-                updateTextCards();
+}
+
+async function loadTextsFromAPI() {
+    try {
+        console.log('Loading texts from API...');
+        const response = await fetch('http://localhost:8000/analysis/semana-ciencia/texts');
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        }
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        // Define the specific order we want
+        const orderedIds = [
+            '68f9e5a22e476535f8a73ec4', // Paloma Lago
+            '68f9e5a22e476535f8a73ec2', // Paula Badosa
+            '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+            '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+            '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+            '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+        ];
+        
+        // Reorder texts according to our sequence
+        challengeState.texts = orderedIds.map(id => {
+            const text = data.texts.find(t => t._id === id);
+            if (!text) {
+                console.warn(`Text with ID ${id} not found`);
+                return null;
             }
-        }
-    }
-}
-
-function setupAssessmentModal() {
-    const assessmentSection = document.getElementById('difficultyAssessmentSection');
-    const confirmBtn = document.getElementById('confirmAssessment');
-    const skipBtn = document.getElementById('skipAssessment');
-
-    // If assessment UI is not present on this page, safely exit
-    if (!assessmentSection || !confirmBtn || !skipBtn) {
-        return;
-    }
-
-    let selectedOption = null;
-
-    // Handle option selection (both level and challenge in one click)
-    document.querySelectorAll('.option-card').forEach(card => {
-        card.addEventListener('click', function() {
-            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedOption = {
-                level: this.getAttribute('data-level'),
-                challenge: this.getAttribute('data-challenge')
+            return {
+                id: text._id,
+                title: text.title || 'Texto para Analizar',
+                content: text.text,
+                categories: ['Semana de la Ciencia 2025']
             };
-            confirmBtn.disabled = false;
-        });
-    });
-
-    // Confirm assessment
-    confirmBtn.addEventListener('click', function() {
-        if (selectedOption) {
-            userDifficulty.level = selectedOption.level;
-            userDifficulty.challenge = selectedOption.challenge;
-
-            // Set initial unlocked texts based on assessment
-            setInitialUnlockedTexts(selectedOption.level, selectedOption.challenge);
-
-            // Save to localStorage so it persists after redirect
-            localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
-            localStorage.setItem('challenge_assessed', '1');
-
-            // Hide assessment section and show other sections
-            assessmentSection.style.display = 'none';
-            document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
-                section.style.display = 'block';
-            });
-
-            // Update UI
-            updateUserLevelDisplay();
-            updateDifficultyControls();
-            updateTextCards();
-
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    });
-
-    // Skip assessment
-    skipBtn.addEventListener('click', function() {
-        // Use default settings
-        userDifficulty.level = 'principiante';
-        userDifficulty.challenge = 'facil';
-        setInitialUnlockedTexts('principiante', 'facil');
-
-        // Save to localStorage so it persists after redirect
-        localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
-        localStorage.setItem('challenge_assessed', '1');
-
-        // Hide assessment section and show other sections
-        assessmentSection.style.display = 'none';
-        document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
-            section.style.display = 'block';
-        });
-
-        // Update UI
-        updateUserLevelDisplay();
-        updateDifficultyControls();
-        updateTextCards();
-
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-}
-
-function setInitialUnlockedTexts(level, challenge) {
-    // Reset unlocked texts
-    userDifficulty.unlockedTexts = { facil: 0, medio: 0, dificil: 0 };
-    
-    // Set based on assessment - only 3 levels now
-    if (level === 'principiante' && challenge === 'facil') {
-        userDifficulty.unlockedTexts.facil = 3;
-    } else if (level === 'intermedio' && challenge === 'medio') {
-        userDifficulty.unlockedTexts.facil = 2;
-        userDifficulty.unlockedTexts.medio = 2;
-    } else if (level === 'avanzado' && challenge === 'dificil') {
-        userDifficulty.unlockedTexts.facil = 1;
-        userDifficulty.unlockedTexts.medio = 2;
-        userDifficulty.unlockedTexts.dificil = 2;
-    }
-}
-
-function setupDifficultyControls() {
-    // Unlock all button (optional in page)
-    const unlockAllBtn = document.getElementById('unlockAllBtn');
-    if (unlockAllBtn) {
-        unlockAllBtn.addEventListener('click', function() {
-            userDifficulty.unlockedTexts.facil = 10;
-            userDifficulty.unlockedTexts.medio = 10;
-            userDifficulty.unlockedTexts.dificil = 10;
-            updateDifficultyControls();
-            updateTextCards();
-            saveUserDifficulty();
-        });
-    }
-    
-    // Adjust level button (optional in page)
-    const adjustLevelBtn = document.getElementById('adjustLevelBtn');
-    const assessmentSection = document.getElementById('difficultyAssessmentSection');
-    if (adjustLevelBtn && assessmentSection) {
-        adjustLevelBtn.addEventListener('click', function() {
-            // Show assessment section
-            assessmentSection.style.display = 'block';
-            // Hide other sections temporarily
-            document.querySelectorAll('.row:not(#difficultyAssessmentSection)').forEach(section => {
-                section.style.display = 'none';
-            });
-            // Scroll to assessment
-            assessmentSection.scrollIntoView({ behavior: 'smooth' });
-        });
-    }
-}
-
-function updateUserLevelDisplay() {
-    const currentLevelEl = document.getElementById('currentLevel');
-    const levelDescriptionEl = document.getElementById('levelDescription');
-    if (currentLevelEl) currentLevelEl.textContent = getLevelDisplayName(userDifficulty.level);
-    if (levelDescriptionEl) levelDescriptionEl.textContent = getLevelDescription(userDifficulty.level);
-}
-
-function updateDifficultyControls() {
-    // Update counts display in difficulty management section (optional)
-    const facilCountEl = document.getElementById('facilCount');
-    const medioCountEl = document.getElementById('medioCount');
-    const dificilCountEl = document.getElementById('dificilCount');
-    if (facilCountEl) facilCountEl.textContent = userDifficulty.unlockedTexts.facil;
-    if (medioCountEl) medioCountEl.textContent = userDifficulty.unlockedTexts.medio;
-    if (dificilCountEl) dificilCountEl.textContent = userDifficulty.unlockedTexts.dificil;
-    
-    // Update counts display in section headers (present)
-    const facilHdr = document.getElementById('facilCountHeader');
-    const medioHdr = document.getElementById('medioCountHeader');
-    const dificilHdr = document.getElementById('dificilCountHeader');
-    if (facilHdr) facilHdr.textContent = userDifficulty.unlockedTexts.facil;
-    if (medioHdr) medioHdr.textContent = userDifficulty.unlockedTexts.medio;
-    if (dificilHdr) dificilHdr.textContent = userDifficulty.unlockedTexts.dificil;
-}
-
-function updateTextCards() {
-    const textCards = document.querySelectorAll('.text-card');
-    let facilCount = 0;
-    let medioCount = 0;
-    let dificilCount = 0;
-    
-    textCards.forEach(card => {
-        const difficulty = card.querySelector('.badge').textContent.trim();
-        let isUnlocked = false;
-        let isRecommended = false;
-        let isNew = false;
+        }).filter(text => text !== null);
         
-        if (difficulty === 'Fácil') {
-            facilCount++;
-            isUnlocked = facilCount <= userDifficulty.unlockedTexts.facil;
-            isRecommended = facilCount <= 2 && userDifficulty.level === 'principiante';
-        } else if (difficulty === 'Medio') {
-            medioCount++;
-            isUnlocked = medioCount <= userDifficulty.unlockedTexts.medio;
-            isRecommended = medioCount <= 2 && userDifficulty.level === 'intermedio';
-        } else if (difficulty === 'Difícil') {
-            dificilCount++;
-            isUnlocked = dificilCount <= userDifficulty.unlockedTexts.dificil;
-            isRecommended = dificilCount <= 2 && (userDifficulty.level === 'avanzado' || userDifficulty.level === 'experto');
+        if (challengeState.texts.length === 0) {
+            throw new Error('No se encontraron textos para el desafío');
         }
         
-        // Update card classes
-        card.classList.remove('locked', 'recommended', 'new');
-        if (!isUnlocked) {
-            card.classList.add('locked');
-        } else {
-            if (isRecommended) {
-                card.classList.add('recommended');
-            }
-            if (facilCount === 1 || medioCount === 1 || dificilCount === 1) {
-                card.classList.add('new');
-            }
-        }
-    });
-}
-
-function saveUserDifficulty() {
-    // This would be an API call in real implementation
-    // For now, we'll use localStorage as fallback
-    localStorage.setItem('userDifficulty', JSON.stringify(userDifficulty));
-}
-
-function saveUserDifficultyToServer(difficulty) {
-    // This would be an API call to save user difficulty to server
-    // For now, we'll simulate it
-    console.log('Saving user difficulty to server:', difficulty);
-    
-    // In a real implementation, this would be:
-    // fetch('/api/user/difficulty', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(difficulty)
-    // });
-    
-    // For now, just save to localStorage as fallback
-    localStorage.setItem('userDifficulty', JSON.stringify(difficulty));
-}
-
-function getLevelDisplayName(level) {
-    const names = {
-        'principiante': 'Principiante',
-        'intermedio': 'Intermedio',
-        'avanzado': 'Avanzado'
-    };
-    return names[level] || 'Principiante';
-}
-
-function getLevelDescription(level) {
-    const descriptions = {
-        'principiante': 'Nunca has hecho esto',
-        'intermedio': 'He analizado algunos textos',
-        'avanzado': 'Tengo experiencia regular'
-    };
-    return descriptions[level] || 'Nunca has hecho esto';
-}
-
-function getChallengeDisplayName(challenge) {
-    const names = {
-        'facil': 'Fácil',
-        'medio': 'Medio',
-        'dificil': 'Difícil'
-    };
-    return names[challenge] || 'Fácil';
-}
-
-function getSelectionDescription(level, challenge) {
-    const descriptions = {
-        'principiante-facil': 'Perfecto para empezar desde cero con textos fáciles',
-        'intermedio-medio': 'Ideal para tu nivel de experiencia intermedia',
-        'avanzado-dificil': 'Desafíos que pondrán a prueba tus habilidades avanzadas'
-    };
-    
-    const key = `${level}-${challenge}`;
-    return descriptions[key] || 'Configuración personalizada para tu nivel';
-}
-
-function loadChallengeStats() {
-    // No longer needed - removed statistics section
-}
-
-// New functions for enhanced difficulty system
-function selectDifficultyLevel(level) {
-    // Update user difficulty
-    userDifficulty.challenge = level;
-    
-    // Update UI to show selection in the integrated buttons
-    document.querySelectorAll('.select-difficulty-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    const selectedBtn = document.querySelector(`[data-level="${level}"]`);
-    if (selectedBtn) {
-        selectedBtn.classList.add('active');
-    }
-    
-    // Update progress and unlock texts based on level
-    updateUnlockedTexts(level);
-    
-    // Save to localStorage
-    saveUserDifficulty();
-    
-    // Show feedback
-    showDifficultyFeedback(level);
-    
-    // Scroll to texts section (fallback compatible without :has selector)
-    setTimeout(() => {
-        const sections = Array.from(document.querySelectorAll('.row'));
-        const textSection = sections.find(sec => sec.querySelector('.text-card'));
-        if (textSection) {
-            textSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, 500);
-}
-
-function updateUnlockedTexts(level) {
-    // Unlock texts based on difficulty level
-    switch(level) {
-        case 'facil':
-            userDifficulty.unlockedTexts.facil = 10;
-            userDifficulty.unlockedTexts.medio = 0;
-            userDifficulty.unlockedTexts.dificil = 0;
-            break;
-        case 'medio':
-            userDifficulty.unlockedTexts.facil = 10;
-            userDifficulty.unlockedTexts.medio = 10;
-            userDifficulty.unlockedTexts.dificil = 0;
-            break;
-        case 'dificil':
-            userDifficulty.unlockedTexts.facil = 10;
-            userDifficulty.unlockedTexts.medio = 10;
-            userDifficulty.unlockedTexts.dificil = 10;
-            break;
-    }
-    
-    updateDifficultyControls();
-    updateTextCards();
-}
-
-function updateProgressCircle() {
-    const progressCircle = document.getElementById('difficultyProgress');
-    const progressText = document.getElementById('progressText');
-    
-    if (!progressCircle || !progressText) return;
-    
-    // Calculate progress based on completed texts
-    const totalCompleted = userDifficulty.completedTexts.facil + 
-                          userDifficulty.completedTexts.medio + 
-                          userDifficulty.completedTexts.dificil;
-    
-    const totalAvailable = userDifficulty.unlockedTexts.facil + 
-                          userDifficulty.unlockedTexts.medio + 
-                          userDifficulty.unlockedTexts.dificil;
-    
-    const progressPercentage = totalAvailable > 0 ? (totalCompleted / totalAvailable) * 100 : 0;
-    
-    // Update progress circle
-    progressCircle.style.background = `conic-gradient(#4CAF50 ${progressPercentage * 3.6}deg, #e0e0e0 ${progressPercentage * 3.6}deg)`;
-    progressText.textContent = `${Math.round(progressPercentage)}%`;
-}
-
-function showDifficultyFeedback(level) {
-    const feedbackMessages = {
-        'facil': {
-            title: '¡Perfecto para empezar!',
-            message: 'Has seleccionado textos fáciles. Los sesgos serán evidentes y fáciles de identificar.',
-            type: 'success'
-        },
-        'medio': {
-            title: '¡Nivel intermedio seleccionado!',
-            message: 'Has seleccionado textos de nivel medio. Los sesgos serán más sutiles pero detectables. ¡Perfecto para desarrollar tus habilidades!',
-            type: 'warning'
-        },
-        'dificil': {
-            title: '¡Desafío avanzado!',
-            message: 'Has seleccionado textos difíciles. Los sesgos serán muy sutiles y complejos. ¡Prepárate para un análisis profundo!',
-            type: 'danger'
-        }
-    };
-    
-    const feedback = feedbackMessages[level];
-    if (!feedback) return;
-    
-    // Create and show feedback toast
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${feedback.type} alert-dismissible fade show position-fixed`;
-    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    toast.innerHTML = `
-        <strong>${feedback.title}</strong><br>
-        ${feedback.message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.parentNode.removeChild(toast);
-        }
-    }, 5000);
-}
-
-function updateUserLevelDisplay() {
-    const currentLevelElement = document.getElementById('currentLevel');
-    const levelDescriptionElement = document.getElementById('levelDescription');
-    
-    if (currentLevelElement) {
-        currentLevelElement.textContent = getLevelDisplayName(userDifficulty.level);
-    }
-    
-    if (levelDescriptionElement) {
-        levelDescriptionElement.textContent = getLevelDescription(userDifficulty.level);
+    } catch (error) {
+        console.error('Error loading texts from API:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        throw error;
     }
 }
 
-function getLevelDisplayName(level) {
-    const names = {
-        'principiante': 'Principiante',
-        'intermedio': 'Intermedio',
-        'avanzado': 'Avanzado'
-    };
-    return names[level] || 'Principiante';
-}
-
-function getLevelDescription(level) {
-    const descriptions = {
-        'principiante': 'Nunca has hecho esto',
-        'intermedio': 'He analizado algunos textos',
-        'avanzado': 'Tengo experiencia regular'
-    };
-    return descriptions[level] || 'Nunca has hecho esto';
-}
-
-// Adaptive UI functions
-function adaptInterfaceToDifficulty(level) {
-    // Hide/show sections based on difficulty (without :has)
-    const sections = Array.from(document.querySelectorAll('.row'));
-    const textSections = sections.filter(sec => sec.querySelector('.text-card'));
+function showSequentialText() {
+    // Get current text in sequence
+    const selectedText = challengeState.texts[challengeState.currentTextIndex];
     
-    textSections.forEach(section => {
-        const hasEasy = !!section.querySelector('.badge.bg-success');
-        const hasMedium = !!section.querySelector('.badge.bg-warning');
-        const hasHard = !!section.querySelector('.badge.bg-danger');
-        
-        if (level === 'facil') {
-            section.style.display = hasEasy ? 'block' : 'none';
-        } else if (level === 'medio') {
-            section.style.display = (hasEasy || hasMedium) ? 'block' : 'none';
-        } else {
-            section.style.display = 'block';
-        }
-    });
-    
-    // Update help text based on difficulty
-    updateHelpText(level);
-    
-    // Adjust interface complexity
-    adjustInterfaceComplexity(level);
-}
-
-function updateHelpText(level) {
-    const helpTexts = {
-        'facil': {
-            title: 'Consejos para el nivel fácil',
-            content: 'Los sesgos en este nivel son evidentes. Busca frases como "primera mujer", "exclusivamente por mérito" o desbalances claros en las fuentes.'
-        },
-        'medio': {
-            title: 'Consejos para el nivel medio',
-            content: 'Los sesgos son más sutiles. Presta atención a diferencias en el tratamiento del lenguaje, desbalances moderados y términos técnicos.'
-        },
-        // For difficult level, do not show tips
-        'dificil': null
-    };
-    
-    const help = helpTexts[level];
-    if (!help) {
-        // Remove help section if present
-        const existing = document.getElementById('difficulty-help');
-        if (existing && existing.parentNode) {
-            existing.parentNode.removeChild(existing);
-        }
-        return;
-    }
-    
-    // Create or update help section
-    let helpSection = document.getElementById('difficulty-help');
-    if (!helpSection) {
-        helpSection = document.createElement('div');
-        helpSection.id = 'difficulty-help';
-        helpSection.className = 'alert alert-info mt-4';
-        document.querySelector('.container-fluid').appendChild(helpSection);
-    }
-    
-    helpSection.innerHTML = `
-        <h5><i class="fas fa-lightbulb me-2"></i>${help.title}</h5>
-        <p class="mb-0">${help.content}</p>
+    const container = document.getElementById('currentTextContainer');
+    container.innerHTML = `
+        <div class="card mx-auto" style="max-width: 800px;">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-text me-2"></i>
+                    ${selectedText.title}
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text lead">${selectedText.content}</p>
+                <div class="categories mt-3">
+                    ${selectedText.categories.map(cat => 
+                        `<span class="badge bg-secondary me-1">${cat}</span>`
+                    ).join('')}
+                </div>
+            </div>
+            <div class="card-footer bg-light text-center">
+                ${challengeState.currentTextIndex < challengeState.texts.length - 1 ? 
+                    `<button class="btn btn-primary btn-lg me-3" onclick="nextText()">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        Siguiente Texto
+                    </button>` : ''
+                }
+                <button class="btn btn-success btn-lg" onclick="startAnalysis(${selectedText.id})">
+                    <i class="fas fa-microscope me-2"></i>
+                    Analizar este Texto
+                </button>
+            </div>
+        </div>
     `;
 }
 
-function adjustInterfaceComplexity(level) {
-    // Adjust button sizes and complexity based on level
-    const buttons = document.querySelectorAll('.start-analysis-btn');
-    
-    buttons.forEach(button => {
-        if (level === 'facil') {
-            button.classList.add('btn-lg');
-            button.innerHTML = '<i class="fas fa-play me-2"></i>¡Empezar Análisis!';
-        } else if (level === 'medio') {
-            button.classList.remove('btn-lg');
-            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar Análisis';
-        } else if (level === 'dificil') {
-            button.classList.remove('btn-lg');
-            button.innerHTML = '<i class="fas fa-play me-2"></i>Comenzar análisis';
-        }
-    });
-    
-    // Adjust card complexity
-    const cards = document.querySelectorAll('.text-card');
-    cards.forEach(card => {
-        if (level === 'facil') {
-            card.classList.add('simplified');
-        } else {
-            card.classList.remove('simplified');
-        }
-    });
+function nextText() {
+    // Move to next text in sequence
+    if (challengeState.currentTextIndex < challengeState.texts.length - 1) {
+        challengeState.currentTextIndex++;
+        showSequentialText();
+    }
 }
 
-// Enhanced initialization
-function initializeEnhancedDifficultySystem() {
-    // Set up difficulty selection handlers
-    document.querySelectorAll('.select-difficulty-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const level = this.getAttribute('data-level');
-            selectDifficultyLevel(level);
-            adaptInterfaceToDifficulty(level);
-        });
-    });
+function startAnalysis(textId) {
+    // Store current text index for navigation
+    const currentIndex = challengeState.texts.findIndex(text => text.id === textId);
+    if (currentIndex !== -1) {
+        challengeState.currentTextIndex = currentIndex;
+    }
     
-    // Initialize with current difficulty
-    const currentLevel = userDifficulty.challenge || 'facil';
-    selectDifficultyLevel(currentLevel);
-    adaptInterfaceToDifficulty(currentLevel);
-    
-    // Add keyboard navigation
-    document.addEventListener('keydown', function(e) {
-        if (e.key >= '1' && e.key <= '3') {
-            const levels = ['facil', 'medio', 'dificil'];
-            const level = levels[parseInt(e.key) - 1];
-            if (level) {
-                selectDifficultyLevel(level);
-                adaptInterfaceToDifficulty(level);
-            }
-        }
-    });
+    // Redirect to analysis page with selected text
+    window.location.href = `/challenge/analyze/${textId}`;
 }
 
-// Update the main initialization
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the difficulty system
-    initializeDifficultySystem();
-    initializeEnhancedDifficultySystem();
-    
-    // Handle analysis button clicks
-    document.querySelectorAll('.start-analysis-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const textId = this.getAttribute('data-text-id');
-            window.location.href = `/challenge/analyze/${textId}`;
-        });
-    });
+// Function to get next text in sequence
+function getNextTextId() {
+    const nextIndex = challengeState.currentTextIndex + 1;
+    if (nextIndex < challengeState.texts.length) {
+        return challengeState.texts[nextIndex].id;
+    }
+    return null;
+}
 
-    // Load challenge statistics
-    loadChallengeStats();
-    
-    // Show assessment modal if first time
-    checkFirstTimeUser();
-    
-    // Initialize progress circle
-    updateProgressCircle();
-});
+// Function to check if there are more texts
+function hasNextText() {
+    return challengeState.currentTextIndex + 1 < challengeState.texts.length;
+}
+
 </script>
 {% endblock %}

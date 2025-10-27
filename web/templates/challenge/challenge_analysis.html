@@ -55,7 +55,7 @@
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h6>{{ _('Análisis con IRIS') }}</h6>
-                                <p class="text-muted small">{{ _('Compara con inteligencia artificial') }}</p>
+                                <p class="text-muted small">{{ _('Compara con IRIS') }}</p>
                             </div>
                         </div>
                         <div class="step" id="step-results">
@@ -130,6 +130,7 @@
                                             <select class="form-select" id="annotation-variable" required>
                                                 <option value="">{{ _('Seleccionar...') }}</option>
                                             </select>
+                                            <div id="variable-checkboxes-container" style="display: none;" class="mt-2"></div>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">{{ _('Valor') }}</label>
@@ -158,9 +159,6 @@
                         <div class="card border-0 shadow-sm" id="difficulty-info-card">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
-                                    <div class="difficulty-badge me-3" id="difficulty-badge">
-                                        <span class="badge fs-6 px-3 py-2" id="difficulty-level">Fácil</span>
-                                    </div>
                                     <div>
                                         <h5 class="mb-1" id="difficulty-title"></h5>
                                         <p class="text-muted mb-0" id="difficulty-description"></p>
@@ -188,7 +186,7 @@
                                         <div class="row g-2">
                                             <div class="col-12">
                                                 <div class="variable-category-info">
-                                                    <h6 class="text-primary small">
+                                                    <h6 class="text-success small" style="color: #4caf50;">
                                                         <i class="fas fa-file-text me-1"></i>
                                                         {{ _('Contenido General') }}
                                                     </h6>
@@ -200,7 +198,7 @@
                             </div>
                                             <div class="col-12">
                                                 <div class="variable-category-info">
-                                                    <h6 class="text-warning small">
+                                                    <h6 class="text-danger small" style="color: #f44336;">
                                                         <i class="fas fa-language me-1"></i>
                                                         {{ _('Lenguaje') }}
                                                     </h6>
@@ -212,7 +210,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="variable-category-info">
-                                                    <h6 class="text-info small">
+                                                    <h6 class="text-primary small" style="color: #2196F3;">
                                                         <i class="fas fa-quote-left me-1"></i>
                                                         {{ _('Fuentes') }}
                                                     </h6>
@@ -263,6 +261,7 @@
                                             <select class="form-select" id="annotation-variable" required>
                                                 <option value="">{{ _('Seleccionar...') }}</option>
                                             </select>
+                                            <div id="variable-checkboxes-container" style="display: none;" class="mt-2"></div>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">{{ _('Valor') }}</label>
@@ -319,10 +318,26 @@
 
                     <!-- Botones de Acción -->
                     <div class="action-buttons">
-                        <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
-                            <i class="fas fa-check me-2"></i>
-                            {{ _('Finalizar y comparar con IRIS') }}
-                        </button>
+                        <div class="row g-2">
+                            <div class="col-md-3 col-6">
+                                <button class="btn btn-outline-secondary w-100 btn-sm py-2" id="prev-text-btn" style="display: none;">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    {{ _('Anterior') }}
+                                </button>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <button class="btn btn-success w-100 btn-sm py-2" id="next-text-btn" style="display: none;">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    {{ _('Siguiente') }}
+                                </button>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <button class="btn btn-primary w-100 btn-sm py-2" id="save-analysis-btn" disabled>
+                                    <i class="fas fa-check me-1"></i>
+                                    {{ _('Finalizar y comparar con IRIS') }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -518,6 +533,13 @@
     border: 1px solid #e9ecef;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.text-analysis-area.edit-mode-active {
+    background-color: #fffef0;
+    border: 2px solid #ffc107;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3), 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .text-header {
@@ -843,6 +865,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Available fields:', Object.keys(currentText || {}));
     
     initializeChallengeAnalysis();
+    
+    // Setup next text button
+    setupNextTextButton();
     updateDifficultyInfo();
     analyzeProtagonist();
     initMultiLabelTooltips();
@@ -1242,6 +1267,7 @@ function toggleEditMode() {
     isEditMode = !isEditMode;
     const btn = document.getElementById('edit-mode-btn');
     const textArea = document.getElementById('analysis-text');
+    const textAnalysisArea = document.querySelector('.text-analysis-area');
     
     if (isEditMode) {
         btn.innerHTML = '<i class="fas fa-check me-1"></i> {{ _("Modo Edición Activo") }}';
@@ -1249,12 +1275,18 @@ function toggleEditMode() {
         btn.classList.add('btn-warning');
         textArea.style.cursor = 'text';
         textArea.classList.add('edit-mode');
+        if (textAnalysisArea) {
+            textAnalysisArea.classList.add('edit-mode-active');
+        }
     } else {
         btn.innerHTML = '<i class="fas fa-pen me-1"></i> {{ _("Modo Edición") }}';
         btn.classList.remove('btn-warning');
         btn.classList.add('btn-primary');
         textArea.style.cursor = 'default';
         textArea.classList.remove('edit-mode');
+        if (textAnalysisArea) {
+            textAnalysisArea.classList.remove('edit-mode-active');
+        }
         hideAnnotationPanel();
     }
 }
@@ -1379,8 +1411,44 @@ function updateCategoryOptionsForAnnotationForm(difficulty) {
 
 function updateVariableOptions(category) {
     const variableSelect = document.getElementById('annotation-variable');
-    variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    const checkboxContainer = document.getElementById('variable-checkboxes-container');
     
+    // Clear both containers
+    variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    if (checkboxContainer) {
+        checkboxContainer.innerHTML = '';
+    }
+    
+    // Show checkboxes for Lenguaje category, select for others
+    const valueSelect = document.getElementById('annotation-value');
+    const valueLabel = valueSelect?.parentElement?.querySelector('label');
+    
+    if (category === 'lenguaje') {
+        variableSelect.style.display = 'none';
+        variableSelect.removeAttribute('required'); // Remove required when hidden
+        if (checkboxContainer) {
+            checkboxContainer.style.display = 'block';
+        }
+        // Hide value selector for lenguaje (will use "Sí" automatically)
+        if (valueSelect) {
+            valueSelect.style.display = 'none';
+            valueSelect.removeAttribute('required'); // Remove required when hidden
+        }
+        if (valueLabel) valueLabel.style.display = 'none';
+    } else {
+        variableSelect.style.display = 'block';
+        variableSelect.setAttribute('required', 'required');
+        if (checkboxContainer) {
+            checkboxContainer.style.display = 'none';
+        }
+        // Show value selector for other categories
+        if (valueSelect) {
+            valueSelect.style.display = 'block';
+            valueSelect.setAttribute('required', 'required');
+        }
+        if (valueLabel) valueLabel.style.display = 'block';
+    }
+
     console.log('updateVariableOptions - Category:', category);
     
     // All difficulty levels use the same variables
@@ -1398,8 +1466,9 @@ function updateVariableOptions(category) {
         availableVariables = variables.lenguaje;
         console.log('updateVariableOptions - Using lenguaje variables:', availableVariables);
     } else if (category === 'fuentes' && variables.fuentes) {
-        availableVariables = variables.fuentes;
-        console.log('updateVariableOptions - Using fuentes variables:', availableVariables);
+        // Solo mostrar declaracion_fuente, las otras se muestran como controles adicionales
+        availableVariables = ['declaracion_fuente'];
+        console.log('updateVariableOptions - Using fuentes variables (only declaracion_fuente):', availableVariables);
     }
     
     console.log('updateVariableOptions - Final available variables:', availableVariables);
@@ -1407,12 +1476,33 @@ function updateVariableOptions(category) {
     const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
     availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
     
-    availableVariables.forEach(variable => {
-        const option = document.createElement('option');
-        option.value = variable;
-        option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        variableSelect.appendChild(option);
-    });
+    // Create checkboxes for lenguaje category, options for others
+    if (category === 'lenguaje' && checkboxContainer) {
+        availableVariables.forEach(variable => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'form-check';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input';
+            checkbox.id = `variable-checkbox-${variable}`;
+            checkbox.value = variable;
+            checkbox.name = 'variable-checkbox';
+            const label = document.createElement('label');
+            label.className = 'form-check-label';
+            label.htmlFor = `variable-checkbox-${variable}`;
+            label.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+            checkboxContainer.appendChild(checkboxDiv);
+        });
+    } else {
+        availableVariables.forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable;
+            option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            variableSelect.appendChild(option);
+        });
+    }
 }
 
 function updateValueOptions(category, variable) {
@@ -1570,6 +1660,39 @@ function updateValueOptions(category, variable) {
         nombre_fuente: 'genero_fuente'
     };
 
+    // Manejo especial para declaracion_fuente: mostrar controles adicionales para fuentes
+    if (variable === 'declaracion_fuente') {
+        if (compositeControls) {
+            compositeControls.style.display = 'block';
+            const nombreFuenteValues = variableValues['nombre_fuente'] || [];
+            const generoFuenteValues = variableValues['genero_fuente'] || [];
+            const tipoFuenteValues = variableValues['tipo_fuente'] || [];
+            
+            compositeControls.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">Nombre de la fuente</label>
+                        <select class="form-select" id="composite-nombre-fuente">
+                            ${nombreFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Género de la fuente</label>
+                        <select class="form-select" id="composite-genero-fuente">
+                            ${generoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Tipo de fuente</label>
+                        <select class="form-select" id="composite-tipo-fuente">
+                            <option value="">Seleccionar tipo...</option>
+                            ${tipoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+        }
+    }
+
     // Si la variable seleccionada es parte de un compuesto (solo se muestra la base), mostrar control de género
     const compositeDetail = compositePairs[variable];
     if (compositeDetail) {
@@ -1636,15 +1759,97 @@ function saveAnnotation() {
     
     // Always use the form values for all difficulty levels
         const category = document.getElementById('annotation-category').value;
-        const variable = document.getElementById('annotation-variable').value;
-        const value = document.getElementById('annotation-value').value;
+        const variableSelect = document.getElementById('annotation-variable');
+        const valueSelect = document.getElementById('annotation-value');
+        const value = category === 'lenguaje' ? '2' : valueSelect.value;
         
-        if (!category || !variable || !value) {
+        // Handle multiple selection for lenguaje category using checkboxes
+        let selectedVariables = [];
+        if (category === 'lenguaje') {
+            const checkboxes = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+            selectedVariables = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log('Lenguaje checkboxes checked:', selectedVariables);
+            if (selectedVariables.length === 0) {
+                alert('{{ _("Por favor selecciona al menos una variable") }}');
+                return;
+            }
+        } else {
+            selectedVariables = [variableSelect.value];
+        }
+
+        console.log('Category:', category, 'Value:', value, 'SelectedVariables:', selectedVariables);
+        
+        if (!category || !value || selectedVariables.length === 0) {
             alert('{{ _("Por favor completa todos los campos") }}');
             return;
         }
         
     const createdAt = new Date().toISOString();
+    
+    // Manejo especial para declaracion_fuente: guardar todas las anotaciones de fuentes
+    const firstVariable = selectedVariables[0]; // Get first variable for special cases
+    if (firstVariable === 'declaracion_fuente') {
+        const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+        const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+        const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+        
+        // 1) declaracion_fuente
+        annotations.push({
+            id: Date.now(),
+            text: selectedText,
+            category: category,
+            variable: firstVariable,
+            value: value,
+            timestamp: createdAt
+        });
+        try { applyInlineHighlight(window.currentSelection, category, firstVariable); } catch(e) {}
+        
+        // 2) nombre_fuente
+        if (nombreFuenteValue) {
+            annotations.push({
+                id: Date.now() + 1,
+                text: selectedText,
+                category: category,
+                variable: 'nombre_fuente',
+                value: nombreFuenteValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, 'nombre_fuente'); } catch(e) {}
+        }
+        
+        // 3) genero_fuente
+        if (generoFuenteValue) {
+            annotations.push({
+                id: Date.now() + 2,
+                text: selectedText,
+                category: category,
+                variable: 'genero_fuente',
+                value: generoFuenteValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, 'genero_fuente'); } catch(e) {}
+        }
+        
+        // 4) tipo_fuente
+        if (tipoFuenteValue) {
+            annotations.push({
+                id: Date.now() + 3,
+                text: selectedText,
+                category: category,
+                variable: 'tipo_fuente',
+                value: tipoFuenteValue,
+                timestamp: createdAt
+            });
+            try { applyInlineHighlight(window.currentSelection, category, 'tipo_fuente'); } catch(e) {}
+        }
+        
+        updateAnnotationsList();
+        hideAnnotationPanel();
+        
+        // Habilitar botón
+        document.getElementById('save-analysis-btn').disabled = false;
+        return;
+    }
     
     // Manejo de variables compuestas: crear dos anotaciones sincronizadas
     const compositePairs = {
@@ -1654,43 +1859,56 @@ function saveAnnotation() {
     };
     const compositeControls = document.getElementById('composite-gender');
     
-    if (compositePairs[variable]) {
-        // Usuario anotó la presencia: set presente y género seleccionado
-        const genderValue = compositeControls ? compositeControls.value : null;
-        // 1) presencia
-        annotations.push({
-            id: Date.now(),
-            text: selectedText,
-            category: category,
-            variable: variable,
-            value: '1',
-            timestamp: createdAt
-        });
-        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-        // 2) género
-        if (genderValue) {
+    // Process each selected variable
+    let idCounter = 0;
+    let appliedHighlight = false;
+    
+    selectedVariables.forEach(variable => {
+        if (compositePairs[variable]) {
+            // Usuario anotó la presencia: set presente y género seleccionado
+            const genderValue = compositeControls ? compositeControls.value : null;
+            // 1) presencia
             annotations.push({
-                id: Date.now()+1,
+                id: Date.now() + idCounter++,
                 text: selectedText,
                 category: category,
-                variable: compositePairs[variable],
-                value: genderValue,
+                variable: variable,
+                value: '1',
                 timestamp: createdAt
             });
-            try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+            // Apply highlight only once for all variables
+            if (!appliedHighlight) {
+                try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {}
+                appliedHighlight = true;
+            }
+            // 2) género
+            if (genderValue) {
+                annotations.push({
+                id: Date.now() + idCounter++,
+                    text: selectedText,
+                    category: category,
+                    variable: compositePairs[variable],
+                    value: genderValue,
+                    timestamp: createdAt
+                });
+            }
+        } else {
+            // Anotación normal
+            annotations.push({
+                id: Date.now() + idCounter++,
+                text: selectedText,
+                category: category,
+                variable: variable,
+                value: value,
+                timestamp: createdAt
+            });
+            // Apply highlight only once for all variables with comma-separated list
+            if (!appliedHighlight) {
+                try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {}
+                appliedHighlight = true;
+            }
         }
-    } else {
-        // Anotación normal
-        annotations.push({
-            id: Date.now(),
-            text: selectedText,
-            category: category,
-            variable: variable,
-            value: value,
-            timestamp: createdAt
-        });
-        try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-    }
+    });
     updateAnnotationsList();
     hideAnnotationPanel();
     
@@ -1865,6 +2083,87 @@ function initMultiLabelTooltips() {
 
     document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
     document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
+}
+
+// Setup next and previous text button functionality
+function setupNextTextButton() {
+    const nextTextBtn = document.getElementById('next-text-btn');
+    const prevTextBtn = document.getElementById('prev-text-btn');
+    
+    if (!nextTextBtn || !prevTextBtn) return;
+    
+    // Check if there are more texts in the sequence
+    // This would need to be passed from the challenge home page
+    // For now, we'll show the button and handle the logic
+    nextTextBtn.style.display = 'block';
+    prevTextBtn.style.display = 'block';
+    
+    nextTextBtn.addEventListener('click', function() {
+        // Get the next text ID from the sequence
+        // This would need to be implemented with proper state management
+        const currentTextId = currentText._id;
+        const nextTextId = getNextTextInSequence(currentTextId);
+        
+        if (nextTextId) {
+            // Redirect to next text analysis
+            window.location.href = `/challenge/analyze/${nextTextId}`;
+        } else {
+            // No more texts, redirect back to challenge home
+            window.location.href = '/challenge/';
+        }
+    });
+    
+    prevTextBtn.addEventListener('click', function() {
+        // Get the previous text ID from the sequence
+        const currentTextId = currentText._id;
+        const prevTextId = getPreviousTextInSequence(currentTextId);
+        
+        if (prevTextId) {
+            // Redirect to previous text analysis
+            window.location.href = `/challenge/analyze/${prevTextId}`;
+        } else {
+            // No previous text, redirect back to challenge home
+            window.location.href = '/challenge/';
+        }
+    });
+}
+
+// Function to get next text in sequence
+function getNextTextInSequence(currentId) {
+    // Define the sequence order (same as in challenge_home.html)
+    const sequence = [
+        '68f9e5a22e476535f8a73ec4', // Paloma Lago
+        '68f9e5a22e476535f8a73ec2', // Paula Badosa
+        '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+        '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+        '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+        '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+    ];
+    
+    const currentIndex = sequence.indexOf(currentId);
+    if (currentIndex !== -1 && currentIndex < sequence.length - 1) {
+        return sequence[currentIndex + 1];
+    }
+    return null;
+}
+
+// Function to get previous text in sequence
+function getPreviousTextInSequence(currentId) {
+    // Define the sequence order (same as in challenge_home.html)
+    const sequence = [
+        '68f9e5a22e476535f8a73ec4', // Paloma Lago
+        '68f9e5a22e476535f8a73ec2', // Paula Badosa
+        '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+        '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+        '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+        '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+    ];
+    
+    const currentIndex = sequence.indexOf(currentId);
+    if (currentIndex !== -1 && currentIndex > 0) {
+        return sequence[currentIndex - 1];
+    }
+    return null;
 }
 
 </script>
