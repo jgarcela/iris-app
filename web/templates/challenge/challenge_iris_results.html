@@ -391,6 +391,21 @@
     font-size: 0.875rem;
     color: #6c757d;
 }
+
+.summary-texts {
+    margin-top: 0.5rem;
+}
+
+.summary-text-item {
+    padding: 0.375rem 0.5rem;
+    margin-bottom: 0.25rem;
+    background: #f8f9fa;
+    border-left: 2px solid #dee2e6;
+    font-size: 0.85rem;
+    color: #495057;
+    font-style: italic;
+    border-radius: 3px;
+}
 </style>
 
 <script>
@@ -606,9 +621,18 @@ function generateSummaryHTML(annotations, container) {
     
     Object.entries(variables).forEach(([variable, data]) => {
       const varDesc = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ');
+      const textsArray = Array.from(data.texts);
       html += '<li>';
       html += `<strong>${varDesc}</strong>`;
-      html += `<span>${data.count} anotación${data.count > 1 ? 'es' : ''}</span>`;
+      html += `<span class="badge bg-secondary ms-2">${data.count} ${data.count > 1 ? 'anotaciones' : 'anotación'}</span>`;
+      if (textsArray.length > 0) {
+        html += '<div class="summary-texts mt-2">';
+        textsArray.forEach(text => {
+          const truncatedText = text.length > 80 ? text.substring(0, 80) + '...' : text;
+          html += `<div class="summary-text-item"><i class="fas fa-quote-left me-1"></i>${escapeHtml(truncatedText)}</div>`;
+        });
+        html += '</div>';
+      }
       html += '</li>';
     });
     
