@@ -24,7 +24,7 @@
                             {{ _('Siguiente Texto') }}
                         </a>
                     {% else %}
-                        <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
+                    <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-check me-2"></i>
                             {{ _('Finalizar') }}
                         </a>
@@ -35,34 +35,29 @@
     </div>
 
     <!-- Métricas de Comparación -->
-    <div class="row mb-4">
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-line me-2"></i>
-                        {{ _('Métricas de Comparación') }}
-                    </h5>
+            <div class="metrics-compact">
+                <div class="metrics-header">
+                    <span class="metrics-title">{{ _('Métricas de Comparación') }}</span>
                 </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <div class="metric-item">
-                                <div class="metric-value" id="precision-score">0%</div>
-                                <div class="metric-label">{{ _('Precisión') }}</div>
-                            </div>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <div class="metric-compact-item">
+                            <span class="metric-compact-value" id="precision-score">0%</span>
+                            <span class="metric-compact-label">{{ _('Precisión') }}</span>
                         </div>
-                        <div class="col-md-4">
-                            <div class="metric-item">
-                                <div class="metric-value" id="recall-score">0%</div>
-                                <div class="metric-label">{{ _('Cobertura') }}</div>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="metric-compact-item">
+                            <span class="metric-compact-value" id="recall-score">0%</span>
+                            <span class="metric-compact-label">{{ _('Cobertura') }}</span>
                         </div>
-                        <div class="col-md-4">
-                            <div class="metric-item">
-                                <div class="metric-value score-highlight" id="total-score">0%</div>
-                                <div class="metric-label">{{ _('Puntuación Total') }}</div>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="metric-compact-item">
+                            <span class="metric-compact-value score-highlight" id="total-score">0%</span>
+                            <span class="metric-compact-label">{{ _('Puntuación Total') }}</span>
                         </div>
                     </div>
                 </div>
@@ -151,7 +146,7 @@
                                 <p><strong>{{ _('Texto con anotaciones IRIS:') }}</strong> <span id="original-annotations-count" class="badge" style="background-color: #8e44ad;">0</span></p>
                                 <div id="original-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
                                     <!-- Texto con highlights se carga aquí -->
-                                </div>
+                </div>
                             </div>
                         </div>
                         
@@ -216,6 +211,50 @@
 }
 
 .score-highlight {
+    color: #28a745 !important;
+}
+
+/* Compact Metrics Styles */
+.metrics-compact {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+
+.metrics-header {
+    margin-bottom: 0.5rem;
+}
+
+.metrics-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.metric-compact-item {
+    text-align: center;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.metric-compact-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.metric-compact-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.metric-compact-value.score-highlight {
     color: #28a745 !important;
 }
 
