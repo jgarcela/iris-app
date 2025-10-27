@@ -82,10 +82,37 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="text-visualization">
-                        <p><strong>{{ _('Texto con tus anotaciones:') }}</strong> <span id="manual-annotations-count" class="badge" style="background-color: #5de0e6;">0</span></p>
-                        <div id="manual-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
-                            <!-- Texto con highlights se carga aquí -->
+                    <!-- Tabs Navigation -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="manual-text-tab" data-bs-toggle="tab" href="#manual-text-content" role="tab">
+                                <i class="fas fa-file-alt me-1"></i> {{ _('Texto') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="manual-summary-tab" data-bs-toggle="tab" href="#manual-summary-content" role="tab">
+                                <i class="fas fa-list me-1"></i> {{ _('Resumen') }}
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Texto Tab -->
+                        <div class="tab-pane fade show active" id="manual-text-content" role="tabpanel">
+                            <div class="text-visualization">
+                                <p><strong>{{ _('Texto con tus anotaciones:') }}</strong> <span id="manual-annotations-count" class="badge" style="background-color: #5de0e6;">0</span></p>
+                                <div id="manual-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
+                                    <!-- Texto con highlights se carga aquí -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Resumen Tab -->
+                        <div class="tab-pane fade" id="manual-summary-content" role="tabpanel">
+                            <div id="manual-summary" class="annotations-summary">
+                                <!-- Resumen por categorías se carga aquí -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -102,10 +129,37 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="text-visualization">
-                        <p><strong>{{ _('Texto con anotaciones IRIS:') }}</strong> <span id="original-annotations-count" class="badge" style="background-color: #8e44ad;">0</span></p>
-                        <div id="original-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
-                            <!-- Texto con highlights se carga aquí -->
+                    <!-- Tabs Navigation -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="original-text-tab" data-bs-toggle="tab" href="#original-text-content" role="tab">
+                                <i class="fas fa-file-alt me-1"></i> {{ _('Texto') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="original-summary-tab" data-bs-toggle="tab" href="#original-summary-content" role="tab">
+                                <i class="fas fa-list me-1"></i> {{ _('Resumen') }}
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Texto Tab -->
+                        <div class="tab-pane fade show active" id="original-text-content" role="tabpanel">
+                            <div class="text-visualization">
+                                <p><strong>{{ _('Texto con anotaciones IRIS:') }}</strong> <span id="original-annotations-count" class="badge" style="background-color: #8e44ad;">0</span></p>
+                                <div id="original-text-highlights" class="highlighted-text" style="padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; background: #f8f9fa;">
+                                    <!-- Texto con highlights se carga aquí -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Resumen Tab -->
+                        <div class="tab-pane fade" id="original-summary-content" role="tabpanel">
+                            <div id="original-summary" class="annotations-summary">
+                                <!-- Resumen por categorías se carga aquí -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -260,6 +314,83 @@
 .action-buttons {
     margin-top: 2rem;
 }
+
+/* Tab Styles */
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.5rem 1rem;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    border-bottom-color: #007bff;
+    background-color: transparent;
+}
+
+/* Annotations Summary Styles */
+.annotations-summary {
+    padding: 1rem;
+}
+
+.summary-category {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #ddd;
+}
+
+.summary-category.contenido_general {
+    border-left-color: #28a745;
+}
+
+.summary-category.lenguaje {
+    border-left-color: #dc3545;
+}
+
+.summary-category.fuentes {
+    border-left-color: #007bff;
+}
+
+.summary-category h6 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-variables {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-variables li {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: white;
+    border-radius: 4px;
+    border-left: 3px solid #dee2e6;
+}
+
+.summary-variables li strong {
+    color: #495057;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.summary-variables li span {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
 </style>
 
 <script>
@@ -302,7 +433,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function loadAnalysisResults() {
   loadManualAnnotations();
+  loadManualSummary();
   loadOriginalAnnotations();
+  loadOriginalSummary();
   calculateMetrics();
   initMultiLabelTooltips();
 }
@@ -376,9 +509,68 @@ function loadManualAnnotations() {
   // Get the original text
   const originalText = {{ text_data.text | tojson | safe }};
   
-  // Apply highlights to text
+ // Apply highlights to text
   let highlightedText = applyAnnotationsToText(originalText, manualAnnotations);
   container.innerHTML = highlightedText;
+}
+
+function loadManualSummary() {
+  const container = document.getElementById('manual-summary');
+  generateSummaryHTML(manualAnnotations, container);
+}
+
+function loadOriginalSummary() {
+  const container = document.getElementById('original-summary');
+  generateSummaryHTML(originalAnnotations, container);
+}
+
+function generateSummaryHTML(annotations, container) {
+  if (!annotations || annotations.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>{{ _("No hay anotaciones para mostrar") }}</p>';
+    return;
+  }
+
+  // Group by category and variable
+  const grouped = {};
+  annotations.forEach(ann => {
+    const cat = ann.category || 'other';
+    if (!grouped[cat]) {
+      grouped[cat] = {};
+    }
+    const varName = ann.variable || 'unknown';
+    if (!grouped[cat][varName]) {
+      grouped[cat][varName] = {
+        texts: new Set(),
+        count: 0
+      };
+    }
+    grouped[cat][varName].texts.add(ann.text);
+    grouped[cat][varName].count++;
+  });
+
+  // Generate HTML
+  let html = '';
+  Object.entries(grouped).forEach(([category, variables]) => {
+    const categoryName = category === 'contenido_general' ? 'Contenido General' :
+                        category === 'lenguaje' ? 'Lenguaje' :
+                        category === 'fuentes' ? 'Fuentes' : category;
+    
+    html += `<div class="summary-category ${category}">`;
+    html += `<h6>${categoryName}</h6>`;
+    html += '<ul class="summary-variables">';
+    
+    Object.entries(variables).forEach(([variable, data]) => {
+      const varDesc = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ');
+      html += '<li>';
+      html += `<strong>${varDesc}</strong>`;
+      html += `<span>${data.count} anotación${data.count > 1 ? 'es' : ''}</span>`;
+      html += '</li>';
+    });
+    
+    html += '</ul></div>';
+  });
+
+  container.innerHTML = html;
 }
 
 function applyAnnotationsToText(text, annotations) {
