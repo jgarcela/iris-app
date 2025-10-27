@@ -128,6 +128,15 @@ def analyze_ai():
         text_id = payload.get('text_id')
         manual_annotations = payload.get('manual_annotations', [])
         
+        # If text_id is None, try to get it from text_data
+        if not text_id:
+            text_data_payload = payload.get('text_data', {})
+            text_id = text_data_payload.get('_id')
+            print(f"[CHALLENGE/ANALYZE-AI] Got text_id from text_data: {text_id}")
+        
+        if not text_id:
+            return jsonify(success=False, error="text_id is required"), 400
+        
         print(f"[CHALLENGE/ANALYZE-AI] Processing text_id: {text_id}, annotations: {len(manual_annotations)}")
         
         # Get current user info
@@ -138,26 +147,47 @@ def analyze_ai():
         
         print(f"[CHALLENGE/ANALYZE-AI] User: {username} (ID: {user_id})")
         
-        # Store manual annotations in the database
-        update_fields = {
-            'manual_annotations': manual_annotations,
-            'updated_at': datetime.now(timezone.utc),
-            'user_id': user_id,
-            'username': username
-        }
+        # Import DB_ANALYSIS_SEMANA_CIENCIA
+        from database.db import DB_ANALYSIS_SEMANA_CIENCIA
         
-        # Try to update by _id (ObjectId) first
+        # Get original text data
         from bson import ObjectId
-        result = DB_SEMANA_CIENCIA.update_one({'_id': ObjectId(text_id)}, { '$set': update_fields })
+        try:
+            text_data = DB_SEMANA_CIENCIA.find_one({'_id': ObjectId(text_id)})
+        except:
+            text_data = None
         
-        # If no document was updated, try by integer id
-        if result.matched_count == 0:
+        if not text_data:
+            # Try with integer id
             try:
                 int_id = int(text_id)
-                result = DB_SEMANA_CIENCIA.update_one({'id': int_id}, { '$set': update_fields })
-            except ValueError:
+                text_data = DB_SEMANA_CIENCIA.find_one({'id': int_id})
+            except (ValueError, TypeError):
                 pass
-        print(f"[CHALLENGE/ANALYZE-AI] Database update result: {result.modified_count} documents modified")
+        
+        if not text_data:
+            return jsonify(success=False, error="Text not found"), 404
+        
+        # Create a new analysis document (copies original text + adds user analysis)
+        analysis_document = {
+            'text_id': text_id,
+            'text_data': {
+                'title': text_data.get('title'),
+                'text': text_data.get('text'),
+                'difficulty': text_data.get('difficulty'),
+                'url': text_data.get('url'),
+                'authors': text_data.get('authors'),
+                'date': text_data.get('date')
+            },
+            'manual_annotations': manual_annotations,
+            'user_id': user_id,
+            'username': username,
+            'created_at': datetime.now(timezone.utc)
+        }
+        
+        # Insert into challenge analyses collection
+        result = DB_ANALYSIS_SEMANA_CIENCIA.insert_one(analysis_document)
+        print(f"[CHALLENGE/ANALYZE-AI] New analysis created with ID: {result.inserted_id}")
 
         # Redirect to comparison page
         redirect_url = url_for('challenge.ai_results', text_id=text_id)
@@ -229,7 +259,27 @@ def ai_results(text_id):
     
     # Get the main comparison analysis (matches text difficulty)
     main_ai_analysis = analysis_data.get(difficulty_key, {})
-    manual_annotations = text_doc.get('manual_annotations', [])
+    
+    # Get manual annotations from challenge analyses collection (user-specific)
+    from database.db import DB_ANALYSIS_SEMANA_CIENCIA
+    from web.utils.challenge_decorators import get_current_user
+    current_user = get_current_user()
+    user_id = current_user.get('id') if current_user else None
+    
+    # Find the user's analysis for this text
+    manual_annotations = []
+    if user_id:
+        user_analysis = DB_ANALYSIS_SEMANA_CIENCIA.find_one({
+            'text_id': text_id,
+            'user_id': user_id
+        })
+        if user_analysis:
+            manual_annotations = user_analysis.get('manual_annotations', [])
+            print(f"[CHALLENGE/AI-RESULTS] Found user analysis with {len(manual_annotations)} annotations")
+    
+    # Fallback: try to get from original document if no user analysis found (for backwards compatibility)
+    if not manual_annotations:
+        manual_annotations = text_doc.get('manual_annotations', [])
 
     print(f"[CHALLENGE/AI-RESULTS] Manual analysis: {manual_annotations}")
 
