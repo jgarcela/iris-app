@@ -1,27 +1,9 @@
 /* ——————————————————————————————————
-   Variables para temas y colores
+   Enhanced Dashboard Styles
 —————————————————————————————————— */
 
-:root {
-  --background-footer: #f0f4f8;
-  --text-black-color: #1a202c;
-  --text-white-color: #ffffff;
-  --primary-color: #142637;
-  --secondary-color: #ffffff;
-  --accent-color: #5de0e6;
-  --input-border-color: #ccd1d9;
-  --button-hover-color: #003a88;
-  --background-footer: #ffffff;
-  --violet-iris-color: #a02c93;
-  --blue-iris-color: #1c6080;
-  --red-color: #d64545;
-
-  --font-family: 'Roboto', sans-serif;
-  --font-size: 14px;
-  --header-font-size: calc(var(--font-size) + 8px);
-
-  --transition-speed: 0.3s;
-}
+/* Import main variables from styles.css */
+@import url('styles.css');
 
 /* Tema oscuro */
 [data-theme="dark"] {
@@ -39,34 +21,330 @@
 }
 
 /* ——————————————————————————————————
-   CONTENEDOR GENERAL, sin ocultar overflow
+   ENHANCED DASHBOARD CONTAINER
 —————————————————————————————————— */
 .dashboard-container {
-    padding: 2rem;
-    background: #fafafa;
-  }
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+}
 
 /* ——————————————————————————————————
-   PANEL DE FILTROS CON FONT AWESOME Y DOS FILAS
+   PAGE HEADER SECTION (separado de filtros)
+—————————————————————————————————— */
+.page-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+}
+
+.page-header-icon {
+  width: 80px;
+  height: 80px;
+  background: #1e40af;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+.page-header-icon i {
+  font-size: 1.75rem;
+  color: white;
+  font-weight: 400;
+}
+
+.page-header-content {
+  flex: 1;
+}
+
+.page-header h1 {
+  margin: 0 0 0.5rem;
+  color: #1a202c;
+  font-size: 2.25rem;
+  font-weight: 700;
+  text-align: left;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.2;
+}
+
+.page-header .subtitle {
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 400;
+  text-align: left;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.4;
+}
+
+/* ——————————————————————————————————
+   ENHANCED FILTERS PANEL (separado del header)
 —————————————————————————————————— */
 .dashboard-filters {
+  background: var(--secondary-color);
   padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+  margin-bottom: 2rem;
+  border: 1px solid var(--medium-gray);
 }
 
-.dashboard-filters h1 {
-  margin: 0 0 1rem;
-  color: var(--violet-iris-color);
-  font-size: 2rem;
-  font-weight: bold;
+.dashboard-filters .filters-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  color: #1a202c;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Grid del form: 2 filas, 4 columnas implícitas */
+.dashboard-filters .filters-title i {
+  color: #8b5cf6;
+  font-size: 1rem;
+}
+
 .dashboard-filters form {
   display: grid;
-  grid-template-columns: 1fr auto 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 1rem;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 1.5rem;
   align-items: end;
+}
+
+.dashboard-filters .filter-db,
+.dashboard-filters .filter-date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dashboard-filters label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.dashboard-filters label i {
+  margin-right: 0.5rem;
+  color: #8b5cf6;
+  font-size: 0.875rem;
+}
+
+.dashboard-filters select,
+.dashboard-filters input {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: var(--secondary-color);
+  color: #1a202c;
+  font-size: 0.85rem;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: all 0.2s ease;
+}
+
+.dashboard-filters select:focus,
+.dashboard-filters input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(20, 38, 55, 0.1);
+  transform: none;
+}
+
+.dashboard-filters .filter-submit button {
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-filters .filter-submit button:hover {
+  background: #0f1f2e;
+  transform: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-filters .filter-submit button i {
+  margin-right: 0.5rem;
+}
+
+/* ——————————————————————————————————
+   ENHANCED DASHBOARD CARDS
+—————————————————————————————————— */
+.dashboard-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.dashboard-bottom {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-container .card {
+  background: var(--secondary-color);
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-speed) ease;
+  overflow: hidden;
+}
+
+.dashboard-container .card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--accent-color);
+}
+
+.dashboard-container .card-header {
+  background: var(--primary-gradient);
+  color: var(--text-white-color);
+  font-weight: var(--font-weight-semibold);
+  font-size: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: none;
+  text-align: center;
+  position: relative;
+}
+
+.dashboard-container .card-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--violet-gradient);
+}
+
+.dashboard-container .card-body {
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.dashboard-container .card-body canvas {
+  max-height: 200px;
+}
+
+/* Special styling for total count card */
+.dashboard-container .card:first-child .card-body {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--violet-iris-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+/* Stacked charts styling */
+.stacked-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.center-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Separator styling */
+.separator {
+  border: none;
+  height: 2px;
+  background: var(--violet-gradient);
+  margin: 2rem 0;
+  border-radius: 1px;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .dashboard-top {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .dashboard-bottom {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .center-column {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 2rem 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  
+  .page-header-icon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .page-header-icon i {
+    font-size: 1.5rem;
+  }
+  
+  .page-header h1 {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+  
+  .page-header .subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
+  .dashboard-filters form {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .dashboard-top {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-bottom {
+    grid-template-columns: 1fr;
+  }
+  
+  .stacked-charts {
+    gap: 1rem;
+  }
+  
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .dashboard-filters {
+    padding: 1.5rem;
+  }
 }
 
 /* Primera fila: selector Medio y botón */
@@ -102,36 +380,64 @@
 .filter-date input[type="date"],
 .filter-db select {
   width: 100%;
-  padding: 0.6rem;
-  border: 1px solid var(--input-border-color);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  background: var(--secondary-color);
+  color: var(--text-black-color);
 }
 .filter-date input[type="date"]:focus,
 .filter-db select:focus {
-  border-color: var(--violet-iris-color);
+  border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(94,42,132,0.2);
+  box-shadow: 0 0 0 2px rgba(20, 38, 55, 0.1);
 }
 
-/* Botón filtrar */
+/* Minimalistic filter submit button */
 .filter-submit button {
-  padding: 0.6rem 1.2rem;
-  background: var(--violet-iris-color);
-  color: var(--background-footer);
+  padding: 0.625rem 1.25rem;
+  background: var(--primary-color);
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: background 0.2s, transform 0.1s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .filter-submit button:hover {
-  background: #472364;
-  transform: translateY(-2px);
+  background: #0f1f2e;
+  transform: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Chips/Badges informativos (para usar si se añaden en plantillas) */
+.info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  background: #e7f1ff;
+  color: #0b5ed7;
+  border: 1px solid rgba(13, 110, 253, 0.2);
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.06);
+}
+
+.update-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--dark-gray);
+  font-weight: 500;
 }
 
   
@@ -166,13 +472,6 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
-  .card-header {
-    background: var(--violet-iris-color);
-    color: var(--background-footer);
-    padding: 0.5rem 1rem;
-    font-weight: bold;
-    text-align: center;
   }
   .card-body {
     padding: 1rem;

@@ -14,7 +14,6 @@ export function attachTooltipHandlers(mark) {
 export function initHighlightTooltip() {
   tooltip = document.getElementById('tooltip') || document.getElementById('variable-tooltip');
   if (!tooltip) {
-    console.warn('No tooltip element found');
     return;
   }
 

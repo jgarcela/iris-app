@@ -1,23 +1,29 @@
 <!-- Icono de accesibilidad -->
-<button id="accessibility-menu-button" class="accessibility-menu-button">
-    <i class="fas fa-user-gear"></i>
+<button id="accessibility-menu-button" class="accessibility-menu-button" data-tooltip="{{ _('Configuración de Accesibilidad') }}" aria-label="{{ _('Configuración de Accesibilidad') }}">
+    <i class="fas fa-universal-access"></i>
 </button>
 
 <!-- Modal de accesibilidad -->
-<div id="accessibility-modal" class="modal hidden">
+<div id="accessibility-modal" class="modal hidden" role="dialog" aria-labelledby="accessibility-modal-title" aria-hidden="true">
     <div class="modal-content">
-        <h2>{{ _('Configuración de Accesibilidad') }}</h2>
-        <label for="theme-select">{{ _('Seleccionar Tema') }}:</label>
-        <select id="theme-select">
-            <option value="light">{{ _('Claro') }}</option>
-            <option value="dark">{{ _('Oscuro') }}</option>
-        </select>
-        <label for="font-size">{{ _('Tamaño de Letra') }}:</label>
-        <select id="font-size">
-            <option value="small">{{ _('Pequeño') }}</option>
-            <option value="medium" selected>{{ _('Mediano') }}</option>
-            <option value="large">{{ _('Grande') }}</option>
-        </select>
-        <button id="close-modal" class="close-modal-button">{{ _('Cerrar') }}</button>
+        <h2 id="accessibility-modal-title">{{ _('Configuración de Accesibilidad') }}</h2>
+        <div class="form-group">
+            <label for="theme-select">{{ _('Seleccionar Tema') }}</label>
+            <select id="theme-select" aria-describedby="theme-help">
+                <option value="light">{{ _('Claro') }}</option>
+                <option value="dark">{{ _('Oscuro') }}</option>
+            </select>
+            <small id="theme-help" class="form-help">{{ _('Elige entre tema claro u oscuro para mejor visibilidad') }}</small>
+        </div>
+        <div class="form-group">
+            <label for="font-size">{{ _('Tamaño de Letra') }}</label>
+            <select id="font-size" aria-describedby="font-help">
+                <option value="small">{{ _('Pequeño') }}</option>
+                <option value="medium" selected>{{ _('Mediano') }}</option>
+                <option value="large">{{ _('Grande') }}</option>
+            </select>
+            <small id="font-help" class="form-help">{{ _('Ajusta el tamaño del texto para mejor legibilidad') }}</small>
+        </div>
+        <button id="close-modal" class="close-modal-button" aria-label="{{ _('Cerrar configuración') }}">{{ _('Aplicar y Cerrar') }}</button>
     </div>
 </div>

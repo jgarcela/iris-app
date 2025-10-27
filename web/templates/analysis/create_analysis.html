@@ -1,65 +1,217 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Home') }} - IRIS{% endblock %}
+{% block title %}{{ _('Análisis de Texto') }} - IRIS{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-5">
-  <h1 class="h2 mt-4">{{ _('Iniciar análisis') }}</h1>
-  <div class="row gx-5">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-search-plus me-3 text-primary"></i>
+                    {{ _('Análisis de Texto') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Analiza contenido periodístico para detectar sesgos de género y mejorar la representación mediática') }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+  <!-- Main Analysis Form -->
+  <div class="row gx-4">
     <div class="col-12">
-      <div class="card-principal h-100 p-4">
+      <div class="card-principal h-100 p-4" style="border-radius: var(--border-radius-xl); box-shadow: var(--shadow-lg);">
         <!-- FORMULARIO UNIFICADO -->
         <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
-          <div class="row">
-            <!-- Columna izquierda: opciones -->
-            <div class="col-md-4">
-              <!-- Selección de modelo -->
-              <div class="mb-4">
-                <label for="model" class="form-label">{{ _('Modelo') }} <span class="req">*</span></label>
-                <select id="model" name="model" class="form-select">
-                  <option value="basico">{{ _('Básico') }}</option>
-                  <option value="avanzado" selected>{{ _('Avanzado') }}</option>
-                </select>
+          <input type="hidden" id="analysis-mode" name="analysis_mode" value="automatic">
+          <input type="hidden" id="model" name="model" value="avanzado">
+          
+          <div class="row g-3">
+            <!-- Left column: Mode + Model selection -->
+            <div class="col-lg-4 analysis-left-panel">
+              <!-- Modern Analysis Mode Selection -->
+              <div class="analysis-mode-modern mb-3">
+                <div class="text-center mb-2">
+                  <h5 class="fw-bold text-primary mb-3 d-inline-flex align-items-center gap-2">
+                    <i data-lucide="target" class="text-primary" style="width: 20px; height: 20px;"></i>
+                    {{ _('Selecciona el tipo de análisis') }}
+                  </h5>
+                </div>
+                
+                <div class="row g-3 justify-content-center">
+                  <div class="col-12">
+                    <div class="mode-card-modern" id="automatic-mode" data-mode="automatic">
+                      <div class="mode-icon-modern">
+                        <i class="fas fa-robot"></i>
+                      </div>
+                      <div class="mode-content-modern">
+                        <h4 class="mode-title-modern">{{ _('Análisis Automático') }}</h4>
+                        <p class="mode-desc-modern">{{ _('Nuestra IA analiza automáticamente el texto y detecta sesgos de género') }}</p>
+                        <div class="mode-features">
+                          <span class="feature-tag">{{ _('Rápido') }}</span>
+                          <span class="feature-tag">{{ _('Preciso') }}</span>
+                          <span class="feature-tag">{{ _('Completo') }}</span>
+                        </div>
+                      </div>
+                      <div class="mode-check">
+                        <i class="fas fa-check"></i>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-12">
+                    <div class="mode-card-modern" id="manual-mode" data-mode="manual">
+                      <div class="mode-icon-modern">
+                        <i class="fas fa-user-edit"></i>
+                      </div>
+                      <div class="mode-content-modern">
+                        <h4 class="mode-title-modern">{{ _('Análisis Manual') }}</h4>
+                        <p class="mode-desc-modern">{{ _('Tú seleccionas y anotas los elementos del texto que quieres analizar') }}</p>
+                        <div class="mode-features">
+                          <span class="feature-tag">{{ _('Personalizado') }}</span>
+                          <span class="feature-tag">{{ _('Interactivo') }}</span>
+                          <span class="feature-tag">{{ _('Educativo') }}</span>
+                        </div>
+                      </div>
+                      <div class="mode-check">
+                        <i class="fas fa-check"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <!-- Título artículo -->
-              <div class="mb-4">
-                <label for="title" class="form-label">{{ _('Título del artículo') }}</label>
-                <input type="text" id="title" name="title" class="form-control" placeholder="{{ _('Escribe aquí el título...') }}">
-              </div>
-              <!-- Autoría -->
-              <div class="mb-4">
-                <label for="authors" class="form-label">{{ _('Autoría') }}</label>
-                <input type="text" id="authors" name="authors" class="form-control" placeholder="{{ _('Escribe aquí la autoría...') }}">
-              </div>
-              <!-- Botones contextuales -->
-              <div class="d-grid gap-2">
-                <button type="button" class="btn secondary" id="load-example">📂 {{ _('Cargar ejemplo') }}</button>
-                <button type="button" class="btn tertiary" id="use-url">🔗 {{ _('Usar URL') }}</button>
-              </div>
-            </div>
 
-            <!-- Columna derecha: input principal -->
-            <div class="col-md-8">
-              <!-- Texto -->
-              <div id="fields-text" class="mb-4">
-                <label for="input-text" class="form-label">{{ _('Texto del artículo') }} <span class="req">*</span></label>
-                <textarea id="input-text" name="text" class="form-control" rows="12" placeholder="{{ _('Escribe aquí tu texto…') }}" required></textarea>
-              </div>
-              <!-- URL oculto -->
-              <div id="fields-url" class="mb-4" style="display:none;">
-                <label for="url" class="form-label">{{ _('URL del artículo') }} <span class="req">*</span></label>
-                <div class="input-group">
-                  <input type="url" id="url" name="url" class="form-control" placeholder="{{ _('https://...') }}">
-                  <button type="button" class="btn btn-outline-secondary" id="back-to-text">← {{ _('Volver') }}</button>
+              <!-- Model Selection (only for automatic mode) -->
+              <div id="model-selection" class="model-selection-modern mb-3">
+                <div class="text-center">
+                  <h5 class="fw-bold text-primary mb-3">
+                    <i class="fas fa-brain me-2"></i>{{ _('Selecciona el modelo de IA') }}
+                  </h5>
+                  <div class="row g-2 justify-content-center">
+                    <div class="col-6">
+                      <div class="model-option" data-model="basico">
+                        <div class="model-icon">
+                          <i class="fas fa-cog"></i>
+                        </div>
+                        <h6>{{ _('Básico') }}</h6>
+                        <small class="text-muted">{{ _('Análisis estándar') }}</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="model-option selected" data-model="avanzado">
+                        <div class="model-icon">
+                          <i class="fas fa-rocket"></i>
+                        </div>
+                        <h6>{{ _('Avanzado') }}</h6>
+                        <small class="text-muted">{{ _('GPT-4 - Mayor precisión') }}</small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Acciones finales -->
-          <div class="d-flex justify-content-end mt-4">
-            <button type="reset" class="btn reset me-2">🧹 {{ _('Limpiar') }}</button>
-            <button type="submit" class="btn primary">🔍 {{ _('Analizar texto') }}</button>
+            <!-- Right column: Metadata, actions, inputs, buttons -->
+            <div class="col-lg-8 analysis-right-panel">
+              <!-- Content Input Section (stacked) -->
+              <div class="content-input-section">
+                <!-- Article Info -->
+                <div class="info-card">
+                  <h6 class="info-title">
+                    <i class="fas fa-info-circle me-2"></i>{{ _('Información del artículo') }}
+                  </h6>
+                  <div class="info-fields">
+                    <input type="text" id="title" name="title" class="info-input" placeholder="{{ _('Título del artículo') }}">
+                    <input type="text" id="authors" name="authors" class="info-input" placeholder="{{ _('Autoría') }}">
+                  </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="actions-card">
+                  <h6 class="actions-title">
+                    <i class="fas fa-bolt me-2"></i>{{ _('Acciones rápidas') }}
+                  </h6>
+                  <div class="actions-buttons">
+                    <button type="button" class="action-btn primary" id="load-example">
+                      <i class="fas fa-folder-open"></i>
+                      <span>{{ _('Cargar ejemplo') }}</span>
+                    </button>
+                    <button type="button" class="action-btn secondary" id="use-url">
+                      <i class="fas fa-link"></i>
+                      <span>{{ _('Usar URL') }}</span>
+                    </button>
+                    <a href="{{ url_for('glossary.glossary_home') }}" class="action-btn" style="text-decoration: none;">
+                      <i class="fas fa-book"></i>
+                      <span>{{ _('Glosario de variables') }}</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Text Input -->
+                <div id="fields-text" class="text-input-section mt-3">
+                  <div class="text-input-header">
+                    <h5 class="text-input-title">
+                      <i class="fas fa-align-left me-2"></i>{{ _('Texto del artículo') }}
+                      <span class="required-badge">*</span>
+                    </h5>
+                    <p class="text-input-subtitle">{{ _('Pega aquí el contenido que quieres analizar') }}</p>
+                  </div>
+                  <div class="text-input-container">
+                    <textarea id="input-text" name="text" class="text-input" placeholder="{{ _('Escribe o pega aquí el texto del artículo que quieres analizar para detectar sesgos de género...') }}" required></textarea>
+                    <div class="text-input-footer">
+                      <div class="text-input-tip">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        {{ _('Contenido periodístico funciona mejor') }}
+                      </div>
+                      <div class="text-input-actions">
+                        <button type="button" class="btn-clear" id="clear-text">
+                          <i class="fas fa-eraser me-1"></i>{{ _('Limpiar') }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- URL Input (hidden by default) -->
+                <div id="fields-url" class="mb-3" style="display:none;">
+                  <label for="url" class="form-label">
+                    <i class="fas fa-globe me-2"></i>{{ _('URL del artículo') }} <span class="req">*</span>
+                  </label>
+                  <div class="input-group">
+                    <input type="url" id="url" name="url" class="form-control" placeholder="{{ _('https://ejemplo.com/articulo') }}">
+                    <button type="button" class="btn btn-outline-secondary" id="back-to-text">
+                      <i class="fas fa-arrow-left me-1"></i>{{ _('Volver') }}
+                    </button>
+                  </div>
+                  <div class="form-text">
+                    <i class="fas fa-info-circle me-1"></i>
+                    {{ _('La URL debe apuntar a un artículo de noticias accesible públicamente') }}
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons mt-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <button type="reset" class="btn btn-outline-secondary">
+                      <i class="fas fa-eraser me-2"></i>{{ _('Limpiar formulario') }}
+                    </button>
+                    <div class="analysis-info">
+                      <span id="analysis-mode-info" class="badge bg-primary me-2">
+                        <i class="fas fa-robot me-1"></i>{{ _('Análisis Automático') }}
+                      </span>
+                      <span id="model-info" class="badge bg-success">
+                        <i class="fas fa-brain me-1"></i>{{ _('Modelo Avanzado') }}
+                      </span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" id="analyze-button">
+                      <i class="fas fa-search me-2"></i>{{ _('Iniciar Análisis') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>
@@ -72,4 +224,5 @@
 
 <script src="{{ url_for('static', filename='js/analysis_windows.js') }}"></script>
 <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+<script src="{{ url_for('static', filename='js/create_analysis_enhanced.js') }}"></script>
 {% endblock %}

@@ -1,17 +1,20 @@
-<!-- Icono de accesibilidad -->
-<button id="translate-menu-button" class="translate-menu-button">
-    <i class="fas fa-language"></i>
+<!-- Icono de idioma -->
+<button id="translate-menu-button" class="translate-menu-button" data-tooltip="{{ _('Configuración de Idioma') }}" aria-label="{{ _('Configuración de Idioma') }}">
+    <i class="fas fa-globe"></i>
 </button>
 
-<!-- Modal de accesibilidad -->
-<div id="translate-modal" class="modal hidden">
+<!-- Modal de idioma -->
+<div id="translate-modal" class="modal hidden" role="dialog" aria-labelledby="translate-modal-title" aria-hidden="true">
     <div class="modal-content">
-        <h2>Configuración de Idioma</h2>
-        <label for="theme-select-translate">Seleccionar Idioma:</label>
-        <select id="theme-select-translate">
-            <option value="es" {% if current_language == 'es' %}selected{% endif %}>🇪🇸 ES</option>
-            <option value="en" {% if current_language == 'en' %}selected{% endif %}>🇬🇧 EN</option>
-        </select>
-        <button id="close-modal-translate" class="close-modal-button">Cerrar</button>
+        <h2 id="translate-modal-title">{{ _('Configuración de Idioma') }}</h2>
+        <div class="form-group">
+            <label for="theme-select-translate">{{ _('Seleccionar Idioma') }}</label>
+            <select id="theme-select-translate" aria-describedby="language-help">
+                <option value="es" {% if current_language == 'es' %}selected{% endif %}>🇪🇸 {{ _('Español') }}</option>
+                <option value="en" {% if current_language == 'en' %}selected{% endif %}>🇬🇧 {{ _('English') }}</option>
+            </select>
+            <small id="language-help" class="form-help">{{ _('Selecciona tu idioma preferido para la interfaz') }}</small>
+        </div>
+        <button id="close-modal-translate" class="close-modal-button" aria-label="{{ _('Aplicar idioma') }}">{{ _('Aplicar Idioma') }}</button>
     </div>
 </div>

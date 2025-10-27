@@ -2,37 +2,73 @@
 {% block title %}Admin · {{ _('Dashboard') }}{% endblock %}
 
 {% block admin_content %}
-<h1 class="h2 mt-4">{{ _('Panel de control') }}</h1>
-<div class="row my-4">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-cogs me-3 text-primary"></i>
+                    {{ _('Panel de control') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Administra usuarios, roles y permisos del sistema') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row my-4">
   <div class="col-md-4">
-    <div class="card text-white bg-primary mb-3">
-      <div class="card-header">{{ _('Personas Usuarias') }}</div>
+    <div class="admin-dashboard-card admin-card-users">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <h3>{{ _('Personas Usuarias') }}</h3>
+      </div>
       <div class="card-body">
-        <h5 class="card-title">{{ total_users }}</h5>
-        <p class="card-text">{{ _('Registrados') }}</p>
-        <a href="{{ url_for('admin.list_users') }}" class="btn btn-light">{{ _('Ver lista') }}</a>
+        <div class="card-number">{{ total_users }}</div>
+        <p class="card-description">{{ _('Registrados') }}</p>
+        <a href="{{ url_for('admin.list_users') }}" class="card-btn">
+          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
+        </a>
       </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card text-white bg-success mb-3">
-      <div class="card-header">{{ _('Roles') }}</div>
+    <div class="admin-dashboard-card admin-card-roles">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-user-tag"></i>
+        </div>
+        <h3>{{ _('Roles') }}</h3>
+      </div>
       <div class="card-body">
-        <h5 class="card-title">{{ total_roles }}</h5>
-        <p class="card-text">{{ _('Definidos') }}</p>
-        <a href="{{ url_for('admin.list_roles') }}" class="btn btn-light">{{ _('Ver lista') }}</a>
+        <div class="card-number">{{ total_roles }}</div>
+        <p class="card-description">{{ _('Definidos') }}</p>
+        <a href="{{ url_for('admin.list_roles') }}" class="card-btn">
+          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
+        </a>
       </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card text-white bg-warning mb-3">
-      <div class="card-header">{{ _('Permisos') }}</div>
+    <div class="admin-dashboard-card admin-card-permissions">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-key"></i>
+        </div>
+        <h3>{{ _('Permisos') }}</h3>
+      </div>
       <div class="card-body">
-        <h5 class="card-title">{{ total_permissions }}</h5>
-        <p class="card-text">{{ _('Disponibles') }}</p>
-        <a href="{{ url_for('admin.list_permissions') }}" class="btn btn-light">{{ _('Ver lista') }}</a>
+        <div class="card-number">{{ total_permissions }}</div>
+        <p class="card-description">{{ _('Disponibles') }}</p>
+        <a href="{{ url_for('admin.list_permissions') }}" class="card-btn">
+          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
+        </a>
       </div>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}

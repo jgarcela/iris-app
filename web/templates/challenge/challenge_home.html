@@ -1,0 +1,1043 @@
+{% extends "challenge/challenge_base.html" %}
+
+{% block title %}{{ _('Desafío de Análisis IRIS - Semana de la Ciencia') }}{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block challenge_content %}
+<div class="container-fluid py-4">
+
+
+
+    <!-- Instrucciones -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        {{ _('¿Cómo funciona el desafío?') }}
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon">
+                                <i class="fas fa-mouse-pointer fa-2x text-primary mb-2"></i>
+                                <h5>{{ _('1. Recibe un texto') }}</h5>
+                                <p class="text-muted small">{{ _('Se te proporcionará uno de los textos disponibles') }}</p>
+                                
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon">
+                                <i class="fas fa-edit fa-2x text-success mb-2"></i>
+                                <h5>{{ _('2. Analiza manualmente') }}</h5>
+                                <p class="text-muted small">{{ _('Identifica sesgos usando nuestras herramientas') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon">
+                                <i class="fas fa-robot fa-2x text-warning mb-2"></i>
+                                <h5>{{ _('3. Compara con IRIS') }}</h5>
+                                <p class="text-muted small">{{ _('Ve cómo se compara tu análisis con el de IRIS') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Control Panel -->
+
+    <!-- Simple Challenge Interface -->
+    <div class="row">
+        <div class="col-12">
+            <div id="challengeInterface" class="text-center">
+                <!-- Start Button -->
+                <div id="startSection">
+                    <h2 class="mb-4">
+                        <i class="fas fa-microscope me-2"></i>
+                        {{ _('¡Únete al Desafío!') }}
+            </h2>
+                    <p class="lead text-muted mb-4">
+                        {{ _('Analiza el texto que aparece a continuación e identifica los sesgos de género.') }}
+                    </p>
+                    <button id="startChallengeBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-play me-2"></i>
+                                {{ _('Comenzar Análisis') }}
+                            </button>
+    </div>
+
+                <!-- Text Display (hidden initially) -->
+                <div id="textSection" style="display: none;">
+                    <div id="currentTextContainer">
+                        <!-- Text will be loaded here -->
+                </div>
+                                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+/* Scientific theme styling */
+body {
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+    min-height: 100vh;
+}
+
+
+.difficulty-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.difficulty-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.difficulty-card[data-level="facil"]:hover {
+    border-color: #28a745;
+}
+
+.difficulty-card[data-level="medio"]:hover {
+    border-color: #ffc107;
+}
+
+.difficulty-card[data-level="dificil"]:hover {
+    border-color: #dc3545;
+}
+
+.difficulty-icon {
+    transition: transform 0.3s ease;
+}
+
+.difficulty-card:hover .difficulty-icon {
+    transform: scale(1.1);
+}
+
+.difficulty-icon-large {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    backdrop-filter: blur(10px);
+}
+
+.difficulty-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.difficulty-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.difficulty-features-preview {
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    border-left: 3px solid;
+}
+
+.difficulty-facil .difficulty-features-preview {
+    border-left-color: #28a745;
+}
+
+.difficulty-medio .difficulty-features-preview {
+    border-left-color: #ffc107;
+}
+
+.difficulty-dificil .difficulty-features-preview {
+    border-left-color: #dc3545;
+}
+
+.difficulty-section-header {
+    background: rgba(255,255,255,0.8);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Progress Circle */
+.progress-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: conic-gradient(#4CAF50 0deg, #4CAF50 0deg, #e0e0e0 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-circle::before {
+    content: '';
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    position: absolute;
+    backdrop-filter: blur(10px);
+}
+
+.progress-circle-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.progress-text {
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+}
+
+/* Level Badge */
+.level-badge .badge {
+    background: rgba(255,255,255,0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Text Cards Enhanced */
+.text-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.text-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.difficulty-facil:hover {
+    border-color: #28a745;
+}
+
+.difficulty-medio:hover {
+    border-color: #ffc107;
+}
+
+.difficulty-dificil:hover {
+    border-color: #dc3545;
+}
+
+/* Button Enhancements */
+.select-difficulty-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.select-difficulty-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.select-difficulty-btn:hover::before {
+    left: 100%;
+}
+
+/* Animation for difficulty selection */
+@keyframes difficultySelect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.difficulty-card.selected {
+    animation: difficultySelect 0.3s ease;
+    border-color: currentColor;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* Difficulty Selector in Step Icon */
+.difficulty-selector {
+    margin-top: 1rem;
+}
+
+.difficulty-selector .btn-group .btn {
+    border-radius: 0;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.difficulty-selector .btn-group .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.difficulty-selector .btn-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.difficulty-selector .btn-group .btn.active {
+    color: white;
+}
+
+.difficulty-selector .btn-group .btn[data-level="facil"].active {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.difficulty-selector .btn-group .btn[data-level="medio"].active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.difficulty-selector .btn-group .btn[data-level="dificil"].active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .difficulty-icon-large {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .progress-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .progress-circle::before {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .difficulty-selector .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .difficulty-selector .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 0.25rem;
+    }
+}
+
+.step-icon {
+    padding: 1.5rem;
+    border-radius: 15px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.step-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.step-icon:hover::before {
+    left: 100%;
+}
+
+.step-icon:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+.step-icon i {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 15px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.text-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.text-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.text-card .card-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.text-card .badge {
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: none;
+}
+
+.text-card .badge.bg-success {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white;
+}
+
+.text-card .badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+    color: white;
+}
+
+.text-card .badge.bg-danger {
+    background: linear-gradient(135deg, #dc3545, #e83e8c) !important;
+    color: white;
+}
+
+.stat-item {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-radius: 15px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+}
+
+.stat-item i {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.categories .badge {
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+    color: #667eea !important;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 15px;
+    padding: 0.4rem 0.8rem;
+}
+
+.start-analysis-btn {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.start-analysis-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.start-analysis-btn:hover::before {
+    left: 100%;
+}
+
+.start-analysis-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Cards styling */
+.card {
+    border-radius: 15px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.08);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+/* Section headers */
+h2, h3, h4, h5 {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+/* Footer styling */
+.challenge-footer {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+/* Assessment Section Styling */
+.assessment-container {
+    padding: 1rem 0;
+}
+
+.question-section {
+    margin-bottom: 2rem;
+}
+
+.question-title {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.option-card {
+    padding: 1.5rem 1rem;
+    border: 2px solid rgba(102, 126, 234, 0.1);
+    border-radius: 15px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.option-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.option-card:hover::before {
+    left: 100%;
+}
+
+.option-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+.option-card.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
+    transform: translateY(-5px) scale(1.01);
+}
+
+.option-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.option-title {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.option-desc {
+    font-size: 0.9rem;
+    color: #495057;
+    line-height: 1.4;
+    margin-bottom: 0;
+    font-weight: 400;
+}
+
+.option-details {
+    margin-top: auto;
+}
+
+.option-details small {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #6c757d;
+}
+
+.selected-options {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    margin: 2rem 0;
+}
+
+.selected-display {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+/* Assessment section visibility */
+#difficultyAssessmentSection {
+    display: block;
+}
+
+#difficultyAssessmentSection.hidden {
+    display: none;
+}
+
+/* User Control Panel Styling */
+.user-level-display {
+    padding: 0.5rem 0;
+}
+
+.level-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* Difficulty Management Styling */
+.difficulty-item {
+    padding: 1rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.difficulty-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.difficulty-item h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.difficulty-item .badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Difficulty Management Styling */
+.difficulty-controls {
+    padding: 0.5rem 0;
+}
+
+.difficulty-section {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+    border-radius: 10px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    height: 100%;
+}
+
+.difficulty-section h6 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.unlock-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.unlock-status .btn {
+    flex-shrink: 0;
+}
+
+/* Text Card Enhancements */
+.text-card.locked {
+    opacity: 0.6;
+    position: relative;
+    pointer-events: none;
+}
+
+.text-card.locked::after {
+    content: '\f023';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: #6c757d;
+    background: white;
+    padding: 1rem;
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.text-card.recommended {
+    border: 2px solid #28a745;
+    position: relative;
+}
+
+.text-card.recommended::before {
+    content: 'Recomendado';
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.text-card.new {
+    border: 2px solid #17a2b8;
+    position: relative;
+}
+
+.text-card.new::before {
+    content: 'Nuevo';
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: #17a2b8;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 10;
+}
+
+/* Fix Bootstrap grid issues */
+.row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    margin-right: -15px !important;
+    margin-left: -15px !important;
+}
+
+.col, .col-12, .col-sm-6, .col-lg-3 {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+@media (min-width: 576px) {
+    .col-sm-6 {
+        width: 50% !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .col-lg-3 {
+        width: 25% !important;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .control-buttons {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    
+    .unlock-status {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .unlock-status .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .option-card {
+        padding: 1rem 0.75rem;
+        min-height: 100px;
+    }
+    
+    .option-icon {
+        font-size: 1.5rem;
+    }
+    
+    .option-title {
+        font-size: 1rem;
+    }
+    
+    .option-desc {
+        font-size: 0.85rem;
+    }
+}
+
+</style>
+
+<script>
+// Sequential Challenge System for Semana de la Ciencia 2025
+let challengeState = {
+    isStarted: false,
+    currentTextIndex: 0,
+    texts: [],
+    loading: false
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Start challenge button
+    document.getElementById('startChallengeBtn').addEventListener('click', function() {
+        startChallenge();
+    });
+}
+
+async function startChallenge() {
+    if (challengeState.loading) return;
+    
+    challengeState.loading = true;
+    
+    // Show loading state
+    document.getElementById('startSection').style.display = 'none';
+    document.getElementById('textSection').style.display = 'block';
+    
+    const container = document.getElementById('currentTextContainer');
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando textos...</span>
+            </div>
+            <p class="mt-3">Cargando textos del desafío...</p>
+        </div>
+    `;
+    
+    try {
+        // Load texts from API
+        await loadTextsFromAPI();
+        
+        // Go directly to analysis of first text
+        startAnalysis(challengeState.texts[0].id);
+    } catch (error) {
+        console.error('Error loading texts:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger text-center">
+                <h5>Error al cargar los textos</h5>
+                <p>No se pudieron cargar los textos del desafío. Por favor, inténtalo de nuevo.</p>
+                <button class="btn btn-primary" onclick="location.reload()">Reintentar</button>
+            </div>
+        `;
+    } finally {
+        challengeState.loading = false;
+    }
+}
+
+async function loadTextsFromAPI() {
+    try {
+        console.log('Loading texts from API...');
+        const response = await fetch('http://localhost:8000/analysis/semana-ciencia/texts');
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        }
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        // Define the specific order we want
+        const orderedIds = [
+            '68f9e5a22e476535f8a73ec4', // Paloma Lago
+            '68f9e5a22e476535f8a73ec2', // Paula Badosa
+            '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+            '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+            '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+            '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+        ];
+        
+        // Reorder texts according to our sequence
+        challengeState.texts = orderedIds.map(id => {
+            const text = data.texts.find(t => t._id === id);
+            if (!text) {
+                console.warn(`Text with ID ${id} not found`);
+                return null;
+            }
+            return {
+                id: text._id,
+                title: text.title || 'Texto para Analizar',
+                content: text.text,
+                categories: ['Semana de la Ciencia 2025']
+            };
+        }).filter(text => text !== null);
+        
+        if (challengeState.texts.length === 0) {
+            throw new Error('No se encontraron textos para el desafío');
+        }
+        
+    } catch (error) {
+        console.error('Error loading texts from API:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        throw error;
+    }
+}
+
+function showSequentialText() {
+    // Get current text in sequence
+    const selectedText = challengeState.texts[challengeState.currentTextIndex];
+    
+    const container = document.getElementById('currentTextContainer');
+    container.innerHTML = `
+        <div class="card mx-auto" style="max-width: 800px;">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-text me-2"></i>
+                    ${selectedText.title}
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text lead">${selectedText.content}</p>
+                <div class="categories mt-3">
+                    ${selectedText.categories.map(cat => 
+                        `<span class="badge bg-secondary me-1">${cat}</span>`
+                    ).join('')}
+                </div>
+            </div>
+            <div class="card-footer bg-light text-center">
+                ${challengeState.currentTextIndex < challengeState.texts.length - 1 ? 
+                    `<button class="btn btn-primary btn-lg me-3" onclick="nextText()">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        Siguiente Texto
+                    </button>` : ''
+                }
+                <button class="btn btn-success btn-lg" onclick="startAnalysis(${selectedText.id})">
+                    <i class="fas fa-microscope me-2"></i>
+                    Analizar este Texto
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function nextText() {
+    // Move to next text in sequence
+    if (challengeState.currentTextIndex < challengeState.texts.length - 1) {
+        challengeState.currentTextIndex++;
+        showSequentialText();
+    }
+}
+
+function startAnalysis(textId) {
+    // Store current text index for navigation
+    const currentIndex = challengeState.texts.findIndex(text => text.id === textId);
+    if (currentIndex !== -1) {
+        challengeState.currentTextIndex = currentIndex;
+    }
+    
+    // Redirect to analysis page with selected text
+    window.location.href = `/challenge/analyze/${textId}`;
+}
+
+// Function to get next text in sequence
+function getNextTextId() {
+    const nextIndex = challengeState.currentTextIndex + 1;
+    if (nextIndex < challengeState.texts.length) {
+        return challengeState.texts[nextIndex].id;
+    }
+    return null;
+}
+
+// Function to check if there are more texts
+function hasNextText() {
+    return challengeState.currentTextIndex + 1 < challengeState.texts.length;
+}
+
+</script>
+{% endblock %}

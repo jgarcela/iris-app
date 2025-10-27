@@ -7,6 +7,7 @@ from flask import Blueprint, abort, request, jsonify
 from datetime import datetime, timezone
 from newspaper import Article
 from bson import ObjectId
+from pymongo import MongoClient
 
 import database.db as db
 from api.utils.logger import logger
@@ -91,13 +92,20 @@ def analysis_analyze():
         logger.exception("Error en el análisis")
         return jsonify({'error': 'Error interno en el servidor.'}), 500
 
+    # Get user information from request headers or session
+    user_id = request.headers.get('X-User-ID', 'anonymous')
+    user_email = request.headers.get('X-User-Email', 'anonymous@example.com')
+    
     # Estructura editable
+    from datetime import datetime, timezone
     document = {
         'model': model,
         'text': text,
         'title': title,
         'authors': authors,
         'url': url,
+        'user_id': user_id,
+        'user_email': user_email,
         'analysis': {
             'original': {
                 'contenido_general': analysis_contenido_general,
@@ -122,7 +130,9 @@ def analysis_analyze():
                 'lenguaje': None
             }
         },
-        'timestamp': datetime.now(timezone.utc)
+        'source': 'regular',
+        'created_at': datetime.now(timezone.utc),
+        'updated_at': datetime.now(timezone.utc)
     }
 
     # Guardar en MongoDB
@@ -133,8 +143,9 @@ def analysis_analyze():
     except Exception as e:
         print(f"Error al guardar en MongoDB: {e}")
 
-    # Convertir timestamp a string
-    document['timestamp'] = document['timestamp'].isoformat()
+    # Convertir timestamps a string
+    document['created_at'] = document['created_at'].isoformat()
+    document['updated_at'] = document['updated_at'].isoformat()
     document['status'] = 'ok'
 
     return jsonify(document), 200
@@ -159,4 +170,292 @@ def save_edits():
         return jsonify(success=True)
     else:
         return jsonify(success=False, error='No se pudo actualizar el documento')
+
+
+@bp.route('/save_annotations', methods=['POST'])
+# @role_required('user','admin')
+def save_annotations():
+    """Save analysis and manual annotations to database"""
+    try:
+        data = request.get_json()
+        doc_id = data.get('doc_id')
+        analysis = data.get('analysis')
+        annotations = data.get('annotations', [])
+        highlight_html = data.get('highlight_html', {})
+        timestamp = data.get('timestamp')
+        
+        print(f"[SAVE_ANNOTATIONS] Received data:")
+        print(f"  - doc_id: {doc_id}")
+        print(f"  - annotations count: {len(annotations)}")
+        print(f"  - highlight_html keys: {list(highlight_html.keys())}")
+        print(f"  - timestamp: {timestamp}")
+        
+        if not doc_id:
+            return jsonify(success=False, error='Document ID is required'), 400
+        
+        # Prepare update data
+        update_data = {
+            'analysis.original': analysis,
+            'annotations': annotations,
+            'highlight.edited': highlight_html,
+            'updated_at': datetime.now(timezone.utc)
+        }
+        
+        # Get user information from request headers
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        user_email = request.headers.get('X-User-Email', 'anonymous@example.com')
+        
+        # If it's a new document (no existing doc_id), create it
+        if doc_id == 'new' or not ObjectId.is_valid(doc_id):
+            # Create new document
+            new_doc = {
+                'user_id': user_id,
+                'user_email': user_email,
+                'analysis': {
+                    'original': analysis,
+                    'edited': None
+                },
+                'annotations': annotations,
+                'highlight': {
+                    'original': {},
+                    'edited': highlight_html
+                },
+                'created_at': datetime.now(timezone.utc),
+                'updated_at': datetime.now(timezone.utc),
+                'status': 'draft'
+            }
+            
+            print(f"[SAVE_ANNOTATIONS] Creating new document with {len(annotations)} annotations")
+            result = db.DB_ANALYSIS.insert_one(new_doc)
+            new_doc_id = str(result.inserted_id)
+            
+            print(f"[DB] ✅ New document created with ID: {new_doc_id}")
+            print(f"[DB] Document contains {len(annotations)} annotations")
+            return jsonify(success=True, doc_id=new_doc_id)
+        
+        else:
+            # Update existing document
+            print(f"[SAVE_ANNOTATIONS] Updating existing document {doc_id} with {len(annotations)} annotations")
+            result = db.DB_ANALYSIS.update_one(
+                {'_id': ObjectId(doc_id)},
+                {'$set': update_data}
+            )
+            
+            if result.modified_count == 1:
+                print(f"[DB] ✅ Document updated with ID: {doc_id}")
+                print(f"[DB] Document now contains {len(annotations)} annotations")
+                return jsonify(success=True, doc_id=doc_id)
+            else:
+                print(f"[DB] ❌ Failed to update document {doc_id}")
+                return jsonify(success=False, error='No se pudo actualizar el documento')
+                
+    except Exception as e:
+        print(f"[ERROR] Error saving annotations: {str(e)}")
+        return jsonify(success=False, error=f'Error interno: {str(e)}'), 500
+
+
+@bp.route('/history', methods=['GET'])
+def get_analysis_history():
+    """Get analysis history with search and filtering capabilities"""
+    try:
+        # Get query parameters
+        search_query = request.args.get('search', '').strip()
+        date_from = request.args.get('date_from', '').strip()
+        date_to = request.args.get('date_to', '').strip()
+        analysis_mode_filter = request.args.get('analysis_mode', '').strip()
+        limit = int(request.args.get('limit', 50))
+        offset = int(request.args.get('offset', 0))
+        
+        print(f"[ANALYSIS_HISTORY] Request parameters:")
+        print(f"  - search: {search_query}")
+        print(f"  - date_from: {date_from}")
+        print(f"  - date_to: {date_to}")
+        print(f"  - analysis_mode: {analysis_mode_filter}")
+        print(f"  - limit: {limit}, offset: {offset}")
+        
+        # Get user information from request headers
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        
+        # Build MongoDB query - handle both ObjectId and string user_id formats
+        try:
+            # Try to convert to ObjectId if it's a valid ObjectId string
+            from bson import ObjectId
+            if user_id != 'anonymous' and len(user_id) == 24:
+                user_id_obj = ObjectId(user_id)
+                query = {'user_id': {'$in': [user_id, user_id_obj]}}  # Support both formats
+            else:
+                query = {'user_id': user_id}
+        except:
+            # Fallback to string matching
+            query = {'user_id': user_id}
+        
+        # Search in title, text, and authors
+        if search_query:
+            # Preserve the existing user_id filter and add search conditions
+            user_filter = query['user_id'] if 'user_id' in query else {'user_id': user_id}
+            query = {
+                '$and': [
+                    user_filter,
+                    {'$or': [
+                        {'title': {'$regex': search_query, '$options': 'i'}},
+                        {'text': {'$regex': search_query, '$options': 'i'}},
+                        {'authors': {'$regex': search_query, '$options': 'i'}}
+                    ]}
+                ]
+            }
+        
+        # Filter by analysis mode
+        if analysis_mode_filter:
+            query['analysis_mode'] = analysis_mode_filter
+        
+        # Filter by date range
+        if date_from or date_to:
+            date_query = {}
+            if date_from:
+                try:
+                    from_date = datetime.strptime(date_from, '%Y-%m-%d')
+                    date_query['$gte'] = from_date
+                except ValueError:
+                    pass
+            if date_to:
+                try:
+                    to_date = datetime.strptime(date_to, '%Y-%m-%d')
+                    # Add one day to include the entire day
+                    to_date = to_date.replace(hour=23, minute=59, second=59)
+                    date_query['$lte'] = to_date
+                except ValueError:
+                    pass
+            if date_query:
+                query['timestamp'] = date_query
+        
+        print(f"[ANALYSIS_HISTORY] MongoDB query: {query}")
+        
+        # Execute query
+        cursor = db.DB_ANALYSIS.find(query).sort('timestamp', -1).skip(offset).limit(limit)
+        analyses = list(cursor)
+        
+        # Convert ObjectId to string and format timestamps
+        for analysis in analyses:
+            analysis['_id'] = str(analysis['_id'])
+            # Convert any ObjectId fields to strings
+            if 'user_id' in analysis and hasattr(analysis['user_id'], '__str__'):
+                analysis['user_id'] = str(analysis['user_id'])
+            if 'timestamp' in analysis and hasattr(analysis['timestamp'], 'isoformat'):
+                analysis['timestamp'] = analysis['timestamp'].isoformat()
+            if 'created_at' in analysis and hasattr(analysis['created_at'], 'isoformat'):
+                analysis['created_at'] = analysis['created_at'].isoformat()
+            if 'updated_at' in analysis and hasattr(analysis['updated_at'], 'isoformat'):
+                analysis['updated_at'] = analysis['updated_at'].isoformat()
+        
+        # Get total count for pagination
+        total_count = db.DB_ANALYSIS.count_documents(query)
+        
+        print(f"[ANALYSIS_HISTORY] Found {len(analyses)} analyses (total: {total_count})")
+        
+        return jsonify({
+            'success': True,
+            'analyses': analyses,
+            'total_count': total_count,
+            'limit': limit,
+            'offset': offset,
+            'has_more': (offset + len(analyses)) < total_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error getting analysis history: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error interno: {str(e)}'
+        }), 500
+
+
+@bp.route('/<analysis_id>', methods=['GET'])
+def get_analysis_by_id(analysis_id):
+    """Get a specific analysis by ID"""
+    try:
+        # Get user information from request headers
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        
+        # Validate ObjectId
+        if not ObjectId.is_valid(analysis_id):
+            return jsonify({
+                'success': False,
+                'error': 'ID de análisis inválido'
+            }), 400
+        
+        # Find analysis by ID and user
+        analysis = db.DB_ANALYSIS.find_one({
+            '_id': ObjectId(analysis_id),
+            'user_id': user_id
+        })
+        
+        if not analysis:
+            return jsonify({
+                'success': False,
+                'error': 'Análisis no encontrado o no tienes permisos para verlo'
+            }), 404
+        
+        # Convert ObjectId to string and format timestamps
+        analysis['_id'] = str(analysis['_id'])
+        if 'timestamp' in analysis:
+            analysis['timestamp'] = analysis['timestamp'].isoformat()
+        if 'created_at' in analysis:
+            analysis['created_at'] = analysis['created_at'].isoformat()
+        if 'updated_at' in analysis:
+            analysis['updated_at'] = analysis['updated_at'].isoformat()
+        
+        return jsonify({
+            'success': True,
+            'analysis': analysis
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error getting analysis by ID: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error interno: {str(e)}'
+        }), 500
+
+
+@bp.route('/semana-ciencia/texts', methods=['GET'])
+def get_semana_ciencia_texts():
+    """Get all texts from iris_semana_ciencia_2025 collection for the challenge"""
+    try:
+        # Connect to MongoDB
+        client = MongoClient('mongodb://localhost:27017')
+        db = client['iris']
+        collection = db['iris_semana_ciencia_2025']
+        
+        # Get all texts from the collection
+        texts = list(collection.find({}, {
+            '_id': 1,
+            'title': 1,
+            'text': 1,
+            'authors': 1,
+            'url': 1,
+            'analysis_mode': 1,
+            'status': 1,
+            'created_at': 1
+        }))
+        
+        # Convert ObjectId to string for JSON serialization
+        for text in texts:
+            text['_id'] = str(text['_id'])
+            if 'created_at' in text and hasattr(text['created_at'], 'isoformat'):
+                text['created_at'] = text['created_at'].isoformat()
+        
+        client.close()
+        
+        return jsonify({
+            'success': True,
+            'texts': texts,
+            'count': len(texts)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error getting Semana de la Ciencia texts: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error interno: {str(e)}'
+        }), 500
 

@@ -1,10 +1,8 @@
-{# templates/noticias.html #}
 {% extends "base.html" %}
 
 {% block title %}{{ _('Tabla de Noticias') }} – IRIS{% endblock %}
 
 {% block head_extra %}
-
   <!-- ====== 0) Custom CSS ====== -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 
@@ -19,152 +17,237 @@
 {% endblock %}
 
 {% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-database me-3 text-primary"></i>
+                    {{ _('Listado completo de Noticias') }}
+                </h1>
+                <p class="lead text-muted">
+                    {% if selected_context %}
+                        {{ _('Base de datos de noticias para') }} <em>{{ selected_context }}</em>
+                    {% else %}
+                        {{ _('Consulta y gestiona todos los datos de noticias disponibles') }}
+                    {% endif %}
+                    {% set fd = request.args.get('fecha_desde') %}
+                    {% set fh = request.args.get('fecha_hasta') %}
+                    {% if fd or fh %}
+                        <br>{{ _('Periodo') }}: {{ fd if fd else _('inicio') }} {{ _('a') }} {{ fh if fh else _('hoy') }}
+                    {% endif %}
+                </p>
+            </div>
 
-<div class="dashboard-filters">
-  <h1>
-    {{ _('Listado completo de Noticias') }}
-    {% if selected_context %}
-      – <em>{{ selected_context }}</em>
-    {% else %}
-      – {{ _('Todos los datos') }}
-    {% endif %}
-    {% set fd = request.args.get('fecha_desde') %}
-    {% set fh = request.args.get('fecha_hasta') %}
-    {% if fd or fh %}
-      – <span class="periodo">
-        {{ _('Periodo') }}:
-        {{ fd if fd else _('inicio') }}
-        {{ _('a') }}
-        {{ fh if fh else _('hoy') }}
-      </span>
-    {% endif %}
-  </h1>
-  <form method="get" action="{{ url_for('table.table_iris') }}">
-    <!-- Primera fila: Contexto + Botón -->
-    <div class="filter-db">
-      <label for="context"><i class="fas fa-layer-group"></i> {{ _('Contexto') }}</label>
-      <select id="context" name="context">
-        <option value="">{{ _('Todos') }}</option>
-        {% for ctx in contextos %}
-          <option value="{{ ctx }}" {% if ctx == selected_context %}selected{% endif %}>
-            {{ ctx }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="filter-submit">
-      <button type="submit"><i class="fas fa-filter"></i> {{ _('Filtrar') }}</button>
-    </div>
+            <!-- Search and Filter Section -->
+            <div class="search-filters-panel mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            {{ _('Búsqueda y Filtros') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="{{ url_for('table.table_iris') }}" class="row g-3">
+                            <!-- Context Filter -->
+                            <div class="col-md-4">
+                                <label for="context" class="form-label">
+                                    <i class="fas fa-layer-group me-1"></i>
+                                    {{ _('Contexto') }}
+                                </label>
+                                <select class="form-select" id="context" name="context">
+                                    <option value="">{{ _('Todos') }}</option>
+                                    {% for ctx in contextos %}
+                                        <option value="{{ ctx }}" {% if ctx == selected_context %}selected{% endif %}>
+                                            {{ ctx }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
 
-    <!-- Segunda fila: Fechas Desde / Hasta -->
-    <div class="filter-date">
-      <label for="fecha_desde"><i class="fas fa-calendar-alt"></i> {{ _('Desde') }}</label>
-      <input type="date" id="fecha_desde" name="fecha_desde" value="{{ fd }}">
+                            <!-- Date From -->
+                            <div class="col-md-2">
+                                <label for="fecha_desde" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ _('Desde') }}
+                                </label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="fecha_desde" 
+                                       name="fecha_desde" 
+                                       value="{{ fd }}">
+                            </div>
+
+                            <!-- Date To -->
+                            <div class="col-md-2">
+                                <label for="fecha_hasta" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ _('Hasta') }}
+                                </label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="fecha_hasta" 
+                                       name="fecha_hasta" 
+                                       value="{{ fh }}">
+                            </div>
+
+                            <!-- Filter Buttons -->
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="d-grid gap-2 w-100">
+                                    <button type="submit" class="btn btn-primary text-start">
+                                        <i class="fas fa-filter me-1"></i>
+                                        {{ _('Filtrar') }}
+                                    </button>
+                                    <a href="{{ url_for('table.table_iris') }}" class="btn btn-outline-secondary text-start">
+                                        <i class="fas fa-times me-1"></i>
+                                        {{ _('Limpiar') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Summary -->
+            <div class="results-summary mb-3">
+                <div class="d-flex justify-content-end align-items-center">
+                    <div class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        {{ _('Última actualización') }}: <span id="current-time"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Content -->
+            <div class="container-fluid p-3">
+                <!-- ====== TOOLBAR PERSONALIZADO ====== -->
+                <div id="toolbar" class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex gap-2">
+                        <button id="exportar-csv" class="btn btn-outline-primary">
+                            <i class="fas fa-file-csv me-1"></i>{{ _('CSV') }}
+                        </button>
+                        <button id="exportar-excel" class="btn btn-outline-success">
+                            <i class="fas fa-file-excel me-1"></i>{{ _('Excel') }}
+                        </button>
+                        <button id="exportar-json" class="btn btn-outline-secondary">
+                            <i class="fas fa-file-code me-1"></i>{{ _('JSON') }}
+                        </button>
+                        <button id="exportar-pdf" class="btn btn-outline-danger">
+                            <i class="fas fa-file-pdf me-1"></i>{{ _('PDF') }}
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">{{ _('Filtros activos:') }}</span>
+                        <button id="clear-filters" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-times me-1"></i>{{ _('Limpiar') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ====== TABLA ====== -->
+                <div class="table-responsive">
+                    <table
+                        id="tabla-noticias"
+                        class="table table-striped"
+                        data-toggle="table"
+                        data-search="false"
+                        data-show-columns="true"
+                        data-show-export="false"
+                        data-pagination="true"
+                        data-page-size="10"
+                        data-page-list="[5, 10, 25, 50, 100]"
+                        data-locale="es-ES"
+                        data-filter-control="true"
+                        data-filter-show-clear="true"
+                        data-click-to-select="true"
+                        data-sort-name="IdNoticia"
+                        data-sort-order="asc"
+                    >
+                        <thead class="table-light">
+                            <tr>
+                                <!-- Columna para checkbox -->
+                                <th data-field="state" data-checkbox="true"></th>
+
+                                {% if data and data|length > 0 %}
+                                    {% set primera = data[0] %}
+
+                                    {# 1) Columnas fijas en order_cols, en el orden dado #}
+                                    {% for key in order_cols %}
+                                        {% if key in primera.keys() and key not in exclude_cols %}
+                                            <th
+                                                data-field="{{ key }}"
+                                                data-sortable="true"
+                                                data-filter-control="{% if key in input_filter_cols %}input{% else %}select{% endif %}"
+                                            >
+                                                {{ key.replace('_',' ') | title }}
+                                            </th>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {# 2) Resto de claves dinámicas, excluyendo las de order_cols y exclude_cols #}
+                                    {% for key in primera.keys() %}
+                                        {% if key not in order_cols and key not in exclude_cols %}
+                                            <th
+                                                data-field="{{ key }}"
+                                                data-sortable="true"
+                                                data-filter-control="{% if key in input_filter_cols %}input{% else %}select{% endif %}"
+                                            >
+                                                {{ key.replace('_',' ') | title }}
+                                            </th>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for n in data %}
+                                <tr>
+                                    <td></td> {# checkbox automático #}
+
+                                    {# 1) Valores de order_cols #}
+                                    {% for key in order_cols %}
+                                        {% if key in primera.keys() and key not in exclude_cols %}
+                                            <td>{{ n[key] }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {# 2) Valores restantes #}
+                                    {% for key in primera.keys() %}
+                                        {% if key not in order_cols and key not in exclude_cols %}
+                                            <td>{{ n[key] }}</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="filter-date">
-      <label for="fecha_hasta"><i class="fas fa-calendar-alt"></i> {{ _('Hasta') }}</label>
-      <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ fh }}">
-    </div>
-  </form>
 </div>
 
-  <div class="container-fluid p-3">
-
-    <!-- ====== BOTONES CUSTOM DE EXPORTACIÓN ====== -->
-    <div class="d-flex mb-2">
-      <button id="exportar-csv" class="btn btn-outline-primary btn-sm me-2">
-        {{ _('Exportar CSV') }}
-      </button>
-      <button id="exportar-excel" class="btn btn-outline-success btn-sm me-2">
-        {{ _('Exportar Excel') }}
-      </button>
-      <button id="exportar-json" class="btn btn-outline-secondary btn-sm me-2">
-        {{ _('Exportar JSON') }}
-      </button>
-      <button id="exportar-pdf" class="btn btn-outline-danger btn-sm">
-        {{ _('Exportar PDF') }}
-      </button>
-    </div>
-
-    <!-- ====== TABLA ====== -->
-    <div class="table-responsive">
-      <table
-        id="tabla-noticias"
-        class="table table-striped"
-        data-toggle="table"
-        data-search="true"
-        data-show-columns="true"
-        data-show-export="false"
-        data-pagination="true"
-        data-page-size="10"
-        data-page-list="[5, 10, 25, 50, 100]"
-        data-locale="es-ES"
-        data-filter-control="true"
-        data-filter-show-clear="true"
-        data-click-to-select="true"
-        data-sort-name="IdNoticia"
-        data-sort-order="asc"
-      >
-        <thead class="table-light">
-          <tr>
-            <!-- Columna para checkbox -->
-            <th data-field="state" data-checkbox="true"></th>
-
-            {% if data and data|length > 0 %}
-              {% set primera = data[0] %}
-
-              {# 1) Columnas fijas en order_cols, en el orden dado #}
-              {% for key in order_cols %}
-                {% if key in primera.keys() and key not in exclude_cols %}
-                  <th
-                    data-field="{{ key }}"
-                    data-sortable="true"
-                    data-filter-control="{% if key in input_filter_cols %}input{% else %}select{% endif %}"
-                  >
-                    {{ key.replace('_',' ') | title }}
-                  </th>
-                {% endif %}
-              {% endfor %}
-
-              {# 2) Resto de claves dinámicas, excluyendo las de order_cols y exclude_cols #}
-              {% for key in primera.keys() %}
-                {% if key not in order_cols and key not in exclude_cols %}
-                  <th
-                    data-field="{{ key }}"
-                    data-sortable="true"
-                    data-filter-control="{% if key in input_filter_cols %}input{% else %}select{% endif %}"
-                  >
-                    {{ key.replace('_',' ') | title }}
-                  </th>
-                {% endif %}
-              {% endfor %}
-            {% endif %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for n in data %}
-            <tr>
-              <td></td> {# checkbox automático #}
-
-              {# 1) Valores de order_cols #}
-              {% for key in order_cols %}
-                {% if key in primera.keys() and key not in exclude_cols %}
-                  <td>{{ n[key] }}</td>
-                {% endif %}
-              {% endfor %}
-
-              {# 2) Valores restantes #}
-              {% for key in primera.keys() %}
-                {% if key not in order_cols and key not in exclude_cols %}
-                  <td>{{ n[key] }}</td>
-                {% endif %}
-              {% endfor %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
+<!-- Analysis Actions JavaScript -->
+<script>
+// Set current time
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const timeString = now.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    const timeElement = document.getElementById('current-time');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
+});
+</script>
 {% endblock %}
 
 {% block scripts_extra %}
@@ -191,5 +274,5 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- ====== 8) Tu script de inicialización y exportación ====== -->
-  <script src="/static/js/table_noticias.js"></script>
+  <script src="{{ url_for('static', filename='js/table_noticias.js') }}"></script>
 {% endblock %}

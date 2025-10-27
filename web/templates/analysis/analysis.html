@@ -2,201 +2,404 @@
 
 {% block title %}{{ _('Resultados') }} - IRIS{% endblock %}
 
-
-
-
-
 {% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-file-alt me-3 text-primary"></i>
+                    {{ _('Análisis Automático') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Análisis automático del contenido con herramientas de edición y anotación') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Left Column - Analysis Tools -->
+        <div class="col-md-4">
+            <!-- Analysis Tools Panel -->
+            <div class="analysis-tools-panel tools-panel-minimal">
+                <div class="panel-header-minimal">
+                    <h6 class="panel-title-minimal">
+                        <i class="fas fa-tools me-2"></i>
+                        {{ _('Herramientas de Análisis') }}
+                    </h6>
+                </div>
+                
+                <!-- Model Info Minimal -->
+                <div class="model-info-minimal">
+                    <span class="model-label">{{ _('Modelo') }}:</span>
+                    <span class="model-value" id="selected-model">{{ data.model }}</span>
+                </div>
+                
+                <!-- Export Buttons -->
+                <div class="button-group">
+                    <div class="button-group-title">
+                        <i class="fas fa-download me-1"></i>
+                        {{ _('Exportar') }}
+                    </div>
+                    <div class="action-buttons-minimal">
+                        <button class="btn-minimal btn-export" onclick="generatePDF()">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            {{ _('PDF') }}
+                        </button>
+                        <button class="btn-minimal btn-export" onclick="generateWord()">
+                            <i class="fas fa-file-word me-2"></i>
+                            {{ _('Word') }}
+                        </button>
+                    </div>
+                </div>
 
-<div class="analysis-header">
-    <span class="model-selected">
-        {{ _('Modelo seleccionado:') }} <span class="pill">{{ data.model }}</span>
-    </span>
-    <div class="actions-right">
-        <a href="{{ url_for('analysis.generate_report', doc_id=data._id) }}" class="btn generate">
-            <i class="fas fa-file-pdf"></i> {{ _('Generar PDF') }}
-        </a>
-        <a href="{{ url_for('analysis.generate_report_word', doc_id=data._id) }}" class="btn generate">
-            <i class="fas fa-file-word"></i> {{ _('Generar Word') }}
-        </a>
-        <a href="/" class="btn finalize">
-            <i class="fas fa-flag-checkered"></i> {{ _('Finalizar análisis') }}
-        </a>
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <div class="button-group-title">
+                        <i class="fas fa-cogs me-1"></i>
+                        {{ _('Acciones') }}
+                    </div>
+                    <div class="action-buttons-minimal">
+                        <button class="btn-minimal btn-edit-mode" id="edit-analysis-btn" onclick="editAnalysis()" disabled>
+                            <i class="fas fa-edit me-2"></i>
+                            {{ _('Editar Análisis') }}
+                        </button>
+                        <a class="btn-minimal" href="{{ url_for('glossary.glossary_home') }}">
+                            <i class="fas fa-book me-2"></i>
+                            {{ _('Glosario de variables') }}
+                        </a>
+                        <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
+                            <i class="fas fa-save me-2"></i>
+                            {{ _('Guardar') }}
+                        </button>
+                        <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
+                            <i class="fas fa-check me-2"></i>
+                            {{ _('Finalizar') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help / Info Panel as dropdown -->
+            <div class="analysis-tools-panel">
+                <div class="collapsible-header" data-target="help-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ _('Cómo editar anotaciones') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="help-content" class="collapsible-content">
+                    <div class="small">
+                        <div class="mb-2"><strong>{{ _('Editar/aceptar/eliminar') }}:</strong> {{ _('haz clic en cualquier texto resaltado para abrir el menú de acciones. Al aceptar verás un check junto al fragmento.') }}</div>
+                        <div class="mb-2"><strong>{{ _('Crear anotaciones nuevas') }}:</strong> {{ _('selecciona un fragmento del texto y elige la variable/valor desde el panel; se abrirá un selector con opciones válidas.') }}</div>
+                        <div class="mb-2"><strong>{{ _('Nota') }}:</strong> {{ _('No es necesario anotar cada una de las variables; marca solo las que identifiques en el texto. Es normal que un texto no contenga todas las variables posibles.') }}</div>
+                        <div class="mb-0"><strong>{{ _('Guardar cambios') }}:</strong> {{ _('usa el botón Guardar del panel para persistir las anotaciones.') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inclusivity Score as dropdown -->
+            <div class="analysis-tools-panel">
+                <div class="collapsible-header" data-target="score-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        {{ _('Puntuación de Inclusividad') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="score-content" class="collapsible-content">
+                    <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
+                    <div class="score-bar">
+                        <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="label">{{ _('Contenido General') }}</span>
+                            <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">{{ _('Lenguaje') }}</span>
+                            <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">{{ _('Fuentes') }}</span>
+                            <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recomendaciones -->
+            <div class="analysis-tools-panel">
+                <div class="collapsible-header" data-target="recomendaciones-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        {{ _('Recomendaciones') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="recomendaciones-content" class="collapsible-content">
+                    <ul class="list-unstyled">
+                        {% for recommendation in data.analysis.original.recommendations %}
+                        <li>{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Annotation Panel -->
+            <div class="annotation-panel" id="annotation-panel" style="display: none;">
+                <div class="annotation-header">
+                    <h6 class="annotation-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Anotar Texto Seleccionado
+                    </h6>
+                    <button type="button" class="btn-close" id="close-annotation-panel" aria-label="Close"></button>
+                </div>
+                <div class="annotation-content">
+                    <div class="mb-3">
+                        <label class="form-label">Texto seleccionado:</label>
+                        <div class="selected-text-preview bg-light p-2 rounded" id="selected-text-preview" style="font-style: italic; color: #6c757d; border: 1px solid #dee2e6;"></div>
+                    </div>
+                    
+                    <form id="annotation-form">
+                        <div class="mb-3">
+                            <label class="form-label" for="annotation-category">Categoría</label>
+                            <select class="form-select" id="annotation-category" required>
+                                <option value="">Seleccionar categoría...</option>
+                                <option value="contenido_general">Contenido General</option>
+                                <option value="lenguaje">Lenguaje y Análisis del discurso</option>
+                                <option value="fuentes">Fuentes de información</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="annotation-variable">Variable</label>
+                            <select class="form-select" id="annotation-variable" required>
+                                <option value="">Seleccionar variable...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label" for="annotation-value">Valor</label>
+                            <select class="form-select" id="annotation-value" required>
+                                <option value="">Seleccionar valor...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Controles compuestos (para variables que requieren género) -->
+                        <div id="composite-controls" style="display:none;">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </form>
+                    
+                    <div class="annotation-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-annotation">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="add-annotation">Agregar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-list-ul me-2"></i>
+                        {{ _('Categorías') }}
+                    </h6>
+                </div>
+                
+                <!-- Contenido General -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="contenido-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-newspaper me-2"></i>
+                            {{ _('Contenido General') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="contenido-content" class="collapsible-content">
+                        <div id="contenido-variables" class="variables-grid">
+                            <!-- Variables will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lenguaje y Análisis del discurso -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="lenguaje-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-language me-2"></i>
+                            {{ _('Lenguaje y Análisis del discurso') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="lenguaje-content" class="collapsible-content">
+                        <div id="lenguaje-variables" class="variables-grid">
+                            <!-- Variables will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fuentes de información -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="fuentes-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-users me-2"></i>
+                            {{ _('Fuentes de información') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="fuentes-content" class="collapsible-content">
+                        <div id="fuentes-sources" class="sources-grid">
+                            <!-- Sources will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protagonismo Section -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-list-ul me-2"></i>
+                        {{ _('PROTAGONISMO') }}
+                    </h6>
+                </div>
+                
+                 <!-- Protagonist Analysis Dropdown -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="protagonist-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-user-star me-2"></i>
+                            {{ _('Protagonista de la Noticia') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="protagonist-content" class="collapsible-content">
+                        <div id="protagonist-analysis" class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                            </div>
+                            <p class="text-muted mt-2">{{ _('Analizando protagonista...') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           
+            <!-- Tema Section -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-list-ul me-2"></i>
+                        {{ _('TEMA') }}
+                    </h6>
+                </div>
+
+                <!-- Topic Analysis Dropdown -->
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="topic-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-tag me-2"></i>
+                            {{ _('Tema de la Noticia') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="topic-content" class="collapsible-content">
+                        <div id="topic-analysis" class="text-center py-3">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                            </div>
+                            <p class="text-muted mt-2">{{ _('Analizando tema...') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Right Column - Text Analysis -->
+        <div class="col-md-8">
+            <!-- Instructions Panel (shown by default) -->
+            <div class="plain-text">
+                <div class="instructions-panel">
+                    <div class="instructions-content">
+                        <div class="instructions-header">
+                            <h4 class="instructions-title">¿Cómo proceder?</h4>
+                            <p class="instructions-subtitle">Elige una categoría del menú de la izquierda para comenzar</p>
+                        </div>
+                        
+                        <div class="instructions-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h6 class="step-title">Selecciona una categoría</h6>
+                                    <p class="step-description">Contenido General, Lenguaje o Fuentes</p>
+                                </div>
+                            </div>
+                            
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h6 class="step-title">Revisa las anotaciones</h6>
+                                    <p class="step-description">Observa los resaltados en el texto</p>
+                                </div>
+                            </div>
+                            
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h6 class="step-title">Edita y valida</h6>
+                                    <p class="step-description">Haz clic en los resaltados para editar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Analysis Panel (shown when categories are expanded) -->
+            <div class="text-analysis-panel" style="display: none;">
+                <h5 class="panel-title">
+                    <i class="fas fa-file-alt me-2"></i>
+                    {{ _('Análisis del Texto') }}
+                </h5>
+                
+                <!-- Highlighted Text Content -->
+                <div class="highlight-text">
+                    <div class="small text-muted mb-2"><i class="fas fa-mouse-pointer me-1"></i>Haz clic sobre un resaltado para editar, aceptar o eliminar la anotación.</div>
+                    
+                    <!-- Contenido General Highlights -->
+                    <div id="highlight-contenido" class="highlight-block highlight-contenido" style="display: none;">
+                        <h6 class="mb-3">{{ _('Contenido General') }}</h6>
+                        <div class="markup-area">{{ data.highlight.original.contenido_general | safe }}</div>
+                    </div>
+                    
+                    <!-- Lenguaje Highlights -->
+                    <div id="highlight-lenguaje" class="highlight-block highlight-lenguaje" style="display: none;">
+                        <h6 class="mb-3">{{ _('Lenguaje y Análisis del discurso') }}</h6>
+                        <div class="markup-area">{{ data.highlight.original.lenguaje | safe }}</div>
+                    </div>
+                    
+                    <!-- Fuentes Highlights -->
+                    <div id="highlight-fuentes" class="highlight-block highlight-fuentes" style="display: none;">
+                        <h6 class="mb-3">{{ _('Fuentes de información') }}</h6>
+                        <div class="markup-area">{{ data.highlight.original.fuentes | safe }}</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="analysis-container">
-    <!-- COL 1: TEXTO ORIGINAL y TEXTO MARCADO -->
-    <div class="col-left">
-        <!-- Si hay título o autoría, los mostramos antes del texto -->
-        {% if data.title or data.authors or data.url %}
-        <div class="article-meta">
-            {% if data.title %}
-                <h2>{{ data.title }}</h2>
-            {% endif %}
-
-            {% if data.authors %}
-                <p><strong>Autoría:</strong>
-                    {{ data.authors if data.authors is string else data.authors | join(', ') }}
-                </p>
-            {% endif %}
-
-
-            {% if data.url %}
-                <p><strong>Fuente:</strong> <a href="{{ data.url }}" target="_blank">{{ data.url }}</a></p>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        <!-- 1. Texto plain: siempre visible -->
-        <div class="plain-text">
-            <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
-        </div>
-
-        <!-- 2. Texto highlighted: oculto hasta abrir -->
-        <div class="highlight-text" style="display: none;">
-            <div class="highlight-controls" style="margin-bottom: 10px;">
-                <button id="edit-mode-toggle" class="edit-button">
-                  <i class="fa fa-pen"></i> Editar
-                </button>  
-              
-                <button id="save-changes" class="save-button" style="display: none;">
-                  <i class="fa fa-save"></i> Guardar cambios
-                </button>
-              </div>
-              
-            <div class="markup-area">
-                <p>{{ data.text | replace('\n\n', '</p><p>') | safe }}</p>
-            </div>
-        </div>
-        <!-- Tooltip predicciones -->
-        <div id="tooltip" class="custom-tooltip">
-            <i class="fas fa-check" title="Aceptar"></i>
-            <i class="fas fa-times" title="Rechazar"></i>
-        </div> 
-        <!-- Tooltip new -->
-        <div id="variable-tooltip" class="custom-tooltip" style="display: none;">
-            {% for var in contenido_general_variables %}
-                <button class="var-btn" data-block="contenido" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
-            {% endfor %}
-            {% for var in lenguaje_variables %}
-                <button class="var-btn" data-block="lenguaje" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
-            {% endfor %}
-            {% for var in fuentes_variables %}
-                <button class="var-btn" data-block="fuentes" data-variable="{{ var|lower|replace(' ', '_') }}">{{ var }}</button>
-            {% endfor %}
-        </div>
-                  
-    </div>
-
-
-    <!-- COL 2: MÉTRICAS Y RECOMENDACIONES -->
-    <div class="col-right">
-        <p>{{ _('Selecciona cada apartado individualmente para ver el texto resaltado correspondiente') }}</p>
-        <!-- Acordeón: Inclusividad -->
-        <div class="accordion-card">
-            <button class="accordion-header">
-            {{ _('Puntuación de inclusividad') }}
-            <span class="accordion-icon">+</span>
-            </button>
-            <div class="accordion-body">
-            <div class="score-bar">
-                <div class="fill" style="width: {{ score }}%;"></div>
-            </div>
-            <div class="score-value">{{ score }}/100</div>
-            <div class="metrics">
-                <div class="metric">
-                <span class="label">{{ _('Total palabras') }}</span>
-                <span class="value">{{ total_words }}</span>
-                </div>
-                <div class="metric">
-                <span class="label">{{ _('Términos sesgados') }}</span>
-                <span class="value">{{ biased_terms|length }}</span>
-                </div>
-                <div class="metric">
-                <span class="label">{{ _('Términos inclusivos') }}</span>
-                <span class="value">{{ inclusive_terms|length }}</span>
-                </div>
-            </div>
-            </div>
-        </div>
-
-        <!-- Acordeón: Bloque II Variables (Contenido General) -->
-        <div class="accordion-card">
-            <button class="accordion-header" id="accordion_contenido_general">
-            {{ _('Bloque II Variables') }}
-            {{ _('Contenido General') }}
-            <span class="accordion-icon" id="icon_contenido_general">+</span>
-            </button>
-            <div class="accordion-body" id="body_contenido_general">
-                <ul>
-                    {% for key, value in data.analysis.original.contenido_general.items() %}
-                    {# sacamos el color o uno por defecto si no existe #}
-                    {% set color = highlight_map.get(key, "#ffffff") %} 
-                    <li> 
-                        <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <!-- Acordeón: Bloque III Variables (Lenguaje y Análisis del discurso) -->
-        <div class="accordion-card">
-            <button class="accordion-header" id="accordion_lenguaje">
-            {{ _('Bloque III Variables') }}
-            {{ _('Lenguaje y Análisis del discurso') }}
-            <span class="accordion-icon" id="icon_lenguaje">+</span>
-            </button>
-            <div class="accordion-body" id="body_lenguaje">
-                <ul>
-                    {% for key, value in data.analysis.original.lenguaje.items() %}
-                        {# sacamos el color o uno por defecto si no existe #}
-                        {% set color = highlight_map.get(key, "#ffffff") %}
-                        <li>
-                            <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
-                        </li>
-                    {% endfor %}
-                </ul>                
-            </div>
-        </div>
-
-        <!-- Acordeón: Bloque V Variables (Fuentes de información) -->
-        <div class="accordion-card">
-            <button class="accordion-header" id="accordion_fuentes">
-            {{ _('Bloque V Variables') }}
-            {{ _('Fuentes de información') }}
-            <span class="accordion-icon" id="icon_fuentes">+</span>
-            </button>
-            <div class="accordion-body" id="body_fuentes">
-                <ul>
-                    {% for fuente in data.analysis.original.fuentes.fuentes %}
-                        {% for key, value in fuente.items() %}
-                            {% set color = highlight_map.get(key, "#ffffff") %}
-                            <li>
-                                <mark class="{{ color }}"><strong>{{ key }}:</strong></mark> {{ value }}
-                            </li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>                
-            </div>
-        </div>
-
-        <!-- Acordeón: Recomendaciones -->
-        <div class="accordion-card">
-            <button class="accordion-header">
-            {{ _('Recomendaciones generales') }}
-            <span class="accordion-icon">+</span>
-            </button>
-            <div class="accordion-body">
-            <ul>
-                {% for rec in recommendations %}
-                <li>{{ rec }}</li>
-                {% endfor %}
-            </ul>
-            </div>
-        </div>
-    </div>
+<!-- Highlight tooltip -->
+<div id="highlight-tooltip" class="highlight-tooltip">
+    <div class="tooltip-title"></div>
+    <div class="tooltip-description"></div>
 </div>
 
 
@@ -204,11 +407,909 @@
     window.data = {{ data | tojson | safe }};
     window.highlight_color_map = {{ highlight_map | safe }};
     window.api_url_edit = {{ api_url_edit | tojson | safe }};
+    window.api_url_save_annotations = {{ api_url_save_annotations | tojson | safe }};
+    window.current_user = {{ current_user | tojson | safe if current_user else 'null' }};
+    
+    // Initialize protagonist and topic analysis
+    document.addEventListener('DOMContentLoaded', function() {
+        updateProtagonistAnalysis();
+        updateTopicAnalysis();
+        
+        // Initialize edit mode
+        let isEditMode = false;
+        
+        // Override the existing editAnalysis function to add visual feedback
+        const originalEditAnalysis = window.editAnalysis;
+        window.editAnalysis = function() {
+            if (originalEditAnalysis) {
+                originalEditAnalysis();
+            }
+            toggleEditMode();
+        };
+        
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('edit-analysis-btn');
+            const textArea = document.getElementById('analysis-text');
+            const textAnalysisArea = document.querySelector('.text-analysis-area');
+            const textAnalysisPanel = document.querySelector('.text-analysis-panel');
+            
+            if (isEditMode) {
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> Modo Edición Activo';
+                btn.classList.remove('btn-edit-mode');
+                btn.classList.add('btn-warning');
+                // Add edit-mode class to body for annotation panel detection
+                document.body.classList.add('edit-mode');
+                if (textArea) {
+                    textArea.style.cursor = 'text';
+                    textArea.classList.add('edit-mode');
+                }
+                if (textAnalysisArea) {
+                    textAnalysisArea.classList.add('edit-mode');
+                }
+                if (textAnalysisPanel) {
+                    textAnalysisPanel.classList.add('edit-mode');
+                }
+            } else {
+                btn.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Análisis';
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-edit-mode');
+                // Remove edit-mode class from body
+                document.body.classList.remove('edit-mode');
+                if (textArea) {
+                    textArea.style.cursor = 'default';
+                    textArea.classList.remove('edit-mode');
+                }
+                if (textAnalysisArea) {
+                    textAnalysisArea.classList.remove('edit-mode');
+                }
+                if (textAnalysisPanel) {
+                    textAnalysisPanel.classList.remove('edit-mode');
+                }
+                hideAnnotationPanel();
+            }
+        }
+    });
+    
+    function updateProtagonistAnalysis() {
+        const protagonistDiv = document.getElementById('protagonist-analysis');
+        if (!protagonistDiv) return;
+        
+        if (!window.data) {
+            protagonistDiv.innerHTML = `
+                <div class="protagonist-result">
+                    <div class="no-data">
+                        <i class="fas fa-exclamation-triangle text-warning mb-2"></i>
+                        <p class="text-muted mb-0">No hay datos disponibles</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Get protagonist analysis from data
+        const protagonistData = window.data.protagonist_analysis || {};
+        const protagonist = protagonistData.protagonist || 'No identificado';
+        const confidence = protagonistData.confidence || 0;
+        const counts = protagonistData.counts || { masculino: 0, femenino: 0, mixto: 0 };
+        
+        // Create protagonist display
+        const confidencePercentage = Math.round(confidence * 100);
+        const confidenceClass = confidence > 0.7 ? 'text-success' : confidence > 0.4 ? 'text-warning' : 'text-danger';
+        
+        protagonistDiv.innerHTML = `
+            <div class="protagonist-result">
+                <div class="protagonist-badge mb-3">
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="fas fa-user me-2"></i>
+                        ${protagonist}
+                    </span>
+                </div>
+                
+                <div class="gender-counts">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="count-item">
+                                <div class="count-number text-primary fw-bold">${counts.masculino}</div>
+                                <div class="count-label small text-muted">Masculino</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="count-item">
+                                <div class="count-number text-success fw-bold">${counts.femenino}</div>
+                                <div class="count-label small text-muted">Femenino</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="count-item">
+                                <div class="count-number text-info fw-bold">${counts.mixto}</div>
+                                <div class="count-label small text-muted">Mixto</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function updateTopicAnalysis() {
+        const topicDiv = document.getElementById('topic-analysis');
+        if (!topicDiv || !window.data) return;
+        
+        // Get topic from data
+        const analysis = window.data.analysis || {};
+        const original = analysis.original || {};
+        const contenidoGeneral = original.contenido_general || {};
+        const tema = contenidoGeneral.tema;
+        
+        const topicNames = {
+            '1': 'Científica/Investigación',
+            '2': 'Comunicación',
+            '3': 'De farándula o espectáculo',
+            '4': 'Deportiva',
+            '5': 'Economía',
+            '6': 'Educación/cultura',
+            '7': 'Empleo/Trabajo',
+            '8': 'Empresa',
+            '9': 'Judicial',
+            '10': 'Medioambiente',
+            '11': 'Policial',
+            '12': 'Política',
+            '13': 'Salud',
+            '14': 'Social',
+            '15': 'Tecnología',
+            '16': 'Transporte',
+            '17': 'Otros'
+        };
+        
+        if (tema) {
+            const topicName = topicNames[tema] || 'Tema no identificado';
+            
+            topicDiv.innerHTML = `
+                <div class="topic-result">
+                    <div class="topic-badge mb-3">
+                        <span class="badge bg-success fs-6 px-3 py-2">
+                            <i class="fas fa-tag me-2"></i>
+                            ${topicName}
+                        </span>
+                    </div>
+                    <div class="topic-code">
+                        <small class="text-muted">Código: ${tema}</small>
+                    </div>
+                </div>
+            `;
+        } else {
+            topicDiv.innerHTML = `
+                <div class="topic-result">
+                    <div class="no-topic">
+                        <i class="fas fa-question-circle text-muted mb-2"></i>
+                        <p class="text-muted mb-0">Tema no identificado</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // ================================
+    // Manual Annotation System Integration
+    // ================================
+    
+    // Variables from config.ini - same as manual analysis
+    const CHALLENGE_VARIABLES = {
+        'contenido_general': ["cita_textual_titular", "genero_nombre_propio_titular", "genero_periodista", "genero_personas_mencionadas", "nombre_propio_titular", "personas_mencionadas", "tema"],
+        'lenguaje': ["androcentrismo", "asimetria", "cargos_mujeres", "comparacion_mujeres_hombres", "denominacion_dependiente", "denominacion_redundante", "denominacion_sexualizada", "dual_aparente", "excepcion_noticiabilidad", "hombre_humanidad", "infantilizacion", "lenguaje_sexista", "masculino_generico", "sexismo_social"],
+        'fuentes': ["declaracion_fuente", "genero_fuente", "nombre_fuente", "tipo_fuente"]
+    };
+    
+    // Variable descriptions - same as manual analysis
+    const VARIABLE_DESCRIPTIONS = {
+        'cita_textual_titular': 'Cita textual titular',
+        'genero_nombre_propio_titular': 'Género nombre propio titular',
+        'genero_periodista': 'Género periodista',
+        'genero_personas_mencionadas': 'Género personas mencionadas',
+        'nombre_propio_titular': 'Nombre propio titular',
+        'personas_mencionadas': 'Personas mencionadas',
+        'tema': 'Tema',
+        'androcentrismo': 'Androcentrismo',
+        'asimetria': 'Asimetría',
+        'cargos_mujeres': 'Cargos mujeres',
+        'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+        'denominacion_dependiente': 'Denominación dependiente',
+        'denominacion_redundante': 'Denominación redundante',
+        'denominacion_sexualizada': 'Denominación sexualizada',
+        'dual_aparente': 'Dual aparente',
+        'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+        'hombre_humanidad': 'Hombre humanidad',
+        'infantilizacion': 'Infantilización',
+        'lenguaje_sexista': 'Lenguaje sexista',
+        'masculino_generico': 'Masculino genérico',
+        'sexismo_social': 'Sexismo social',
+        'declaracion_fuente': 'Declaración fuente',
+        'genero_fuente': 'Género fuente',
+        'nombre_fuente': 'Nombre fuente',
+        'tipo_fuente': 'Tipo fuente'
+    };
+    
+    // Current selection for annotation
+    let currentAnnotationSelection = null;
+    
+    // Initialize manual annotation system
+    document.addEventListener('DOMContentLoaded', function() {
+        setupAnnotationPanel();
+        initMultiLabelTooltips();
+    });
+    
+    function setupAnnotationPanel() {
+        const categorySelect = document.getElementById('annotation-category');
+        const variableSelect = document.getElementById('annotation-variable');
+        const valueSelect = document.getElementById('annotation-value');
+        const addBtn = document.getElementById('add-annotation');
+        const cancelBtn = document.getElementById('cancel-annotation');
+        const closeBtn = document.getElementById('close-annotation-panel');
+        
+        if (!categorySelect || !variableSelect || !valueSelect || !addBtn) return;
+        
+        // Handle category change
+        categorySelect.addEventListener('change', function() {
+            updateVariableOptions(this.value);
+        });
+        
+        // Handle variable change
+        variableSelect.addEventListener('change', function() {
+            updateValueOptions(categorySelect.value, this.value);
+        });
+        
+        // Handle add annotation
+        addBtn.addEventListener('click', function() {
+            saveAnnotation();
+        });
+        
+        // Handle cancel
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                hideAnnotationPanel();
+            });
+        }
+        
+        // Handle close
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                hideAnnotationPanel();
+            });
+        }
+    }
+    
+    function updateVariableOptions(category) {
+        const variableSelect = document.getElementById('annotation-variable');
+        if (!variableSelect) return;
+        
+        variableSelect.innerHTML = '<option value="">Seleccionar variable...</option>';
+        
+        const variables = CHALLENGE_VARIABLES;
+        let availableVariables = [];
+        
+        if (category === 'contenido_general' && variables.contenido_general) {
+            availableVariables = variables.contenido_general.filter(v => v !== 'tema');
+        } else if (category === 'lenguaje' && variables.lenguaje) {
+            availableVariables = variables.lenguaje;
+        } else if (category === 'fuentes' && variables.fuentes) {
+            availableVariables = variables.fuentes;
+        }
+        
+        // Hide gender-only variables that are driven by a paired presence variable
+        const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
+        availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
+        
+        availableVariables.forEach(variable => {
+            const option = document.createElement('option');
+            option.value = variable;
+            option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            variableSelect.appendChild(option);
+        });
+    }
+    
+    function updateValueOptions(category, variable) {
+        const valueSelect = document.getElementById('annotation-value');
+        const compositeControls = document.getElementById('composite-controls');
+        
+        if (!valueSelect) return;
+        
+        valueSelect.innerHTML = '<option value="">Seleccionar valor...</option>';
+        if (compositeControls) {
+            compositeControls.style.display = 'none';
+            compositeControls.innerHTML = '';
+        }
+        
+        // Variable values mapping - same as manual analysis
+        const variableValues = {
+            // Contenido General
+            'genero_nombre_propio_titular': [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ],
+            'genero_personas_mencionadas': [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ],
+            'genero_periodista': [
+                { value: '1', text: 'Masculino' },
+                { value: '2', text: 'Femenino' },
+                { value: '3', text: 'Mixto' },
+                { value: '4', text: 'Ns/Nc' },
+                { value: '5', text: 'Agencia/otros medios' },
+                { value: '6', text: 'Redacción' },
+                { value: '7', text: 'Corporativo' }
+            ],
+            'cita_textual_titular': [
+                { value: '0', text: 'No' },
+                { value: '1', text: 'Sí' }
+            ],
+            
+            // Lenguaje
+            'lenguaje_sexista': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' },
+                { value: '3', text: 'Sí, además se observa un salto semántico' }
+            ],
+            'androcentrismo': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'asimetria': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'cargos_mujeres': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'comparacion_mujeres_hombres': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'denominacion_dependiente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'denominacion_redundante': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'denominacion_sexualizada': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'dual_aparente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'excepcion_noticiabilidad': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'hombre_humanidad': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'infantilizacion': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'masculino_generico': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'sexismo_social': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            
+            // Fuentes
+            'tipo_fuente': [
+                { value: '1', text: 'Personal' },
+                { value: '2', text: 'Institucional' },
+                { value: '3', text: 'Mixta' }
+            ],
+            'genero_fuente': [
+                { value: '1', text: 'No hay' },
+                { value: '2', text: 'Sí, hombre' },
+                { value: '3', text: 'Sí, mujer' },
+                { value: '4', text: 'Sí, mujer y hombre' }
+            ],
+            'declaracion_fuente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'nombre_fuente': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'personas_mencionadas': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ],
+            'nombre_propio_titular': [
+                { value: '1', text: 'No' },
+                { value: '2', text: 'Sí' }
+            ]
+        };
+        
+        // Compuestos: pares variable-presencia + variable-detalle
+        const compositePairs = {
+            personas_mencionadas: 'genero_personas_mencionadas',
+            nombre_propio_titular: 'genero_nombre_propio_titular',
+            nombre_fuente: 'genero_fuente'
+        };
+
+        // Si la variable seleccionada es parte de un compuesto, mostrar control de género
+        const compositeDetail = compositePairs[variable];
+        if (compositeDetail) {
+            const baseVar = compositePairs[variable] ? variable : Object.keys(compositePairs).find(k => compositePairs[k] === variable);
+            const detailVar = compositePairs[baseVar];
+            if (compositeControls) {
+                compositeControls.style.display = 'block';
+                const genderValues = variableValues[detailVar] || [];
+                let label;
+                if (detailVar === 'genero_personas_mencionadas') {
+                    label = 'Género de la persona';
+                } else if (detailVar === 'genero_nombre_propio_titular') {
+                    label = 'Género nombre propio titular';
+                } else {
+                    label = 'Género de la fuente';
+                }
+                compositeControls.innerHTML = `
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label">${label}</label>
+                            <select class="form-select" id="composite-gender">
+                                ${genderValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // Obtener valores para la variable específica
+        const values = variableValues[variable];
+        
+        if (values) {
+            // Si es un binario (Sí/No), no mostramos la opción negativa
+            const lower = values.map(v => (v.text || '').toLowerCase());
+            const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+            const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+
+            let toRender = values;
+            if (isYesNo || isSiNo) {
+                // Para variables binarias, mostrar solo las opciones afirmativas
+                toRender = values.filter(v => /sí|si/i.test(v.text || ''));
+            }
+
+            toRender.forEach((option, idx) => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.value;
+                optionElement.textContent = option.text;
+                if (idx === 0) optionElement.selected = true;
+                valueSelect.appendChild(optionElement);
+            });
+        } else {
+            // Sin catálogo: ocultamos selector y fijamos afirmativo por defecto
+            if (valueSelect && valueSelect.parentElement) valueSelect.parentElement.style.display = 'none';
+            const optionElement = document.createElement('option');
+            optionElement.value = '1';
+            optionElement.textContent = '';
+            optionElement.selected = true;
+            valueSelect.appendChild(optionElement);
+        }
+    }
+    
+    function saveAnnotation() {
+        if (!currentAnnotationSelection) {
+            alert('No hay texto seleccionado');
+            return;
+        }
+        
+        const category = document.getElementById('annotation-category').value;
+        const variable = document.getElementById('annotation-variable').value;
+        const value = document.getElementById('annotation-value').value;
+        
+        if (!category || !variable || !value) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+        
+        const createdAt = new Date().toISOString();
+        
+        // Manejo de variables compuestas: crear dos anotaciones sincronizadas
+        const compositePairs = {
+            personas_mencionadas: 'genero_personas_mencionadas',
+            nombre_propio_titular: 'genero_nombre_propio_titular',
+            nombre_fuente: 'genero_fuente'
+        };
+        const compositeControls = document.getElementById('composite-gender');
+        
+        if (compositePairs[variable]) {
+            // Usuario anotó la presencia: set presente y género seleccionado
+            const genderValue = compositeControls ? compositeControls.value : null;
+            // 1) presencia
+            const presenceAnnotation = {
+                id: Date.now(),
+                text: currentAnnotationSelection.text,
+                category: category,
+                variable: variable,
+                value: '1',
+                timestamp: createdAt
+            };
+            applyInlineHighlight(currentAnnotationSelection, category, variable);
+            // Integrate into existing analysis system
+            if (typeof integrateAnnotationIntoAnalysis === 'function') {
+                integrateAnnotationIntoAnalysis(presenceAnnotation);
+            }
+            // 2) género
+            if (genderValue) {
+                const genderAnnotation = {
+                    id: Date.now()+1,
+                    text: currentAnnotationSelection.text,
+                    category: category,
+                    variable: compositePairs[variable],
+                    value: genderValue,
+                    timestamp: createdAt
+                };
+                applyInlineHighlight(currentAnnotationSelection, category, compositePairs[variable]);
+                // Integrate into existing analysis system
+                if (typeof integrateAnnotationIntoAnalysis === 'function') {
+                    integrateAnnotationIntoAnalysis(genderAnnotation);
+                }
+            }
+        } else {
+            // Anotación normal
+            const annotation = {
+                id: Date.now(),
+                text: currentAnnotationSelection.text,
+                category: category,
+                variable: variable,
+                value: value,
+                timestamp: createdAt
+            };
+            applyInlineHighlight(currentAnnotationSelection, category, variable);
+            // Integrate into existing analysis system
+            if (typeof integrateAnnotationIntoAnalysis === 'function') {
+                integrateAnnotationIntoAnalysis(annotation);
+            }
+        }
+        
+        // Re-run highlight processing to update the display
+        if (typeof processHighlights === 'function') {
+            processHighlights();
+        }
+        
+        // Hide panel
+        hideAnnotationPanel();
+        
+        // Clear selection
+        currentAnnotationSelection = null;
+    }
+    
+    function applyInlineHighlight(selectionData, category, variable) {
+        if (!selectionData || !selectionData.range) return;
+        const range = selectionData.range.cloneRange();
+        if (range.collapsed) return;
+        const wrapper = document.createElement('mark');
+        wrapper.className = `annotation-mark mark-${category}`;
+        wrapper.setAttribute('data-variable', variable);
+        try {
+            range.surroundContents(wrapper);
+        } catch (e) {
+            // Fallback: wrap text node by splitting
+            const text = document.createTextNode(range.toString());
+            wrapper.appendChild(text);
+            range.deleteContents();
+            range.insertNode(wrapper);
+        }
+    }
+    
+    function showAnnotationPanel(selectedText, range) {
+        currentAnnotationSelection = {
+            text: selectedText,
+            range: range
+        };
+        
+        // Set the selected text preview
+        const preview = document.getElementById('selected-text-preview');
+        if (preview) {
+            preview.textContent = selectedText;
+        }
+        
+        // Reset form
+        document.getElementById('annotation-category').value = '';
+        document.getElementById('annotation-variable').innerHTML = '<option value="">Seleccionar variable...</option>';
+        document.getElementById('annotation-value').innerHTML = '<option value="">Seleccionar valor...</option>';
+        const compositeControls = document.getElementById('composite-controls');
+        if (compositeControls) {
+            compositeControls.style.display = 'none';
+            compositeControls.innerHTML = '';
+        }
+        
+        // Show panel
+        const panel = document.getElementById('annotation-panel');
+        if (panel) {
+            panel.style.display = 'block';
+        }
+    }
+    
+    function hideAnnotationPanel() {
+        const panel = document.getElementById('annotation-panel');
+        if (panel) {
+            panel.style.display = 'none';
+        }
+        currentAnnotationSelection = null;
+    }
+    
+    // Multi-etiqueta: al pasar el ratón, si hay varias marcas superpuestas,
+    // mostrar en el tooltip todas las variables implicadas
+    function initMultiLabelTooltips() {
+        let tooltip = null;
+        const ensureTooltip = () => {
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'annotation-tooltip';
+                document.body.appendChild(tooltip);
+            }
+            return tooltip;
+        };
+
+        document.addEventListener('mousemove', function(e) {
+            const tip = ensureTooltip();
+            const underPointer = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []);
+            const marks = underPointer.filter(el => el && el.classList && el.classList.contains('annotation-mark'));
+            if (!marks || marks.length === 0) { tip.style.display = 'none'; return; }
+
+            const variables = Array.from(new Set(marks.map(m => m.getAttribute('data-variable')).filter(Boolean)));
+            const categories = Array.from(new Set(marks.map(m => {
+                if (m.classList.contains('mark-contenido_general')) return 'Contenido General';
+                if (m.classList.contains('mark-lenguaje')) return 'Lenguaje';
+                if (m.classList.contains('mark-fuentes')) return 'Fuentes';
+                return '';
+            }).filter(Boolean)));
+            const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
+            const catLabel = categories.join(', ');
+            tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+            tip.style.left = (e.clientX + 12) + 'px';
+            tip.style.top = (e.clientY + 12) + 'px';
+            tip.style.display = 'block';
+        });
+
+        document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
+        document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
+    }
 </script>
+
+<!-- External Scripts -->
 <script type="module" src="{{ url_for('static', filename='js/accordion.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_prediction.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_tooltip.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_human.js') }}"></script>
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">
+
+<style>
+/* Edit Mode Styles */
+.text-analysis-panel.edit-mode {
+    border: 3px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    position: relative;
+}
+
+.text-analysis-panel.edit-mode::before {
+    content: "MODO EDICIÓN ACTIVO";
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: #ffc107;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.text-analysis-area.edit-mode {
+    border: 3px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    position: relative;
+}
+
+.text-analysis-area.edit-mode::before {
+    content: "MODO EDICIÓN ACTIVO";
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: #ffc107;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.edit-mode-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+}
+
+#edit-mode-btn {
+    transition: all 0.3s ease;
+}
+
+#edit-mode-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Manual Annotation Styles - Same as manual analysis */
+.annotation-mark {
+    background-color: #fff3cd;
+    box-shadow: inset 0 -6px 0 rgba(255, 235, 59, 0.6);
+    border-radius: 2px;
+    padding: 0 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.annotation-mark:hover {
+    background-color: #ffeaa7;
+    box-shadow: inset 0 -6px 0 rgba(255, 193, 7, 0.8);
+}
+
+.annotation-mark.mark-contenido_general { 
+    background-color: rgba(13, 110, 253, 0.1); 
+    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4);
+    color: #0d6efd;
+}
+
+.annotation-mark.mark-contenido_general:hover {
+    background-color: rgba(13, 110, 253, 0.2);
+    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.6);
+}
+
+.annotation-mark.mark-lenguaje { 
+    background-color: rgba(111, 66, 193, 0.1); 
+    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
+    color: #6f42c1;
+}
+
+.annotation-mark.mark-lenguaje:hover {
+    background-color: rgba(111, 66, 193, 0.2);
+    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.6);
+}
+
+.annotation-mark.mark-fuentes { 
+    background-color: rgba(13, 202, 240, 0.1); 
+    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4);
+    color: #0dcaf0;
+}
+
+.annotation-mark.mark-fuentes:hover {
+    background-color: rgba(13, 202, 240, 0.2);
+    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.6);
+}
+
+/* Lightweight tooltip for annotations */
+.annotation-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    max-width: 280px;
+    line-height: 1.3;
+    display: none;
+}
+
+/* Modal improvements */
+.modal-body .form-control-plaintext {
+    border: 1px solid #dee2e6;
+    background-color: #f8f9fa !important;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+#compositeControls {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+#compositeControls .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Annotation Panel Styles */
+.annotation-panel {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.annotation-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 10px 10px 0 0;
+}
+
+.annotation-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.annotation-content {
+    padding: 1rem;
+}
+
+.selected-text-preview {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.annotation-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.annotation-actions .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+#composite-controls {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+#composite-controls .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+</style>
 
 {% endblock %}

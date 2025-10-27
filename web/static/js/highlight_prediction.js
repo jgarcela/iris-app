@@ -63,9 +63,17 @@ document.addEventListener('DOMContentLoaded', () => {
               edited_highlight_html: markupHTML
             };
 
+            const headers = { 'Content-Type': 'application/json' };
+            
+            // Add user headers if available
+            if (window.current_user && window.current_user._id) {
+              headers['X-User-ID'] = window.current_user._id;
+              headers['X-User-Email'] = window.current_user.email || 'anonymous@example.com';
+            }
+            
             const response = await fetch(`${window.api_url_edit}`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: headers,
               body: JSON.stringify(payload)
             });
 

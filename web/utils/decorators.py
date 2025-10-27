@@ -18,6 +18,26 @@ def login_required(f):
     return decorated
 
 
+def challenge_restricted(f):
+    """Decorator to restrict access for users with 'challenge' role"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Get user from session or make API call to get current user
+        token = request.cookies.get('access_token_cookie')
+        if token:
+            try:
+                headers = {'Authorization': f'Bearer {token}'}
+                resp = requests.get(f"http://localhost:8000/auth/me", headers=headers, timeout=2)
+                if resp.ok:
+                    user = resp.json().get('user')
+                    if user and 'challenge' in user.get('roles', []):
+                        abort(403)  # Forbidden for challenge users
+            except Exception:
+                pass
+        return f(*args, **kwargs)
+    return decorated
+
+
 # def role_required(*required_roles):
 #     def wrapper(fn):
 #         @wraps(fn)

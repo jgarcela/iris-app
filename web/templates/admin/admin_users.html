@@ -1,61 +1,230 @@
 {% extends 'admin/admin_base.html' %}
 {% block title %}Admin · {{ _('Cuentas') }}{% endblock %}
 {% block admin_content %}
-<h1 class="h2 mt-4 d-flex justify-content-between">
-  {{ _('Cuentas') }}
-  <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">
-    <i class="fas fa-plus me-1"></i> {{ _('Crear cuenta') }}
-  </a>
-</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-6 mb-3">
+                            <i class="fas fa-users me-3 text-primary"></i>
+                            {{ _('Gestión de Cuentas') }}
+                        </h1>
+                        <p class="lead text-muted">
+                            {{ _('Administra las cuentas de usuario del sistema') }}
+                        </p>
+                    </div>
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>{{ _('Crear cuenta') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="table-responsive">
-  <table
-    id="users-table"
-    class="table"
-    data-toggle="table"
-    data-search="true"
-    data-filter-control="true"
-    data-pagination="true"
-    data-page-size="10"
-    data-show-columns="true"
-  >
-    <thead class="table-light">
-      <tr>
-        <th data-field="_id"            data-filter-control="input">{{ _('ID') }}</th>
-        <th data-field="first_name"     data-filter-control="input">{{ _('Nombre') }}</th>
-        <th data-field="last_name"      data-filter-control="input">{{ _('Apellido') }}</th>
-        <th data-field="email"          data-filter-control="input">{{ _('Email') }}</th>
-        <th data-field="roles"                          data-filter-control="select">{{ _('Roles') }}</th>
-        <th data-field="actions">{{ _('Acciones') }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in users %}
-      <tr>
-        <td>{{ u._id }}</td>
-        <td>{{ u.first_name or '-' }}</td>
-        <td>{{ u.last_name or '-' }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.roles | join(', ') }}</td>
-        <td>
-          <a
-            href="{{ url_for('admin.edit_user', user_id=u._id) }}"
-            class="btn btn-sm btn-primary me-1"
-          ><i class="fas fa-edit"></i></a>
-          <form
-            action="{{ url_for('admin.delete_user', user_id=u._id) }}"
-            method="post"
-            style="display:inline"
-            onsubmit="return confirm('{{ _('¿Borrar cuenta?') }}');"
-          >
-            <button type="submit" class="btn btn-sm btn-danger">
-              <i class="fas fa-trash"></i>
-            </button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<!-- Stats Cards -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stats-content">
+        <h3>{{ users|length }}</h3>
+        <p>{{ _('Total Usuarios') }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-icon">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="stats-content">
+        <h3>
+          {% set admin_count = 0 %}
+          {% for user in users %}
+            {% if 'admin' in user.roles %}
+              {% set admin_count = admin_count + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ admin_count }}
+        </h3>
+        <p>{{ _('Administradores') }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-icon">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="stats-content">
+        <h3>
+          {% set user_count = 0 %}
+          {% for user in users %}
+            {% if 'user' in user.roles %}
+              {% set user_count = user_count + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ user_count }}
+        </h3>
+        <p>{{ _('Usuarios Activos') }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-icon">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stats-content">
+        <h3>{{ users|length }}</h3>
+        <p>{{ _('Registros') }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Table Section -->
+<div class="admin-table-container">
+  <div class="table-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="table-title">
+        <i class="fas fa-list me-2"></i>{{ _('Lista de Usuarios') }}
+      </h3>
+      <div class="table-actions">
+        <button id="refresh-table" class="btn btn-refresh">
+          <i class="fas fa-sync-alt me-1"></i>{{ _('Actualizar') }}
+        </button>
+        <button id="export-users" class="btn btn-export">
+          <i class="fas fa-download me-1"></i>{{ _('Exportar') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filter Bar -->
+  <div class="table-controls mb-3">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="user-search" class="form-control search-input" placeholder="Buscar usuarios...">
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        <div class="filter-controls">
+          <select id="role-filter" class="form-select filter-select">
+            <option value="">Todos los roles</option>
+            <option value="admin">Administradores</option>
+            <option value="user">Usuarios</option>
+            <option value="analyst">Analistas</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table id="users-table" class="table admin-table">
+      <thead>
+        <tr>
+          <th>
+            <i class="fas fa-hashtag me-1"></i>{{ _('ID') }}
+          </th>
+          <th>
+            <i class="fas fa-user me-1"></i>{{ _('Nombre') }}
+          </th>
+          <th>
+            <i class="fas fa-user me-1"></i>{{ _('Apellido') }}
+          </th>
+          <th>
+            <i class="fas fa-envelope me-1"></i>{{ _('Email') }}
+          </th>
+          <th>
+            <i class="fas fa-user-tag me-1"></i>{{ _('Roles') }}
+          </th>
+          <th>
+            <i class="fas fa-cogs me-1"></i>{{ _('Acciones') }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="user-row" data-roles="{{ u.roles|join(',') }}">
+          <td>
+            <span class="user-id">{{ u._id[:8] }}...</span>
+          </td>
+          <td>
+            <div class="user-info">
+              <span class="user-name">{{ u.first_name or '-' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="user-lastname">{{ u.last_name or '-' }}</span>
+          </td>
+          <td>
+            <span class="user-email">{{ u.email }}</span>
+          </td>
+          <td>
+            <div class="user-roles">
+              {% for role in u.roles %}
+                <span class="role-badge role-{{ role }}">
+                  {{ role|title }}
+                </span>
+              {% endfor %}
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <a
+                href="{{ url_for('admin.edit_user', user_id=u._id) }}"
+                class="btn btn-action btn-edit"
+                title="{{ _('Editar usuario') }}"
+              >
+                <i class="fas fa-edit"></i>
+              </a>
+              <form
+                action="{{ url_for('admin.delete_user', user_id=u._id) }}"
+                method="post"
+                class="d-inline"
+                onsubmit="return confirm('{{ _('¿Estás seguro de que quieres eliminar este usuario?') }}');"
+              >
+                <button type="submit" class="btn btn-action btn-delete" title="{{ _('Eliminar usuario') }}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="table-pagination">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="pagination-info">
+        <span id="pagination-info">Mostrando 1-{{ users|length }} de {{ users|length }} usuarios</span>
+      </div>
+      <div class="pagination-controls">
+        <button id="prev-page" class="btn btn-pagination" disabled>
+          <i class="fas fa-chevron-left"></i> Anterior
+        </button>
+        <span id="page-numbers" class="page-numbers"></span>
+        <button id="next-page" class="btn btn-pagination" disabled>
+          Siguiente <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar for Bootstrap Table -->
+<div id="toolbar" style="display: none;"></div>
 </div>
 {% endblock %}

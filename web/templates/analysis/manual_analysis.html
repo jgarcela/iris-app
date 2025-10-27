@@ -1,0 +1,1883 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Análisis Manual') }} - IRIS{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/create_analysis.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Header Section -->
+  <div class="history-header mb-4">
+    <h1 class="display-6 mb-3">
+      <i class="fas fa-user-edit me-3 text-primary"></i>
+      {{ _('Análisis Manual') }}
+    </h1>
+    <p class="lead text-muted">
+      {{ _('Selecciona y marca manualmente los elementos del texto para analizar') }}
+    </p>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="row">
+    <!-- Panel de Herramientas (Izquierda) -->
+    <div class="col-lg-4">
+      <div class="analysis-panel" id="manual-panel">
+        <div class="panel-header">
+          <h5 class="panel-title">
+            <i class="fas fa-edit me-2"></i>
+            {{ _('Análisis Manual') }}
+          </h5>
+        </div>
+        
+        <div class="panel-content">
+          <!-- Modo Edición -->
+          <div class="edit-mode-section mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">{{ _('Modo de Análisis') }}</h6>
+                <small class="text-muted">{{ _('Activa el modo edición para marcar sesgos') }}</small>
+              </div>
+              <button class="btn btn-primary" id="edit-mode-btn">
+                <i class="fas fa-pen me-2"></i>
+                {{ _('Modo Edición') }}
+              </button>
+            </div>
+          </div>
+                    <!-- Panel de Anotación (aparece al seleccionar texto) -->
+                    <div class="mb-4">
+        <div class="annotation-panel" id="annotation-panel" style="display: none;">
+          <div class="annotation-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tag me-2"></i>
+                                    {{ _('Anotar Texto Seleccionado') }}
+                                </h6>
+                                <button class="btn-close" id="close-annotation-panel"></button>
+            </div>
+                            <div class="annotation-content">
+                                <div class="selected-text mb-3">
+                                    <strong>{{ _('Texto seleccionado:') }}</strong>
+                                    <span id="selected-text-preview" class="text-primary"></span>
+          </div>
+                                <div id="simple-annotation-message" class="text-center py-4" style="display: none;"></div>
+                                <form id="annotation-form">
+            <div class="row g-2">
+              <div class="col-12">
+                                            <label class="form-label">{{ _('Categoría') }}</label>
+                                            <select class="form-select" id="annotation-category" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                                                <option value="contenido_general">{{ _('Contenido General') }}</option>
+                                                <option value="lenguaje">{{ _('Lenguaje') }}</option>
+                                                <option value="fuentes">{{ _('Fuentes') }}</option>
+                </select>
+              </div>
+              <div class="col-12">
+                                            <label class="form-label">{{ _('Variable') }}</label>
+                                            <select class="form-select" id="annotation-variable" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                </select>
+              </div>
+              <div class="col-12">
+                                            <label class="form-label">{{ _('Valor') }}</label>
+                                            <select class="form-select" id="annotation-value" required>
+                                                <option value="">{{ _('Seleccionar...') }}</option>
+                </select>
+              </div>
+            </div>
+                                    <div id="composite-controls" style="display:none" class="mt-2"></div>
+                                    <div class="mt-3 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="fas fa-plus me-2"></i>
+                                            {{ _('Agregar Anotación') }}
+              </button>
+                                        <button type="button" class="btn btn-outline-secondary" id="cancel-annotation">
+                                            {{ _('Cancelar') }}
+              </button>
+            </div>
+                                </form>
+          </div>
+        </div>
+      </div>
+
+          <!-- Análisis del Protagonista -->
+          <div class="protagonist-section mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title mb-3">
+                  <i class="fas fa-user-star me-2 text-primary"></i>
+                  {{ _('Protagonista de la Noticia') }}
+                </h6>
+                <div id="protagonist-analysis" class="text-center py-3">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">{{ _('Analizando...') }}</span>
+                  </div>
+                  <p class="text-muted mt-2">{{ _('Analizando protagonista...') }}</p>
+                </div>
+          </div>
+        </div>
+      </div>
+
+          <!-- Tema de la Noticia -->
+          <div class="topic-section mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title mb-3">
+                  <i class="fas fa-tag me-2 text-success"></i>
+                  {{ _('Tema de la Noticia') }}
+                </h6>
+                <div class="topic-selection">
+                  <label class="form-label small">{{ _('Selecciona el tema principal:') }}</label>
+                  <select class="form-select form-select-sm" id="topic-select">
+                    <option value="">{{ _('Seleccionar tema...') }}</option>
+                    <option value="1">{{ _('Científica/Investigación') }}</option>
+                    <option value="2">{{ _('Comunicación') }}</option>
+                    <option value="3">{{ _('De farándula o espectáculo') }}</option>
+                    <option value="4">{{ _('Deportiva') }}</option>
+                    <option value="5">{{ _('Economía (incluido: consumo; compras; viajes…)') }}</option>
+                    <option value="6">{{ _('Educación/cultura') }}</option>
+                    <option value="7">{{ _('Empleo/Trabajo') }}</option>
+                    <option value="8">{{ _('Empresa') }}</option>
+                    <option value="9">{{ _('Judicial') }}</option>
+                    <option value="10">{{ _('Medioambiente') }}</option>
+                    <option value="11">{{ _('Policial') }}</option>
+                    <option value="12">{{ _('Política') }}</option>
+                    <option value="13">{{ _('Salud') }}</option>
+                    <option value="14">{{ _('Social') }}</option>
+                    <option value="15">{{ _('Tecnología') }}</option>
+                    <option value="16">{{ _('Transporte') }}</option>
+                    <option value="17">{{ _('Otros') }}</option>
+                  </select>
+                  <div id="selected-topic-display" class="mt-2" style="display: none;">
+                    <span class="badge bg-success">
+                      <i class="fas fa-check me-1"></i>
+                      <span id="selected-topic-text"></span>
+                    </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+          <!-- Variables Disponibles -->
+          <div class="variables-section mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title mb-3">
+                  <i class="fas fa-list me-2 text-primary"></i>
+                  {{ _('Variables Disponibles') }}
+                </h6>
+                <div class="variables-collapsible">
+                  <button class="btn btn-outline-primary btn-sm w-100" type="button" id="variablesToggle" data-bs-toggle="collapse" data-bs-target="#variablesCollapse" aria-expanded="false" aria-controls="variablesCollapse">
+                    <i class="fas fa-eye me-2"></i>
+                    <span id="variablesToggleText">{{ _('Ver Variables por Categoría') }}</span>
+                    <i class="fas fa-chevron-down ms-auto" id="variablesChevron"></i>
+                  </button>
+                  <div class="collapse" id="variablesCollapse">
+                    <div class="variables-content mt-2">
+                      <div class="variables-category">
+                        <h6 class="text-primary small mb-2">
+                          <i class="fas fa-file-text me-2"></i>
+                          {{ _('Contenido General') }}
+                        </h6>
+                        <div id="contenido-variables-collapse" class="variables-list">
+                          <!-- Variables se cargan dinámicamente -->
+                        </div>
+                      </div>
+                        <div class="variables-category mt-3">
+                          <h6 class="small mb-2" style="color: #6f42c1;">
+                            <i class="fas fa-language me-2"></i>
+                            {{ _('Lenguaje') }}
+                          </h6>
+                        <div id="lenguaje-variables-collapse" class="variables-list">
+                          <!-- Variables se cargan dinámicamente -->
+                        </div>
+                      </div>
+                      <div class="variables-category mt-3">
+                        <h6 class="text-info small mb-2">
+                          <i class="fas fa-quote-left me-2"></i>
+                          {{ _('Fuentes') }}
+                        </h6>
+                        <div id="fuentes-variables-collapse" class="variables-list">
+                          <!-- Variables se cargan dinámicamente -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+
+          <!-- Resumen de Anotaciones -->
+          <div class="annotations-summary">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="section-title mb-0">
+                <i class="fas fa-sticky-note me-2"></i>
+                {{ _('Mis Anotaciones') }}
+              </h6>
+              <div class="annotation-filters">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-primary btn-sm filter-btn active" data-filter="all">
+                    <i class="fas fa-list me-1"></i>
+                    {{ _('Todas') }}
+                  </button>
+                  <button type="button" class="btn btn-outline-primary btn-sm filter-btn" data-filter="contenido_general">
+                    <i class="fas fa-file-text me-1"></i>
+                    {{ _('General') }}
+                  </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-filter="lenguaje" style="border-color: #6f42c1; color: #6f42c1;">
+                  <i class="fas fa-language me-1"></i>
+                  {{ _('Lenguaje') }}
+                </button>
+                  <button type="button" class="btn btn-outline-info btn-sm filter-btn" data-filter="fuentes">
+                    <i class="fas fa-quote-left me-1"></i>
+                    {{ _('Fuentes') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="annotations-list" class="annotations-list">
+              <p class="text-muted text-center py-3">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ _('Selecciona texto para comenzar a anotar') }}
+              </p>
+          </div>
+            <div id="annotations-stats" class="annotations-stats mt-2" style="display: none;">
+              <small class="text-muted">
+                <span id="filtered-count">0</span> de <span id="total-count">0</span> anotaciones
+              </small>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="action-buttons">
+            <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
+              <i class="fas fa-check me-2"></i>
+              {{ _('Finalizar Análisis') }}
+            </button>
+          </div>
+            </div>
+          </div>
+        </div>
+
+    <!-- Área de Texto (Derecha) -->
+    <div class="col-lg-8">
+      <div class="text-analysis-area">
+        <div class="text-header">
+          <h5 class="text-title">{{ data.title if data and data.title else _('Texto para Analizar') }}</h5>
+          <div class="text-meta">
+            <span class="badge bg-light text-dark me-2">
+              <i class="fas fa-clock me-1"></i>
+              {{ _('Tiempo estimado: 15 min') }}
+            </span>
+            <span class="badge bg-light text-dark">
+              <i class="fas fa-target me-1"></i>
+              {{ _('Objetivo: Identificar todos los sesgos') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="text-content" id="analysis-text">
+          <div class="text-body">
+            {% if data and data.text %}
+              {% if data.title %}<h2 class="article-title">{{ data.title }}</h2>{% endif %}
+              {% if data.authors %}<p class="article-authors">{{ data.authors }}</p>{% endif %}
+              <div class="article-content">{{ data.text | replace('\n\n', '</p><p>') | replace('\n', '<br>') | safe }}</div>
+            {% else %}
+              <p class="text-muted text-center py-5">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ _('No hay texto disponible para analizar') }}
+              </p>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+
+<style>
+  .analysis-panel {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  height: fit-content;
+      position: sticky;
+      top: 20px;
+  }
+  
+  .panel-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      justify-content: between;
+      align-items: center;
+}
+
+.panel-title {
+      margin: 0;
+      color: #495057;
+  }
+  
+  .panel-content {
+      padding: 1rem;
+  }
+  
+  .edit-mode-section {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      border-radius: 10px;
+      padding: 1rem;
+  }
+  
+  .edit-mode-section h6 {
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+  }
+  
+  .edit-mode-section .btn {
+      font-weight: 600;
+      padding: 0.5rem 1.5rem;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+  }
+  
+  .edit-mode-section .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .section-title {
+      color: #6c757d;
+  font-size: 0.9rem;
+      font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+  .text-analysis-area {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      position: relative;
+  }
+  
+  /* Edit mode indicator */
+  .text-analysis-area.edit-mode {
+      border: 3px solid #ffc107;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+      background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+  }
+  
+  .text-analysis-area.edit-mode::before {
+      content: "MODO EDICIÓN ACTIVO";
+      position: absolute;
+      top: -15px;
+      left: 20px;
+      background: #ffc107;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 10;
+  }
+  
+  .text-header {
+  padding: 1.5rem;
+      border-bottom: 1px solid #e9ecef;
+      background: #f8f9fa;
+  }
+  
+  .text-title {
+      margin: 0 0 0.5rem 0;
+      color: #495057;
+  }
+  
+  .text-content {
+  padding: 1.5rem;
+  }
+  
+  .text-body {
+      line-height: 1.8;
+      font-size: 1.1rem;
+      color: #495057;
+  }
+  
+  .annotation-panel {
+      position: static; /* inline inside left column */
+      width: 100%;
+      max-width: 100%;
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-top: 0.5rem;
+  }
+  
+  .annotation-header {
+  padding: 1rem;
+      border-bottom: 1px solid #e9ecef;
+  display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+  }
+  
+  .annotation-content {
+      padding: 1rem;
+  }
+  
+  .progress-steps {
+    display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+  }
+  
+  .step {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      position: relative;
+  }
+  
+  .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e9ecef;
+      color: #6c757d;
+  display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 1rem;
+      transition: all 0.3s ease;
+  }
+  
+  .step.active .step-number {
+      background: #007bff;
+      color: white;
+  }
+  
+  .step.completed .step-number {
+      background: #28a745;
+      color: white;
+  }
+  
+  .step-content h6 {
+      margin: 0;
+  font-size: 0.9rem;
+      font-weight: 600;
+  }
+  
+  .step-content p {
+      margin: 0;
+  font-size: 0.8rem;
+  }
+  
+  .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 60px;
+      right: -50%;
+      height: 2px;
+      background: #e9ecef;
+      z-index: -1;
+  }
+  
+  .step.completed:not(:last-child)::after {
+      background: #28a745;
+  }
+  
+.annotations-list {
+    max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Annotation Filters Styles */
+.annotation-filters .btn-group {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.annotation-filters .filter-btn {
+    border: none;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.annotation-filters .filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.annotation-filters .filter-btn.active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.annotation-filters .filter-btn[data-filter="all"].active {
+    background-color: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.annotation-filters .filter-btn[data-filter="contenido_general"].active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+.annotation-filters .filter-btn[data-filter="lenguaje"].active {
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #ffc107;
+}
+
+.annotation-filters .filter-btn[data-filter="fuentes"].active {
+    background-color: #0dcaf0;
+    color: #212529;
+    border-color: #0dcaf0;
+}
+
+.annotation-item {
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+.annotation-item.filtered-out {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.annotations-stats {
+    text-align: center;
+    padding: 0.25rem 0;
+    border-top: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+  
+.annotation-item {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #007bff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+    transition: all 0.3s ease;
+}
+
+.annotation-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Category-specific colors for annotation items */
+.annotation-item.annotation-contenido_general {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.1) 100%);
+    border-left: 4px solid #0d6efd;
+}
+
+.annotation-item.annotation-lenguaje {
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(111, 66, 193, 0.1) 100%);
+    border-left: 4px solid #6f42c1;
+}
+
+.annotation-item.annotation-fuentes {
+    background: linear-gradient(135deg, rgba(13, 202, 240, 0.05) 0%, rgba(13, 202, 240, 0.1) 100%);
+    border-left: 4px solid #0dcaf0;
+}
+
+.annotation-content {
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
+.annotation-actions {
+  display: flex;
+  align-items: center;
+    gap: 0.25rem;
+}
+
+.delete-annotation {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-annotation:hover {
+    background-color: #dc3545;
+    color: white;
+    transform: scale(1.1);
+}
+  
+  .annotation-text {
+      font-size: 0.9rem;
+      color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+  .annotation-meta {
+      font-size: 0.8rem;
+      color: #6c757d;
+}
+
+.action-buttons {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e9ecef;
+  }
+  
+/* Protagonist Analysis Styles */
+.protagonist-section .card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-left: 4px solid #667eea;
+}
+
+/* Topic Section Styles */
+.topic-section .card {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(20, 108, 67, 0.05) 100%);
+    border-left: 4px solid #198754;
+}
+
+.topic-section .topic-selection {
+    background: white;
+    border-radius: 0.5rem;
+  padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.topic-section .topic-selection:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.topic-section .form-label {
+    font-weight: 500;
+    color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.topic-section .form-select-sm {
+    font-size: 0.8rem;
+    padding: 0.375rem 0.5rem;
+}
+
+.topic-section #selected-topic-display {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.protagonist-result {
+    text-align: center;
+}
+
+.protagonist-gender .badge {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.protagonist-details h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.protagonist-details p {
+  font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Variables Section Styles */
+.variables-section .card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #007bff;
+}
+
+.variables-collapsible .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+    justify-content: space-between;
+}
+
+.variables-collapsible .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.variables-collapsible .btn i.fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.variables-collapsible .btn[aria-expanded="true"] i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.variables-content {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.variables-category h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.variables-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.variables-list .variable-item {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #495057;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.variables-list .variable-item:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+}
+
+.variables-list .variable-item i {
+    width: 12px;
+    margin-right: 0.5rem;
+    color: #28a745;
+}
+  
+  .variables-section .variable-category-info {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+  margin-bottom: 0.5rem;
+      border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  }
+  
+  .variables-section .variable-category-info:hover {
+  transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .variables-section .variable-category-info h6 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+  }
+  
+  .variables-section .variable-category-info ul li {
+      margin-bottom: 0.2rem;
+      font-size: 0.75rem;
+      line-height: 1.3;
+  }
+  
+  .variables-section .variable-category-info ul li i {
+      width: 10px;
+  }
+  
+  /* Inline highlight for user annotations */
+  .annotation-mark {
+      background-color: #fff3cd;
+      box-shadow: inset 0 -6px 0 rgba(255, 235, 59, 0.6);
+      border-radius: 2px;
+      padding: 0 1px;
+  }
+  .annotation-mark.mark-contenido_general { 
+      background-color: rgba(13, 110, 253, 0.1); 
+      box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4);
+      color: #0d6efd;
+  }
+  .annotation-mark.mark-lenguaje { 
+      background-color: rgba(111, 66, 193, 0.1); 
+      box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
+      color: #6f42c1;
+  }
+  .annotation-mark.mark-fuentes { 
+      background-color: rgba(13, 202, 240, 0.1); 
+      box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4);
+      color: #0dcaf0;
+  }
+  
+  /* Lightweight tooltip for annotations */
+  .annotation-tooltip {
+      position: fixed;
+      z-index: 2000;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      pointer-events: none;
+      max-width: 280px;
+      line-height: 1.3;
+      display: none;
+}
+
+/* Article title and authors within text */
+.article-title {
+  font-size: 1.75rem;
+    font-weight: 700;
+    color: #495057;
+  line-height: 1.2;
+    margin: 0 0 0.5rem 0;
+  text-align: left;
+}
+
+.article-authors {
+  font-size: 1.1rem;
+    color: #6c757d;
+  font-style: italic;
+    margin: 0 0 1rem 0;
+    font-weight: 500;
+}
+
+.article-content {
+  margin-top: 0.5rem;
+  text-align: justify;
+}
+</style>
+
+<script>
+  // Datos del texto actual
+  const currentText = {
+      id: 'manual-analysis',
+      title: '',
+      text: '',
+      authors: ''
+  };
+  
+let annotations = [];
+let selectedTopic = '';
+
+// Variables from config.ini - parse the string arrays
+  const CHALLENGE_VARIABLES = {
+      'contenido_general': ["cita_textual_titular", "genero_nombre_propio_titular", "genero_periodista", "genero_personas_mencionadas", "nombre_propio_titular", "personas_mencionadas", "tema"],
+      'lenguaje': ["androcentrismo", "asimetria", "cargos_mujeres", "comparacion_mujeres_hombres", "denominacion_dependiente", "denominacion_redundante", "denominacion_sexualizada", "dual_aparente", "excepcion_noticiabilidad", "hombre_humanidad", "infantilizacion", "lenguaje_sexista", "masculino_generico", "sexismo_social"],
+      'fuentes': ["declaracion_fuente", "genero_fuente", "nombre_fuente", "tipo_fuente"]
+  };
+  
+  // Variables loaded from config.ini
+  
+  // Variable descriptions
+  const VARIABLE_DESCRIPTIONS = {
+      'cita_textual_titular': 'Cita textual titular',
+      'genero_nombre_propio_titular': 'Género nombre propio titular',
+      'genero_periodista': 'Género periodista',
+      'genero_personas_mencionadas': 'Género personas mencionadas',
+      'nombre_propio_titular': 'Nombre propio titular',
+      'personas_mencionadas': 'Personas mencionadas',
+      'tema': 'Tema',
+      'androcentrismo': 'Androcentrismo',
+      'asimetria': 'Asimetría',
+      'cargos_mujeres': 'Cargos mujeres',
+      'comparacion_mujeres_hombres': 'Comparación mujeres/hombres',
+      'denominacion_dependiente': 'Denominación dependiente',
+      'denominacion_redundante': 'Denominación redundante',
+      'denominacion_sexualizada': 'Denominación sexualizada',
+      'dual_aparente': 'Dual aparente',
+      'excepcion_noticiabilidad': 'Excepción noticiabilidad',
+      'hombre_humanidad': 'Hombre humanidad',
+      'infantilizacion': 'Infantilización',
+      'lenguaje_sexista': 'Lenguaje sexista',
+      'masculino_generico': 'Masculino genérico',
+      'sexismo_social': 'Sexismo social',
+      'declaracion_fuente': 'Declaración fuente',
+      'genero_fuente': 'Género fuente',
+      'nombre_fuente': 'Nombre fuente',
+      'tipo_fuente': 'Tipo fuente'
+  };
+  
+  let isEditMode = false;
+  
+document.addEventListener('DOMContentLoaded', function() {
+    initializeManualAnalysis();
+    initMultiLabelTooltips();
+    updateVariablesDisplay();
+    analyzeProtagonist();
+    setupTopicSelection();
+    setupAnnotationFilters();
+});
+  
+  function initializeManualAnalysis() {
+      setupTextSelection();
+      setupAnnotationForm();
+      setupActionButtons();
+      updateProgressSteps();
+  }
+  
+  function setupTextSelection() {
+      const textElement = document.getElementById('analysis-text');
+      
+      textElement.addEventListener('mouseup', function(e) {
+          if (!isEditMode) return;
+          
+          const selection = window.getSelection();
+          const selectedText = selection.toString().trim();
+          
+          if (selectedText.length > 0) {
+              showAnnotationPanel(selectedText, selection.getRangeAt(0));
+          }
+      });
+  }
+  
+  function setupAnnotationForm() {
+      const form = document.getElementById('annotation-form');
+      const categorySelect = document.getElementById('annotation-category');
+      const variableSelect = document.getElementById('annotation-variable');
+      const valueSelect = document.getElementById('annotation-value');
+      
+      // Manejar cambio de categoría
+      categorySelect.addEventListener('change', function() {
+          updateVariableOptions(this.value);
+      });
+      
+      // Manejar cambio de variable
+      variableSelect.addEventListener('change', function() {
+          updateValueOptions(categorySelect.value, this.value);
+      });
+      
+      // Manejar envío del formulario
+      form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          saveAnnotation();
+      });
+      
+      // Manejar cancelar
+      document.getElementById('cancel-annotation').addEventListener('click', function() {
+          hideAnnotationPanel();
+      });
+      
+      // Manejar cerrar panel
+      document.getElementById('close-annotation-panel').addEventListener('click', function() {
+          hideAnnotationPanel();
+      });
+  }
+  
+  function setupActionButtons() {
+      // Botón de modo edición
+      document.getElementById('edit-mode-btn').addEventListener('click', function() {
+          toggleEditMode();
+      });
+      
+      // Botón finalizar
+      document.getElementById('save-analysis-btn').addEventListener('click', function() {
+          saveAnalysis();
+      });
+  }
+  
+  function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const btn = document.getElementById('edit-mode-btn');
+      const textArea = document.getElementById('analysis-text');
+      const textAnalysisArea = document.querySelector('.text-analysis-area');
+      
+      if (isEditMode) {
+          btn.innerHTML = '<i class="fas fa-check me-1"></i> Modo Edición Activo';
+          btn.classList.remove('btn-outline-primary', 'btn-primary');
+          btn.classList.add('btn-warning');
+          textArea.style.cursor = 'text';
+          textArea.classList.add('edit-mode');
+          textAnalysisArea.classList.add('edit-mode');
+      } else {
+          btn.innerHTML = '<i class="fas fa-pen me-1"></i> Modo Edición';
+          btn.classList.remove('btn-warning');
+          btn.classList.add('btn-primary');
+          textArea.style.cursor = 'default';
+          textArea.classList.remove('edit-mode');
+          textAnalysisArea.classList.remove('edit-mode');
+          hideAnnotationPanel();
+      }
+  }
+  
+  function showAnnotationPanel(selectedText, range) {
+      const panel = document.getElementById('annotation-panel');
+      const preview = document.getElementById('selected-text-preview');
+      
+      preview.textContent = selectedText;
+      panel.style.display = 'block';
+      
+      // Guardar el rango para después
+      window.currentSelection = {
+          text: selectedText,
+          range: range
+      };
+      
+      // Initialize the annotation form
+      initializeAnnotationForm();
+  }
+  
+  function hideAnnotationPanel() {
+      const panel = document.getElementById('annotation-panel');
+      panel.style.display = 'none';
+      window.currentSelection = null;
+  }
+  
+  function initializeAnnotationForm() {
+      const categorySelect = document.getElementById('annotation-category');
+      const variableSelect = document.getElementById('annotation-variable');
+      const valueSelect = document.getElementById('annotation-value');
+      
+      // Clear and reset the form
+      if (categorySelect) categorySelect.value = '';
+      if (variableSelect) variableSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      if (valueSelect) valueSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      
+      // If there's a default category available, select it and load its variables
+      if (categorySelect && categorySelect.options.length > 1) {
+          const firstCategory = categorySelect.options[1].value;
+          categorySelect.value = firstCategory;
+          updateVariableOptions(firstCategory);
+      }
+  }
+  
+  function updateVariableOptions(category) {
+      const variableSelect = document.getElementById('annotation-variable');
+      variableSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      
+      const variables = CHALLENGE_VARIABLES;
+      let availableVariables = [];
+      
+      if (category === 'contenido_general' && variables.contenido_general) {
+          availableVariables = variables.contenido_general.filter(v => v !== 'tema');
+      } else if (category === 'lenguaje' && variables.lenguaje) {
+          availableVariables = variables.lenguaje;
+      } else if (category === 'fuentes' && variables.fuentes) {
+          availableVariables = variables.fuentes;
+      }
+      
+      // Hide gender-only variables that are driven by a paired presence variable
+      const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
+      availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
+      
+      availableVariables.forEach(variable => {
+          const option = document.createElement('option');
+          option.value = variable;
+          option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          variableSelect.appendChild(option);
+      });
+  }
+  
+  function updateValueOptions(category, variable) {
+      const valueSelect = document.getElementById('annotation-value');
+      valueSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      const compositeControls = document.getElementById('composite-controls');
+      if (compositeControls) compositeControls.style.display = 'none', compositeControls.innerHTML = '';
+      
+      // Mapeo de variables a sus valores
+      const variableValues = {
+          // Contenido General
+          'genero_nombre_propio_titular': [
+              { value: '1', text: 'No hay' },
+              { value: '2', text: 'Sí, hombre' },
+              { value: '3', text: 'Sí, mujer' },
+              { value: '4', text: 'Sí, mujer y hombre' }
+          ],
+          'genero_personas_mencionadas': [
+              { value: '1', text: 'No hay' },
+              { value: '2', text: 'Sí, hombre' },
+              { value: '3', text: 'Sí, mujer' },
+              { value: '4', text: 'Sí, mujer y hombre' }
+          ],
+          'genero_periodista': [
+              { value: '1', text: 'Masculino' },
+              { value: '2', text: 'Femenino' },
+              { value: '3', text: 'Mixto' },
+              { value: '4', text: 'Ns/Nc' },
+              { value: '5', text: 'Agencia/otros medios' },
+              { value: '6', text: 'Redacción' },
+              { value: '7', text: 'Corporativo' }
+          ],
+          'tema': [
+              { value: '1', text: 'Científica/Investigación' },
+              { value: '2', text: 'Comunicación' },
+              { value: '3', text: 'De farándula o espectáculo' },
+              { value: '4', text: 'Deportiva' },
+              { value: '5', text: 'Economía (incluido: consumo; compras; viajes…)' },
+              { value: '6', text: 'Educación/cultura' },
+              { value: '7', text: 'Empleo/Trabajo' },
+              { value: '8', text: 'Empresa' },
+              { value: '9', text: 'Judicial' },
+              { value: '10', text: 'Medioambiente' },
+              { value: '11', text: 'Policial' },
+              { value: '12', text: 'Política' },
+              { value: '13', text: 'Salud' },
+              { value: '14', text: 'Social' },
+              { value: '15', text: 'Tecnología' },
+              { value: '16', text: 'Transporte' },
+              { value: '17', text: 'Otros' }
+          ],
+          'cita_textual_titular': [
+              { value: '0', text: 'No' },
+              { value: '1', text: 'Sí' }
+          ],
+          
+          // Lenguaje
+          'lenguaje_sexista': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' },
+              { value: '3', text: 'Sí, además se observa un salto semántico' }
+          ],
+          'androcentrismo': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'asimetria': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'cargos_mujeres': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'comparacion_mujeres_hombres': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'denominacion_dependiente': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'denominacion_redundante': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'denominacion_sexualizada': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'dual_aparente': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'excepcion_noticiabilidad': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'hombre_humanidad': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'infantilizacion': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'masculino_generico': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'sexismo_social': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          
+          // Fuentes
+          'tipo_fuente': [
+              { value: '1', text: 'Personal' },
+              { value: '2', text: 'Institucional' },
+              { value: '3', text: 'Mixta' }
+          ],
+          'genero_fuente': [
+              { value: '1', text: 'No hay' },
+              { value: '2', text: 'Sí, hombre' },
+              { value: '3', text: 'Sí, mujer' },
+              { value: '4', text: 'Sí, mujer y hombre' }
+          ],
+          'declaracion_fuente': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ],
+          'nombre_fuente': [
+              { value: '1', text: 'No' },
+              { value: '2', text: 'Sí' }
+          ]
+      };
+      
+      // Compuestos: pares variable-presencia + variable-detalle
+      const compositePairs = {
+          personas_mencionadas: 'genero_personas_mencionadas',
+          nombre_propio_titular: 'genero_nombre_propio_titular',
+          nombre_fuente: 'genero_fuente'
+      };
+  
+      // Si la variable seleccionada es parte de un compuesto, mostrar control de género
+      const compositeDetail = compositePairs[variable];
+      if (compositeDetail) {
+          const baseVar = compositePairs[variable] ? variable : Object.keys(compositePairs).find(k => compositePairs[k] === variable);
+          const detailVar = compositePairs[baseVar];
+          if (compositeControls) {
+              compositeControls.style.display = 'block';
+              const genderValues = variableValues[detailVar] || [];
+              let label;
+              if (detailVar === 'genero_personas_mencionadas') {
+                  label = 'Género de la persona';
+              } else if (detailVar === 'genero_nombre_propio_titular') {
+                  label = 'Género nombre propio titular';
+              } else {
+                  label = 'Género de la fuente';
+              }
+              compositeControls.innerHTML = `
+                  <div class="row g-2">
+                      <div class="col-12">
+                          <label class="form-label">${label}</label>
+                          <select class="form-select" id="composite-gender">
+                              ${genderValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                          </select>
+                      </div>
+                  </div>`;
+          }
+      }
+  
+      // Obtener valores para la variable específica
+      const values = variableValues[variable];
+      
+      if (values) {
+          // Si es un binario (Sí/No), no mostramos la opción negativa
+          const lower = values.map(v => (v.text || '').toLowerCase());
+          const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+          const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+  
+          let toRender = values;
+          if (isYesNo || isSiNo) {
+              toRender = values.filter(v => /sí|si/i.test(v.text || ''));
+          }
+  
+          toRender.forEach((option, idx) => {
+              const optionElement = document.createElement('option');
+              optionElement.value = option.value;
+              optionElement.textContent = option.text;
+              if (idx === 0) optionElement.selected = true;
+              valueSelect.appendChild(optionElement);
+          });
+      } else {
+          // Sin catálogo: ocultamos selector y fijamos afirmativo por defecto
+          if (valueSelect && valueSelect.parentElement) valueSelect.parentElement.style.display = 'none';
+          const optionElement = document.createElement('option');
+          optionElement.value = '1';
+          optionElement.textContent = '';
+          optionElement.selected = true;
+          valueSelect.appendChild(optionElement);
+      }
+  }
+  
+  function saveAnnotation() {
+      const selectedText = window.currentSelection ? window.currentSelection.text : '';
+      
+      if (!selectedText) {
+          alert('No hay texto seleccionado');
+          return;
+      }
+      
+      const category = document.getElementById('annotation-category').value;
+      const variable = document.getElementById('annotation-variable').value;
+      const value = document.getElementById('annotation-value').value;
+      
+      if (!category || !variable || !value) {
+          alert('Por favor completa todos los campos');
+          return;
+      }
+      
+      const createdAt = new Date().toISOString();
+      
+      // Manejo de variables compuestas: crear dos anotaciones sincronizadas
+      const compositePairs = {
+          personas_mencionadas: 'genero_personas_mencionadas',
+          nombre_propio_titular: 'genero_nombre_propio_titular',
+          nombre_fuente: 'genero_fuente'
+      };
+      const compositeControls = document.getElementById('composite-gender');
+      
+      if (compositePairs[variable]) {
+          // Usuario anotó la presencia: set presente y género seleccionado
+          const genderValue = compositeControls ? compositeControls.value : null;
+          // 1) presencia
+          annotations.push({
+              id: Date.now(),
+              text: selectedText,
+              category: category,
+              variable: variable,
+              value: '1',
+              timestamp: createdAt
+          });
+          try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+          // 2) género
+          if (genderValue) {
+              annotations.push({
+                  id: Date.now()+1,
+                  text: selectedText,
+                  category: category,
+                  variable: compositePairs[variable],
+                  value: genderValue,
+                  timestamp: createdAt
+              });
+              try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+          }
+      } else {
+          // Anotación normal
+          annotations.push({
+              id: Date.now(),
+              text: selectedText,
+              category: category,
+              variable: variable,
+              value: value,
+              timestamp: createdAt
+          });
+          try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
+      }
+      updateAnnotationsList();
+      hideAnnotationPanel();
+      
+      // Habilitar botón
+      document.getElementById('save-analysis-btn').disabled = false;
+  }
+  
+function updateAnnotationsList() {
+    const container = document.getElementById('annotations-list');
+    
+    if (annotations.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>Selecciona texto para comenzar a anotar</p>';
+        document.getElementById('annotations-stats').style.display = 'none';
+        return;
+    }
+    
+    container.innerHTML = annotations.map((annotation, index) => `
+        <div class="annotation-item annotation-${annotation.category}" data-category="${annotation.category}" data-index="${index}">
+            <div class="annotation-content">
+                <div class="annotation-text">"${annotation.text}"</div>
+                <div class="annotation-meta">
+                    <strong>${annotation.category}</strong> → ${annotation.variable} = ${annotation.value}
+                </div>
+            </div>
+            <div class="annotation-actions">
+                <button class="btn btn-sm btn-outline-danger delete-annotation" data-index="${index}" title="Eliminar anotación">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    // Update protagonist analysis when annotations change
+    updateProtagonistAnalysis();
+    
+    // Update stats
+    updateAnnotationStats();
+    
+    // Apply current filter
+    applyCurrentFilter();
+    
+    // Setup delete buttons
+    setupDeleteButtons();
+}
+
+function setupAnnotationFilters() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Apply filter
+            const filter = this.getAttribute('data-filter');
+            applyFilter(filter);
+        });
+    });
+}
+
+function applyFilter(filter) {
+    const annotationItems = document.querySelectorAll('.annotation-item');
+    let visibleCount = 0;
+    
+    annotationItems.forEach(item => {
+        const category = item.getAttribute('data-category');
+        
+        if (filter === 'all' || category === filter) {
+            item.classList.remove('filtered-out');
+            visibleCount++;
+        } else {
+            item.classList.add('filtered-out');
+        }
+    });
+    
+    // Update stats
+    updateFilteredStats(visibleCount, annotations.length);
+}
+
+function applyCurrentFilter() {
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        const filter = activeFilter.getAttribute('data-filter');
+        applyFilter(filter);
+    }
+}
+
+function updateAnnotationStats() {
+    const statsElement = document.getElementById('annotations-stats');
+    if (annotations.length > 0) {
+        statsElement.style.display = 'block';
+        document.getElementById('total-count').textContent = annotations.length;
+    } else {
+        statsElement.style.display = 'none';
+    }
+}
+
+function updateFilteredStats(visible, total) {
+    document.getElementById('filtered-count').textContent = visible;
+    document.getElementById('total-count').textContent = total;
+}
+
+function setupDeleteButtons() {
+    const deleteButtons = document.querySelectorAll('.delete-annotation');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const index = parseInt(this.getAttribute('data-index'));
+            deleteAnnotation(index);
+        });
+    });
+}
+
+function deleteAnnotation(index) {
+    if (index >= 0 && index < annotations.length) {
+        // Remove from annotations array
+        const deletedAnnotation = annotations.splice(index, 1)[0];
+        
+        // Remove highlight from text if it exists
+        removeHighlightFromText(deletedAnnotation);
+        
+        // Update the display
+        updateAnnotationsList();
+        
+        // Update protagonist analysis
+        updateProtagonistAnalysis();
+        
+        // Check if we need to disable save button
+        if (annotations.length === 0) {
+            document.getElementById('save-analysis-btn').disabled = true;
+        }
+        
+        console.log('Annotation deleted:', deletedAnnotation);
+    }
+}
+
+function removeHighlightFromText(annotation) {
+    // Find and remove highlight marks that match this annotation
+    const marks = document.querySelectorAll('.annotation-mark');
+    marks.forEach(mark => {
+        const variable = mark.getAttribute('data-variable');
+        if (variable === annotation.variable) {
+            // Replace the mark with just the text content
+            const parent = mark.parentNode;
+            while (mark.firstChild) {
+                parent.insertBefore(mark.firstChild, mark);
+            }
+            parent.removeChild(mark);
+        }
+    });
+}
+
+function analyzeProtagonist() {
+    const protagonistContainer = document.getElementById('protagonist-analysis');
+    if (!protagonistContainer) return;
+    
+    // Show initial state immediately
+    updateProtagonistAnalysis();
+}
+
+function analyzeTextForProtagonist() {
+    // Check if there are any annotations with gender information
+    const genderAnnotations = annotations.filter(annotation => 
+        annotation.variable === 'genero_personas_mencionadas' || 
+        annotation.variable === 'genero_nombre_propio_titular' ||
+        annotation.variable === 'genero_periodista' ||
+        annotation.variable === 'genero_fuente'
+    );
+    
+    // If no gender annotations, show neutral message
+    if (genderAnnotations.length === 0) {
+        return {
+            gender: 'No disponible',
+            title: 'Sin datos de género',
+            description: 'No se han anotado personas con información de género aún. Realiza anotaciones para ver el análisis del protagonista.'
+        };
+    }
+    
+    // Count gender values from annotations
+    let femaleCount = 0;
+    let maleCount = 0;
+    let unspecifiedCount = 0;
+    
+    genderAnnotations.forEach(annotation => {
+        if (annotation.variable === 'genero_periodista') {
+            // Lógica específica para género periodista
+            if (annotation.value === '2') { // Femenino
+                femaleCount++;
+            } else if (annotation.value === '1') { // Masculino
+                maleCount++;
+            } else if (annotation.value === '3') { // Mixto
+                maleCount++;
+                femaleCount++;
+            } else {
+                unspecifiedCount++;
+            }
+        } else {
+            // Lógica para otras variables de género
+            if (annotation.value === '3') { // Sí, mujer
+                femaleCount++;
+            } else if (annotation.value === '2') { // Sí, hombre
+                maleCount++;
+            } else if (annotation.value === '4') { // Sí, mujer y hombre
+                maleCount++;
+                femaleCount++;
+            } else {
+                unspecifiedCount++;
+            }
+        }
+    });
+    
+    // Determine protagonist based on annotation counts
+    if (femaleCount > maleCount && femaleCount > unspecifiedCount) {
+        return {
+            gender: 'Mujer',
+            title: 'Protagonista Femenina',
+            description: `Basado en ${femaleCount} anotación(es) de género femenino.`
+        };
+    } else if (maleCount > femaleCount && maleCount > unspecifiedCount) {
+        return {
+            gender: 'Hombre',
+            title: 'Protagonista Masculino',
+            description: `Basado en ${maleCount} anotación(es) de género masculino.`
+        };
+    } else if (unspecifiedCount > 0 && femaleCount === 0 && maleCount === 0) {
+        return {
+            gender: 'No especificado',
+            title: 'Protagonista sin género definido',
+            description: `Basado en ${unspecifiedCount} anotación(es) sin género especificado.`
+        };
+    } else {
+        return {
+            gender: 'Mixto',
+            title: 'Protagonista Mixto',
+            description: `Equilibrio entre géneros: ${maleCount} masculino, ${femaleCount} femenino.`
+        };
+    }
+}
+
+function updateProtagonistAnalysis() {
+    const protagonistContainer = document.getElementById('protagonist-analysis');
+    if (!protagonistContainer) return;
+    
+    const protagonistInfo = analyzeTextForProtagonist();
+    
+    protagonistContainer.innerHTML = `
+        <div class="protagonist-result">
+            <div class="protagonist-gender mb-2">
+                <span class="badge ${protagonistInfo.gender === 'Mujer' ? 'bg-success' : protagonistInfo.gender === 'Hombre' ? 'bg-primary' : protagonistInfo.gender === 'No disponible' ? 'bg-secondary' : 'bg-info'} fs-6 px-3 py-2">
+                    <i class="fas ${protagonistInfo.gender === 'Mujer' ? 'fa-venus' : protagonistInfo.gender === 'Hombre' ? 'fa-mars' : protagonistInfo.gender === 'No disponible' ? 'fa-question' : 'fa-balance-scale'} me-2"></i>
+                    ${protagonistInfo.gender}
+                </span>
+            </div>
+            <div class="protagonist-details">
+                <h6 class="mb-1">${protagonistInfo.title}</h6>
+                <p class="text-muted small mb-0">${protagonistInfo.description}</p>
+            </div>
+        </div>
+    `;
+}
+
+function setupTopicSelection() {
+    const topicSelect = document.getElementById('topic-select');
+    const selectedTopicDisplay = document.getElementById('selected-topic-display');
+    const selectedTopicText = document.getElementById('selected-topic-text');
+    
+    if (topicSelect) {
+        topicSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            const selectedText = this.options[this.selectedIndex].text;
+            
+            if (selectedValue) {
+                selectedTopic = selectedValue;
+                selectedTopicText.textContent = selectedText;
+                selectedTopicDisplay.style.display = 'block';
+                
+                // Add topic as an annotation automatically
+                addTopicAnnotation(selectedValue, selectedText);
+            } else {
+                selectedTopic = '';
+                selectedTopicDisplay.style.display = 'none';
+            }
+        });
+    }
+}
+
+function addTopicAnnotation(value, text) {
+    // Check if topic annotation already exists
+    const existingTopicAnnotation = annotations.find(annotation => 
+        annotation.variable === 'tema'
+    );
+    
+    if (existingTopicAnnotation) {
+        // Update existing topic annotation
+        existingTopicAnnotation.value = value;
+        existingTopicAnnotation.text = text;
+    } else {
+        // Add new topic annotation
+        const topicAnnotation = {
+            id: Date.now(),
+            text: text,
+            category: 'contenido_general',
+            variable: 'tema',
+            value: value,
+            timestamp: new Date().toISOString()
+        };
+        
+        annotations.push(topicAnnotation);
+    }
+    
+    // Update annotations list
+    updateAnnotationsList();
+    
+    // Enable save button if not already enabled
+    const saveBtn = document.getElementById('save-analysis-btn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+    }
+}
+  
+  function saveAnalysis() {
+      if (annotations.length === 0) {
+          alert('Por favor realiza al menos una anotación antes de finalizar');
+          return;
+      }
+      
+      // Mostrar loading
+      const loadingBtn = document.getElementById('save-analysis-btn');
+      const originalText = loadingBtn.innerHTML;
+      loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+      loadingBtn.disabled = true;
+      
+      // Preparar datos para enviar (usar selectores seguros y valores por defecto)
+      const analysisTextEl = document.getElementById('analysis-text');
+      const titleEl = document.querySelector('.text-title') || document.querySelector('.article-title');
+      const authorsEl = document.querySelector('.text-authors') || document.querySelector('.article-authors');
+      const urlEl = document.querySelector('.text-url');
+
+      const analysisData = {
+          text: (analysisTextEl && (analysisTextEl.innerText || analysisTextEl.textContent)) || '',
+          title: (titleEl && titleEl.textContent ? titleEl.textContent.trim() : ''),
+          authors: (authorsEl && authorsEl.textContent ? authorsEl.textContent.trim() : ''),
+          url: (urlEl && urlEl.textContent ? urlEl.textContent.trim() : ''),
+          annotations: annotations,
+          selected_topic: selectedTopic,
+          protagonist_analysis: getProtagonistAnalysis(),
+          analysis_mode: 'manual',
+          timestamp: new Date().toISOString()
+      };
+      
+      // Enviar datos al servidor
+      fetch(window.location.href, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify(analysisData)
+      })
+      .then(response => {
+          if (response.ok) {
+              return response.json();
+          }
+          throw new Error('Error al guardar el análisis');
+      })
+      .then(data => {
+          alert(`Análisis guardado correctamente. ID: ${data.analysis_id}`);
+          // Redirigir a la página de resultados o historial
+          window.location.href = '/analysis/history';
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Error al guardar el análisis: ' + error.message);
+          loadingBtn.innerHTML = originalText;
+          loadingBtn.disabled = false;
+      });
+  }
+  
+  function getProtagonistAnalysis() {
+      // Obtener análisis del protagonista basado en las anotaciones
+      const genderAnnotations = annotations.filter(ann => 
+          ann.variable === 'genero_personas_mencionadas' || 
+          ann.variable === 'genero_nombre_propio_titular'
+      );
+      
+      if (genderAnnotations.length === 0) {
+          return { protagonist: 'No identificado', confidence: 0 };
+      }
+      
+      // Lógica simple para determinar protagonista
+      const maleCount = genderAnnotations.filter(ann => ann.value === '2').length;
+      const femaleCount = genderAnnotations.filter(ann => ann.value === '3').length;
+      const mixedCount = genderAnnotations.filter(ann => ann.value === '4').length;
+      
+      if (maleCount > femaleCount && maleCount > mixedCount) {
+          return { protagonist: 'Masculino', confidence: maleCount / genderAnnotations.length };
+      } else if (femaleCount > maleCount && femaleCount > mixedCount) {
+          return { protagonist: 'Femenino', confidence: femaleCount / genderAnnotations.length };
+      } else if (mixedCount > 0) {
+          return { protagonist: 'Mixto', confidence: mixedCount / genderAnnotations.length };
+      }
+      
+      return { protagonist: 'No identificado', confidence: 0 };
+  }
+
+  function updateProgressSteps() {
+      // Actualizar indicadores de progreso
+      if (annotations.length > 0) {
+          document.getElementById('step-manual').classList.add('completed');
+          document.getElementById('step-results').classList.add('active');
+      }
+  }
+  
+  function updateVariablesDisplay() {
+      const variables = CHALLENGE_VARIABLES;
+      
+      // Update contenido general variables in collapse
+      const contenidoCollapse = document.getElementById('contenido-variables-collapse');
+      if (contenidoCollapse && variables.contenido_general) {
+          contenidoCollapse.innerHTML = variables.contenido_general.map(variable => 
+              `<div class="variable-item">
+                  <i class="fas fa-check"></i>
+                  <span>${VARIABLE_DESCRIPTIONS[variable] || variable}</span>
+              </div>`
+          ).join('');
+      }
+      
+      // Update lenguaje variables in collapse
+      const lenguajeCollapse = document.getElementById('lenguaje-variables-collapse');
+      if (lenguajeCollapse && variables.lenguaje) {
+          lenguajeCollapse.innerHTML = variables.lenguaje.map(variable => 
+              `<div class="variable-item">
+                  <i class="fas fa-check"></i>
+                  <span>${VARIABLE_DESCRIPTIONS[variable] || variable}</span>
+              </div>`
+          ).join('');
+      }
+      
+      // Update fuentes variables in collapse
+      const fuentesCollapse = document.getElementById('fuentes-variables-collapse');
+      if (fuentesCollapse && variables.fuentes) {
+          fuentesCollapse.innerHTML = variables.fuentes.map(variable => 
+              `<div class="variable-item">
+                  <i class="fas fa-check"></i>
+                  <span>${VARIABLE_DESCRIPTIONS[variable] || variable}</span>
+              </div>`
+          ).join('');
+      }
+  }
+  
+  function applyInlineHighlight(selectionData, category, variable) {
+      if (!selectionData || !selectionData.range) return;
+      const range = selectionData.range.cloneRange();
+      if (range.collapsed) return;
+      const wrapper = document.createElement('mark');
+      wrapper.className = `annotation-mark mark-${category}`;
+      wrapper.setAttribute('data-variable', variable);
+      try {
+          range.surroundContents(wrapper);
+      } catch (e) {
+          // Fallback: wrap text node by splitting
+          const text = document.createTextNode(range.toString());
+          wrapper.appendChild(text);
+          range.deleteContents();
+          range.insertNode(wrapper);
+      }
+  }
+  
+  // Multi-etiqueta: al pasar el ratón, si hay varias marcas superpuestas,
+  // mostrar en el tooltip todas las variables implicadas
+  function initMultiLabelTooltips() {
+      let tooltip = null;
+      const ensureTooltip = () => {
+          if (!tooltip) {
+              tooltip = document.createElement('div');
+              tooltip.className = 'annotation-tooltip';
+              document.body.appendChild(tooltip);
+          }
+          return tooltip;
+      };
+  
+      document.addEventListener('mousemove', function(e) {
+          const tip = ensureTooltip();
+          const underPointer = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []);
+          const marks = underPointer.filter(el => el && el.classList && el.classList.contains('annotation-mark'));
+          if (!marks || marks.length === 0) { tip.style.display = 'none'; return; }
+  
+          const variables = Array.from(new Set(marks.map(m => m.getAttribute('data-variable')).filter(Boolean)));
+          const categories = Array.from(new Set(marks.map(m => {
+              if (m.classList.contains('mark-contenido_general')) return 'Contenido General';
+              if (m.classList.contains('mark-lenguaje')) return 'Lenguaje';
+              if (m.classList.contains('mark-fuentes')) return 'Fuentes';
+              return '';
+          }).filter(Boolean)));
+          const varLabel = variables.map(v => VARIABLE_DESCRIPTIONS[v] || (v || '').replace(/_/g,' ')).join(' + ');
+          const catLabel = categories.join(', ');
+          if (tip) {
+              tip.textContent = catLabel ? `${catLabel} · ${varLabel}` : varLabel;
+              tip.style.left = (e.clientX + 12) + 'px';
+              tip.style.top = (e.clientY + 12) + 'px';
+              tip.style.display = 'block';
+          }
+      });
+  
+      document.addEventListener('scroll', function() { if (tooltip) tooltip.style.display = 'none'; }, true);
+      document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
+  }
+</script>
+  
+  
+{% endblock %}

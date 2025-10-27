@@ -3,17 +3,37 @@
 {% block title %}{{ _('Contacto') }} - IRIS{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <h1 class="mb-4">{{ _('Contacto') }}</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-envelope me-3 text-primary"></i>
+                    {{ _('Contacto') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Información de contacto y colaboradores del proyecto IRIS') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="container py-3">
+                <p>
+                    {{ _('Este proyecto es una iniciativa conjunta de la Universidad Carlos III de Madrid (UC3M) y del Instituto de Estudios de Género de la UC3M, y cuenta con el apoyo y financiación de la Comunidad de Madrid.') }}
+                </p>
 
-  <p>
-    {{ _('Este proyecto es una iniciativa conjunta de la Universidad Carlos III de Madrid (UC3M) y del Instituto de Estudios de Género de la UC3M, y cuenta con el apoyo y financiación de la Comunidad de Madrid.') }}
-  </p>
-
-  <h2 class="mt-5">{{ _('Correos de contacto') }}</h2>
-  <ul class="list-unstyled">
-    <li><a href="mailto:iris@uc3m.es">iris@uc3m.es</a></li>
-    <li><a href="mailto:genero@uc3m.es">genero@uc3m.es</a></li>
-  </ul>
+                <h2 class="mt-5">{{ _('Correos de contacto') }}</h2>
+                <ul class="list-unstyled">
+                    <li><a href="mailto:jgarcela@pa.uc3m.es">jgarcela@pa.uc3m.es</a></li>
+                    <li><a href="mailto:cbaranda@hum.uc3m.es">cbaranda@hum.uc3m.es</a></li>
+                    <li><a href="mailto:tonorati@ing.uc3m.es">tonorati@inf.uc3m.es</a></li>
+                    <li><a href="mailto:carmen@tsc.uc3m.es">carmen@tsc.uc3m.es</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

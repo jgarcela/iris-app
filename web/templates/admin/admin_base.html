@@ -22,25 +22,31 @@
   <div class="row">
 
     <!-- Sidebar de administración -->
-    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-      <div class="sidebar-sticky pt-3">
-        <h6 class="sidebar-heading px-3 mb-1 text-muted">
+    <nav class="col-md-2 d-none d-md-block sidebar">
+      <div class="history-header mb-3">
+        <h6 class="mb-2">
+          <i class="fas fa-cogs me-2 text-primary"></i>
           {{ _('Administración') }}
         </h6>
+        <p class="small text-muted mb-0">
+          {{ _('Panel de control') }}
+        </p>
+      </div>
+      <div class="sidebar-sticky">
         <ul class="nav flex-column">
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_users') }}">
-              <i class="fas fa-users me-1"></i> {{ _('Personas Usuarias') }}
+              <i class="fas fa-users me-2"></i> {{ _('Personas Usuarias') }}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_roles') }}">
-              <i class="fas fa-user-tag me-1"></i> {{ _('Roles') }}
+              <i class="fas fa-user-tag me-2"></i> {{ _('Roles') }}
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('admin.list_permissions') }}">
-              <i class="fas fa-key me-1"></i> {{ _('Permisos') }}
+              <i class="fas fa-key me-2"></i> {{ _('Permisos') }}
             </a>
           </li>
         </ul>
@@ -68,10 +74,418 @@
   <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
   <!-- 4) Filter Control extension -->
   <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-  <!-- 5) Inicializador global: arranca Boot-strap Table en todas las tablas con data-toggle="table" -->
+  <!-- 5) Enhanced Admin Table Functionality -->
   <script>
     $(function(){
-      $('[data-toggle="table"]').bootstrapTable();
+      // Table functionality variables
+      let allUsers = [];
+      let filteredUsers = [];
+      let currentPage = 1;
+      const usersPerPage = 10;
+
+      // Initialize table data
+      function initializeTable() {
+        allUsers = [];
+        $('#users-table tbody tr').each(function() {
+          const $row = $(this);
+          allUsers.push({
+            element: $row,
+            id: $row.find('.user-id').text(),
+            name: $row.find('.user-name').text(),
+            lastname: $row.find('.user-lastname').text(),
+            email: $row.find('.user-email').text(),
+            roles: $row.data('roles') ? $row.data('roles').split(',') : []
+          });
+        });
+        filteredUsers = [...allUsers];
+        updatePagination();
+        showCurrentPage();
+      }
+
+      // Search functionality
+      $('#user-search').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterUsers(searchTerm, $('#role-filter').val());
+      });
+
+      // Role filter functionality
+      $('#role-filter').on('change', function() {
+        const selectedRole = $(this).val();
+        filterUsers($('#user-search').val().toLowerCase(), selectedRole);
+      });
+
+      // Filter users based on search and role
+      function filterUsers(searchTerm, roleFilter) {
+        filteredUsers = allUsers.filter(user => {
+          const matchesSearch = !searchTerm || 
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.lastname.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm);
+          
+          const matchesRole = !roleFilter || user.roles.includes(roleFilter);
+          
+          return matchesSearch && matchesRole;
+        });
+
+        currentPage = 1;
+        updatePagination();
+        showCurrentPage();
+      }
+
+      // Show current page
+      function showCurrentPage() {
+        // Hide all rows
+        allUsers.forEach(user => user.element.hide());
+        
+        // Show filtered users for current page
+        const startIndex = (currentPage - 1) * usersPerPage;
+        const endIndex = startIndex + usersPerPage;
+        const usersToShow = filteredUsers.slice(startIndex, endIndex);
+        
+        usersToShow.forEach(user => user.element.show());
+        
+        // Update pagination info
+        const totalUsers = filteredUsers.length;
+        const startUser = totalUsers > 0 ? startIndex + 1 : 0;
+        const endUser = Math.min(endIndex, totalUsers);
+        $('#pagination-info').text(`Mostrando ${startUser}-${endUser} de ${totalUsers} usuarios`);
+      }
+
+      // Update pagination controls
+      function updatePagination() {
+        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+        const $pageNumbers = $('#page-numbers');
+        $pageNumbers.empty();
+
+        // Previous button
+        $('#prev-page').prop('disabled', currentPage === 1);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          const $pageBtn = $(`<span class="page-number ${i === currentPage ? 'active' : ''}">${i}</span>`);
+          $pageBtn.on('click', function() {
+            currentPage = i;
+            showCurrentPage();
+            updatePagination();
+          });
+          $pageNumbers.append($pageBtn);
+        }
+
+        // Next button
+        $('#next-page').prop('disabled', currentPage === totalPages);
+      }
+
+      // Pagination button handlers
+      $('#prev-page').on('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showCurrentPage();
+          updatePagination();
+        }
+      });
+
+      $('#next-page').on('click', function() {
+        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          showCurrentPage();
+          updatePagination();
+        }
+      });
+
+      // Enhanced refresh functionality
+      $('#refresh-table').on('click', function() {
+        location.reload();
+      });
+
+      // Export functionality
+      $('#export-users').on('click', function() {
+        const csvContent = convertToCSV(filteredUsers);
+        downloadCSV(csvContent, 'usuarios_exportados.csv');
+      });
+
+      // Helper function to convert data to CSV
+      function convertToCSV(users) {
+        if (!users || users.length === 0) return '';
+        
+        const headers = ['ID', 'Nombre', 'Apellido', 'Email', 'Roles'];
+        const csvRows = [headers.join(',')];
+        
+        users.forEach(user => {
+          const values = [
+            user.id || '',
+            user.name || '',
+            user.lastname || '',
+            user.email || '',
+            user.roles ? user.roles.join('; ') : ''
+          ];
+          csvRows.push(values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+        });
+        
+        return csvRows.join('\r\n');
+      }
+
+      // Helper function to download CSV
+      function downloadCSV(csvContent, filename) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Add loading states to action buttons
+      $('.btn-action').on('click', function() {
+        const $btn = $(this);
+        const $icon = $btn.find('i');
+        const originalClass = $icon.attr('class');
+        
+        $icon.removeClass().addClass('fas fa-spinner fa-spin');
+        
+        setTimeout(() => {
+          $icon.removeClass().addClass(originalClass);
+        }, 2000);
+      });
+
+      // Enhanced table row hover effects
+      $('#users-table tbody tr').on('mouseenter', function() {
+        $(this).addClass('table-row-hover');
+      }).on('mouseleave', function() {
+        $(this).removeClass('table-row-hover');
+      });
+
+      // Initialize table when page loads
+      initializeTable();
+
+      // Roles table functionality
+      if ($('#roles-table').length) {
+        initializeRolesTable();
+      }
+
+      // Permissions table functionality
+      if ($('#permissions-table').length) {
+        initializePermissionsTable();
+      }
     });
+
+    // Roles table functionality
+    function initializeRolesTable() {
+      let allRoles = [];
+      let filteredRoles = [];
+      let currentPage = 1;
+      const rolesPerPage = 10;
+
+      function initializeRolesData() {
+        allRoles = [];
+        $('#roles-table tbody tr').each(function() {
+          const $row = $(this);
+          allRoles.push({
+            element: $row,
+            id: $row.find('.role-id').text(),
+            name: $row.find('.role-name-badge').text().trim(),
+            permissions: $row.data('permissions') ? $row.data('permissions').split(',') : []
+          });
+        });
+        filteredRoles = [...allRoles];
+        updateRolesPagination();
+        showCurrentRolesPage();
+      }
+
+      $('#role-search').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterRoles(searchTerm, $('#permission-filter').val());
+      });
+
+      $('#permission-filter').on('change', function() {
+        const selectedPermission = $(this).val();
+        filterRoles($('#role-search').val().toLowerCase(), selectedPermission);
+      });
+
+      function filterRoles(searchTerm, permissionFilter) {
+        filteredRoles = allRoles.filter(role => {
+          const matchesSearch = !searchTerm || 
+            role.name.toLowerCase().includes(searchTerm);
+          
+          const matchesPermission = !permissionFilter || role.permissions.includes(permissionFilter);
+          
+          return matchesSearch && matchesPermission;
+        });
+
+        currentPage = 1;
+        updateRolesPagination();
+        showCurrentRolesPage();
+      }
+
+      function showCurrentRolesPage() {
+        allRoles.forEach(role => role.element.hide());
+        
+        const startIndex = (currentPage - 1) * rolesPerPage;
+        const endIndex = startIndex + rolesPerPage;
+        const rolesToShow = filteredRoles.slice(startIndex, endIndex);
+        
+        rolesToShow.forEach(role => role.element.show());
+        
+        const totalRoles = filteredRoles.length;
+        const startRole = totalRoles > 0 ? startIndex + 1 : 0;
+        const endRole = Math.min(endIndex, totalRoles);
+        $('#roles-pagination-info').text(`Mostrando ${startRole}-${endRole} de ${totalRoles} roles`);
+      }
+
+      function updateRolesPagination() {
+        const totalPages = Math.ceil(filteredRoles.length / rolesPerPage);
+        const $pageNumbers = $('#roles-page-numbers');
+        $pageNumbers.empty();
+
+        $('#prev-roles-page').prop('disabled', currentPage === 1);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const $pageBtn = $(`<span class="page-number ${i === currentPage ? 'active' : ''}">${i}</span>`);
+          $pageBtn.on('click', function() {
+            currentPage = i;
+            showCurrentRolesPage();
+            updateRolesPagination();
+          });
+          $pageNumbers.append($pageBtn);
+        }
+
+        $('#next-roles-page').prop('disabled', currentPage === totalPages);
+      }
+
+      $('#prev-roles-page').on('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showCurrentRolesPage();
+          updateRolesPagination();
+        }
+      });
+
+      $('#next-roles-page').on('click', function() {
+        const totalPages = Math.ceil(filteredRoles.length / rolesPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          showCurrentRolesPage();
+          updateRolesPagination();
+        }
+      });
+
+      $('#refresh-roles-table').on('click', function() {
+        location.reload();
+      });
+
+      initializeRolesData();
+    }
+
+    // Permissions table functionality
+    function initializePermissionsTable() {
+      let allPermissions = [];
+      let filteredPermissions = [];
+      let currentPage = 1;
+      const permissionsPerPage = 10;
+
+      function initializePermissionsData() {
+        allPermissions = [];
+        $('#permissions-table tbody tr').each(function() {
+          const $row = $(this);
+          allPermissions.push({
+            element: $row,
+            id: $row.find('.permission-id').text(),
+            name: $row.find('.permission-name-badge').text().trim(),
+            description: $row.find('.permission-description').text(),
+            type: $row.data('type')
+          });
+        });
+        filteredPermissions = [...allPermissions];
+        updatePermissionsPagination();
+        showCurrentPermissionsPage();
+      }
+
+      $('#permission-search').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        filterPermissions(searchTerm, $('#permission-type-filter').val());
+      });
+
+      $('#permission-type-filter').on('change', function() {
+        const selectedType = $(this).val();
+        filterPermissions($('#permission-search').val().toLowerCase(), selectedType);
+      });
+
+      function filterPermissions(searchTerm, typeFilter) {
+        filteredPermissions = allPermissions.filter(permission => {
+          const matchesSearch = !searchTerm || 
+            permission.name.toLowerCase().includes(searchTerm) ||
+            permission.description.toLowerCase().includes(searchTerm);
+          
+          const matchesType = !typeFilter || permission.type.includes(typeFilter);
+          
+          return matchesSearch && matchesType;
+        });
+
+        currentPage = 1;
+        updatePermissionsPagination();
+        showCurrentPermissionsPage();
+      }
+
+      function showCurrentPermissionsPage() {
+        allPermissions.forEach(permission => permission.element.hide());
+        
+        const startIndex = (currentPage - 1) * permissionsPerPage;
+        const endIndex = startIndex + permissionsPerPage;
+        const permissionsToShow = filteredPermissions.slice(startIndex, endIndex);
+        
+        permissionsToShow.forEach(permission => permission.element.show());
+        
+        const totalPermissions = filteredPermissions.length;
+        const startPermission = totalPermissions > 0 ? startIndex + 1 : 0;
+        const endPermission = Math.min(endIndex, totalPermissions);
+        $('#permissions-pagination-info').text(`Mostrando ${startPermission}-${endPermission} de ${totalPermissions} permisos`);
+      }
+
+      function updatePermissionsPagination() {
+        const totalPages = Math.ceil(filteredPermissions.length / permissionsPerPage);
+        const $pageNumbers = $('#permissions-page-numbers');
+        $pageNumbers.empty();
+
+        $('#prev-permissions-page').prop('disabled', currentPage === 1);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const $pageBtn = $(`<span class="page-number ${i === currentPage ? 'active' : ''}">${i}</span>`);
+          $pageBtn.on('click', function() {
+            currentPage = i;
+            showCurrentPermissionsPage();
+            updatePermissionsPagination();
+          });
+          $pageNumbers.append($pageBtn);
+        }
+
+        $('#next-permissions-page').prop('disabled', currentPage === totalPages);
+      }
+
+      $('#prev-permissions-page').on('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          showCurrentPermissionsPage();
+          updatePermissionsPagination();
+        }
+      });
+
+      $('#next-permissions-page').on('click', function() {
+        const totalPages = Math.ceil(filteredPermissions.length / permissionsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          showCurrentPermissionsPage();
+          updatePermissionsPagination();
+        }
+      });
+
+      $('#refresh-permissions-table').on('click', function() {
+        location.reload();
+      });
+
+      initializePermissionsData();
+    }
   </script>
 {% endblock %}

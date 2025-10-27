@@ -43,6 +43,13 @@
       />
     {% endif %}
 
+    {% if request.endpoint == 'analysis.create_analysis' %}
+      <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/create_analysis.css') }}"
+      />
+    {% endif %}
+
     {% block head_extra %}{% endblock %}
   </head>
 
@@ -79,24 +86,57 @@
               </a>
             </li>
             {% if current_user %}
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'analysis.create_analysis' %}active{% endif %}"
-                  href="{{ url_for('analysis.create_analysis') }}">
-                  <i class="fas fa-search-plus me-1"></i> {{ _('Análisis') }}
-                </a>
-              </li>  
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'table.table_iris' %}active{% endif %}"
-                  href="{{ url_for('table.table_iris') }}">
-                  <i class="fas fa-history me-1"></i> {{ _('Histórico') }}
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_iris' %}active{% endif %}"
-                  href="{{ url_for('dashboard.dashboard_iris') }}">
-                  <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
-                </a>
-              </li>            
+              {% if 'challenge' not in current_user.roles %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'analysis.create_analysis' %}active{% endif %}"
+                    href="{{ url_for('analysis.create_analysis') }}">
+                    <i class="fas fa-search-plus me-1"></i> {{ _('Análisis') }}
+                  </a>
+                </li>  
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'glossary.glossary_home' %}active{% endif %}"
+                    href="{{ url_for('glossary.glossary_home') }}">
+                    <i class="fas fa-book me-1"></i> {{ _('Glosario') }}
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'table.table_iris' %}active{% endif %}"
+                    href="{{ url_for('table.table_iris') }}">
+                    <i class="fas fa-database me-1"></i> {{ _('Base de Datos') }}
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'analysis.analysis_history' %}active{% endif %}"
+                    href="{{ url_for('analysis.analysis_history') }}">
+                    <i class="fas fa-history me-1"></i> {{ _('Historial de Análisis') }}
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_iris' %}active{% endif %}"
+                    href="{{ url_for('dashboard.dashboard_iris') }}">
+                    <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}
+                  </a>
+                </li>
+                <!-- Challenge tab for non-challenge users (including admins) - only if enabled -->
+                {% if challenge_enabled and 'admin' in current_user.roles %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
+                    href="{{ url_for('challenge.challenge_home') }}">
+                    <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
+                  </a>
+                </li>
+                {% endif %}            
+              {% else %}
+                <!-- Challenge tab for challenge users - only if enabled -->
+                {% if challenge_enabled %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'challenge.challenge_home' %}active{% endif %}"
+                    href="{{ url_for('challenge.challenge_home') }}">
+                    <i class="fas fa-trophy me-1"></i> {{ _('Desafío') }}
+                  </a>
+                </li>
+                {% endif %}
+              {% endif %}
               {% if 'admin' in current_user.roles %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}"
@@ -170,8 +210,17 @@
     ></script>
 
     <!-- Tus scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="{{ url_for('static', filename='js/translate_menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/accessibility_menu.js') }}"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+          lucide.createIcons();
+        }
+      });
+    </script>
 
     {% block scripts_extra %}{% endblock %}
   </body>

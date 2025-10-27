@@ -8,40 +8,111 @@
 {% endblock %}
 
 {% block admin_content %}
-<h1 class="h2 mt-4">
-  {% if action=='create' %}{{ _('Crear permiso') }}{% else %}{{ _('Editar permiso') }}{% endif %}
-</h1>
+<div class="admin-form-container">
+  <!-- Header Section -->
+  <div class="admin-form-header">
+    <div class="d-flex align-items-center mb-3">
+      <div class="form-icon">
+        <i class="fas fa-key"></i>
+      </div>
+      <div class="form-title-section">
+        <h1 class="form-title">
+          {% if action=='create' %}{{ _('Crear permiso') }}{% else %}{{ _('Editar permiso') }}{% endif %}
+        </h1>
+        <p class="form-subtitle">
+          {% if action=='create' %}
+            {{ _('Crear un nuevo permiso para el sistema') }}
+          {% else %}
+            {{ _('Modificar la información del permiso') }}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
 
-<form method="post" class="row g-3">
-  <div class="col-md-4">
-    <label for="name" class="form-label">{{ _('Nombre del permiso') }}</label>
-    <input
-      type="text"
-      id="name"
-      name="name"
-      class="form-control"
-      required
-      value="{{ permission.name if permission else '' }}"
-      {% if action=='edit' %}readonly{% endif %}
-    >
+  <!-- Form Section -->
+  <div class="admin-form-card">
+    <form method="post" class="admin-form">
+      <!-- Permission Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-key me-2"></i>
+          <h3>{{ _('Información del Permiso') }}</h3>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="name" class="form-label">
+                <i class="fas fa-tag me-1"></i>{{ _('Nombre del permiso') }}
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                class="form-control modern-input"
+                required
+                value="{{ permission.name if permission else '' }}"
+                placeholder="{{ _('Ingresa el nombre del permiso') }}"
+                {% if action=='edit' %}readonly{% endif %}
+              >
+              {% if action=='edit' %}
+                <div class="form-help">{{ _('El nombre del permiso no se puede modificar') }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="description" class="form-label">
+                <i class="fas fa-info-circle me-1"></i>{{ _('Descripción') }}
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                class="form-control modern-input"
+                rows="3"
+                placeholder="{{ _('Describe qué hace este permiso') }}"
+              >{{ permission.description if permission else '' }}</textarea>
+              <div class="form-help">{{ _('Proporciona una descripción clara del permiso') }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permission Preview Section -->
+      {% if action=='edit' and permission %}
+      <div class="form-section">
+        <div class="section-header">
+          <i class="fas fa-eye me-2"></i>
+          <h3>{{ _('Vista Previa del Permiso') }}</h3>
+        </div>
+        <div class="permission-preview">
+          <div class="permission-preview-card">
+            <div class="permission-preview-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="permission-preview-content">
+              <h4>{{ permission.name|title }}</h4>
+              <p>{{ permission.description or _('Sin descripción') }}</p>
+              <span class="permission-badge permission-{{ permission.name|lower|replace('_', '-') }}">
+                {{ permission.name|title }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-save">
+          <i class="fas fa-save me-2"></i>
+          {% if action=='create' %}{{ _('Crear permiso') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
+        </button>
+        <a href="{{ url_for('admin.list_permissions') }}" class="btn btn-secondary btn-cancel">
+          <i class="fas fa-times me-2"></i>{{ _('Cancelar') }}
+        </a>
+      </div>
+    </form>
   </div>
-  <div class="col-md-6">
-    <label for="description" class="form-label">{{ _('Descripción') }}</label>
-    <input
-      type="text"
-      id="description"
-      name="description"
-      class="form-control"
-      value="{{ permission.description if permission else '' }}"
-    >
-  </div>
-  <div class="col-12">
-    <button type="submit" class="btn btn-success">
-      {% if action=='create' %}{{ _('Crear') }}{% else %}{{ _('Guardar cambios') }}{% endif %}
-    </button>
-    <a href="{{ url_for('admin.list_permissions') }}" class="btn btn-secondary">
-      {{ _('Cancelar') }}
-    </a>
-  </div>
-</form>
+</div>
 {% endblock %}
