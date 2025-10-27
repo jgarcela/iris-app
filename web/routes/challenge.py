@@ -294,30 +294,27 @@ def iris_results(text_id):
         'categories': text_doc.get('categories', [])
     }
     
-    # Get the next text id using _id field
-    from bson import ObjectId
-    current_object_id = text_doc.get('_id')  # This is already a string after conversion
-    
+    # Get the next text id - simple approach: get next by _id
+    current_object_id = text_doc.get('_id')  # Already converted to string
     next_text = None
+    
     print(f"[CHALLENGE/IRIS-RESULTS] Current text _id: {current_object_id}")
     
-    # Find next document by _id (sorted)
-    all_docs = list(DB_SEMANA_CIENCIA.find({}).sort('_id', 1))  # Sort ascending
-    
-    # Find index of current document
-    current_idx = None
-    for i, doc in enumerate(all_docs):
-        if str(doc['_id']) == current_object_id:
-            current_idx = i
-            break
-    
-    # Get next document if exists
-    if current_idx is not None and current_idx + 1 < len(all_docs):
-        next_doc = all_docs[current_idx + 1]
-        next_text = str(next_doc['_id'])
-        print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
-    else:
-        print(f"[CHALLENGE/IRIS-RESULTS] No next text found")
+    # Convert back to ObjectId for query
+    from bson import ObjectId
+    try:
+        current_obj_id = ObjectId(current_object_id)
+        
+        # Find next document by _id (MongoDB's natural order)
+        next_text_doc = DB_SEMANA_CIENCIA.find_one({'_id': {'$gt': current_obj_id}}, sort=[('_id', 1)])
+        
+        if next_text_doc:
+            next_text = str(next_text_doc['_id'])
+            print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
+        else:
+            print(f"[CHALLENGE/IRIS-RESULTS] No next text found (last text)")
+    except Exception as e:
+        print(f"[CHALLENGE/IRIS-RESULTS] Error getting next text: {e}")
 
     return render_template(
         'challenge/challenge_iris_results.html',
