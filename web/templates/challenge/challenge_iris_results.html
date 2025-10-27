@@ -18,10 +18,17 @@
                     </p>
                 </div>
                 <div>
-                    <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>
-                        {{ _('Volver al Desafío') }}
-                    </a>
+                    {% if next_text_id %}
+                        <a href="{{ url_for('challenge.analyze_text', text_id=next_text_id) }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-right me-2"></i>
+                            {{ _('Siguiente Texto') }}
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('challenge.challenge_home') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-check me-2"></i>
+                            {{ _('Finalizar') }}
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -289,12 +289,26 @@ def iris_results(text_id):
         'difficulty_reason': text_doc.get('difficulty_reason'),
         'categories': text_doc.get('categories', [])
     }
+    
+    # Get the next text id
+    current_id = text_doc.get('id')
+    next_text = None
+    print(f"[CHALLENGE/IRIS-RESULTS] Current text id: {current_id}")
+    if current_id is not None:
+        next_text_doc = DB_SEMANA_CIENCIA.find_one({'id': {'$gt': current_id}})
+        print(f"[CHALLENGE/IRIS-RESULTS] Next text found: {next_text_doc}")
+        if next_text_doc:
+            next_text = str(next_text_doc['_id'])
+            print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
+    else:
+        print(f"[CHALLENGE/IRIS-RESULTS] Current text has no 'id' field")
 
     return render_template(
         'challenge/challenge_iris_results.html',
         text_data=text_data,
         manual_annotations=manual_annotations,
         original_annotations=original_annotations,  # Ground truth annotations
+        next_text_id=next_text,  # Next text ID or None
         language=get_locale()
     )
 
