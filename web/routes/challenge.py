@@ -130,10 +130,20 @@ def analyze_ai():
         
         print(f"[CHALLENGE/ANALYZE-AI] Processing text_id: {text_id}, annotations: {len(manual_annotations)}")
         
+        # Get current user info
+        from web.utils.challenge_decorators import get_current_user
+        current_user = get_current_user()
+        user_id = current_user.get('id') if current_user else None
+        username = current_user.get('username') if current_user else None
+        
+        print(f"[CHALLENGE/ANALYZE-AI] User: {username} (ID: {user_id})")
+        
         # Store manual annotations in the database
         update_fields = {
             'manual_annotations': manual_annotations,
-            'updated_at': datetime.now(timezone.utc)
+            'updated_at': datetime.now(timezone.utc),
+            'user_id': user_id,
+            'username': username
         }
         
         # Try to update by _id (ObjectId) first
