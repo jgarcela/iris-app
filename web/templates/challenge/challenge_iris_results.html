@@ -431,6 +431,13 @@
     color: #6c757d;
 }
 
+.annotation-count {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-left: 0.5rem;
+    font-style: italic;
+}
+
 .summary-texts {
     margin-top: 0.5rem;
 }
@@ -719,7 +726,7 @@ function generateSummaryHTML(annotations, container) {
       const textsArray = Array.from(data.texts);
       html += '<li>';
       html += `<strong>${varDesc}</strong>`;
-      html += `<span class="badge bg-secondary ms-2">${data.count} ${data.count > 1 ? 'anotaciones' : 'anotación'}</span>`;
+      html += `<span class="annotation-count">${data.count} ${data.count > 1 ? 'anotaciones' : 'anotación'}</span>`;
       if (textsArray.length > 0) {
         html += '<div class="summary-texts mt-2">';
         textsArray.forEach(text => {
