@@ -319,13 +319,19 @@
                     <!-- Botones de Acción -->
                     <div class="action-buttons">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100" id="prev-text-btn" style="display: none;">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    {{ _('Anterior Texto') }}
+                                </button>
+                            </div>
+                            <div class="col-4">
                                 <button class="btn btn-success w-100" id="next-text-btn" style="display: none;">
                                     <i class="fas fa-arrow-right me-2"></i>
                                     {{ _('Siguiente Texto') }}
                                 </button>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <button class="btn btn-primary w-100" id="save-analysis-btn" disabled>
                                     <i class="fas fa-check me-2"></i>
                                     {{ _('Finalizar y comparar con IRIS') }}
@@ -2079,15 +2085,18 @@ function initMultiLabelTooltips() {
     document.addEventListener('mouseleave', function() { if (tooltip) tooltip.style.display = 'none'; });
 }
 
-// Setup next text button functionality
+// Setup next and previous text button functionality
 function setupNextTextButton() {
     const nextTextBtn = document.getElementById('next-text-btn');
-    if (!nextTextBtn) return;
+    const prevTextBtn = document.getElementById('prev-text-btn');
+    
+    if (!nextTextBtn || !prevTextBtn) return;
     
     // Check if there are more texts in the sequence
     // This would need to be passed from the challenge home page
     // For now, we'll show the button and handle the logic
     nextTextBtn.style.display = 'block';
+    prevTextBtn.style.display = 'block';
     
     nextTextBtn.addEventListener('click', function() {
         // Get the next text ID from the sequence
@@ -2100,6 +2109,20 @@ function setupNextTextButton() {
             window.location.href = `/challenge/analyze/${nextTextId}`;
         } else {
             // No more texts, redirect back to challenge home
+            window.location.href = '/challenge/';
+        }
+    });
+    
+    prevTextBtn.addEventListener('click', function() {
+        // Get the previous text ID from the sequence
+        const currentTextId = currentText._id;
+        const prevTextId = getPreviousTextInSequence(currentTextId);
+        
+        if (prevTextId) {
+            // Redirect to previous text analysis
+            window.location.href = `/challenge/analyze/${prevTextId}`;
+        } else {
+            // No previous text, redirect back to challenge home
             window.location.href = '/challenge/';
         }
     });
@@ -2120,6 +2143,25 @@ function getNextTextInSequence(currentId) {
     const currentIndex = sequence.indexOf(currentId);
     if (currentIndex !== -1 && currentIndex < sequence.length - 1) {
         return sequence[currentIndex + 1];
+    }
+    return null;
+}
+
+// Function to get previous text in sequence
+function getPreviousTextInSequence(currentId) {
+    // Define the sequence order (same as in challenge_home.html)
+    const sequence = [
+        '68f9e5a22e476535f8a73ec4', // Paloma Lago
+        '68f9e5a22e476535f8a73ec2', // Paula Badosa
+        '68f9e5a22e476535f8a73ec3', // Ariarne Titmus
+        '68f9e5a22e476535f8a73ec1', // Begoña Aramendía
+        '68f9e5a22e476535f8a73ec6', // Michelle Jenner
+        '68f9e5a22e476535f8a73ec5'  // Álvaro Bilbao
+    ];
+    
+    const currentIndex = sequence.indexOf(currentId);
+    if (currentIndex !== -1 && currentIndex > 0) {
+        return sequence[currentIndex - 1];
     }
     return null;
 }
