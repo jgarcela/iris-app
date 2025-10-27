@@ -250,15 +250,19 @@ def iris_results(text_id):
     user_id = current_user.get('id') if current_user else None
     
     # Find the user's analysis for this text - user must have their own analysis
+    # Get the most recent analysis if there are multiple
     manual_annotations = []
     if user_id:
-        user_analysis = DB_ANALYSIS_SEMANA_CIENCIA.find_one({
-            'text_id': text_id,
-            'user_id': user_id
-        })
+        user_analysis = DB_ANALYSIS_SEMANA_CIENCIA.find_one(
+            {
+                'text_id': text_id,
+                'user_id': user_id
+            },
+            sort=[('created_at', -1)]  # Sort by created_at descending to get the most recent
+        )
         if user_analysis:
             manual_annotations = user_analysis.get('manual_annotations', [])
-            print(f"[CHALLENGE/IRIS-RESULTS] Found user analysis with {len(manual_annotations)} annotations")
+            print(f"[CHALLENGE/IRIS-RESULTS] Found most recent user analysis with {len(manual_annotations)} annotations")
         else:
             # User hasn't analyzed this text yet - redirect to analysis page
             print(f"[CHALLENGE/IRIS-RESULTS] No analysis found for user_id={user_id}, redirecting to analyze page")
@@ -290,18 +294,30 @@ def iris_results(text_id):
         'categories': text_doc.get('categories', [])
     }
     
-    # Get the next text id
-    current_id = text_doc.get('id')
+    # Get the next text id using _id field
+    from bson import ObjectId
+    current_object_id = text_doc.get('_id')  # This is already a string after conversion
+    
     next_text = None
-    print(f"[CHALLENGE/IRIS-RESULTS] Current text id: {current_id}")
-    if current_id is not None:
-        next_text_doc = DB_SEMANA_CIENCIA.find_one({'id': {'$gt': current_id}})
-        print(f"[CHALLENGE/IRIS-RESULTS] Next text found: {next_text_doc}")
-        if next_text_doc:
-            next_text = str(next_text_doc['_id'])
-            print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
+    print(f"[CHALLENGE/IRIS-RESULTS] Current text _id: {current_object_id}")
+    
+    # Find next document by _id (sorted)
+    all_docs = list(DB_SEMANA_CIENCIA.find({}).sort('_id', 1))  # Sort ascending
+    
+    # Find index of current document
+    current_idx = None
+    for i, doc in enumerate(all_docs):
+        if str(doc['_id']) == current_object_id:
+            current_idx = i
+            break
+    
+    # Get next document if exists
+    if current_idx is not None and current_idx + 1 < len(all_docs):
+        next_doc = all_docs[current_idx + 1]
+        next_text = str(next_doc['_id'])
+        print(f"[CHALLENGE/IRIS-RESULTS] Next text ID: {next_text}")
     else:
-        print(f"[CHALLENGE/IRIS-RESULTS] Current text has no 'id' field")
+        print(f"[CHALLENGE/IRIS-RESULTS] No next text found")
 
     return render_template(
         'challenge/challenge_iris_results.html',
