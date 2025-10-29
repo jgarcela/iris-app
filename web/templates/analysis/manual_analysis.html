@@ -1529,19 +1529,28 @@ document.addEventListener('DOMContentLoaded', function() {
           const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
           const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
           
-          // 1) declaracion_fuente
-          annotations.push({ id: Date.now(), text: selectedText, category, variable: firstVariable, value, timestamp: createdAt });
-          try { applyInlineHighlight(window.currentSelection, category, firstVariable); } catch(e) {}
-          
+          // Create all related annotations and collect ids for highlight
+          const baseId = Date.now();
+          const ids = [];
+          annotations.push({ id: baseId, text: selectedText, category, variable: firstVariable, value, timestamp: createdAt });
+          ids.push(String(baseId));
+          let idOffset = 1;
           if (nombreFuenteValue) {
-              annotations.push({ id: Date.now()+1, text: selectedText, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: createdAt });
+              const id = baseId + idOffset++;
+              annotations.push({ id, text: selectedText, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: createdAt });
+              ids.push(String(id));
           }
           if (generoFuenteValue) {
-              annotations.push({ id: Date.now()+2, text: selectedText, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: createdAt });
+              const id = baseId + idOffset++;
+              annotations.push({ id, text: selectedText, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: createdAt });
+              ids.push(String(id));
           }
           if (tipoFuenteValue) {
-              annotations.push({ id: Date.now()+3, text: selectedText, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: createdAt });
+              const id = baseId + idOffset++;
+              annotations.push({ id, text: selectedText, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: createdAt });
+              ids.push(String(id));
           }
+          try { applyInlineHighlight(window.currentSelection, category, firstVariable, ids); } catch(e) {}
           updateAnnotationsList();
           hideAnnotationPanel();
           document.getElementById('save-analysis-btn').disabled = false;
@@ -1556,7 +1565,7 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       const compositeControls = document.getElementById('composite-gender');
       let idCounter = 0;
-      let appliedHighlight = false;
+      const highlightIds = [];
       selectedVariables.forEach(v => {
           // Determine value per variable for lenguaje
           let valueForVar = value;
@@ -1568,16 +1577,22 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           if (compositePairs[v]) {
               const genderValue = compositeControls ? compositeControls.value : null;
-              annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value: '1', timestamp: createdAt });
-              if (!appliedHighlight) { try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {} appliedHighlight = true; }
+              const baseId = Date.now()+idCounter++;
+              annotations.push({ id: baseId, text: selectedText, category, variable: v, value: '1', timestamp: createdAt });
+              highlightIds.push(String(baseId));
               if (genderValue) {
-                  annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: compositePairs[v], value: genderValue, timestamp: createdAt });
+                  const id = Date.now()+idCounter++;
+                  annotations.push({ id, text: selectedText, category, variable: compositePairs[v], value: genderValue, timestamp: createdAt });
+                  highlightIds.push(String(id));
               }
           } else {
-              annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value: valueForVar, timestamp: createdAt });
-              if (!appliedHighlight) { try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {} appliedHighlight = true; }
+              const id = Date.now()+idCounter++;
+              annotations.push({ id, text: selectedText, category, variable: v, value: valueForVar, timestamp: createdAt });
+              highlightIds.push(String(id));
           }
       });
+      // Apply a single highlight span for the selection carrying all related annotation ids
+      try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(','), highlightIds); } catch(e) {}
       updateAnnotationsList();
       hideAnnotationPanel();
       
@@ -1719,17 +1734,29 @@ function deleteAnnotation(index) {
 }
 
 function removeHighlightFromText(annotation) {
-    // Find and remove highlight marks that match this annotation
     const marks = document.querySelectorAll('.annotation-mark');
     marks.forEach(mark => {
-        const variable = mark.getAttribute('data-variable');
-        if (variable === annotation.variable) {
-            // Replace the mark with just the text content
-            const parent = mark.parentNode;
-            while (mark.firstChild) {
-                parent.insertBefore(mark.firstChild, mark);
+        const idsAttr = mark.getAttribute('data-annotation-ids');
+        if (!idsAttr) {
+            // legacy behavior: fallback to variable match
+            if (mark.getAttribute('data-variable') === annotation.variable) {
+                const parent = mark.parentNode;
+                while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+                parent.removeChild(mark);
             }
-            parent.removeChild(mark);
+            return;
+        }
+        const ids = idsAttr.split(',').map(s => s.trim()).filter(Boolean);
+        const idx = ids.indexOf(String(annotation.id));
+        if (idx !== -1) {
+            ids.splice(idx, 1);
+            if (ids.length === 0) {
+                const parent = mark.parentNode;
+                while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+                parent.removeChild(mark);
+            } else {
+                mark.setAttribute('data-annotation-ids', ids.join(','));
+            }
         }
     });
 }
@@ -2103,13 +2130,16 @@ function addTopicAnnotation(value, text) {
       }
   }
   
-  function applyInlineHighlight(selectionData, category, variable) {
+  function applyInlineHighlight(selectionData, category, variable, annotationIds) {
       if (!selectionData || !selectionData.range) return;
       const range = selectionData.range.cloneRange();
       if (range.collapsed) return;
       const wrapper = document.createElement('mark');
       wrapper.className = `annotation-mark mark-${category}`;
       wrapper.setAttribute('data-variable', variable);
+      if (Array.isArray(annotationIds) && annotationIds.length > 0) {
+          wrapper.setAttribute('data-annotation-ids', annotationIds.join(','));
+      }
       try {
           range.surroundContents(wrapper);
       } catch (e) {
