@@ -857,6 +857,9 @@ h2, h3, h4, h5 {
 
 <script>
 // Sequential Challenge System for Semana de la Ciencia 2025
+// API URL from backend configuration
+const API_BASE_URL = {{ api_url | tojson | safe }};
+
 let challengeState = {
     isStarted: false,
     currentTextIndex: 0,
@@ -917,7 +920,7 @@ async function startChallenge() {
 async function loadTextsFromAPI() {
     try {
         console.log('Loading texts from API...');
-        const response = await fetch('http://localhost:8000/analysis/semana-ciencia/texts');
+        const response = await fetch(`${API_BASE_URL}/analysis/semana-ciencia/texts`);
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
         

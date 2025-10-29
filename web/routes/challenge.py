@@ -63,9 +63,11 @@ def get_challenge_texts():
 def challenge_home():
     """Página principal del desafío"""
     texts = get_challenge_texts()
+    api_url = f"http://{API_HOST}:{API_PORT}"
     return render_template('challenge/challenge_home.html', 
                          texts=texts,
-                         language=get_locale())
+                         language=get_locale(),
+                         api_url=api_url)
 
 @bp.route('/analyze/<text_id>')
 @challenge_required

@@ -362,7 +362,7 @@
                 
                 <div class="text-content" id="analysis-text">
                     <div class="text-body">
-                        <p>{{ text_data.text }}</p>
+                        <div class="article-content">{{ text_data.text | replace('\n\n', '</p><p>') | replace('\n', '<br>') | safe }}</div>
                     </div>
                 </div>
 
@@ -561,6 +561,9 @@
     line-height: 1.8;
     font-size: 1.1rem;
     color: #495057;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: justify;
 }
 
 .annotation-panel {
