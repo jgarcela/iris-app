@@ -881,6 +881,10 @@
 }
 </style>
 
+{% if config and config.FUENTES and config.FUENTES.TIPO_FUENTE %}
+<div id="config-tipo-fuente" data-map='{{ config.FUENTES.TIPO_FUENTE | tojson | safe }}' style="display:none"></div>
+{% endif %}
+
 <script>
   // Datos del texto actual
   const currentText = {
@@ -932,6 +936,39 @@ let selectedTopic = '';
   };
   
   let isEditMode = false;
+  
+  // Config-driven mappings (from config.ini) - optional
+  // Read from hidden HTML container if provided by backend
+  const CONFIG_TIPO_FUENTE_RAW = (function(){
+      const el = document.getElementById('config-tipo-fuente');
+      if (!el) return null;
+      const raw = el.getAttribute('data-map');
+      try { return JSON.parse(raw); } catch (_) { return raw; }
+  })();
+
+  function parseConfigMap(raw) {
+      if (!raw) return {};
+      if (typeof raw === 'object' && !Array.isArray(raw)) return raw;
+      if (typeof raw === 'string') {
+          // Try JSON first
+          try { return JSON.parse(raw); } catch (_) {}
+          // Replace single quotes and attempt again
+          try { return JSON.parse(raw.replace(/'/g, '"')); } catch (_) {}
+          // Fallback: naive parse of entries like {'1': 'A', '2': 'B'}
+          const obj = {};
+          const m = raw.replace(/[{}]/g,'').split(',').map(s=>s.trim()).filter(Boolean);
+          m.forEach(pair => {
+              const parts = pair.split(':');
+              if (parts.length >= 2) {
+                  const k = parts[0].trim().replace(/^[\'"]|[\'"]$/g,'');
+                  const v = parts.slice(1).join(':').trim().replace(/^[\'"]|[\'"]$/g,'');
+                  obj[k] = v;
+              }
+          });
+          return obj;
+      }
+      return {};
+  }
   
 document.addEventListener('DOMContentLoaded', function() {
     initializeManualAnalysis();
@@ -1256,12 +1293,20 @@ document.addEventListener('DOMContentLoaded', function() {
               { value: '2', text: 'Sí' }
           ],
           
-          // Fuentes
-          'tipo_fuente': [
-              { value: '1', text: 'Personal' },
-              { value: '2', text: 'Institucional' },
-              { value: '3', text: 'Mixta' }
-          ],
+          // Fuentes (tipo_fuente driven by config.ini when available)
+          'tipo_fuente': (function(){
+              const map = parseConfigMap(CONFIG_TIPO_FUENTE_RAW);
+              const entries = Object.entries(map || {});
+              if (entries.length > 0) {
+                  return entries.map(([value, text]) => ({ value, text }));
+              }
+              // Fallback defaults if config not provided
+              return [
+                  { value: '1', text: 'Personal' },
+                  { value: '2', text: 'Institucional' },
+                  { value: '3', text: 'Mixta' }
+              ];
+          })(),
           'genero_fuente': [
               { value: '1', text: 'No hay' },
               { value: '2', text: 'Sí, hombre' },
