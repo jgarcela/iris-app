@@ -5,7 +5,12 @@ import requests
 from flask_jwt_extended import get_jwt_identity
 from bson import ObjectId
 from database.db import DB_USERS, DB_ROLES
+import configparser
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+API_HOST = config['API']['HOST']
+API_PORT = config['API']['PORT']
 
 def login_required(f):
     @wraps(f)
@@ -27,7 +32,8 @@ def challenge_restricted(f):
         if token:
             try:
                 headers = {'Authorization': f'Bearer {token}'}
-                resp = requests.get(f"http://localhost:8000/auth/me", headers=headers, timeout=2)
+                resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
+
                 if resp.ok:
                     user = resp.json().get('user')
                     if user and 'challenge' in user.get('roles', []):
