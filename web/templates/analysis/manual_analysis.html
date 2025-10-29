@@ -77,6 +77,7 @@
                                             <select class="form-select" id="annotation-variable" required>
                                                 <option value="">{{ _('Seleccionar...') }}</option>
                 </select>
+                <div id="variable-checkboxes-container" style="display: none;" class="mt-2"></div>
               </div>
               <div class="col-12">
                                             <label class="form-label">{{ _('Valor') }}</label>
@@ -1075,7 +1076,29 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function updateVariableOptions(category) {
       const variableSelect = document.getElementById('annotation-variable');
+      const checkboxContainer = document.getElementById('variable-checkboxes-container');
+      
+      // Reset containers
       variableSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      if (checkboxContainer) checkboxContainer.innerHTML = '';
+      
+      // Show checkboxes for Lenguaje, select for others
+      const valueSelect = document.getElementById('annotation-value');
+      const valueLabel = valueSelect?.parentElement?.querySelector('label');
+      
+      if (category === 'lenguaje') {
+          variableSelect.style.display = 'none';
+          variableSelect.removeAttribute('required');
+          if (checkboxContainer) checkboxContainer.style.display = 'block';
+          if (valueSelect) { valueSelect.style.display = 'none'; valueSelect.removeAttribute('required'); }
+          if (valueLabel) valueLabel.style.display = 'none';
+      } else {
+          variableSelect.style.display = 'block';
+          variableSelect.setAttribute('required','required');
+          if (checkboxContainer) checkboxContainer.style.display = 'none';
+          if (valueSelect) { valueSelect.style.display = 'block'; valueSelect.setAttribute('required','required'); }
+          if (valueLabel) valueLabel.style.display = 'block';
+      }
       
       const variables = CHALLENGE_VARIABLES;
       let availableVariables = [];
@@ -1085,19 +1108,39 @@ document.addEventListener('DOMContentLoaded', function() {
       } else if (category === 'lenguaje' && variables.lenguaje) {
           availableVariables = variables.lenguaje;
       } else if (category === 'fuentes' && variables.fuentes) {
-          availableVariables = variables.fuentes;
+          // Only base variable visible; the rest will appear as composite controls
+          availableVariables = ['declaracion_fuente'];
       }
       
-      // Hide gender-only variables that are driven by a paired presence variable
       const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
       availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
       
-      availableVariables.forEach(variable => {
-          const option = document.createElement('option');
-          option.value = variable;
-          option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          variableSelect.appendChild(option);
-      });
+      if (category === 'lenguaje' && checkboxContainer) {
+          availableVariables.forEach(variable => {
+              const wrap = document.createElement('div');
+              wrap.className = 'form-check';
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.className = 'form-check-input';
+              cb.id = `variable-checkbox-${variable}`;
+              cb.value = variable;
+              cb.name = 'variable-checkbox';
+              const label = document.createElement('label');
+              label.className = 'form-check-label';
+              label.htmlFor = cb.id;
+              label.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              wrap.appendChild(cb);
+              wrap.appendChild(label);
+              checkboxContainer.appendChild(wrap);
+          });
+      } else {
+          availableVariables.forEach(variable => {
+              const option = document.createElement('option');
+              option.value = variable;
+              option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              variableSelect.appendChild(option);
+          });
+      }
   }
   
   function updateValueOptions(category, variable) {
@@ -1241,7 +1284,37 @@ document.addEventListener('DOMContentLoaded', function() {
           nombre_propio_titular: 'genero_nombre_propio_titular',
           nombre_fuente: 'genero_fuente'
       };
-  
+
+      // Fuentes: si selecciona declaracion_fuente, mostrar controles adicionales
+      if (variable === 'declaracion_fuente' && compositeControls) {
+          const nombreFuenteValues = variableValues['nombre_fuente'] || [];
+          const generoFuenteValues = variableValues['genero_fuente'] || [];
+          const tipoFuenteValues = variableValues['tipo_fuente'] || [];
+          compositeControls.style.display = 'block';
+          compositeControls.innerHTML = `
+              <div class="row g-2">
+                  <div class="col-12">
+                      <label class="form-label">Nombre de la fuente</label>
+                      <select class="form-select" id="composite-nombre-fuente">
+                          ${nombreFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                      </select>
+                  </div>
+                  <div class="col-12">
+                      <label class="form-label">Género de la fuente</label>
+                      <select class="form-select" id="composite-genero-fuente">
+                          ${generoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                      </select>
+                  </div>
+                  <div class="col-12">
+                      <label class="form-label">Tipo de fuente</label>
+                      <select class="form-select" id="composite-tipo-fuente">
+                          <option value="">Seleccionar tipo...</option>
+                          ${tipoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                      </select>
+                  </div>
+              </div>`;
+      }
+
       // Si la variable seleccionada es parte de un compuesto, mostrar control de género
       const compositeDetail = compositePairs[variable];
       if (compositeDetail) {
@@ -1311,16 +1384,56 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       const category = document.getElementById('annotation-category').value;
-      const variable = document.getElementById('annotation-variable').value;
-      const value = document.getElementById('annotation-value').value;
+      const variableSelect = document.getElementById('annotation-variable');
+      const valueSelect = document.getElementById('annotation-value');
+      const value = category === 'lenguaje' ? '2' : valueSelect.value;
       
-      if (!category || !variable || !value) {
+      // Collect variables: multiple for lenguaje via checkboxes, single otherwise
+      let selectedVariables = [];
+      if (category === 'lenguaje') {
+          const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+          selectedVariables = Array.from(checks).map(cb => cb.value);
+          if (selectedVariables.length === 0) {
+              alert('Por favor selecciona al menos una variable');
+              return;
+          }
+      } else {
+          selectedVariables = [variableSelect.value];
+      }
+      
+      if (!category || !value || selectedVariables.length === 0) {
           alert('Por favor completa todos los campos');
           return;
       }
       
       const createdAt = new Date().toISOString();
       
+      // Manejo especial para declaracion_fuente: crear anotaciones derivadas
+      const firstVariable = selectedVariables[0];
+      if (firstVariable === 'declaracion_fuente') {
+          const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+          const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+          const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+          
+          // 1) declaracion_fuente
+          annotations.push({ id: Date.now(), text: selectedText, category, variable: firstVariable, value, timestamp: createdAt });
+          try { applyInlineHighlight(window.currentSelection, category, firstVariable); } catch(e) {}
+          
+          if (nombreFuenteValue) {
+              annotations.push({ id: Date.now()+1, text: selectedText, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: createdAt });
+          }
+          if (generoFuenteValue) {
+              annotations.push({ id: Date.now()+2, text: selectedText, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: createdAt });
+          }
+          if (tipoFuenteValue) {
+              annotations.push({ id: Date.now()+3, text: selectedText, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: createdAt });
+          }
+          updateAnnotationsList();
+          hideAnnotationPanel();
+          document.getElementById('save-analysis-btn').disabled = false;
+          return;
+      }
+
       // Manejo de variables compuestas: crear dos anotaciones sincronizadas
       const compositePairs = {
           personas_mencionadas: 'genero_personas_mencionadas',
@@ -1328,44 +1441,21 @@ document.addEventListener('DOMContentLoaded', function() {
           nombre_fuente: 'genero_fuente'
       };
       const compositeControls = document.getElementById('composite-gender');
-      
-      if (compositePairs[variable]) {
-          // Usuario anotó la presencia: set presente y género seleccionado
-          const genderValue = compositeControls ? compositeControls.value : null;
-          // 1) presencia
-          annotations.push({
-              id: Date.now(),
-              text: selectedText,
-              category: category,
-              variable: variable,
-              value: '1',
-              timestamp: createdAt
-          });
-          try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-          // 2) género
-          if (genderValue) {
-              annotations.push({
-                  id: Date.now()+1,
-                  text: selectedText,
-                  category: category,
-                  variable: compositePairs[variable],
-                  value: genderValue,
-                  timestamp: createdAt
-              });
-              try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+      let idCounter = 0;
+      let appliedHighlight = false;
+      selectedVariables.forEach(v => {
+          if (compositePairs[v]) {
+              const genderValue = compositeControls ? compositeControls.value : null;
+              annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value: '1', timestamp: createdAt });
+              if (!appliedHighlight) { try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {} appliedHighlight = true; }
+              if (genderValue) {
+                  annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: compositePairs[v], value: genderValue, timestamp: createdAt });
+              }
+          } else {
+              annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value, timestamp: createdAt });
+              if (!appliedHighlight) { try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {} appliedHighlight = true; }
           }
-      } else {
-          // Anotación normal
-          annotations.push({
-              id: Date.now(),
-              text: selectedText,
-              category: category,
-              variable: variable,
-              value: value,
-              timestamp: createdAt
-          });
-          try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-      }
+      });
       updateAnnotationsList();
       hideAnnotationPanel();
       
