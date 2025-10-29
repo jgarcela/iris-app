@@ -45,6 +45,19 @@
               </button>
             </div>
           </div>
+          <!-- Modo Corregir Texto -->
+          <div class="edit-mode-section mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">{{ _('Modo Corregir Texto') }}</h6>
+                <small class="text-muted">{{ _('Abre el editor para corregir, eliminar o añadir texto') }}</small>
+              </div>
+              <button class="btn btn-secondary" id="edit-text-btn">
+                <i class="fas fa-file-alt me-2"></i>
+                {{ _('Editar texto') }}
+              </button>
+            </div>
+          </div>
                     <!-- Panel de Anotación (aparece al seleccionar texto) -->
                     <div class="mb-4">
         <div class="annotation-panel" id="annotation-panel" style="display: none;">
@@ -77,6 +90,7 @@
                                             <select class="form-select" id="annotation-variable" required>
                                                 <option value="">{{ _('Seleccionar...') }}</option>
                 </select>
+                <div id="variable-checkboxes-container" style="display: none;" class="mt-2"></div>
               </div>
               <div class="col-12">
                                             <label class="form-label">{{ _('Valor') }}</label>
@@ -878,7 +892,37 @@
   margin-top: 0.5rem;
   text-align: justify;
 }
+
+  /* Simple modal for editing text */
+  .modal-backdrop-simple {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  .modal-backdrop-simple.active { display: flex; }
+  .modal-card-simple {
+    background: #fff;
+    width: min(900px, 95vw);
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-card-header { padding: 0.75rem 1rem; border-bottom: 1px solid #e9ecef; }
+  .modal-card-title { margin: 0; font-weight: 600; }
+  .modal-card-body { padding: 0.75rem 1rem; }
+  .modal-card-footer { padding: 0.75rem 1rem; border-top: 1px solid #e9ecef; display: flex; gap: 0.5rem; justify-content: flex-end; }
+  #edit-textarea { width: 100%; height: 55vh; font-family: inherit; font-size: 1rem; line-height: 1.5; }
 </style>
+
+{% if config and config.FUENTES and config.FUENTES.TIPO_FUENTE %}
+<div id="config-tipo-fuente" data-map='{{ config.FUENTES.TIPO_FUENTE | tojson | safe }}' style="display:none"></div>
+{% endif %}
 
 <script>
   // Datos del texto actual
@@ -932,6 +976,39 @@ let selectedTopic = '';
   
   let isEditMode = false;
   
+  // Config-driven mappings (from config.ini) - optional
+  // Read from hidden HTML container if provided by backend
+  const CONFIG_TIPO_FUENTE_RAW = (function(){
+      const el = document.getElementById('config-tipo-fuente');
+      if (!el) return null;
+      const raw = el.getAttribute('data-map');
+      try { return JSON.parse(raw); } catch (_) { return raw; }
+  })();
+
+  function parseConfigMap(raw) {
+      if (!raw) return {};
+      if (typeof raw === 'object' && !Array.isArray(raw)) return raw;
+      if (typeof raw === 'string') {
+          // Try JSON first
+          try { return JSON.parse(raw); } catch (_) {}
+          // Replace single quotes and attempt again
+          try { return JSON.parse(raw.replace(/'/g, '"')); } catch (_) {}
+          // Fallback: naive parse of entries like {'1': 'A', '2': 'B'}
+          const obj = {};
+          const m = raw.replace(/[{}]/g,'').split(',').map(s=>s.trim()).filter(Boolean);
+          m.forEach(pair => {
+              const parts = pair.split(':');
+              if (parts.length >= 2) {
+                  const k = parts[0].trim().replace(/^[\'"]|[\'"]$/g,'');
+                  const v = parts.slice(1).join(':').trim().replace(/^[\'"]|[\'"]$/g,'');
+                  obj[k] = v;
+              }
+          });
+          return obj;
+      }
+      return {};
+  }
+  
 document.addEventListener('DOMContentLoaded', function() {
     initializeManualAnalysis();
     initMultiLabelTooltips();
@@ -939,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', function() {
     analyzeProtagonist();
     setupTopicSelection();
     setupAnnotationFilters();
+    setupEditText();
 });
   
   function initializeManualAnalysis() {
@@ -1075,7 +1153,29 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function updateVariableOptions(category) {
       const variableSelect = document.getElementById('annotation-variable');
+      const checkboxContainer = document.getElementById('variable-checkboxes-container');
+      
+      // Reset containers
       variableSelect.innerHTML = '<option value="">Seleccionar...</option>';
+      if (checkboxContainer) checkboxContainer.innerHTML = '';
+      
+      // Show checkboxes for Lenguaje, select for others
+      const valueSelect = document.getElementById('annotation-value');
+      const valueLabel = valueSelect?.parentElement?.querySelector('label');
+      
+      if (category === 'lenguaje') {
+          variableSelect.style.display = 'none';
+          variableSelect.removeAttribute('required');
+          if (checkboxContainer) checkboxContainer.style.display = 'block';
+          if (valueSelect) { valueSelect.style.display = 'none'; valueSelect.removeAttribute('required'); }
+          if (valueLabel) valueLabel.style.display = 'none';
+      } else {
+          variableSelect.style.display = 'block';
+          variableSelect.setAttribute('required','required');
+          if (checkboxContainer) checkboxContainer.style.display = 'none';
+          if (valueSelect) { valueSelect.style.display = 'block'; valueSelect.setAttribute('required','required'); }
+          if (valueLabel) valueLabel.style.display = 'block';
+      }
       
       const variables = CHALLENGE_VARIABLES;
       let availableVariables = [];
@@ -1085,19 +1185,66 @@ document.addEventListener('DOMContentLoaded', function() {
       } else if (category === 'lenguaje' && variables.lenguaje) {
           availableVariables = variables.lenguaje;
       } else if (category === 'fuentes' && variables.fuentes) {
-          availableVariables = variables.fuentes;
+          // Only base variable visible; the rest will appear as composite controls
+          availableVariables = ['declaracion_fuente'];
       }
       
-      // Hide gender-only variables that are driven by a paired presence variable
       const hiddenVariables = ['genero_personas_mencionadas','genero_nombre_propio_titular','genero_fuente'];
       availableVariables = availableVariables.filter(v => !hiddenVariables.includes(v));
       
-      availableVariables.forEach(variable => {
-          const option = document.createElement('option');
-          option.value = variable;
-          option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          variableSelect.appendChild(option);
-      });
+      if (category === 'lenguaje' && checkboxContainer) {
+          availableVariables.forEach(variable => {
+              const wrap = document.createElement('div');
+              wrap.className = 'form-check';
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.className = 'form-check-input';
+              cb.id = `variable-checkbox-${variable}`;
+              cb.value = variable;
+              cb.name = 'variable-checkbox';
+              const label = document.createElement('label');
+              label.className = 'form-check-label';
+              label.htmlFor = cb.id;
+              label.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              wrap.appendChild(cb);
+              wrap.appendChild(label);
+
+              // Special control for lenguaje_sexista to choose between "Sí" and "Sí, salto semántico"
+              if (variable === 'lenguaje_sexista') {
+                  const selectWrap = document.createElement('div');
+                  selectWrap.className = 'mt-1 ms-4';
+                  selectWrap.id = 'lenguaje-sexista-select-wrap';
+                  const select = document.createElement('select');
+                  select.className = 'form-select form-select-sm';
+                  select.id = 'lenguaje-sexista-value';
+                  // Default to "Sí"
+                  const optSi = document.createElement('option');
+                  optSi.value = '2';
+                  optSi.textContent = 'Sí';
+                  const optSalto = document.createElement('option');
+                  optSalto.value = '3';
+                  optSalto.textContent = 'Sí, además se observa un salto semántico';
+                  select.appendChild(optSi);
+                  select.appendChild(optSalto);
+                  // Only show the select when the checkbox is checked
+                  selectWrap.style.display = 'none';
+                  cb.addEventListener('change', function(){
+                      selectWrap.style.display = this.checked ? 'block' : 'none';
+                  });
+                  selectWrap.appendChild(select);
+                  wrap.appendChild(selectWrap);
+              }
+
+              checkboxContainer.appendChild(wrap);
+          });
+      } else {
+          availableVariables.forEach(variable => {
+              const option = document.createElement('option');
+              option.value = variable;
+              option.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              variableSelect.appendChild(option);
+          });
+      }
   }
   
   function updateValueOptions(category, variable) {
@@ -1213,12 +1360,20 @@ document.addEventListener('DOMContentLoaded', function() {
               { value: '2', text: 'Sí' }
           ],
           
-          // Fuentes
-          'tipo_fuente': [
-              { value: '1', text: 'Personal' },
-              { value: '2', text: 'Institucional' },
-              { value: '3', text: 'Mixta' }
-          ],
+          // Fuentes (tipo_fuente driven by config.ini when available)
+          'tipo_fuente': (function(){
+              const map = parseConfigMap(CONFIG_TIPO_FUENTE_RAW);
+              const entries = Object.entries(map || {});
+              if (entries.length > 0) {
+                  return entries.map(([value, text]) => ({ value, text }));
+              }
+              // Fallback defaults if config not provided
+              return [
+                  { value: '1', text: 'Personal' },
+                  { value: '2', text: 'Institucional' },
+                  { value: '3', text: 'Mixta' }
+              ];
+          })(),
           'genero_fuente': [
               { value: '1', text: 'No hay' },
               { value: '2', text: 'Sí, hombre' },
@@ -1241,7 +1396,37 @@ document.addEventListener('DOMContentLoaded', function() {
           nombre_propio_titular: 'genero_nombre_propio_titular',
           nombre_fuente: 'genero_fuente'
       };
-  
+
+      // Fuentes: si selecciona declaracion_fuente, mostrar controles adicionales
+      if (variable === 'declaracion_fuente' && compositeControls) {
+          const nombreFuenteValues = variableValues['nombre_fuente'] || [];
+          const generoFuenteValues = variableValues['genero_fuente'] || [];
+          const tipoFuenteValues = variableValues['tipo_fuente'] || [];
+          compositeControls.style.display = 'block';
+          compositeControls.innerHTML = `
+              <div class="row g-2">
+                  <div class="col-12">
+                      <label class="form-label">Nombre de la fuente</label>
+                      <select class="form-select" id="composite-nombre-fuente">
+                          ${nombreFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                      </select>
+                  </div>
+                  <div class="col-12">
+                      <label class="form-label">Género de la fuente</label>
+                      <select class="form-select" id="composite-genero-fuente">
+                          ${generoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                      </select>
+                  </div>
+                  <div class="col-12">
+                      <label class="form-label">Tipo de fuente</label>
+                      <select class="form-select" id="composite-tipo-fuente">
+                          <option value="">Seleccionar tipo...</option>
+                          ${tipoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                      </select>
+                  </div>
+              </div>`;
+      }
+
       // Si la variable seleccionada es parte de un compuesto, mostrar control de género
       const compositeDetail = compositePairs[variable];
       if (compositeDetail) {
@@ -1311,16 +1496,67 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       const category = document.getElementById('annotation-category').value;
-      const variable = document.getElementById('annotation-variable').value;
-      const value = document.getElementById('annotation-value').value;
+      const variableSelect = document.getElementById('annotation-variable');
+      const valueSelect = document.getElementById('annotation-value');
+      // Value may vary per variable in "lenguaje" (e.g., lenguaje_sexista may be "3" for salto semántico)
+      const defaultLenguajeValue = '2';
+      const value = category === 'lenguaje' ? defaultLenguajeValue : valueSelect.value;
       
-      if (!category || !variable || !value) {
+      // Collect variables: multiple for lenguaje via checkboxes, single otherwise
+      let selectedVariables = [];
+      if (category === 'lenguaje') {
+          const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+          selectedVariables = Array.from(checks).map(cb => cb.value);
+          if (selectedVariables.length === 0) {
+              alert('Por favor selecciona al menos una variable');
+              return;
+          }
+      } else {
+          selectedVariables = [variableSelect.value];
+      }
+      
+      if (!category || !value || selectedVariables.length === 0) {
           alert('Por favor completa todos los campos');
           return;
       }
       
       const createdAt = new Date().toISOString();
       
+      // Manejo especial para declaracion_fuente: crear anotaciones derivadas
+      const firstVariable = selectedVariables[0];
+      if (firstVariable === 'declaracion_fuente') {
+          const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+          const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+          const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+          
+          // Create all related annotations and collect ids for highlight
+          const baseId = Date.now();
+          const ids = [];
+          annotations.push({ id: baseId, text: selectedText, category, variable: firstVariable, value, timestamp: createdAt });
+          ids.push(String(baseId));
+          let idOffset = 1;
+          if (nombreFuenteValue) {
+              const id = baseId + idOffset++;
+              annotations.push({ id, text: selectedText, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: createdAt });
+              ids.push(String(id));
+          }
+          if (generoFuenteValue) {
+              const id = baseId + idOffset++;
+              annotations.push({ id, text: selectedText, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: createdAt });
+              ids.push(String(id));
+          }
+          if (tipoFuenteValue) {
+              const id = baseId + idOffset++;
+              annotations.push({ id, text: selectedText, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: createdAt });
+              ids.push(String(id));
+          }
+          try { applyInlineHighlight(window.currentSelection, category, firstVariable, ids); } catch(e) {}
+          updateAnnotationsList();
+          hideAnnotationPanel();
+          document.getElementById('save-analysis-btn').disabled = false;
+          return;
+      }
+
       // Manejo de variables compuestas: crear dos anotaciones sincronizadas
       const compositePairs = {
           personas_mencionadas: 'genero_personas_mencionadas',
@@ -1328,44 +1564,35 @@ document.addEventListener('DOMContentLoaded', function() {
           nombre_fuente: 'genero_fuente'
       };
       const compositeControls = document.getElementById('composite-gender');
-      
-      if (compositePairs[variable]) {
-          // Usuario anotó la presencia: set presente y género seleccionado
-          const genderValue = compositeControls ? compositeControls.value : null;
-          // 1) presencia
-          annotations.push({
-              id: Date.now(),
-              text: selectedText,
-              category: category,
-              variable: variable,
-              value: '1',
-              timestamp: createdAt
-          });
-          try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-          // 2) género
-          if (genderValue) {
-              annotations.push({
-                  id: Date.now()+1,
-                  text: selectedText,
-                  category: category,
-                  variable: compositePairs[variable],
-                  value: genderValue,
-                  timestamp: createdAt
-              });
-              try { applyInlineHighlight(window.currentSelection, category, compositePairs[variable]); } catch(e) {}
+      let idCounter = 0;
+      const highlightIds = [];
+      selectedVariables.forEach(v => {
+          // Determine value per variable for lenguaje
+          let valueForVar = value;
+          if (category === 'lenguaje' && v === 'lenguaje_sexista') {
+              const select = document.getElementById('lenguaje-sexista-value');
+              if (select && select.value) {
+                  valueForVar = select.value;
+              }
           }
-      } else {
-          // Anotación normal
-          annotations.push({
-              id: Date.now(),
-              text: selectedText,
-              category: category,
-              variable: variable,
-              value: value,
-              timestamp: createdAt
-          });
-          try { applyInlineHighlight(window.currentSelection, category, variable); } catch(e) {}
-      }
+          if (compositePairs[v]) {
+              const genderValue = compositeControls ? compositeControls.value : null;
+              const baseId = Date.now()+idCounter++;
+              annotations.push({ id: baseId, text: selectedText, category, variable: v, value: '1', timestamp: createdAt });
+              highlightIds.push(String(baseId));
+              if (genderValue) {
+                  const id = Date.now()+idCounter++;
+                  annotations.push({ id, text: selectedText, category, variable: compositePairs[v], value: genderValue, timestamp: createdAt });
+                  highlightIds.push(String(id));
+              }
+          } else {
+              const id = Date.now()+idCounter++;
+              annotations.push({ id, text: selectedText, category, variable: v, value: valueForVar, timestamp: createdAt });
+              highlightIds.push(String(id));
+          }
+      });
+      // Apply a single highlight span for the selection carrying all related annotation ids
+      try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(','), highlightIds); } catch(e) {}
       updateAnnotationsList();
       hideAnnotationPanel();
       
@@ -1507,17 +1734,29 @@ function deleteAnnotation(index) {
 }
 
 function removeHighlightFromText(annotation) {
-    // Find and remove highlight marks that match this annotation
     const marks = document.querySelectorAll('.annotation-mark');
     marks.forEach(mark => {
-        const variable = mark.getAttribute('data-variable');
-        if (variable === annotation.variable) {
-            // Replace the mark with just the text content
-            const parent = mark.parentNode;
-            while (mark.firstChild) {
-                parent.insertBefore(mark.firstChild, mark);
+        const idsAttr = mark.getAttribute('data-annotation-ids');
+        if (!idsAttr) {
+            // legacy behavior: fallback to variable match
+            if (mark.getAttribute('data-variable') === annotation.variable) {
+                const parent = mark.parentNode;
+                while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+                parent.removeChild(mark);
             }
-            parent.removeChild(mark);
+            return;
+        }
+        const ids = idsAttr.split(',').map(s => s.trim()).filter(Boolean);
+        const idx = ids.indexOf(String(annotation.id));
+        if (idx !== -1) {
+            ids.splice(idx, 1);
+            if (ids.length === 0) {
+                const parent = mark.parentNode;
+                while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+                parent.removeChild(mark);
+            } else {
+                mark.setAttribute('data-annotation-ids', ids.join(','));
+            }
         }
     });
 }
@@ -1775,6 +2014,77 @@ function addTopicAnnotation(value, text) {
       return { protagonist: 'No identificado', confidence: 0 };
   }
 
+  function setupEditText() {
+      const btn = document.getElementById('edit-text-btn');
+      if (!btn) return;
+      btn.addEventListener('click', openEditTextModal);
+  }
+
+  function getCurrentArticlePlainText() {
+      const container = document.querySelector('.article-content') || document.getElementById('analysis-text');
+      if (!container) return '';
+      // Use textContent to get a clean editable version
+      return (container.textContent || '').trim();
+  }
+
+  function setArticleHtmlFromPlainText(plain) {
+      const container = document.querySelector('.article-content');
+      const host = container || document.querySelector('#analysis-text .text-body');
+      if (!host) return;
+      const html = (plain || '')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      if (container) {
+          container.innerHTML = html;
+      } else if (host) {
+          // If there was no article-content wrapper, create one
+          const div = document.createElement('div');
+          div.className = 'article-content';
+          div.innerHTML = html;
+          host.appendChild(div);
+      }
+  }
+
+  function openEditTextModal() {
+      let backdrop = document.getElementById('edit-text-modal');
+      if (!backdrop) {
+          backdrop = document.createElement('div');
+          backdrop.id = 'edit-text-modal';
+          backdrop.className = 'modal-backdrop-simple';
+          backdrop.innerHTML = `
+            <div class="modal-card-simple">
+              <div class="modal-card-header">
+                <h6 class="modal-card-title">{{ _('Editar texto a analizar') }}</h6>
+              </div>
+              <div class="modal-card-body">
+                <textarea id="edit-textarea" placeholder="{{ _('Escribe o pega aquí el texto...') }}"></textarea>
+              </div>
+              <div class="modal-card-footer">
+                <button type="button" class="btn btn-outline-secondary" id="edit-cancel-btn">{{ _('Cancelar') }}</button>
+                <button type="button" class="btn btn-primary" id="edit-apply-btn">{{ _('Aplicar cambios') }}</button>
+              </div>
+            </div>`;
+          document.body.appendChild(backdrop);
+          // Wire actions
+          backdrop.addEventListener('click', function(e){ if (e.target === backdrop) closeEditTextModal(); });
+          document.getElementById('edit-cancel-btn').addEventListener('click', closeEditTextModal);
+          document.getElementById('edit-apply-btn').addEventListener('click', function(){
+              const val = (document.getElementById('edit-textarea').value || '').trim();
+              setArticleHtmlFromPlainText(val);
+              closeEditTextModal();
+          });
+      }
+      const ta = document.getElementById('edit-textarea');
+      if (ta) ta.value = getCurrentArticlePlainText();
+      backdrop.classList.add('active');
+      ta && ta.focus();
+  }
+
+  function closeEditTextModal() {
+      const backdrop = document.getElementById('edit-text-modal');
+      if (backdrop) backdrop.classList.remove('active');
+  }
+
   function updateProgressSteps() {
       // Actualizar indicadores de progreso
       if (annotations.length > 0) {
@@ -1820,13 +2130,16 @@ function addTopicAnnotation(value, text) {
       }
   }
   
-  function applyInlineHighlight(selectionData, category, variable) {
+  function applyInlineHighlight(selectionData, category, variable, annotationIds) {
       if (!selectionData || !selectionData.range) return;
       const range = selectionData.range.cloneRange();
       if (range.collapsed) return;
       const wrapper = document.createElement('mark');
       wrapper.className = `annotation-mark mark-${category}`;
       wrapper.setAttribute('data-variable', variable);
+      if (Array.isArray(annotationIds) && annotationIds.length > 0) {
+          wrapper.setAttribute('data-annotation-ids', annotationIds.join(','));
+      }
       try {
           range.surroundContents(wrapper);
       } catch (e) {
