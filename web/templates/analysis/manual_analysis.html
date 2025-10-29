@@ -45,11 +45,18 @@
               </button>
             </div>
           </div>
-          <!-- Edición del Texto -->
-          <div class="mb-4">
-            <button class="btn btn-outline-secondary w-100" id="edit-text-btn">
-              <i class="fas fa-file-alt me-2"></i>{{ _('Editar texto') }}
-            </button>
+          <!-- Modo Corregir Texto -->
+          <div class="edit-mode-section mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">{{ _('Modo Corregir Texto') }}</h6>
+                <small class="text-muted">{{ _('Abre el editor para corregir, eliminar o añadir texto') }}</small>
+              </div>
+              <button class="btn btn-outline-secondary" id="edit-text-btn">
+                <i class="fas fa-file-alt me-2"></i>
+                {{ _('Editar texto') }}
+              </button>
+            </div>
           </div>
                     <!-- Panel de Anotación (aparece al seleccionar texto) -->
                     <div class="mb-4">
