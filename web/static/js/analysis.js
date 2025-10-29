@@ -1089,6 +1089,7 @@ function showAnnotationControls() {
                     <option value="">Selecciona valor</option>
                 </select>
             </div>
+            <div id="composite-controls" style="display:none" class="mb-3"></div>
             <div class="d-grid gap-2">
                 <button type="button" class="btn btn-primary btn-sm" onclick="saveAnnotation()">
                     <i class="fas fa-save me-1"></i>Guardar Anotación
@@ -1116,7 +1117,8 @@ function hideAnnotationControls() {
 
 // Function to enable text selection
 function enableTextSelection() {
-    const analysisText = document.querySelector('.analysis-text');
+    // Prefer the automatic analysis highlight container
+    const analysisText = document.querySelector('.highlight-text') || document.querySelector('.analysis-text');
     if (analysisText) {
         analysisText.addEventListener('mouseup', handleTextSelection);
         analysisText.addEventListener('keyup', handleTextSelection);
@@ -1171,6 +1173,13 @@ function showAnnotationPanel() {
     if (annotationPanel) {
         annotationPanel.style.display = 'block';
     }
+    // Try to update any preview placeholders that might exist in template or JS panel
+    if (currentSelection && currentSelection.text) {
+        const el1 = document.getElementById('selected-text-content');
+        if (el1) el1.textContent = currentSelection.text;
+        const el2 = document.getElementById('selected-text-preview');
+        if (el2) el2.textContent = currentSelection.text;
+    }
 }
 
 // Function to hide annotation panel
@@ -1206,15 +1215,20 @@ function handleCategoryChange() {
     const category = document.getElementById('annotation-category').value;
     const variableSelect = document.getElementById('annotation-variable');
     const valueSelect = document.getElementById('annotation-value');
+    const composite = document.getElementById('composite-controls');
     
     // Clear variable and value selects
     variableSelect.innerHTML = '<option value="">Selecciona variable</option>';
     valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
+    if (composite) { composite.style.display = 'none'; composite.innerHTML = ''; }
     
     if (category) {
         // Get variables for the selected category from config.ini
-        const variables = getVariablesForCategory(category);
-        
+        let variables = getVariablesForCategory(category);
+        // Restrict Fuentes to declaracion_fuente (the others appear as composite controls)
+        if (category === 'fuentes') {
+            variables = ['declaracion_fuente'];
+        }
         variables.forEach(variable => {
             const option = document.createElement('option');
             option.value = variable;
@@ -1228,9 +1242,11 @@ function handleCategoryChange() {
 function handleVariableChange() {
     const variable = document.getElementById('annotation-variable').value;
     const valueSelect = document.getElementById('annotation-value');
+    const composite = document.getElementById('composite-controls');
     
     // Clear value select
     valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
+    if (composite) { composite.style.display = 'none'; composite.innerHTML = ''; }
     
     if (variable) {
         // Get values for the selected variable from config.ini
@@ -1242,6 +1258,45 @@ function handleVariableChange() {
             option.textContent = value.label;
             valueSelect.appendChild(option);
         });
+
+        // Default "Sí" for declaracion_fuente
+        if (variable === 'declaracion_fuente') {
+            // Try to find an option labeled "Sí" and select it
+            const siOption = Array.from(valueSelect.options).find(opt => /sí/i.test(opt.textContent || ''));
+            if (siOption) {
+                valueSelect.value = siOption.value;
+            }
+        }
+
+        // Show composite controls for declaracion_fuente
+        if (variable === 'declaracion_fuente' && composite) {
+            const nombreVals = getValuesForVariable('nombre_fuente');
+            const generoVals = getValuesForVariable('genero_fuente');
+            const tipoVals = getValuesForVariable('tipo_fuente');
+            composite.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label small">Nombre de la fuente</label>
+                        <select class="form-select form-select-sm" id="composite-nombre-fuente">
+                            ${nombreVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Género de la fuente</label>
+                        <select class="form-select form-select-sm" id="composite-genero-fuente">
+                            ${generoVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Tipo de fuente</label>
+                        <select class="form-select form-select-sm" id="composite-tipo-fuente">
+                            <option value="">Seleccionar tipo...</option>
+                            ${tipoVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+            composite.style.display = 'block';
+        }
     }
 }
 
@@ -1340,9 +1395,12 @@ function getValuesForVariable(variable) {
             {key: '25', label: 'Político/a'}, {key: '26', label: 'Rey/Reina'}, 
             {key: '27', label: 'Trabajador/a'}
         ],
+        // Match manual analysis options
         'genero_fuente': [
-            {key: '1', label: 'Masculino'}, {key: '2', label: 'Femenino'}, 
-            {key: '3', label: 'Ns/Nc'}
+            { key: '1', label: 'No hay' },
+            { key: '2', label: 'Sí, hombre' },
+            { key: '3', label: 'Sí, mujer' },
+            { key: '4', label: 'Sí, mujer y hombre' }
         ]
     };
     
@@ -1365,23 +1423,32 @@ function saveAnnotation() {
         return;
     }
     
-    // Create annotation object
-    const annotation = {
-        text: currentSelection.text,
-        category: category,
-        variable: variable,
-        value: value,
-        timestamp: new Date().toISOString()
-    };
-    
-    // Add to annotations array
-    annotations.push(annotation);
-    
-    // Integrate annotation into analysis data structure
-    integrateAnnotationIntoAnalysis(annotation);
-    
-    // Apply highlight to the text
-    applyHighlight(currentSelection.range, variable);
+    // Declaración de fuente: guardar compuestos (declaración + nombre + género + tipo)
+    if (category === 'fuentes' && variable === 'declaracion_fuente') {
+        const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+        const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+        const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+        const baseId = Date.now();
+        const anns = [];
+        anns.push({ id: baseId, text: currentSelection.text, category, variable, value, timestamp: new Date().toISOString() });
+        if (nombreFuenteValue) anns.push({ id: baseId+1, text: currentSelection.text, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: new Date().toISOString() });
+        if (generoFuenteValue) anns.push({ id: baseId+2, text: currentSelection.text, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: new Date().toISOString() });
+        if (tipoFuenteValue) anns.push({ id: baseId+3, text: currentSelection.text, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: new Date().toISOString() });
+        anns.forEach(a => { annotations.push(a); integrateAnnotationIntoAnalysis(a); });
+        applyHighlight(currentSelection.range, variable);
+    } else {
+        // Create single annotation
+        const annotation = {
+            text: currentSelection.text,
+            category: category,
+            variable: variable,
+            value: value,
+            timestamp: new Date().toISOString()
+        };
+        annotations.push(annotation);
+        integrateAnnotationIntoAnalysis(annotation);
+        applyHighlight(currentSelection.range, variable);
+    }
     
     // Show success message
     showNotification('Anotación guardada correctamente', 'success');
