@@ -622,6 +622,13 @@ mark[data-category="fuentes"]:not([data-provenance="ai"]) {
     padding: 0 1px !important;
 }
 
+/* Markup area styles - preserve spaces, paragraphs, and justify text */
+.markup-area {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: justify;
+}
+
 /* Make all highlights clearly interactive */
 .highlight-text .markup-area mark {
   cursor: pointer;
