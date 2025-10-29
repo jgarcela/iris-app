@@ -1306,12 +1306,59 @@ function handleTextSelection() {
     }
 }
 
+// Function to get currently visible category from highlight blocks
+function getCurrentVisibleCategory() {
+    const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
+    if (visibleBlock) {
+        if (visibleBlock.id === 'highlight-contenido') return 'contenido_general';
+        else if (visibleBlock.id === 'highlight-lenguaje') return 'lenguaje';
+        else if (visibleBlock.id === 'highlight-fuentes') return 'fuentes';
+    }
+    return null;
+}
+
 // Function to show annotation panel
 function showAnnotationPanel() {
     const annotationPanel = document.getElementById('annotation-panel');
     if (annotationPanel) {
         annotationPanel.style.display = 'block';
     }
+    
+    // Get currently visible category and restrict annotation panel
+    const visibleCategory = getCurrentVisibleCategory();
+    const categorySelect = document.getElementById('annotation-category');
+    if (categorySelect && visibleCategory) {
+        // Clear and populate with only the visible category
+        categorySelect.innerHTML = '';
+        const categoryMap = {
+            'contenido_general': 'Contenido General',
+            'lenguaje': 'Lenguaje',
+            'fuentes': 'Fuentes'
+        };
+        const option = document.createElement('option');
+        option.value = visibleCategory;
+        option.textContent = categoryMap[visibleCategory];
+        option.selected = true;
+        categorySelect.appendChild(option);
+        
+        // Disable the select so user can't change category
+        categorySelect.disabled = true;
+        
+        // Trigger category change to load variables
+        handleCategoryChange();
+    } else if (categorySelect) {
+        // If no category visible, enable all options
+        categorySelect.disabled = false;
+        if (categorySelect.innerHTML.trim() === '' || !categorySelect.querySelector('option[value="contenido_general"]')) {
+            categorySelect.innerHTML = `
+                <option value="">Selecciona categoría</option>
+                <option value="contenido_general">Contenido General</option>
+                <option value="lenguaje">Lenguaje</option>
+                <option value="fuentes">Fuentes</option>
+            `;
+        }
+    }
+    
     // Try to update any preview placeholders that might exist in template or JS panel
     if (currentSelection && currentSelection.text) {
         const el1 = document.getElementById('selected-text-content');
@@ -1326,6 +1373,21 @@ function hideAnnotationPanel() {
     const annotationPanel = document.getElementById('annotation-panel');
     if (annotationPanel) {
         annotationPanel.style.display = 'none';
+    }
+    
+    // Reset category select if it was disabled
+    const categorySelect = document.getElementById('annotation-category');
+    if (categorySelect) {
+        categorySelect.disabled = false;
+        // Restore all options if they were removed
+        if (!categorySelect.querySelector('option[value="contenido_general"]')) {
+            categorySelect.innerHTML = `
+                <option value="">Selecciona categoría</option>
+                <option value="contenido_general">Contenido General</option>
+                <option value="lenguaje">Lenguaje</option>
+                <option value="fuentes">Fuentes</option>
+            `;
+        }
     }
     
     // Clear selection
