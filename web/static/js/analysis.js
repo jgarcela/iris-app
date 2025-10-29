@@ -467,6 +467,26 @@ function processHighlights() {
         return;
     }
     
+    // First, process all marks in highlight blocks to add category data
+    const allMarksInBlocks = document.querySelectorAll('.highlight-block mark');
+    allMarksInBlocks.forEach(mark => {
+        if (!mark.dataset.category) {
+            const currentHighlightBlock = mark.closest('.highlight-block');
+            if (currentHighlightBlock) {
+                let category = null;
+                if (currentHighlightBlock.id === 'highlight-contenido') category = 'contenido_general';
+                else if (currentHighlightBlock.id === 'highlight-lenguaje') category = 'lenguaje';
+                else if (currentHighlightBlock.id === 'highlight-fuentes') category = 'fuentes';
+                
+                if (category) {
+                    mark.setAttribute('data-category', category);
+                    const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
+                    mark.classList.add(`mark-${categoryClass}`);
+                }
+            }
+        }
+    });
+    
     // Find actual highlight elements (mark elements with color-* classes)
     const highlightElements = document.querySelectorAll('mark[class*="color-"]');
     
@@ -478,6 +498,24 @@ function processHighlights() {
         if (!element.dataset.provenance) {
             element.dataset.provenance = 'ai';
         }
+        
+        // If mark doesn't have data-category, determine it from parent highlight-block
+        if (!element.dataset.category) {
+            const currentHighlightBlock = element.closest('.highlight-block');
+            if (currentHighlightBlock) {
+                let category = null;
+                if (currentHighlightBlock.id === 'highlight-contenido') category = 'contenido_general';
+                else if (currentHighlightBlock.id === 'highlight-lenguaje') category = 'lenguaje';
+                else if (currentHighlightBlock.id === 'highlight-fuentes') category = 'fuentes';
+                
+                if (category) {
+                    element.setAttribute('data-category', category);
+                    const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
+                    element.classList.add(`mark-${categoryClass}`);
+                }
+            }
+        }
+        
         // Remove empty marks defensively
         if (!element.textContent || element.textContent.trim() === '') {
             const span = document.createElement('span');
@@ -644,7 +682,7 @@ function addManualHighlights() {
     
     // Process only new manual annotations (not already processed)
     annotations.forEach(annotation => {
-        const { text, variable, timestamp } = annotation;
+        const { text, variable, category, timestamp } = annotation;
         
         // Check if this annotation was already processed by looking for the data-variable attribute
         const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -653,7 +691,14 @@ function addManualHighlights() {
         if (!existingPattern.test(highlightedText)) {
             // This annotation hasn't been processed yet, add it
             const pattern = new RegExp(`(${escapedText})`, 'gi');
-            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}">$1</mark>`);
+            let categoryAttrs = '';
+            let categoryClass = '';
+            if (category) {
+                categoryAttrs = ` data-category="${category}"`;
+                const categoryClassNorm = category === 'contenido_general' ? 'contenido_general' : category;
+                categoryClass = ` class="mark-${categoryClassNorm}"`;
+            }
+            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}"${categoryAttrs}${categoryClass}>$1</mark>`);
         }
     });
     
@@ -1595,7 +1640,7 @@ function saveAnnotation() {
             integrateAnnotationIntoAnalysis(ann);
             ids.push(String(id));
         });
-        applyHighlight(currentSelection.range, selectedVars.join(','));
+        applyHighlight(currentSelection.range, selectedVars.join(','), category);
         showNotification('Anotaciones guardadas', 'success');
         hideAnnotationPanel();
         document.getElementById('annotation-category').value = '';
@@ -1617,7 +1662,7 @@ function saveAnnotation() {
         if (generoFuenteValue) anns.push({ id: baseId+2, text: currentSelection.text, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: new Date().toISOString() });
         if (tipoFuenteValue) anns.push({ id: baseId+3, text: currentSelection.text, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: new Date().toISOString() });
         anns.forEach(a => { annotations.push(a); integrateAnnotationIntoAnalysis(a); });
-        applyHighlight(currentSelection.range, variable);
+        applyHighlight(currentSelection.range, variable, category);
     } else {
         // Create single annotation
         const annotation = {
@@ -1629,7 +1674,7 @@ function saveAnnotation() {
         };
         annotations.push(annotation);
         integrateAnnotationIntoAnalysis(annotation);
-        applyHighlight(currentSelection.range, variable);
+        applyHighlight(currentSelection.range, variable, category);
     }
     
     // Show success message
@@ -1721,10 +1766,16 @@ function integrateAnnotationIntoAnalysis(annotation) {
 }
 
 // Function to apply highlight (this is now handled by addManualHighlights)
-function applyHighlight(range, variable) {
+function applyHighlight(range, variable, category) {
     if (!range || !variable) return;
     const mark = document.createElement('mark');
     mark.setAttribute('data-variable', variable);
+    if (category) {
+        mark.setAttribute('data-category', category);
+        // Normalize category name for CSS class
+        const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
+        mark.classList.add(`mark-${categoryClass}`);
+    }
     try {
         // Prefer surroundContents to preserve selection boundaries when possible
         const selectedText = range.toString();

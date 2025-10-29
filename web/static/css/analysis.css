@@ -563,25 +563,32 @@ mark[data-variable] {
 }
 
 /* Category-specific highlight colors matching manual analysis */
+/* Higher specificity to override default yellow */
 .annotation-mark.mark-contenido_general,
-mark[data-category="contenido_general"] { 
-    background-color: rgba(13, 110, 253, 0.1); 
-    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4);
-    color: #0d6efd;
+mark[data-category="contenido_general"],
+mark.mark-contenido_general { 
+    background-color: rgba(13, 110, 253, 0.1) !important; 
+    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4) !important;
+    color: #0d6efd !important;
+    padding: 0 1px !important;
 }
 
 .annotation-mark.mark-lenguaje,
-mark[data-category="lenguaje"] { 
-    background-color: rgba(111, 66, 193, 0.1); 
-    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
-    color: #6f42c1;
+mark[data-category="lenguaje"],
+mark.mark-lenguaje { 
+    background-color: rgba(111, 66, 193, 0.1) !important; 
+    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4) !important;
+    color: #6f42c1 !important;
+    padding: 0 1px !important;
 }
 
 .annotation-mark.mark-fuentes,
-mark[data-category="fuentes"] { 
-    background-color: rgba(13, 202, 240, 0.1); 
-    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4);
-    color: #0dcaf0;
+mark[data-category="fuentes"],
+mark.mark-fuentes { 
+    background-color: rgba(13, 202, 240, 0.1) !important; 
+    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4) !important;
+    color: #0dcaf0 !important;
+    padding: 0 1px !important;
 }
 
 /* Make all highlights clearly interactive */
@@ -599,8 +606,8 @@ mark[data-variable]:hover {
   transform: scale(1.02);
 }
 
-/* Default mark styling - using browser default highlight appearance */
-mark {
+/* Default mark styling - only for marks without category (legacy/automatic highlights) */
+mark:not([data-category]) {
   background-color: #fff9c4; /* Pale yellow highlight */
   padding: 0;
   border-radius: 2px;
