@@ -1491,6 +1491,7 @@ function handleVariableChange() {
     const variable = document.getElementById('annotation-variable').value;
     const valueSelect = document.getElementById('annotation-value');
     const composite = document.getElementById('composite-controls');
+    const category = document.getElementById('annotation-category')?.value || '';
     
     // Clear value select
     valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
@@ -1500,12 +1501,30 @@ function handleVariableChange() {
         // Get values for the selected variable from config.ini
         const values = getValuesForVariable(variable);
         
-        values.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value.key;
-            option.textContent = value.label;
-            valueSelect.appendChild(option);
-        });
+        if (values && values.length > 0) {
+            // Show value select only if there are values
+            valueSelect.parentElement.style.display = '';
+            
+            // For binary Yes/No variables, only show "Sí" option (matching manual analysis)
+            const lower = values.map(v => (v.label || '').toLowerCase());
+            const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+            const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+            
+            let toRender = values;
+            if (isYesNo || isSiNo) {
+                toRender = values.filter(v => /sí|si/i.test(v.label || ''));
+            }
+            
+            toRender.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value.key;
+                option.textContent = value.label;
+                valueSelect.appendChild(option);
+            });
+        } else {
+            // Hide value select for variables without fixed values (e.g., contenido_general text examples)
+            valueSelect.parentElement.style.display = 'none';
+        }
 
         // Default "Sí" for declaracion_fuente
         if (variable === 'declaracion_fuente') {
@@ -1545,15 +1564,50 @@ function handleVariableChange() {
                 </div>`;
             composite.style.display = 'block';
         }
+        
+        // Show composite gender controls for contenido_general composite pairs
+        if (category === 'contenido_general' && composite) {
+            const compositePairs = {
+                'personas_mencionadas': 'genero_personas_mencionadas',
+                'nombre_propio_titular': 'genero_nombre_propio_titular'
+            };
+            
+            if (compositePairs[variable]) {
+                const genderVar = compositePairs[variable];
+                const genderVals = getValuesForVariable(genderVar);
+                
+                let label = 'Género';
+                if (genderVar === 'genero_personas_mencionadas') {
+                    label = 'Género de la persona';
+                } else if (genderVar === 'genero_nombre_propio_titular') {
+                    label = 'Género nombre propio titular';
+                }
+                
+                composite.innerHTML = `
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label small">${label}</label>
+                            <select class="form-select form-select-sm" id="composite-gender">
+                                ${genderVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+                composite.style.display = 'block';
+            }
+        }
     }
 }
 
 // Function to get variables for category
 function getVariablesForCategory(category) {
     const categoryVariables = {
+        // Match manual analysis: exclude 'tema' and hidden gender variables from manual selection
         'contenido_general': [
-            'genero_nombre_propio_titular', 'genero_personas_mencionadas', 'genero_periodista',
-            'tema', 'cita_titular', 'criterios_excepcion_noticiabilidad'
+            'cita_textual_titular',
+            'genero_periodista',
+            'nombre_propio_titular',
+            'personas_mencionadas'
+            // Note: genero_nombre_propio_titular and genero_personas_mencionadas are handled as composite pairs
         ],
         'lenguaje': [
             'lenguaje_sexista', 'androcentrismo', 'asimetria', 'cargos_mujeres',
@@ -1598,11 +1652,8 @@ function getValuesForVariable(variable) {
             {key: '14', label: 'Social'}, {key: '15', label: 'Tecnología'}, 
             {key: '16', label: 'Transporte'}, {key: '17', label: 'Otros'}
         ],
-        'cita_titular': [
+        'cita_textual_titular': [
             {key: '0', label: 'No'}, {key: '1', label: 'Sí'}
-        ],
-        'criterios_excepcion_noticiabilidad': [
-            {key: '1', label: 'No'}, {key: '2', label: 'Sí'}
         ],
         
         // LENGUAJE
@@ -1666,15 +1717,21 @@ function saveAnnotation() {
         showNotification('Por favor completa todos los campos', 'error');
         return;
     }
-    if (category !== 'lenguaje') {
+    if (category !== 'lenguaje' && category !== 'contenido_general') {
         if (!variable || !value) {
             showNotification('Por favor completa todos los campos', 'error');
             return;
         }
-    } else {
+    } else if (category === 'lenguaje') {
         const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
         if (!checks || checks.length === 0) {
             showNotification('Por favor selecciona al menos una variable', 'error');
+            return;
+        }
+    } else if (category === 'contenido_general') {
+        // Only require variable; value is not needed
+        if (!variable) {
+            showNotification('Por favor completa todos los campos', 'error');
             return;
         }
     }
@@ -1718,8 +1775,41 @@ function saveAnnotation() {
         return;
     }
 
+    // Contenido General: handle composite pairs (personas_mencionadas/nombre_propio_titular + genero)
+    if (category === 'contenido_general') {
+        const compositePairs = {
+            'personas_mencionadas': 'genero_personas_mencionadas',
+            'nombre_propio_titular': 'genero_nombre_propio_titular'
+        };
+        
+        const baseId = Date.now();
+        const anns = [];
+        const highlightIds = [];
+        
+        // Determine value: use '1' for text-only variables, or the selected value if available
+        const finalValue = value || '1';
+        
+        // Create main annotation
+        const mainAnn = { id: baseId, text: currentSelection.text, category, variable, value: finalValue, timestamp: new Date().toISOString() };
+        anns.push(mainAnn);
+        highlightIds.push(String(baseId));
+        
+        // If this variable has a composite pair and gender is selected, create gender annotation
+        if (compositePairs[variable]) {
+            const genderVar = compositePairs[variable];
+            const genderSelect = document.getElementById('composite-gender');
+            if (genderSelect && genderSelect.value) {
+                const genderAnn = { id: baseId + 1, text: currentSelection.text, category, variable: genderVar, value: genderSelect.value, timestamp: new Date().toISOString() };
+                anns.push(genderAnn);
+                highlightIds.push(String(baseId + 1));
+            }
+        }
+        
+        anns.forEach(a => { annotations.push(a); integrateAnnotationIntoAnalysis(a); });
+        applyHighlight(currentSelection.range, variable, category);
+        
     // Declaración de fuente: guardar compuestos (declaración + nombre + género + tipo)
-    if (category === 'fuentes' && variable === 'declaracion_fuente') {
+    } else if (category === 'fuentes' && variable === 'declaracion_fuente') {
         const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
         const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
         const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
