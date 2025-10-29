@@ -1082,6 +1082,7 @@ function showAnnotationControls() {
                 <select class="form-select form-select-sm" id="annotation-variable">
                     <option value="">Selecciona variable</option>
                 </select>
+                <div id="variable-checkboxes-container" class="mt-2" style="display:none"></div>
             </div>
             <div class="mb-3">
                 <label class="form-label small">Valor</label>
@@ -1303,11 +1304,13 @@ function handleCategoryChange() {
     const variableSelect = document.getElementById('annotation-variable');
     const valueSelect = document.getElementById('annotation-value');
     const composite = document.getElementById('composite-controls');
+    const checkboxContainer = document.getElementById('variable-checkboxes-container');
     
     // Clear variable and value selects
     variableSelect.innerHTML = '<option value="">Selecciona variable</option>';
     valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
     if (composite) { composite.style.display = 'none'; composite.innerHTML = ''; }
+    if (checkboxContainer) { checkboxContainer.style.display = 'none'; checkboxContainer.innerHTML = ''; }
     
     if (category) {
         // Get variables for the selected category from config.ini
@@ -1315,7 +1318,52 @@ function handleCategoryChange() {
         // Restrict Fuentes to declaracion_fuente (the others appear as composite controls)
         if (category === 'fuentes') {
             variables = ['declaracion_fuente'];
+            // Show selects
+            variableSelect.style.display = 'block';
+            valueSelect.style.display = 'block';
+        } else if (category === 'lenguaje') {
+            // Use checkboxes for lenguaje
+            variableSelect.style.display = 'none';
+            valueSelect.style.display = 'none';
+            if (checkboxContainer) {
+                checkboxContainer.style.display = 'block';
+                variables.forEach(variable => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'form-check';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.className = 'form-check-input';
+                    cb.id = `variable-checkbox-${variable}`;
+                    cb.value = variable;
+                    cb.name = 'variable-checkbox';
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.htmlFor = cb.id;
+                    label.textContent = variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    wrap.appendChild(cb);
+                    wrap.appendChild(label);
+                    // Special select for lenguaje_sexista
+                    if (variable === 'lenguaje_sexista') {
+                        const selectWrap = document.createElement('div');
+                        selectWrap.className = 'mt-1 ms-4';
+                        selectWrap.id = 'lenguaje-sexista-select-wrap-auto';
+                        selectWrap.style.display = 'none';
+                        const select = document.createElement('select');
+                        select.className = 'form-select form-select-sm';
+                        select.id = 'lenguaje-sexista-value-auto';
+                        const optSi = document.createElement('option'); optSi.value = '2'; optSi.textContent = 'Sí';
+                        const optSalto = document.createElement('option'); optSalto.value = '3'; optSalto.textContent = 'Sí, además se observa un salto semántico';
+                        select.appendChild(optSi); select.appendChild(optSalto);
+                        cb.addEventListener('change', function(){ selectWrap.style.display = this.checked ? 'block' : 'none'; });
+                        selectWrap.appendChild(select);
+                        wrap.appendChild(selectWrap);
+                    }
+                    checkboxContainer.appendChild(wrap);
+                });
+            }
+            return; // Do not populate select for lenguaje
         }
+        // Default: populate select
         variables.forEach(variable => {
             const option = document.createElement('option');
             option.value = variable;
@@ -1500,9 +1548,22 @@ function saveAnnotation() {
     const variable = document.getElementById('annotation-variable').value;
     const value = document.getElementById('annotation-value').value;
     
-    if (!category || !variable || !value) {
+    // Validation adapted per category
+    if (!category) {
         showNotification('Por favor completa todos los campos', 'error');
         return;
+    }
+    if (category !== 'lenguaje') {
+        if (!variable || !value) {
+            showNotification('Por favor completa todos los campos', 'error');
+            return;
+        }
+    } else {
+        const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+        if (!checks || checks.length === 0) {
+            showNotification('Por favor selecciona al menos una variable', 'error');
+            return;
+        }
     }
     
     if (!currentSelection) {
@@ -1510,6 +1571,40 @@ function saveAnnotation() {
         return;
     }
     
+    // Lenguaje: save multiple variables via checkboxes; lenguaje_sexista can be '3'
+    if (category === 'lenguaje') {
+        const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+        if (!checks || checks.length === 0) {
+            showNotification('Por favor selecciona al menos una variable', 'error');
+            return;
+        }
+        const selectedVars = Array.from(checks).map(cb => cb.value);
+        const baseId = Date.now();
+        let offset = 0;
+        const defaultValue = '2';
+        const ids = [];
+        selectedVars.forEach(v => {
+            let valueForVar = defaultValue;
+            if (v === 'lenguaje_sexista') {
+                const select = document.getElementById('lenguaje-sexista-value-auto');
+                if (select && select.value) valueForVar = select.value;
+            }
+            const id = baseId + offset++;
+            const ann = { id, text: currentSelection.text, category, variable: v, value: valueForVar, timestamp: new Date().toISOString() };
+            annotations.push(ann);
+            integrateAnnotationIntoAnalysis(ann);
+            ids.push(String(id));
+        });
+        applyHighlight(currentSelection.range, selectedVars.join(','));
+        showNotification('Anotaciones guardadas', 'success');
+        hideAnnotationPanel();
+        document.getElementById('annotation-category').value = '';
+        // Reset checkboxes UI
+        const checkboxContainer = document.getElementById('variable-checkboxes-container');
+        if (checkboxContainer) { checkboxContainer.style.display = 'none'; checkboxContainer.innerHTML = ''; }
+        return;
+    }
+
     // Declaración de fuente: guardar compuestos (declaración + nombre + género + tipo)
     if (category === 'fuentes' && variable === 'declaracion_fuente') {
         const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
