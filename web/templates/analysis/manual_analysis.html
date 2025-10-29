@@ -1168,6 +1168,33 @@ document.addEventListener('DOMContentLoaded', function() {
               label.textContent = VARIABLE_DESCRIPTIONS[variable] || variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
               wrap.appendChild(cb);
               wrap.appendChild(label);
+
+              // Special control for lenguaje_sexista to choose between "Sí" and "Sí, salto semántico"
+              if (variable === 'lenguaje_sexista') {
+                  const selectWrap = document.createElement('div');
+                  selectWrap.className = 'mt-1 ms-4';
+                  selectWrap.id = 'lenguaje-sexista-select-wrap';
+                  const select = document.createElement('select');
+                  select.className = 'form-select form-select-sm';
+                  select.id = 'lenguaje-sexista-value';
+                  // Default to "Sí"
+                  const optSi = document.createElement('option');
+                  optSi.value = '2';
+                  optSi.textContent = 'Sí';
+                  const optSalto = document.createElement('option');
+                  optSalto.value = '3';
+                  optSalto.textContent = 'Sí, además se observa un salto semántico';
+                  select.appendChild(optSi);
+                  select.appendChild(optSalto);
+                  // Only show the select when the checkbox is checked
+                  selectWrap.style.display = 'none';
+                  cb.addEventListener('change', function(){
+                      selectWrap.style.display = this.checked ? 'block' : 'none';
+                  });
+                  selectWrap.appendChild(select);
+                  wrap.appendChild(selectWrap);
+              }
+
               checkboxContainer.appendChild(wrap);
           });
       } else {
@@ -1431,7 +1458,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const category = document.getElementById('annotation-category').value;
       const variableSelect = document.getElementById('annotation-variable');
       const valueSelect = document.getElementById('annotation-value');
-      const value = category === 'lenguaje' ? '2' : valueSelect.value;
+      // Value may vary per variable in "lenguaje" (e.g., lenguaje_sexista may be "3" for salto semántico)
+      const defaultLenguajeValue = '2';
+      const value = category === 'lenguaje' ? defaultLenguajeValue : valueSelect.value;
       
       // Collect variables: multiple for lenguaje via checkboxes, single otherwise
       let selectedVariables = [];
@@ -1489,6 +1518,14 @@ document.addEventListener('DOMContentLoaded', function() {
       let idCounter = 0;
       let appliedHighlight = false;
       selectedVariables.forEach(v => {
+          // Determine value per variable for lenguaje
+          let valueForVar = value;
+          if (category === 'lenguaje' && v === 'lenguaje_sexista') {
+              const select = document.getElementById('lenguaje-sexista-value');
+              if (select && select.value) {
+                  valueForVar = select.value;
+              }
+          }
           if (compositePairs[v]) {
               const genderValue = compositeControls ? compositeControls.value : null;
               annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value: '1', timestamp: createdAt });
@@ -1497,7 +1534,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: compositePairs[v], value: genderValue, timestamp: createdAt });
               }
           } else {
-              annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value, timestamp: createdAt });
+              annotations.push({ id: Date.now()+idCounter++, text: selectedText, category, variable: v, value: valueForVar, timestamp: createdAt });
               if (!appliedHighlight) { try { applyInlineHighlight(window.currentSelection, category, selectedVariables.join(',')); } catch(e) {} appliedHighlight = true; }
           }
       });
