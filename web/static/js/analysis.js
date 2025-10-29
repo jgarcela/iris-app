@@ -1132,6 +1132,93 @@ function enableTextSelection() {
     }
 }
 
+// ================================
+// Edit Text (Automatic Analysis)
+// ================================
+
+// Insert an "Editar texto" button in the Acciones group and wire modal
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const actionsGroups = Array.from(document.querySelectorAll('.analysis-tools-panel .button-group'));
+        const actionsGroup = actionsGroups.find(group => group.querySelector('.button-group-title') && /Acciones/i.test(group.querySelector('.button-group-title').textContent || ''));
+        const actionsContainer = actionsGroup ? actionsGroup.querySelector('.action-buttons-minimal') : null;
+        if (actionsContainer && !document.getElementById('edit-text-btn-auto')) {
+            const btn = document.createElement('button');
+            btn.id = 'edit-text-btn-auto';
+            btn.className = 'btn-minimal btn-edit-text';
+            btn.innerHTML = '<i class="fas fa-file-alt me-2"></i>Editar texto';
+            btn.addEventListener('click', openEditTextModalAuto);
+            actionsContainer.insertBefore(btn, actionsContainer.firstChild);
+        }
+    } catch (_) {}
+});
+
+function ensureEditTextModalAuto() {
+    let backdrop = document.getElementById('edit-text-modal-auto');
+    if (backdrop) return backdrop;
+    backdrop = document.createElement('div');
+    backdrop.id = 'edit-text-modal-auto';
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:2000';
+    backdrop.innerHTML = `
+      <div style="background:#fff;width:min(900px,95vw);max-height:90vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.2);display:flex;flex-direction:column;">
+        <div style="padding:12px 16px;border-bottom:1px solid #e9ecef;display:flex;align-items:center;justify-content:space-between;">
+          <h6 style="margin:0;font-weight:600">Editar texto a analizar</h6>
+          <button id="edit-text-cancel-x" class="btn btn-sm btn-outline-secondary">Cerrar</button>
+        </div>
+        <div style="padding:12px 16px;">
+          <textarea id="edit-textarea-auto" style="width:100%;height:55vh;font-family:inherit;font-size:1rem;line-height:1.5"></textarea>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid #e9ecef;display:flex;gap:.5rem;justify-content:flex-end;">
+          <button id="edit-text-cancel-btn" class="btn btn-outline-secondary">Cancelar</button>
+          <button id="edit-text-apply-btn" class="btn btn-primary">Aplicar cambios</button>
+        </div>
+      </div>`;
+    document.body.appendChild(backdrop);
+    const close = () => { backdrop.style.display = 'none'; };
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+    backdrop.querySelector('#edit-text-cancel-x').addEventListener('click', close);
+    backdrop.querySelector('#edit-text-cancel-btn').addEventListener('click', close);
+    backdrop.querySelector('#edit-text-apply-btn').addEventListener('click', function() {
+        const val = (document.getElementById('edit-textarea-auto').value || '').trim();
+        setHighlightsFromPlainText(val);
+        close();
+    });
+    return backdrop;
+}
+
+function openEditTextModalAuto() {
+    const backdrop = ensureEditTextModalAuto();
+    const ta = document.getElementById('edit-textarea-auto');
+    if (ta) ta.value = getPlainTextFromHighlights();
+    backdrop.style.display = 'flex';
+    ta && ta.focus();
+}
+
+function getPlainTextFromHighlights() {
+    // Prefer contenido > lenguaje > fuentes
+    const areas = [
+        document.querySelector('#highlight-contenido .markup-area'),
+        document.querySelector('#highlight-lenguaje .markup-area'),
+        document.querySelector('#highlight-fuentes .markup-area')
+    ];
+    for (const area of areas) {
+        if (area && (area.textContent || '').trim().length > 0) {
+            return (area.textContent || '').trim();
+        }
+    }
+    // Fallback: entire highlight-text container
+    const container = document.querySelector('.highlight-text');
+    return container ? (container.textContent || '').trim() : '';
+}
+
+function setHighlightsFromPlainText(plain) {
+    const html = (plain || '').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+    const areas = document.querySelectorAll('.markup-area');
+    areas.forEach(area => { area.innerHTML = html; });
+    // After changing text, rebind highlight handlers
+    setTimeout(() => { if (typeof processHighlights === 'function') processHighlights(); }, 0);
+}
+
 // Function to disable text selection
 function disableTextSelection() {
     const analysisText = document.querySelector('.analysis-text');
