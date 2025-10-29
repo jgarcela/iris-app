@@ -563,10 +563,39 @@ mark[data-variable] {
 }
 
 /* Category-specific highlight colors matching manual analysis */
-/* Higher specificity to override default yellow */
+/* Automatic highlights (ai) - only background color, no line */
+mark[data-provenance="ai"][data-category="contenido_general"],
+mark[data-provenance="ai"].mark-contenido_general,
+mark[data-provenance="ai"][class*="contenido"] {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #0d6efd !important;
+    padding: 0 1px !important;
+    box-shadow: none !important; /* No line for automatic highlights */
+}
+
+mark[data-provenance="ai"][data-category="lenguaje"],
+mark[data-provenance="ai"].mark-lenguaje,
+mark[data-provenance="ai"][class*="lenguaje"] {
+    background-color: rgba(111, 66, 193, 0.1) !important;
+    color: #6f42c1 !important;
+    padding: 0 1px !important;
+    box-shadow: none !important; /* No line for automatic highlights */
+}
+
+mark[data-provenance="ai"][data-category="fuentes"],
+mark[data-provenance="ai"].mark-fuentes,
+mark[data-provenance="ai"][class*="fuentes"] {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+    color: #0dcaf0 !important;
+    padding: 0 1px !important;
+    box-shadow: none !important; /* No line for automatic highlights */
+}
+
+/* Manual highlights - background color + line */
 .annotation-mark.mark-contenido_general,
-mark[data-category="contenido_general"],
-mark.mark-contenido_general { 
+mark[data-provenance="manual"][data-category="contenido_general"],
+mark[data-provenance="manual"].mark-contenido_general,
+mark[data-category="contenido_general"]:not([data-provenance="ai"]) {
     background-color: rgba(13, 110, 253, 0.1) !important; 
     box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4) !important;
     color: #0d6efd !important;
@@ -574,8 +603,9 @@ mark.mark-contenido_general {
 }
 
 .annotation-mark.mark-lenguaje,
-mark[data-category="lenguaje"],
-mark.mark-lenguaje { 
+mark[data-provenance="manual"][data-category="lenguaje"],
+mark[data-provenance="manual"].mark-lenguaje,
+mark[data-category="lenguaje"]:not([data-provenance="ai"]) {
     background-color: rgba(111, 66, 193, 0.1) !important; 
     box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4) !important;
     color: #6f42c1 !important;
@@ -583,8 +613,9 @@ mark.mark-lenguaje {
 }
 
 .annotation-mark.mark-fuentes,
-mark[data-category="fuentes"],
-mark.mark-fuentes { 
+mark[data-provenance="manual"][data-category="fuentes"],
+mark[data-provenance="manual"].mark-fuentes,
+mark[data-category="fuentes"]:not([data-provenance="ai"]) {
     background-color: rgba(13, 202, 240, 0.1) !important; 
     box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4) !important;
     color: #0dcaf0 !important;

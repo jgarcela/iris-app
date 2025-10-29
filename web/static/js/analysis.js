@@ -468,6 +468,7 @@ function processHighlights() {
     }
     
     // First, process all marks in highlight blocks to add category data
+    // Only add category to marks that don't have it, and preserve provenance
     const allMarksInBlocks = document.querySelectorAll('.highlight-block mark');
     allMarksInBlocks.forEach(mark => {
         if (!mark.dataset.category) {
@@ -482,6 +483,11 @@ function processHighlights() {
                     mark.setAttribute('data-category', category);
                     const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
                     mark.classList.add(`mark-${categoryClass}`);
+                    
+                    // If mark has color-* class (automatic) but no provenance, set it as ai
+                    if (mark.classList.toString().includes('color-') && !mark.dataset.provenance) {
+                        mark.setAttribute('data-provenance', 'ai');
+                    }
                 }
             }
         }
@@ -698,7 +704,7 @@ function addManualHighlights() {
                 const categoryClassNorm = category === 'contenido_general' ? 'contenido_general' : category;
                 categoryClass = ` class="mark-${categoryClassNorm}"`;
             }
-            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}"${categoryAttrs}${categoryClass}>$1</mark>`);
+            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}" data-provenance="manual"${categoryAttrs}${categoryClass}>$1</mark>`);
         }
     });
     
@@ -1770,6 +1776,7 @@ function applyHighlight(range, variable, category) {
     if (!range || !variable) return;
     const mark = document.createElement('mark');
     mark.setAttribute('data-variable', variable);
+    mark.setAttribute('data-provenance', 'manual'); // Mark as manual annotation
     if (category) {
         mark.setAttribute('data-category', category);
         // Normalize category name for CSS class
