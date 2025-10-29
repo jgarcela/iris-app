@@ -467,6 +467,32 @@ function processHighlights() {
         return;
     }
     
+    // First, process all marks in highlight blocks to add category data
+    // Only add category to marks that don't have it, and preserve provenance
+    const allMarksInBlocks = document.querySelectorAll('.highlight-block mark');
+    allMarksInBlocks.forEach(mark => {
+        if (!mark.dataset.category) {
+            const currentHighlightBlock = mark.closest('.highlight-block');
+            if (currentHighlightBlock) {
+                let category = null;
+                if (currentHighlightBlock.id === 'highlight-contenido') category = 'contenido_general';
+                else if (currentHighlightBlock.id === 'highlight-lenguaje') category = 'lenguaje';
+                else if (currentHighlightBlock.id === 'highlight-fuentes') category = 'fuentes';
+                
+                if (category) {
+                    mark.setAttribute('data-category', category);
+                    const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
+                    mark.classList.add(`mark-${categoryClass}`);
+                    
+                    // If mark has color-* class (automatic) but no provenance, set it as ai
+                    if (mark.classList.toString().includes('color-') && !mark.dataset.provenance) {
+                        mark.setAttribute('data-provenance', 'ai');
+                    }
+                }
+            }
+        }
+    });
+    
     // Find actual highlight elements (mark elements with color-* classes)
     const highlightElements = document.querySelectorAll('mark[class*="color-"]');
     
@@ -478,6 +504,24 @@ function processHighlights() {
         if (!element.dataset.provenance) {
             element.dataset.provenance = 'ai';
         }
+        
+        // If mark doesn't have data-category, determine it from parent highlight-block
+        if (!element.dataset.category) {
+            const currentHighlightBlock = element.closest('.highlight-block');
+            if (currentHighlightBlock) {
+                let category = null;
+                if (currentHighlightBlock.id === 'highlight-contenido') category = 'contenido_general';
+                else if (currentHighlightBlock.id === 'highlight-lenguaje') category = 'lenguaje';
+                else if (currentHighlightBlock.id === 'highlight-fuentes') category = 'fuentes';
+                
+                if (category) {
+                    element.setAttribute('data-category', category);
+                    const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
+                    element.classList.add(`mark-${categoryClass}`);
+                }
+            }
+        }
+        
         // Remove empty marks defensively
         if (!element.textContent || element.textContent.trim() === '') {
             const span = document.createElement('span');
@@ -644,7 +688,7 @@ function addManualHighlights() {
     
     // Process only new manual annotations (not already processed)
     annotations.forEach(annotation => {
-        const { text, variable, timestamp } = annotation;
+        const { text, variable, category, timestamp } = annotation;
         
         // Check if this annotation was already processed by looking for the data-variable attribute
         const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -653,7 +697,14 @@ function addManualHighlights() {
         if (!existingPattern.test(highlightedText)) {
             // This annotation hasn't been processed yet, add it
             const pattern = new RegExp(`(${escapedText})`, 'gi');
-            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}">$1</mark>`);
+            let categoryAttrs = '';
+            let categoryClass = '';
+            if (category) {
+                categoryAttrs = ` data-category="${category}"`;
+                const categoryClassNorm = category === 'contenido_general' ? 'contenido_general' : category;
+                categoryClass = ` class="mark-${categoryClassNorm}"`;
+            }
+            highlightedText = highlightedText.replace(pattern, `<mark data-variable="${variable}" data-provenance="manual"${categoryAttrs}${categoryClass}>$1</mark>`);
         }
     });
     
@@ -1082,6 +1133,7 @@ function showAnnotationControls() {
                 <select class="form-select form-select-sm" id="annotation-variable">
                     <option value="">Selecciona variable</option>
                 </select>
+                <div id="variable-checkboxes-container" class="mt-2" style="display:none"></div>
             </div>
             <div class="mb-3">
                 <label class="form-label small">Valor</label>
@@ -1089,6 +1141,7 @@ function showAnnotationControls() {
                     <option value="">Selecciona valor</option>
                 </select>
             </div>
+            <div id="composite-controls" style="display:none" class="mb-3"></div>
             <div class="d-grid gap-2">
                 <button type="button" class="btn btn-primary btn-sm" onclick="saveAnnotation()">
                     <i class="fas fa-save me-1"></i>Guardar Anotación
@@ -1116,7 +1169,8 @@ function hideAnnotationControls() {
 
 // Function to enable text selection
 function enableTextSelection() {
-    const analysisText = document.querySelector('.analysis-text');
+    // Prefer the automatic analysis highlight container
+    const analysisText = document.querySelector('.highlight-text') || document.querySelector('.analysis-text');
     if (analysisText) {
         analysisText.addEventListener('mouseup', handleTextSelection);
         analysisText.addEventListener('keyup', handleTextSelection);
@@ -1128,6 +1182,93 @@ function enableTextSelection() {
         // Detach highlight selection handler to prevent modal
         detachHighlightSelectionHandler();
     }
+}
+
+// ================================
+// Edit Text (Automatic Analysis)
+// ================================
+
+// Insert an "Editar texto" button in the Acciones group and wire modal
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const actionsGroups = Array.from(document.querySelectorAll('.analysis-tools-panel .button-group'));
+        const actionsGroup = actionsGroups.find(group => group.querySelector('.button-group-title') && /Acciones/i.test(group.querySelector('.button-group-title').textContent || ''));
+        const actionsContainer = actionsGroup ? actionsGroup.querySelector('.action-buttons-minimal') : null;
+        if (actionsContainer && !document.getElementById('edit-text-btn-auto')) {
+            const btn = document.createElement('button');
+            btn.id = 'edit-text-btn-auto';
+            btn.className = 'btn-minimal btn-edit-text';
+            btn.innerHTML = '<i class="fas fa-file-alt me-2"></i>Editar texto';
+            btn.addEventListener('click', openEditTextModalAuto);
+            actionsContainer.insertBefore(btn, actionsContainer.firstChild);
+        }
+    } catch (_) {}
+});
+
+function ensureEditTextModalAuto() {
+    let backdrop = document.getElementById('edit-text-modal-auto');
+    if (backdrop) return backdrop;
+    backdrop = document.createElement('div');
+    backdrop.id = 'edit-text-modal-auto';
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:2000';
+    backdrop.innerHTML = `
+      <div style="background:#fff;width:min(900px,95vw);max-height:90vh;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,0.2);display:flex;flex-direction:column;">
+        <div style="padding:12px 16px;border-bottom:1px solid #e9ecef;display:flex;align-items:center;justify-content:space-between;">
+          <h6 style="margin:0;font-weight:600">Editar texto a analizar</h6>
+          <button id="edit-text-cancel-x" class="btn btn-sm btn-outline-secondary">Cerrar</button>
+        </div>
+        <div style="padding:12px 16px;">
+          <textarea id="edit-textarea-auto" style="width:100%;height:55vh;font-family:inherit;font-size:1rem;line-height:1.5"></textarea>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid #e9ecef;display:flex;gap:.5rem;justify-content:flex-end;">
+          <button id="edit-text-cancel-btn" class="btn btn-outline-secondary">Cancelar</button>
+          <button id="edit-text-apply-btn" class="btn btn-primary">Aplicar cambios</button>
+        </div>
+      </div>`;
+    document.body.appendChild(backdrop);
+    const close = () => { backdrop.style.display = 'none'; };
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+    backdrop.querySelector('#edit-text-cancel-x').addEventListener('click', close);
+    backdrop.querySelector('#edit-text-cancel-btn').addEventListener('click', close);
+    backdrop.querySelector('#edit-text-apply-btn').addEventListener('click', function() {
+        const val = (document.getElementById('edit-textarea-auto').value || '').trim();
+        setHighlightsFromPlainText(val);
+        close();
+    });
+    return backdrop;
+}
+
+function openEditTextModalAuto() {
+    const backdrop = ensureEditTextModalAuto();
+    const ta = document.getElementById('edit-textarea-auto');
+    if (ta) ta.value = getPlainTextFromHighlights();
+    backdrop.style.display = 'flex';
+    ta && ta.focus();
+}
+
+function getPlainTextFromHighlights() {
+    // Prefer contenido > lenguaje > fuentes
+    const areas = [
+        document.querySelector('#highlight-contenido .markup-area'),
+        document.querySelector('#highlight-lenguaje .markup-area'),
+        document.querySelector('#highlight-fuentes .markup-area')
+    ];
+    for (const area of areas) {
+        if (area && (area.textContent || '').trim().length > 0) {
+            return (area.textContent || '').trim();
+        }
+    }
+    // Fallback: entire highlight-text container
+    const container = document.querySelector('.highlight-text');
+    return container ? (container.textContent || '').trim() : '';
+}
+
+function setHighlightsFromPlainText(plain) {
+    const html = (plain || '').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+    const areas = document.querySelectorAll('.markup-area');
+    areas.forEach(area => { area.innerHTML = html; });
+    // After changing text, rebind highlight handlers
+    setTimeout(() => { if (typeof processHighlights === 'function') processHighlights(); }, 0);
 }
 
 // Function to disable text selection
@@ -1165,11 +1306,65 @@ function handleTextSelection() {
     }
 }
 
+// Function to get currently visible category from highlight blocks
+function getCurrentVisibleCategory() {
+    const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
+    if (visibleBlock) {
+        if (visibleBlock.id === 'highlight-contenido') return 'contenido_general';
+        else if (visibleBlock.id === 'highlight-lenguaje') return 'lenguaje';
+        else if (visibleBlock.id === 'highlight-fuentes') return 'fuentes';
+    }
+    return null;
+}
+
 // Function to show annotation panel
 function showAnnotationPanel() {
     const annotationPanel = document.getElementById('annotation-panel');
     if (annotationPanel) {
         annotationPanel.style.display = 'block';
+    }
+    
+    // Get currently visible category and restrict annotation panel
+    const visibleCategory = getCurrentVisibleCategory();
+    const categorySelect = document.getElementById('annotation-category');
+    if (categorySelect && visibleCategory) {
+        // Clear and populate with only the visible category
+        categorySelect.innerHTML = '';
+        const categoryMap = {
+            'contenido_general': 'Contenido General',
+            'lenguaje': 'Lenguaje',
+            'fuentes': 'Fuentes'
+        };
+        const option = document.createElement('option');
+        option.value = visibleCategory;
+        option.textContent = categoryMap[visibleCategory];
+        option.selected = true;
+        categorySelect.appendChild(option);
+        
+        // Disable the select so user can't change category
+        categorySelect.disabled = true;
+        
+        // Trigger category change to load variables
+        handleCategoryChange();
+    } else if (categorySelect) {
+        // If no category visible, enable all options
+        categorySelect.disabled = false;
+        if (categorySelect.innerHTML.trim() === '' || !categorySelect.querySelector('option[value="contenido_general"]')) {
+            categorySelect.innerHTML = `
+                <option value="">Selecciona categoría</option>
+                <option value="contenido_general">Contenido General</option>
+                <option value="lenguaje">Lenguaje</option>
+                <option value="fuentes">Fuentes</option>
+            `;
+        }
+    }
+    
+    // Try to update any preview placeholders that might exist in template or JS panel
+    if (currentSelection && currentSelection.text) {
+        const el1 = document.getElementById('selected-text-content');
+        if (el1) el1.textContent = currentSelection.text;
+        const el2 = document.getElementById('selected-text-preview');
+        if (el2) el2.textContent = currentSelection.text;
     }
 }
 
@@ -1178,6 +1373,21 @@ function hideAnnotationPanel() {
     const annotationPanel = document.getElementById('annotation-panel');
     if (annotationPanel) {
         annotationPanel.style.display = 'none';
+    }
+    
+    // Reset category select if it was disabled
+    const categorySelect = document.getElementById('annotation-category');
+    if (categorySelect) {
+        categorySelect.disabled = false;
+        // Restore all options if they were removed
+        if (!categorySelect.querySelector('option[value="contenido_general"]')) {
+            categorySelect.innerHTML = `
+                <option value="">Selecciona categoría</option>
+                <option value="contenido_general">Contenido General</option>
+                <option value="lenguaje">Lenguaje</option>
+                <option value="fuentes">Fuentes</option>
+            `;
+        }
     }
     
     // Clear selection
@@ -1206,15 +1416,67 @@ function handleCategoryChange() {
     const category = document.getElementById('annotation-category').value;
     const variableSelect = document.getElementById('annotation-variable');
     const valueSelect = document.getElementById('annotation-value');
+    const composite = document.getElementById('composite-controls');
+    const checkboxContainer = document.getElementById('variable-checkboxes-container');
     
     // Clear variable and value selects
     variableSelect.innerHTML = '<option value="">Selecciona variable</option>';
     valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
+    if (composite) { composite.style.display = 'none'; composite.innerHTML = ''; }
+    if (checkboxContainer) { checkboxContainer.style.display = 'none'; checkboxContainer.innerHTML = ''; }
     
     if (category) {
         // Get variables for the selected category from config.ini
-        const variables = getVariablesForCategory(category);
-        
+        let variables = getVariablesForCategory(category);
+        // Restrict Fuentes to declaracion_fuente (the others appear as composite controls)
+        if (category === 'fuentes') {
+            variables = ['declaracion_fuente'];
+            // Show selects
+            variableSelect.style.display = 'block';
+            valueSelect.style.display = 'block';
+        } else if (category === 'lenguaje') {
+            // Use checkboxes for lenguaje
+            variableSelect.style.display = 'none';
+            valueSelect.style.display = 'none';
+            if (checkboxContainer) {
+                checkboxContainer.style.display = 'block';
+                variables.forEach(variable => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'form-check';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.className = 'form-check-input';
+                    cb.id = `variable-checkbox-${variable}`;
+                    cb.value = variable;
+                    cb.name = 'variable-checkbox';
+                    const label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.htmlFor = cb.id;
+                    label.textContent = variable.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    wrap.appendChild(cb);
+                    wrap.appendChild(label);
+                    // Special select for lenguaje_sexista
+                    if (variable === 'lenguaje_sexista') {
+                        const selectWrap = document.createElement('div');
+                        selectWrap.className = 'mt-1 ms-4';
+                        selectWrap.id = 'lenguaje-sexista-select-wrap-auto';
+                        selectWrap.style.display = 'none';
+                        const select = document.createElement('select');
+                        select.className = 'form-select form-select-sm';
+                        select.id = 'lenguaje-sexista-value-auto';
+                        const optSi = document.createElement('option'); optSi.value = '2'; optSi.textContent = 'Sí';
+                        const optSalto = document.createElement('option'); optSalto.value = '3'; optSalto.textContent = 'Sí, además se observa un salto semántico';
+                        select.appendChild(optSi); select.appendChild(optSalto);
+                        cb.addEventListener('change', function(){ selectWrap.style.display = this.checked ? 'block' : 'none'; });
+                        selectWrap.appendChild(select);
+                        wrap.appendChild(selectWrap);
+                    }
+                    checkboxContainer.appendChild(wrap);
+                });
+            }
+            return; // Do not populate select for lenguaje
+        }
+        // Default: populate select
         variables.forEach(variable => {
             const option = document.createElement('option');
             option.value = variable;
@@ -1228,29 +1490,124 @@ function handleCategoryChange() {
 function handleVariableChange() {
     const variable = document.getElementById('annotation-variable').value;
     const valueSelect = document.getElementById('annotation-value');
+    const composite = document.getElementById('composite-controls');
+    const category = document.getElementById('annotation-category')?.value || '';
     
     // Clear value select
     valueSelect.innerHTML = '<option value="">Selecciona valor</option>';
+    if (composite) { composite.style.display = 'none'; composite.innerHTML = ''; }
     
     if (variable) {
         // Get values for the selected variable from config.ini
         const values = getValuesForVariable(variable);
         
-        values.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value.key;
-            option.textContent = value.label;
-            valueSelect.appendChild(option);
-        });
+        if (values && values.length > 0) {
+            // Show value select only if there are values
+            valueSelect.parentElement.style.display = '';
+            
+            // For binary Yes/No variables, only show "Sí" option (matching manual analysis)
+            const lower = values.map(v => (v.label || '').toLowerCase());
+            const isYesNo = values.length === 2 && lower.includes('sí') && lower.includes('no');
+            const isSiNo = values.length === 2 && lower.includes('si') && lower.includes('no');
+            
+            let toRender = values;
+            if (isYesNo || isSiNo) {
+                toRender = values.filter(v => /sí|si/i.test(v.label || ''));
+            }
+            
+            toRender.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value.key;
+                option.textContent = value.label;
+                valueSelect.appendChild(option);
+            });
+        } else {
+            // Hide value select for variables without fixed values (e.g., contenido_general text examples)
+            valueSelect.parentElement.style.display = 'none';
+        }
+
+        // Default "Sí" for declaracion_fuente
+        if (variable === 'declaracion_fuente') {
+            // Try to find an option labeled "Sí" and select it
+            const siOption = Array.from(valueSelect.options).find(opt => /sí/i.test(opt.textContent || ''));
+            if (siOption) {
+                valueSelect.value = siOption.value;
+            }
+        }
+
+        // Show composite controls for declaracion_fuente
+        if (variable === 'declaracion_fuente' && composite) {
+            const nombreVals = getValuesForVariable('nombre_fuente');
+            const generoVals = getValuesForVariable('genero_fuente');
+            const tipoVals = getValuesForVariable('tipo_fuente');
+            composite.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label small">Nombre de la fuente</label>
+                        <select class="form-select form-select-sm" id="composite-nombre-fuente">
+                            ${nombreVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Género de la fuente</label>
+                        <select class="form-select form-select-sm" id="composite-genero-fuente">
+                            ${generoVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Tipo de fuente</label>
+                        <select class="form-select form-select-sm" id="composite-tipo-fuente">
+                            <option value="">Seleccionar tipo...</option>
+                            ${tipoVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+            composite.style.display = 'block';
+        }
+        
+        // Show composite gender controls for contenido_general composite pairs
+        if (category === 'contenido_general' && composite) {
+            const compositePairs = {
+                'personas_mencionadas': 'genero_personas_mencionadas',
+                'nombre_propio_titular': 'genero_nombre_propio_titular'
+            };
+            
+            if (compositePairs[variable]) {
+                const genderVar = compositePairs[variable];
+                const genderVals = getValuesForVariable(genderVar);
+                
+                let label = 'Género';
+                if (genderVar === 'genero_personas_mencionadas') {
+                    label = 'Género de la persona';
+                } else if (genderVar === 'genero_nombre_propio_titular') {
+                    label = 'Género nombre propio titular';
+                }
+                
+                composite.innerHTML = `
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label small">${label}</label>
+                            <select class="form-select form-select-sm" id="composite-gender">
+                                ${genderVals.map(v => `<option value="${v.key}">${v.label}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+                composite.style.display = 'block';
+            }
+        }
     }
 }
 
 // Function to get variables for category
 function getVariablesForCategory(category) {
     const categoryVariables = {
+        // Match manual analysis: exclude 'tema' and hidden gender variables from manual selection
         'contenido_general': [
-            'genero_nombre_propio_titular', 'genero_personas_mencionadas', 'genero_periodista',
-            'tema', 'cita_titular', 'criterios_excepcion_noticiabilidad'
+            'cita_textual_titular',
+            'genero_periodista',
+            'nombre_propio_titular',
+            'personas_mencionadas'
+            // Note: genero_nombre_propio_titular and genero_personas_mencionadas are handled as composite pairs
         ],
         'lenguaje': [
             'lenguaje_sexista', 'androcentrismo', 'asimetria', 'cargos_mujeres',
@@ -1295,11 +1652,8 @@ function getValuesForVariable(variable) {
             {key: '14', label: 'Social'}, {key: '15', label: 'Tecnología'}, 
             {key: '16', label: 'Transporte'}, {key: '17', label: 'Otros'}
         ],
-        'cita_titular': [
+        'cita_textual_titular': [
             {key: '0', label: 'No'}, {key: '1', label: 'Sí'}
-        ],
-        'criterios_excepcion_noticiabilidad': [
-            {key: '1', label: 'No'}, {key: '2', label: 'Sí'}
         ],
         
         // LENGUAJE
@@ -1340,9 +1694,12 @@ function getValuesForVariable(variable) {
             {key: '25', label: 'Político/a'}, {key: '26', label: 'Rey/Reina'}, 
             {key: '27', label: 'Trabajador/a'}
         ],
+        // Match manual analysis options
         'genero_fuente': [
-            {key: '1', label: 'Masculino'}, {key: '2', label: 'Femenino'}, 
-            {key: '3', label: 'Ns/Nc'}
+            { key: '1', label: 'No hay' },
+            { key: '2', label: 'Sí, hombre' },
+            { key: '3', label: 'Sí, mujer' },
+            { key: '4', label: 'Sí, mujer y hombre' }
         ]
     };
     
@@ -1355,9 +1712,28 @@ function saveAnnotation() {
     const variable = document.getElementById('annotation-variable').value;
     const value = document.getElementById('annotation-value').value;
     
-    if (!category || !variable || !value) {
+    // Validation adapted per category
+    if (!category) {
         showNotification('Por favor completa todos los campos', 'error');
         return;
+    }
+    if (category !== 'lenguaje' && category !== 'contenido_general') {
+        if (!variable || !value) {
+            showNotification('Por favor completa todos los campos', 'error');
+            return;
+        }
+    } else if (category === 'lenguaje') {
+        const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+        if (!checks || checks.length === 0) {
+            showNotification('Por favor selecciona al menos una variable', 'error');
+            return;
+        }
+    } else if (category === 'contenido_general') {
+        // Only require variable; value is not needed
+        if (!variable) {
+            showNotification('Por favor completa todos los campos', 'error');
+            return;
+        }
     }
     
     if (!currentSelection) {
@@ -1365,23 +1741,99 @@ function saveAnnotation() {
         return;
     }
     
-    // Create annotation object
-    const annotation = {
-        text: currentSelection.text,
-        category: category,
-        variable: variable,
-        value: value,
-        timestamp: new Date().toISOString()
-    };
-    
-    // Add to annotations array
-    annotations.push(annotation);
-    
-    // Integrate annotation into analysis data structure
-    integrateAnnotationIntoAnalysis(annotation);
-    
-    // Apply highlight to the text
-    applyHighlight(currentSelection.range, variable);
+    // Lenguaje: save multiple variables via checkboxes; lenguaje_sexista can be '3'
+    if (category === 'lenguaje') {
+        const checks = document.querySelectorAll('input[name="variable-checkbox"]:checked');
+        if (!checks || checks.length === 0) {
+            showNotification('Por favor selecciona al menos una variable', 'error');
+            return;
+        }
+        const selectedVars = Array.from(checks).map(cb => cb.value);
+        const baseId = Date.now();
+        let offset = 0;
+        const defaultValue = '2';
+        const ids = [];
+        selectedVars.forEach(v => {
+            let valueForVar = defaultValue;
+            if (v === 'lenguaje_sexista') {
+                const select = document.getElementById('lenguaje-sexista-value-auto');
+                if (select && select.value) valueForVar = select.value;
+            }
+            const id = baseId + offset++;
+            const ann = { id, text: currentSelection.text, category, variable: v, value: valueForVar, timestamp: new Date().toISOString() };
+            annotations.push(ann);
+            integrateAnnotationIntoAnalysis(ann);
+            ids.push(String(id));
+        });
+        applyHighlight(currentSelection.range, selectedVars.join(','), category);
+        showNotification('Anotaciones guardadas', 'success');
+        hideAnnotationPanel();
+        document.getElementById('annotation-category').value = '';
+        // Reset checkboxes UI
+        const checkboxContainer = document.getElementById('variable-checkboxes-container');
+        if (checkboxContainer) { checkboxContainer.style.display = 'none'; checkboxContainer.innerHTML = ''; }
+        return;
+    }
+
+    // Contenido General: handle composite pairs (personas_mencionadas/nombre_propio_titular + genero)
+    if (category === 'contenido_general') {
+        const compositePairs = {
+            'personas_mencionadas': 'genero_personas_mencionadas',
+            'nombre_propio_titular': 'genero_nombre_propio_titular'
+        };
+        
+        const baseId = Date.now();
+        const anns = [];
+        const highlightIds = [];
+        
+        // Determine value: use '1' for text-only variables, or the selected value if available
+        const finalValue = value || '1';
+        
+        // Create main annotation
+        const mainAnn = { id: baseId, text: currentSelection.text, category, variable, value: finalValue, timestamp: new Date().toISOString() };
+        anns.push(mainAnn);
+        highlightIds.push(String(baseId));
+        
+        // If this variable has a composite pair and gender is selected, create gender annotation
+        if (compositePairs[variable]) {
+            const genderVar = compositePairs[variable];
+            const genderSelect = document.getElementById('composite-gender');
+            if (genderSelect && genderSelect.value) {
+                const genderAnn = { id: baseId + 1, text: currentSelection.text, category, variable: genderVar, value: genderSelect.value, timestamp: new Date().toISOString() };
+                anns.push(genderAnn);
+                highlightIds.push(String(baseId + 1));
+            }
+        }
+        
+        anns.forEach(a => { annotations.push(a); integrateAnnotationIntoAnalysis(a); });
+        applyHighlight(currentSelection.range, variable, category);
+        
+    // Declaración de fuente: guardar compuestos (declaración + nombre + género + tipo)
+    } else if (category === 'fuentes' && variable === 'declaracion_fuente') {
+        const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+        const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+        const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+        const baseId = Date.now();
+        const anns = [];
+        anns.push({ id: baseId, text: currentSelection.text, category, variable, value, timestamp: new Date().toISOString() });
+        if (nombreFuenteValue) anns.push({ id: baseId+1, text: currentSelection.text, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: new Date().toISOString() });
+        if (generoFuenteValue) anns.push({ id: baseId+2, text: currentSelection.text, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: new Date().toISOString() });
+        if (tipoFuenteValue) anns.push({ id: baseId+3, text: currentSelection.text, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: new Date().toISOString() });
+        anns.forEach(a => { annotations.push(a); integrateAnnotationIntoAnalysis(a); });
+        applyHighlight(currentSelection.range, variable, category);
+    } else {
+        // Create single annotation
+        const annotation = {
+            text: currentSelection.text,
+            category: category,
+            variable: variable,
+            value: value,
+            timestamp: new Date().toISOString()
+        };
+        annotations.push(annotation);
+        integrateAnnotationIntoAnalysis(annotation);
+        applyHighlight(currentSelection.range, variable, category);
+    }
     
     // Show success message
     showNotification('Anotación guardada correctamente', 'success');
@@ -1472,10 +1924,17 @@ function integrateAnnotationIntoAnalysis(annotation) {
 }
 
 // Function to apply highlight (this is now handled by addManualHighlights)
-function applyHighlight(range, variable) {
+function applyHighlight(range, variable, category) {
     if (!range || !variable) return;
     const mark = document.createElement('mark');
     mark.setAttribute('data-variable', variable);
+    mark.setAttribute('data-provenance', 'manual'); // Mark as manual annotation
+    if (category) {
+        mark.setAttribute('data-category', category);
+        // Normalize category name for CSS class
+        const categoryClass = category === 'contenido_general' ? 'contenido_general' : category;
+        mark.classList.add(`mark-${categoryClass}`);
+    }
     try {
         // Prefer surroundContents to preserve selection boundaries when possible
         const selectedText = range.toString();
