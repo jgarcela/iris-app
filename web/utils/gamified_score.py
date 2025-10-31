@@ -162,17 +162,29 @@ def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.8):
                 report["resumen_global"]["faltantes"] += faltantes
                 report["resumen_global"]["puntos_totales"] += puntos
 
-    # Calcular score final normalizado (0–100)
-    total_items = (report["resumen_global"]["exactos"] + 
-                   report["resumen_global"]["parciales"] + 
-                   report["resumen_global"]["extras"] + 
-                   report["resumen_global"]["faltantes"])
+    # Calcular score final normalizado sobre 100%
+    # El máximo teórico es cuando todas las anotaciones IRIS son exactas
+    total_items_iris = (report["resumen_global"]["exactos"] + 
+                        report["resumen_global"]["parciales"] + 
+                        report["resumen_global"]["faltantes"])
     
-    if total_items == 0:
+    if total_items_iris == 0:
+        # Si no hay anotaciones IRIS, el score es 0
         report["resumen_global"]["score_final"] = 0
     else:
-        max_posible = total_items * 100
-        score_raw = max(0, min(100 * report["resumen_global"]["puntos_totales"] / max_posible, 100))
+        # Máximo teórico: todas las anotaciones IRIS perfectas (exactas) = total_items_iris * 100
+        puntos_maximos_posibles = total_items_iris * 100
+        
+        # Puntos actuales (puede ser negativo por extras/faltantes)
+        puntos_actuales = report["resumen_global"]["puntos_totales"]
+        
+        # Normalizar sobre 100%
+        # Score = (puntos_actuales / puntos_maximos_posibles) * 100
+        score_raw = (puntos_actuales / puntos_maximos_posibles) * 100
+        
+        # Asegurar que esté entre 0 y 100
+        score_raw = max(0, min(score_raw, 100))
+        
         report["resumen_global"]["score_final"] = round(score_raw, 2)
     
     return report

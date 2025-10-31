@@ -58,51 +58,77 @@
         </div>
     </div>
 
-    <!-- Desglose de Puntuación -->
+    <!-- Desglose de Puntuación (Tabs) -->
     <div class="row mb-4" id="score-breakdown-section" style="display: none;">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie me-2"></i>{{ _('Desglose de Puntuación') }}
-                    </h5>
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="score-overview-tab" data-bs-toggle="tab" href="#score-overview-pane" role="tab" aria-controls="score-overview-pane" aria-selected="true">
+                                <i class="fas fa-chart-pie me-2"></i>{{ _('Resumen') }}
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="score-table-tab" data-bs-toggle="tab" href="#score-table-pane" role="tab" aria-controls="score-table-pane" aria-selected="false">
+                                <i class="fas fa-list-ol me-2"></i>{{ _('Desglose por anotación') }}
+                            </a>
+                        </li>
+                    </ul>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="text-center p-3 bg-success bg-opacity-10 rounded">
-                                <div class="h3 text-success mb-1" id="breakdown-exactos">0</div>
-                                <div class="text-muted small">{{ _('Exactos') }}</div>
-                                <div class="text-success fw-bold">+100 pts c/u</div>
+                    <div class="tab-content">
+                        <!-- Overview pane -->
+                        <div class="tab-pane fade show active" id="score-overview-pane" role="tabpanel" aria-labelledby="score-overview-tab">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                                        <div class="h3 text-success mb-1" id="breakdown-exactos">0</div>
+                                        <div class="text-muted small">{{ _('Exactos') }}</div>
+                                        <div class="text-success fw-bold">+100 pts c/u</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                                        <div class="h3 text-info mb-1" id="breakdown-parciales">0</div>
+                                        <div class="text-muted small">{{ _('Parciales') }}</div>
+                                        <div class="text-info fw-bold">+50 pts c/u</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                                        <div class="h3 text-warning mb-1" id="breakdown-extras">0</div>
+                                        <div class="text-muted small">{{ _('Extras') }}</div>
+                                        <div class="text-warning fw-bold">-20 pts c/u</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                                        <div class="h3 text-danger mb-1" id="breakdown-faltantes">0</div>
+                                        <div class="text-muted small">{{ _('Faltantes') }}</div>
+                                        <div class="text-danger fw-bold">-10 pts c/u</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center p-3 bg-info bg-opacity-10 rounded">
-                                <div class="h3 text-info mb-1" id="breakdown-parciales">0</div>
-                                <div class="text-muted small">{{ _('Parciales') }}</div>
-                                <div class="text-info fw-bold">+50 pts c/u</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
-                                <div class="h3 text-warning mb-1" id="breakdown-extras">0</div>
-                                <div class="text-muted small">{{ _('Extras') }}</div>
-                                <div class="text-warning fw-bold">-20 pts c/u</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
-                                <div class="h3 text-danger mb-1" id="breakdown-faltantes">0</div>
-                                <div class="text-muted small">{{ _('Faltantes') }}</div>
-                                <div class="text-danger fw-bold">-10 pts c/u</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="text-center">
-                                <strong>{{ _('Puntos Totales') }}:</strong> 
-                                <span class="h5 ms-2" id="breakdown-puntos">0</span>
+
+                        <!-- Table pane -->
+                        <div class="tab-pane fade" id="score-table-pane" role="tabpanel" aria-labelledby="score-table-tab">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle" id="score-breakdown-table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ _('Categoría') }}</th>
+                                            <th>{{ _('Variable') }}</th>
+                                            <th>{{ _('Texto') }}</th>
+                                            <th class="text-center">{{ _('Tipo') }}</th>
+                                            <th class="text-end">{{ _('Puntos') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- filas generadas por JS -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -110,7 +136,6 @@
             </div>
         </div>
     </div>
-
     <!-- Comparación de Análisis -->
     <div class="row">
         <!-- Análisis Manual -->
@@ -945,12 +970,13 @@ function calculateMetrics() {
     document.getElementById('breakdown-parciales').textContent = parciales;
     document.getElementById('breakdown-extras').textContent = extras;
     document.getElementById('breakdown-faltantes').textContent = faltantes;
-    document.getElementById('breakdown-puntos').textContent = puntosTotales;
     
     // Mostrar sección de desglose
     document.getElementById('score-breakdown-section').style.display = 'block';
     
     console.log('[GAMIFIED_SCORE] Exactos:', exactos, 'Parciales:', parciales, 'Extras:', extras, 'Faltantes:', faltantes, 'Puntos:', puntosTotales, 'Score:', scoreFinal);
+    // Construir tabla por anotación
+    buildScoreBreakdownTable();
   } else {
     // Fallback: Comparación exacta (sistema anterior)
     const originalCount = originalAnnotations ? originalAnnotations.length : 0;
@@ -994,6 +1020,89 @@ function calculateMetrics() {
     // Ocultar desglose si no hay reporte gamificado
     document.getElementById('score-breakdown-section').style.display = 'none';
   }
+}
+
+// Construye el desglose por anotación con puntos
+function buildScoreBreakdownTable() {
+  const tbody = document.querySelector('#score-breakdown-table tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  // Crear mapas por categoría/variable para matching exacto
+  const toKey = s => (s || '').toString().trim().toLowerCase();
+  const originalMap = new Map(); // cat -> var -> Set(text)
+  originalAnnotations.forEach(a => {
+    const c = a.category, v = a.variable, t = toKey(a.text);
+    if (!c || !v || !t) return;
+    if (!originalMap.has(c)) originalMap.set(c, new Map());
+    if (!originalMap.get(c).has(v)) originalMap.get(c).set(v, new Set());
+    originalMap.get(c).get(v).add(t);
+  });
+
+  const manualMap = new Map(); // cat -> var -> Set(text)
+  manualAnnotations.forEach(a => {
+    const c = a.category, v = a.variable, t = toKey(a.text);
+    if (!c || !v || !t) return;
+    if (!manualMap.has(c)) manualMap.set(c, new Map());
+    if (!manualMap.get(c).has(v)) manualMap.get(c).set(v, new Set());
+    manualMap.get(c).get(v).add(t);
+  });
+
+  // 1) Filas para cada anotación del usuario
+  manualAnnotations.forEach(a => {
+    const c = a.category, v = a.variable, tRaw = a.text, t = toKey(a.text);
+    if (!c || !v || !t) return;
+
+    const varsInCat = originalMap.get(c) || new Map();
+    const exactSet = (varsInCat.get(v) || new Set());
+    let tipo = 'extra';
+    let puntos = -20;
+
+    if (exactSet.has(t)) {
+      tipo = 'exacto';
+      puntos = 100;
+    } else {
+      // ¿parcial? buscar en otra variable de la misma categoría
+      for (const [ov, setTexts] of varsInCat.entries()) {
+        if (ov === v) continue;
+        if (setTexts.has(t)) {
+          tipo = 'parcial';
+          puntos = 50;
+          break;
+        }
+      }
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c}</td>
+      <td>${v}</td>
+      <td>${escapeHtml(tRaw)}</td>
+      <td class="text-center">
+        <span class="badge ${tipo==='exacto' ? 'bg-success' : tipo==='parcial' ? 'bg-info' : 'bg-warning'}">${tipo}</span>
+      </td>
+      <td class="text-end fw-bold ${puntos>0 ? 'text-success' : puntos<0 ? 'text-danger' : ''}">${puntos}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // 2) Faltantes: en IRIS y no en usuario, por misma variable
+  originalAnnotations.forEach(a => {
+    const c = a.category, v = a.variable, tRaw = a.text, t = toKey(a.text);
+    if (!c || !v || !t) return;
+    const userSet = ((manualMap.get(c) || new Map()).get(v) || new Set());
+    if (!userSet.has(t)) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c}</td>
+        <td>${v}</td>
+        <td>${escapeHtml(tRaw)}</td>
+        <td class="text-center"><span class="badge bg-danger">faltante</span></td>
+        <td class="text-end fw-bold text-danger">-10</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  });
 }
 </script>
 {% endblock %}
