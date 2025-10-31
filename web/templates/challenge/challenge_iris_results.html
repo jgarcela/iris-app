@@ -81,34 +81,21 @@
                         <!-- Overview pane -->
                         <div class="tab-pane fade show active" id="score-overview-pane" role="tabpanel" aria-labelledby="score-overview-tab">
                             <div class="row mb-3">
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <div class="text-center p-3 bg-success bg-opacity-10 rounded">
                                         <div class="h3 text-success mb-1" id="breakdown-exactos">0</div>
                                         <div class="text-muted small">{{ _('Exactos') }}</div>
                                         <div class="text-success fw-bold">+100 pts c/u</div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <div class="text-center p-3 bg-info bg-opacity-10 rounded">
                                         <div class="h3 text-info mb-1" id="breakdown-parciales">0</div>
                                         <div class="text-muted small">{{ _('Parciales') }}</div>
                                         <div class="text-info fw-bold">+50 pts c/u</div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
-                                        <div class="h3 text-warning mb-1" id="breakdown-extras">0</div>
-                                        <div class="text-muted small">{{ _('Extras') }}</div>
-                                        <div class="text-warning fw-bold">-20 pts c/u</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
-                                        <div class="h3 text-danger mb-1" id="breakdown-faltantes">0</div>
-                                        <div class="text-muted small">{{ _('Faltantes') }}</div>
-                                        <div class="text-danger fw-bold">-10 pts c/u</div>
-                                    </div>
-                                </div>
+                                
                             </div>
                         </div>
 
@@ -968,13 +955,12 @@ function calculateMetrics() {
     // Mostrar desglose
     document.getElementById('breakdown-exactos').textContent = exactos;
     document.getElementById('breakdown-parciales').textContent = parciales;
-    document.getElementById('breakdown-extras').textContent = extras;
-    document.getElementById('breakdown-faltantes').textContent = faltantes;
+    // extras y faltantes no se muestran en la UI
     
     // Mostrar sección de desglose
     document.getElementById('score-breakdown-section').style.display = 'block';
     
-    console.log('[GAMIFIED_SCORE] Exactos:', exactos, 'Parciales:', parciales, 'Extras:', extras, 'Faltantes:', faltantes, 'Puntos:', puntosTotales, 'Score:', scoreFinal);
+    console.log('[GAMIFIED_SCORE] Exactos:', exactos, 'Parciales:', parciales, 'Puntos:', puntosTotales, 'Score:', scoreFinal);
     // Construir tabla por anotación
     buildScoreBreakdownTable();
   } else {
@@ -1056,20 +1042,27 @@ function buildScoreBreakdownTable() {
     const varsInCat = originalMap.get(c) || new Map();
     const exactSet = (varsInCat.get(v) || new Set());
     let tipo = 'extra';
-    let puntos = -20;
+    let puntos = 0;
 
     if (exactSet.has(t)) {
       tipo = 'exacto';
       puntos = 100;
     } else {
       // ¿parcial? buscar en otra variable de la misma categoría
+      let encontradoParcial = false;
       for (const [ov, setTexts] of varsInCat.entries()) {
         if (ov === v) continue;
         if (setTexts.has(t)) {
           tipo = 'parcial';
           puntos = 50;
+          encontradoParcial = true;
           break;
         }
+      }
+      // Si no encontró parcial, es extra (0 puntos, sin penalización)
+      if (!encontradoParcial) {
+        tipo = 'extra';
+        puntos = 0;
       }
     }
 
@@ -1081,7 +1074,7 @@ function buildScoreBreakdownTable() {
       <td class="text-center">
         <span class="badge ${tipo==='exacto' ? 'bg-success' : tipo==='parcial' ? 'bg-info' : 'bg-warning'}">${tipo}</span>
       </td>
-      <td class="text-end fw-bold ${puntos>0 ? 'text-success' : puntos<0 ? 'text-danger' : ''}">${puntos}</td>
+      <td class="text-end fw-bold ${puntos>0 ? 'text-success' : 'text-muted'}">${puntos}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -1097,8 +1090,8 @@ function buildScoreBreakdownTable() {
         <td>${c}</td>
         <td>${v}</td>
         <td>${escapeHtml(tRaw)}</td>
-        <td class="text-center"><span class="badge bg-danger">faltante</span></td>
-        <td class="text-end fw-bold text-danger">-10</td>
+        <td class="text-center"><span class="badge bg-secondary">faltante</span></td>
+        <td class="text-end fw-bold text-muted">0</td>
       `;
       tbody.appendChild(tr);
     }

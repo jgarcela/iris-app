@@ -117,13 +117,14 @@ def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.8):
                             break
                 
                 if not found_match:
-                    # No hay match
+                    # No hay match (extras: sin puntos, sin penalización)
                     extras += 1
-                    puntos -= 20
+                    puntos += 0
 
             # Faltantes = IRIS que el usuario no marcó (en la misma variable)
+            # Sin penalización: 0 puntos
             faltantes = len(vals_iris_same_var) - len(matched_iris_same_var)
-            puntos -= 10 * max(0, faltantes)
+            puntos += 0 * max(0, faltantes)
 
             cat_report[var] = {
                 "exactos": exactos,
@@ -149,9 +150,9 @@ def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.8):
         
         for var, vals_iris in vars_iris.items():
             if var not in report["categorías"][cat]:
-                # Variable solo en IRIS (faltante)
+                # Variable solo en IRIS (faltante: sin puntos, sin penalización)
                 faltantes = len(vals_iris)
-                puntos = -10 * faltantes
+                puntos = 0 * faltantes
                 report["categorías"][cat][var] = {
                     "exactos": 0,
                     "parciales": 0,
