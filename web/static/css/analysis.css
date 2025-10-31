@@ -25,10 +25,43 @@
   align-items: center;
   justify-content: space-between;
   transition: all var(--transition-speed) ease;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: -0.5rem;
+}
+
+/* Category color indicators in headers */
+.collapsible-header[data-target="contenido-content"] {
+  border-left: 4px solid #0d6efd;
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.1) 100%);
+}
+
+.collapsible-header[data-target="lenguaje-content"] {
+  border-left: 4px solid #6f42c1;
+  background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(111, 66, 193, 0.1) 100%);
+}
+
+.collapsible-header[data-target="fuentes-content"] {
+  border-left: 4px solid #0dcaf0;
+  background: linear-gradient(135deg, rgba(13, 202, 240, 0.05) 0%, rgba(13, 202, 240, 0.1) 100%);
 }
 
 .collapsible-header:hover {
   color: var(--primary-color);
+  opacity: 0.9;
+}
+
+/* Specific hover states for category headers */
+.collapsible-header[data-target="contenido-content"]:hover {
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0.15) 100%);
+}
+
+.collapsible-header[data-target="lenguaje-content"]:hover {
+  background: linear-gradient(135deg, rgba(111, 66, 193, 0.1) 0%, rgba(111, 66, 193, 0.15) 100%);
+}
+
+.collapsible-header[data-target="fuentes-content"]:hover {
+  background: linear-gradient(135deg, rgba(13, 202, 240, 0.1) 0%, rgba(13, 202, 240, 0.15) 100%);
 }
 
 /* Light blue background for "Cómo editar anotaciones" dropdown content */
@@ -422,20 +455,20 @@
   background-color: rgba(0, 123, 255, 0.1);
 }
 
-/* Category-specific subtle colors */
+/* Category-specific subtle colors matching manual analysis */
 .highlight-contenido .highlighted-text {
-  background-color: rgba(0, 123, 255, 0.15);
-  border-bottom-color: #007bff;
+  background-color: rgba(13, 110, 253, 0.15);
+  border-bottom-color: #0d6efd;
 }
 
 .highlight-lenguaje .highlighted-text {
-  background-color: rgba(40, 167, 69, 0.15);
-  border-bottom-color: #28a745;
+  background-color: rgba(111, 66, 193, 0.15);
+  border-bottom-color: #6f42c1;
 }
 
 .highlight-fuentes .highlighted-text {
-  background-color: rgba(255, 193, 7, 0.15);
-  border-bottom-color: #ffc107;
+  background-color: rgba(13, 202, 240, 0.15);
+  border-bottom-color: #0dcaf0;
 }
 
 /* Tooltip styles */
@@ -526,7 +559,74 @@ mark[data-variable] {
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 2px;
-  padding: 1px 2px;
+  padding: 0 1px;
+}
+
+/* Category-specific highlight colors matching manual analysis */
+/* Automatic highlights (ai) - only background color, no line */
+mark[data-provenance="ai"][data-category="contenido_general"],
+mark[data-provenance="ai"].mark-contenido_general,
+mark[data-provenance="ai"][class*="contenido"] {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #0d6efd !important;
+    padding: 0 1px !important;
+    box-shadow: none !important; /* No line for automatic highlights */
+}
+
+mark[data-provenance="ai"][data-category="lenguaje"],
+mark[data-provenance="ai"].mark-lenguaje,
+mark[data-provenance="ai"][class*="lenguaje"] {
+    background-color: rgba(111, 66, 193, 0.1) !important;
+    color: #6f42c1 !important;
+    padding: 0 1px !important;
+    box-shadow: none !important; /* No line for automatic highlights */
+}
+
+mark[data-provenance="ai"][data-category="fuentes"],
+mark[data-provenance="ai"].mark-fuentes,
+mark[data-provenance="ai"][class*="fuentes"] {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+    color: #0dcaf0 !important;
+    padding: 0 1px !important;
+    box-shadow: none !important; /* No line for automatic highlights */
+}
+
+/* Manual highlights - background color + line */
+.annotation-mark.mark-contenido_general,
+mark[data-provenance="manual"][data-category="contenido_general"],
+mark[data-provenance="manual"].mark-contenido_general,
+mark[data-category="contenido_general"]:not([data-provenance="ai"]) {
+    background-color: rgba(13, 110, 253, 0.1) !important; 
+    box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4) !important;
+    color: #0d6efd !important;
+    padding: 0 1px !important;
+}
+
+.annotation-mark.mark-lenguaje,
+mark[data-provenance="manual"][data-category="lenguaje"],
+mark[data-provenance="manual"].mark-lenguaje,
+mark[data-category="lenguaje"]:not([data-provenance="ai"]) {
+    background-color: rgba(111, 66, 193, 0.1) !important; 
+    box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4) !important;
+    color: #6f42c1 !important;
+    padding: 0 1px !important;
+}
+
+.annotation-mark.mark-fuentes,
+mark[data-provenance="manual"][data-category="fuentes"],
+mark[data-provenance="manual"].mark-fuentes,
+mark[data-category="fuentes"]:not([data-provenance="ai"]) {
+    background-color: rgba(13, 202, 240, 0.1) !important; 
+    box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4) !important;
+    color: #0dcaf0 !important;
+    padding: 0 1px !important;
+}
+
+/* Markup area styles - preserve spaces, paragraphs, and justify text */
+.markup-area {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: justify;
 }
 
 /* Make all highlights clearly interactive */
@@ -544,8 +644,8 @@ mark[data-variable]:hover {
   transform: scale(1.02);
 }
 
-/* Default mark styling - using browser default highlight appearance */
-mark {
+/* Default mark styling - only for marks without category (legacy/automatic highlights) */
+mark:not([data-category]) {
   background-color: #fff9c4; /* Pale yellow highlight */
   padding: 0;
   border-radius: 2px;

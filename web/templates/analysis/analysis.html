@@ -693,7 +693,8 @@
         } else if (category === 'lenguaje' && variables.lenguaje) {
             availableVariables = variables.lenguaje;
         } else if (category === 'fuentes' && variables.fuentes) {
-            availableVariables = variables.fuentes;
+            // Only base variable visible; the rest will appear as composite controls
+            availableVariables = ['declaracion_fuente'];
         }
         
         // Hide gender-only variables that are driven by a paired presence variable
@@ -845,6 +846,36 @@
             nombre_fuente: 'genero_fuente'
         };
 
+        // Fuentes: declaracion_fuente shows additional controls for nombre/género/tipo
+        if (variable === 'declaracion_fuente' && compositeControls) {
+            const nombreFuenteValues = variableValues['nombre_fuente'] || [];
+            const generoFuenteValues = variableValues['genero_fuente'] || [];
+            const tipoFuenteValues = variableValues['tipo_fuente'] || [];
+            compositeControls.style.display = 'block';
+            compositeControls.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">Nombre de la fuente</label>
+                        <select class="form-select" id="composite-nombre-fuente">
+                            ${nombreFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Género de la fuente</label>
+                        <select class="form-select" id="composite-genero-fuente">
+                            ${generoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Tipo de fuente</label>
+                        <select class="form-select" id="composite-tipo-fuente">
+                            <option value="">Seleccionar tipo...</option>
+                            ${tipoFuenteValues.map(v => `<option value="${v.value}">${v.text}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>`;
+        }
+
         // Si la variable seleccionada es parte de un compuesto, mostrar control de género
         const compositeDetail = compositePairs[variable];
         if (compositeDetail) {
@@ -931,7 +962,41 @@
         };
         const compositeControls = document.getElementById('composite-gender');
         
-        if (compositePairs[variable]) {
+        if (variable === 'declaracion_fuente') {
+            // Special handling: save declaracion + nombre/genero/tipo if provided
+            const nombreFuenteValue = document.getElementById('composite-nombre-fuente')?.value;
+            const generoFuenteValue = document.getElementById('composite-genero-fuente')?.value;
+            const tipoFuenteValue = document.getElementById('composite-tipo-fuente')?.value;
+
+            const baseId = Date.now();
+            const ids = [];
+            const baseAnn = {
+                id: baseId,
+                text: currentAnnotationSelection.text,
+                category,
+                variable,
+                value,
+                timestamp: createdAt
+            };
+            ids.push(String(baseId));
+            if (typeof integrateAnnotationIntoAnalysis === 'function') integrateAnnotationIntoAnalysis(baseAnn);
+            if (nombreFuenteValue) {
+                const id = baseId + 1;
+                ids.push(String(id));
+                if (typeof integrateAnnotationIntoAnalysis === 'function') integrateAnnotationIntoAnalysis({ id, text: currentAnnotationSelection.text, category, variable: 'nombre_fuente', value: nombreFuenteValue, timestamp: createdAt });
+            }
+            if (generoFuenteValue) {
+                const id = baseId + 2;
+                ids.push(String(id));
+                if (typeof integrateAnnotationIntoAnalysis === 'function') integrateAnnotationIntoAnalysis({ id, text: currentAnnotationSelection.text, category, variable: 'genero_fuente', value: generoFuenteValue, timestamp: createdAt });
+            }
+            if (tipoFuenteValue) {
+                const id = baseId + 3;
+                ids.push(String(id));
+                if (typeof integrateAnnotationIntoAnalysis === 'function') integrateAnnotationIntoAnalysis({ id, text: currentAnnotationSelection.text, category, variable: 'tipo_fuente', value: tipoFuenteValue, timestamp: createdAt });
+            }
+            applyInlineHighlight(currentAnnotationSelection, category, variable);
+        } else if (compositePairs[variable]) {
             // Usuario anotó la presencia: set presente y género seleccionado
             const genderValue = compositeControls ? compositeControls.value : null;
             // 1) presencia
