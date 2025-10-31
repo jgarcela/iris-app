@@ -434,6 +434,11 @@
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
+/* Keep edit-mode button width stable across states */
+#edit-mode-btn {
+    min-width: 220px; /* accommodates longest label 'Modo Edición Activo' */
+}
+
 /* Difficulty Information Styles */
 .difficulty-section #difficulty-info-card {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
