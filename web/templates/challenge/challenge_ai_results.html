@@ -136,6 +136,12 @@
                 </div>
                 <div class="card-body">
                     <div class="text-content" id="analyzed-text">
+                        {% if text_data.url %}
+                        <p class="mb-2">
+                            <strong><i class="fas fa-link me-1"></i>{{ _('Fuente:') }}</strong>
+                            <a href="{{ text_data.url }}" target="_blank" rel="noopener">{{ text_data.url }}</a>
+                        </p>
+                        {% endif %}
                         <p>{{ text_data.text }}</p>
                     </div>
                 </div>
