@@ -1394,6 +1394,9 @@ function showAnnotationPanel(selectedText, range) {
         range: range
     };
     
+    // Resetear el formulario para evitar valores residuales
+    try { resetAnnotationForm(); } catch (_) {}
+
     // Initialize the annotation form with current text difficulty
     initializeAnnotationFormForTextDifficulty();
 }
@@ -1402,6 +1405,8 @@ function hideAnnotationPanel() {
     const panel = document.getElementById('annotation-panel');
     panel.style.display = 'none';
     window.currentSelection = null;
+    // Limpiar el formulario al cerrar
+    try { resetAnnotationForm(); } catch (_) {}
 }
 
 function initializeAnnotationFormForTextDifficulty() {
@@ -1435,35 +1440,28 @@ function initializeAnnotationFormForTextDifficulty() {
     const formContainer = document.querySelector('#annotation-form .row');
     
     // Always show the full form for all difficulty levels
-        if (formContainer) {
-            formContainer.style.display = 'block';
-        }
-        
-    // Add required attributes for all levels
-        if (categorySelect) categorySelect.setAttribute('required', 'required');
-        if (variableSelect) variableSelect.setAttribute('required', 'required');
-        if (valueSelect) valueSelect.setAttribute('required', 'required');
-        
-        // Hide simple message
-        const simpleMessage = document.getElementById('simple-annotation-message');
-        if (simpleMessage) {
-            simpleMessage.style.display = 'none';
-        }
-        
-        // Update category options based on text difficulty
-        updateCategoryOptionsForAnnotationForm(textDifficulty);
-        
-        // Clear and reset the form
-        if (categorySelect) categorySelect.value = '';
-        if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
-        if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
-        
-        // If there's a default category available, select it and load its variables
-        if (categorySelect && categorySelect.options.length > 1) {
-            const firstCategory = categorySelect.options[1].value;
-            categorySelect.value = firstCategory;
-            updateVariableOptions(firstCategory);
+    if (formContainer) {
+        formContainer.style.display = 'block';
     }
+    
+    // Add required attributes for all levels
+    if (categorySelect) categorySelect.setAttribute('required', 'required');
+    if (variableSelect) variableSelect.setAttribute('required', 'required');
+    if (valueSelect) valueSelect.setAttribute('required', 'required');
+    
+    // Hide simple message
+    const simpleMessage = document.getElementById('simple-annotation-message');
+    if (simpleMessage) {
+        simpleMessage.style.display = 'none';
+    }
+    
+    // Update category options based on text difficulty
+    updateCategoryOptionsForAnnotationForm(textDifficulty);
+    
+    // Clear and leave empty for user selection (no auto-select)
+    if (categorySelect) categorySelect.value = '';
+    if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
 }
 
 function updateCategoryOptionsForAnnotationForm(difficulty) {
@@ -2001,9 +1999,40 @@ function saveAnnotation() {
     });
     updateAnnotationsList();
     hideAnnotationPanel();
+    // Resetear campos tras guardar
+    try { resetAnnotationForm(); } catch (_) {}
     
     // Habilitar botón
     document.getElementById('save-analysis-btn').disabled = false;
+}
+
+// Limpia completamente el formulario de anotaciones
+function resetAnnotationForm() {
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    const checkboxContainer = document.getElementById('variable-checkboxes-container');
+    const compositeControls = document.getElementById('composite-controls');
+    const valueLabel = valueSelect?.parentElement?.querySelector('label');
+    
+    if (categorySelect) categorySelect.value = '';
+    if (variableSelect) {
+        variableSelect.style.display = 'block';
+        variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    }
+    if (valueSelect) {
+        valueSelect.style.display = 'block';
+        valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    }
+    if (valueLabel) valueLabel.style.display = 'block';
+    if (checkboxContainer) {
+        checkboxContainer.style.display = 'none';
+        checkboxContainer.innerHTML = '';
+    }
+    if (compositeControls) {
+        compositeControls.style.display = 'none';
+        compositeControls.innerHTML = '';
+    }
 }
 
 function updateAnnotationsList() {
