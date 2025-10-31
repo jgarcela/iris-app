@@ -139,9 +139,14 @@
               {% endif %}
               {% if 'admin' in current_user.roles %}
                 <li class="nav-item">
-                  <a class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}"
+                  <a class="nav-link position-relative {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}"
                     href="{{ url_for('admin.admin_dashboard') }}">
                     <i class="fas fa-cog me-1"></i> {{ _('Admin') }}
+                    {% if admin_unread_contacts and admin_unread_contacts > 0 %}
+                      <span class="badge rounded-pill bg-danger" style="position: absolute; top: 0.2rem; right: -0.5rem; font-size: 0.6rem; min-width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center;">
+                        {{ admin_unread_contacts }}
+                      </span>
+                    {% endif %}
                   </a>
                 </li>
               {% endif %}

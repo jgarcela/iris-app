@@ -18,8 +18,24 @@
             </div>
         </div>
     </div>
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="row mb-3">
+                <div class="col-12">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 col-lg-6">
             <div class="container py-3">
                 <p>
                     {{ _('Este proyecto es una iniciativa conjunta de la Universidad Carlos III de Madrid (UC3M) y del Instituto de Estudios de Género de la UC3M, y cuenta con el apoyo y financiación de la Comunidad de Madrid.') }}
@@ -32,6 +48,34 @@
                     <li><a href="mailto:tonorati@ing.uc3m.es">tonorati@inf.uc3m.es</a></li>
                     <li><a href="mailto:carmen@tsc.uc3m.es">carmen@tsc.uc3m.es</a></li>
                 </ul>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="container py-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3"><i class="fas fa-paper-plane me-2"></i>{{ _('Enviar un mensaje') }}</h2>
+                        <form id="contact-form" method="post" action="{{ url_for('contact.contact_send') }}">
+                            <div class="mb-3">
+                                <label for="cf-name" class="form-label">{{ _('Nombre') }}</label>
+                                <input type="text" class="form-control" id="cf-name" name="name" placeholder="{{ _('Tu nombre') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="cf-email" class="form-label">{{ _('Email') }}</label>
+                                <input type="email" class="form-control" id="cf-email" name="email" placeholder="nombre@dominio.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="cf-message" class="form-label">{{ _('Mensaje') }}</label>
+                                <textarea class="form-control" id="cf-message" name="message" rows="4" placeholder="{{ _('Escribe tu mensaje...') }}" required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>{{ _('Enviar') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -98,6 +98,36 @@
                     </div>
                 </div>
 
+                    <!-- Navegación entre textos (debajo de modo edición, no guarda progreso) -->
+                    <div class="nav-buttons">
+                        <div class="nav-box">
+                            <div class="nav-box-title">
+                                <i class="fas fa-route me-2"></i>
+                                {{ _('Navegación entre textos (opcional)') }}
+                            </div>
+                            <div class="row g-2 align-items-stretch">
+                                <div class="col-md-6 col-12 d-grid">
+                                    <button class="btn btn-outline-secondary w-100 h-100 btn-sm py-2" id="prev-text-btn" style="display: none;">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    {{ _('Texto anterior') }}
+                                </button>
+                            </div>
+                                <div class="col-md-6 col-12 d-grid">
+                                    <button class="btn btn-outline-success w-100 h-100 btn-sm py-2" id="next-text-btn" style="display: none;">
+                                    <i class="fas fa-arrow-right me-1"></i>
+                                    {{ _('Saltar texto') }}
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <p class="text-muted small mb-0 text-center">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ _('Moverte entre textos no guarda tu progreso') }}
+                                </p>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Panel de Anotación (aparece al seleccionar texto) - ahora inline en la columna izquierda, debajo de Modo de Análisis -->
                     <div class="mb-4">
                         <div class="annotation-panel" id="annotation-panel" style="display: none;">
@@ -316,28 +346,12 @@
                         </div>
                     </div>
 
-                    <!-- Botones de Acción -->
-                    <div class="action-buttons">
-                        <div class="row g-2">
-                            <div class="col-md-3 col-6">
-                                <button class="btn btn-outline-secondary w-100 btn-sm py-2" id="prev-text-btn" style="display: none;">
-                                    <i class="fas fa-arrow-left me-1"></i>
-                                    {{ _('Anterior') }}
-                                </button>
-                            </div>
-                            <div class="col-md-3 col-6">
-                                <button class="btn btn-success w-100 btn-sm py-2" id="next-text-btn" style="display: none;">
-                                    <i class="fas fa-arrow-right me-1"></i>
-                                    {{ _('Siguiente') }}
-                                </button>
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <button class="btn btn-primary w-100 btn-sm py-2" id="save-analysis-btn" disabled>
-                                    <i class="fas fa-check me-1"></i>
-                                    {{ _('Finalizar y comparar con IRIS') }}
-                                </button>
-                            </div>
-                        </div>
+                    <!-- Sección Finalizar (flujo: anotar y finalizar) -->
+                    <div class="finalize-section">
+                        <button class="btn btn-primary w-100 btn-sm py-2" id="save-analysis-btn" disabled>
+                            <i class="fas fa-check me-1"></i>
+                            {{ _('Finalizar y comparar con IRIS') }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -357,6 +371,11 @@
                             <i class="fas fa-target me-1"></i>
                             {{ _('Objetivo: Identificar todos los sesgos') }}
                         </span>
+                        {% if text_data.url %}
+                        <a href="{{ text_data.url }}" target="_blank" rel="noopener" class="ms-2 small text-decoration-none">
+                            <i class="fas fa-link me-1"></i>{{ _('Fuente') }}
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -432,6 +451,11 @@
 .edit-mode-section .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Keep edit-mode button width stable across states */
+#edit-mode-btn {
+    min-width: 220px; /* accommodates longest label 'Modo Edición Activo' */
 }
 
 /* Difficulty Information Styles */
@@ -694,6 +718,44 @@
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid #e9ecef;
+}
+
+.nav-buttons {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #e9ecef;
+}
+
+.nav-buttons .nav-box {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.nav-box-title {
+    font-weight: 600;
+    color: #667eea;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.nav-buttons .btn {
+    min-height: 44px;
+}
+
+.finalize-section {
+    margin-top: 0.75rem;
+}
+
+/* De-emphasize nav buttons vs finalize */
+#prev-text-btn, #next-text-btn {
+    opacity: 0.9;
+}
+
+.finalize-section #save-analysis-btn {
+    font-weight: 700;
 }
 
 /* Protagonist Analysis Styles */
@@ -1337,6 +1399,9 @@ function showAnnotationPanel(selectedText, range) {
         range: range
     };
     
+    // Resetear el formulario para evitar valores residuales
+    try { resetAnnotationForm(); } catch (_) {}
+
     // Initialize the annotation form with current text difficulty
     initializeAnnotationFormForTextDifficulty();
 }
@@ -1345,6 +1410,8 @@ function hideAnnotationPanel() {
     const panel = document.getElementById('annotation-panel');
     panel.style.display = 'none';
     window.currentSelection = null;
+    // Limpiar el formulario al cerrar
+    try { resetAnnotationForm(); } catch (_) {}
 }
 
 function initializeAnnotationFormForTextDifficulty() {
@@ -1378,35 +1445,28 @@ function initializeAnnotationFormForTextDifficulty() {
     const formContainer = document.querySelector('#annotation-form .row');
     
     // Always show the full form for all difficulty levels
-        if (formContainer) {
-            formContainer.style.display = 'block';
-        }
-        
-    // Add required attributes for all levels
-        if (categorySelect) categorySelect.setAttribute('required', 'required');
-        if (variableSelect) variableSelect.setAttribute('required', 'required');
-        if (valueSelect) valueSelect.setAttribute('required', 'required');
-        
-        // Hide simple message
-        const simpleMessage = document.getElementById('simple-annotation-message');
-        if (simpleMessage) {
-            simpleMessage.style.display = 'none';
-        }
-        
-        // Update category options based on text difficulty
-        updateCategoryOptionsForAnnotationForm(textDifficulty);
-        
-        // Clear and reset the form
-        if (categorySelect) categorySelect.value = '';
-        if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
-        if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
-        
-        // If there's a default category available, select it and load its variables
-        if (categorySelect && categorySelect.options.length > 1) {
-            const firstCategory = categorySelect.options[1].value;
-            categorySelect.value = firstCategory;
-            updateVariableOptions(firstCategory);
+    if (formContainer) {
+        formContainer.style.display = 'block';
     }
+    
+    // Add required attributes for all levels
+    if (categorySelect) categorySelect.setAttribute('required', 'required');
+    if (variableSelect) variableSelect.setAttribute('required', 'required');
+    if (valueSelect) valueSelect.setAttribute('required', 'required');
+    
+    // Hide simple message
+    const simpleMessage = document.getElementById('simple-annotation-message');
+    if (simpleMessage) {
+        simpleMessage.style.display = 'none';
+    }
+    
+    // Update category options based on text difficulty
+    updateCategoryOptionsForAnnotationForm(textDifficulty);
+    
+    // Clear and leave empty for user selection (no auto-select)
+    if (categorySelect) categorySelect.value = '';
+    if (variableSelect) variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    if (valueSelect) valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
 }
 
 function updateCategoryOptionsForAnnotationForm(difficulty) {
@@ -1944,9 +2004,40 @@ function saveAnnotation() {
     });
     updateAnnotationsList();
     hideAnnotationPanel();
+    // Resetear campos tras guardar
+    try { resetAnnotationForm(); } catch (_) {}
     
     // Habilitar botón
     document.getElementById('save-analysis-btn').disabled = false;
+}
+
+// Limpia completamente el formulario de anotaciones
+function resetAnnotationForm() {
+    const categorySelect = document.getElementById('annotation-category');
+    const variableSelect = document.getElementById('annotation-variable');
+    const valueSelect = document.getElementById('annotation-value');
+    const checkboxContainer = document.getElementById('variable-checkboxes-container');
+    const compositeControls = document.getElementById('composite-controls');
+    const valueLabel = valueSelect?.parentElement?.querySelector('label');
+    
+    if (categorySelect) categorySelect.value = '';
+    if (variableSelect) {
+        variableSelect.style.display = 'block';
+        variableSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    }
+    if (valueSelect) {
+        valueSelect.style.display = 'block';
+        valueSelect.innerHTML = '<option value="">{{ _("Seleccionar...") }}</option>';
+    }
+    if (valueLabel) valueLabel.style.display = 'block';
+    if (checkboxContainer) {
+        checkboxContainer.style.display = 'none';
+        checkboxContainer.innerHTML = '';
+    }
+    if (compositeControls) {
+        compositeControls.style.display = 'none';
+        compositeControls.innerHTML = '';
+    }
 }
 
 function updateAnnotationsList() {
@@ -2132,6 +2223,9 @@ function setupNextTextButton() {
     prevTextBtn.style.display = 'block';
     
     nextTextBtn.addEventListener('click', function() {
+        // Confirmación: navegar sin guardar
+        const proceed = confirm('{{ _("Vas a cambiar de texto y tu progreso no se guardará. ¿Quieres continuar?") }}');
+        if (!proceed) return;
         // Get the next text ID from the sequence
         // This would need to be implemented with proper state management
         const currentTextId = currentText._id;
@@ -2147,6 +2241,9 @@ function setupNextTextButton() {
     });
     
     prevTextBtn.addEventListener('click', function() {
+        // Confirmación: navegar sin guardar
+        const proceed = confirm('{{ _("Vas a cambiar de texto y tu progreso no se guardará. ¿Quieres continuar?") }}');
+        if (!proceed) return;
         // Get the previous text ID from the sequence
         const currentTextId = currentText._id;
         const prevTextId = getPreviousTextInSequence(currentTextId);

@@ -26,6 +26,7 @@ COLLECTION_ROLES = config['DATABASE']['COLLECTION_ROLES']
 COLLECTION_PERMISSIONS = config['DATABASE']['COLLECTION_PERMISSIONS']
 COLLECTION_SEMANA_CIENCIA = config['DATABASE'].get('COLLECTION_SEMANA_CIENCIA', 'iris_semana_ciencia_2025')
 COLLECTION_ANALYSIS_SEMANA_CIENCIA = config['DATABASE'].get('COLLECTION_ANALYSIS_SEMANA_CIENCIA', 'iris_analysis_semana_ciencia_2025')
+COLLECTION_CONTACT = config['DATABASE'].get('COLLECTION_CONTACT', 'iris_contact')
 
 
 # Construir URI de conexión (autenticación si se usa)
@@ -51,6 +52,7 @@ DB_ROLES       = db[COLLECTION_ROLES]
 DB_PERMISSIONS = db[COLLECTION_PERMISSIONS]
 DB_SEMANA_CIENCIA = db[COLLECTION_SEMANA_CIENCIA]
 DB_ANALYSIS_SEMANA_CIENCIA = db[COLLECTION_ANALYSIS_SEMANA_CIENCIA]
+DB_CONTACT = db[COLLECTION_CONTACT]
 
 # Índices
 DB_USERS.create_index('email', unique=True)
@@ -59,6 +61,12 @@ DB_PERMISSIONS.create_index('name', unique=True)
 # Índices básicos para la colección del desafío si procede
 try:
     DB_SEMANA_CIENCIA.create_index('created_at')
+except Exception:
+    pass
+
+# Índice para mensajes de contacto
+try:
+    DB_CONTACT.create_index('created_at')
 except Exception:
     pass
 
