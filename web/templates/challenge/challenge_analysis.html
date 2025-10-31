@@ -857,7 +857,7 @@ const VARIABLE_DESCRIPTIONS = {
     'nombre_fuente': 'Nombre fuente',
     'tipo_fuente': 'Tipo fuente'
 };
-let isEditMode = false;
+let isEditMode = true;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Debug: Log the current text data to see what fields are available
@@ -1197,6 +1197,24 @@ function initializeChallengeAnalysis() {
     setupAnnotationForm();
     setupActionButtons();
     updateProgressSteps();
+    // Ensure UI reflects default edit mode active state on load
+    if (isEditMode) {
+        const btn = document.getElementById('edit-mode-btn');
+        const textArea = document.getElementById('analysis-text');
+        const textAnalysisArea = document.querySelector('.text-analysis-area');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-check me-1"></i> {{ _("Modo Edición Activo") }}';
+            btn.classList.remove('btn-outline-primary', 'btn-primary');
+            btn.classList.add('btn-warning');
+        }
+        if (textArea) {
+            textArea.style.cursor = 'text';
+            textArea.classList.add('edit-mode');
+        }
+        if (textAnalysisArea) {
+            textAnalysisArea.classList.add('edit-mode-active');
+        }
+    }
 }
 
 function setupTextSelection() {
