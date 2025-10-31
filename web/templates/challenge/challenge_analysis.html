@@ -362,7 +362,15 @@
                 
                 <div class="text-content" id="analysis-text">
                     <div class="text-body">
-                        <div class="article-content">{{ text_data.text | replace('\n\n', '</p><p>') | replace('\n', '<br>') | safe }}</div>
+                        {% set lines = (text_data.text or '').split('\n') %}
+                        {% if lines and lines|length > 0 %}
+                            <div class="in-text-title">{{ lines[0] }}</div>
+                            {% if lines|length > 1 %}
+                                <p>{{ lines[1:]|join('\n') | replace('\n','<br>') | safe }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p>{{ text_data.text }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -561,9 +569,13 @@
     line-height: 1.8;
     font-size: 1.1rem;
     color: #495057;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    text-align: justify;
+}
+
+.in-text-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 0.5rem;
 }
 
 .annotation-panel {
@@ -860,7 +872,7 @@ const VARIABLE_DESCRIPTIONS = {
     'nombre_fuente': 'Nombre fuente',
     'tipo_fuente': 'Tipo fuente'
 };
-let isEditMode = false;
+let isEditMode = true;
 
 document.addEventListener('DOMContentLoaded', function() {
     // Debug: Log the current text data to see what fields are available
@@ -1200,6 +1212,24 @@ function initializeChallengeAnalysis() {
     setupAnnotationForm();
     setupActionButtons();
     updateProgressSteps();
+    // Ensure UI reflects default edit mode active state on load
+    if (isEditMode) {
+        const btn = document.getElementById('edit-mode-btn');
+        const textArea = document.getElementById('analysis-text');
+        const textAnalysisArea = document.querySelector('.text-analysis-area');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-check me-1"></i> {{ _("Modo Edición Activo") }}';
+            btn.classList.remove('btn-outline-primary', 'btn-primary');
+            btn.classList.add('btn-warning');
+        }
+        if (textArea) {
+            textArea.style.cursor = 'text';
+            textArea.classList.add('edit-mode');
+        }
+        if (textAnalysisArea) {
+            textAnalysisArea.classList.add('edit-mode-active');
+        }
+    }
 }
 
 function setupTextSelection() {
