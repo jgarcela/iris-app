@@ -15,6 +15,11 @@
                     </h2>
                     <p class="text-muted mb-0">
                         {{ text_data.title }}
+                        {% if text_data.url %}
+                        <a href="{{ text_data.url }}" target="_blank" rel="noopener" class="ms-2 small text-decoration-none">
+                            <i class="fas fa-link me-1"></i>{{ _('Fuente') }}
+                        </a>
+                        {% endif %}
                     </p>
                 </div>
                 <div>
