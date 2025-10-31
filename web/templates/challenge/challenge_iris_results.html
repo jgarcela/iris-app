@@ -40,17 +40,22 @@
     </div>
 
     <!-- Métricas de Comparación -->
-    <div class="row mb-3">
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="metrics-compact">
-                <div class="metrics-header">
-                    <span class="metrics-title">{{ _('Puntuación Final') }}</span>
+            <div class="gamified-score-card">
+                <div class="gamified-score-header">
+                    <i class="fas fa-trophy me-2"></i>
+                    <span class="gamified-score-title">{{ _('Puntuación Final') }}</span>
                 </div>
-                <div class="row g-2">
-                    <div class="col-12 text-center">
-                        <div class="metric-compact-item">
-                            <span class="metric-compact-value score-highlight" id="total-score" style="font-size: 3rem;">0%</span>
-                            <span class="metric-compact-label">{{ _('Puntuación Total') }}</span>
+                <div class="gamified-score-content">
+                    <div class="gamified-score-display">
+                        <div class="score-circle">
+                            <div class="score-value-wrapper">
+                                <span class="gamified-score-value" id="total-score">0%</span>
+                                <div class="score-label-gamified">
+                                    <i class="fas fa-star me-1"></i>{{ _('Puntuación Total') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -80,22 +85,75 @@
                     <div class="tab-content">
                         <!-- Overview pane -->
                         <div class="tab-pane fade show active" id="score-overview-pane" role="tabpanel" aria-labelledby="score-overview-tab">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="text-center p-3 bg-success bg-opacity-10 rounded">
-                                        <div class="h3 text-success mb-1" id="breakdown-exactos">0</div>
-                                        <div class="text-muted small">{{ _('Exactos') }}</div>
-                                        <div class="text-success fw-bold">+100 pts c/u</div>
+                            <div class="row g-3">
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="gamified-stat-card stat-exacto">
+                                        <div class="stat-card-header">
+                                            <div class="stat-icon-wrapper stat-icon-success">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card-body">
+                                            <div class="stat-value" id="breakdown-exactos">0</div>
+                                            <div class="stat-label">{{ _('Exactos') }}</div>
+                                            <div class="stat-points">
+                                                <i class="fas fa-star me-1"></i>
+                                                <span class="fw-bold">+100 pts c/u</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="text-center p-3 bg-info bg-opacity-10 rounded">
-                                        <div class="h3 text-info mb-1" id="breakdown-parciales">0</div>
-                                        <div class="text-muted small">{{ _('Parciales') }}</div>
-                                        <div class="text-info fw-bold">+50 pts c/u</div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="gamified-stat-card stat-parcial">
+                                        <div class="stat-card-header">
+                                            <div class="stat-icon-wrapper stat-icon-info">
+                                                <i class="fas fa-info-circle"></i>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card-body">
+                                            <div class="stat-value" id="breakdown-parciales">0</div>
+                                            <div class="stat-label">{{ _('Parciales') }}</div>
+                                            <div class="stat-points">
+                                                <i class="fas fa-star-half-alt me-1"></i>
+                                                <span class="fw-bold">+50 pts c/u</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="gamified-stat-card stat-extra">
+                                        <div class="stat-card-header">
+                                            <div class="stat-icon-wrapper stat-icon-warning">
+                                                <i class="fas fa-times-circle"></i>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card-body">
+                                            <div class="stat-value" id="breakdown-extras">0</div>
+                                            <div class="stat-label">{{ _('Extras') }}</div>
+                                            <div class="stat-points stat-points-info">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <span class="text-muted">Solo informativo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="gamified-stat-card stat-faltante">
+                                        <div class="stat-card-header">
+                                            <div class="stat-icon-wrapper stat-icon-secondary">
+                                                <i class="fas fa-minus-circle"></i>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card-body">
+                                            <div class="stat-value" id="breakdown-faltantes">0</div>
+                                            <div class="stat-label">{{ _('Faltantes') }}</div>
+                                            <div class="stat-points stat-points-info">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                <span class="text-muted">Solo informativo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -540,11 +598,11 @@
 #score-breakdown-table thead th {
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-    padding: 1rem 0.75rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.4px;
+    padding: 0.5rem 0.5rem;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 2px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
 }
 
 #score-breakdown-table tbody tr {
@@ -559,8 +617,9 @@
 }
 
 #score-breakdown-table tbody td {
-    padding: 1rem 0.75rem;
+    padding: 0.5rem 0.5rem;
     vertical-align: middle;
+    font-size: 0.95rem;
 }
 
 .gamified-row {
@@ -641,6 +700,344 @@
     border-radius: 4px;
     font-size: 0.9rem;
     border: 1px solid rgba(13, 110, 253, 0.15);
+}
+
+/* Gamified Score Card Styles */
+.gamified-score-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.gamified-score-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.gamified-score-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gamified-score-header i {
+    font-size: 1.5rem;
+    animation: rotate 2s ease-in-out infinite;
+}
+
+@keyframes rotate {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-10deg);
+    }
+    75% {
+        transform: rotate(10deg);
+    }
+}
+
+.gamified-score-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.score-circle {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.score-value-wrapper {
+    text-align: center;
+    z-index: 1;
+}
+
+.gamified-score-value {
+    display: block;
+    font-size: 2.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+@keyframes countUp {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.score-label-gamified {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.score-label-gamified i {
+    color: #ffc107;
+}
+
+/* Gamified Stat Cards */
+.gamified-stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.gamified-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gamified-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.gamified-stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-exacto {
+    border-top: 4px solid #28a745;
+}
+
+.stat-exacto:hover {
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.25);
+}
+
+.stat-exacto::before {
+    background: linear-gradient(90deg, transparent, #28a745, transparent);
+}
+
+.stat-parcial {
+    border-top: 4px solid #17a2b8;
+}
+
+.stat-parcial:hover {
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.25);
+}
+
+.stat-parcial::before {
+    background: linear-gradient(90deg, transparent, #17a2b8, transparent);
+}
+
+.stat-extra {
+    border-top: 4px solid #ffc107;
+}
+
+.stat-extra:hover {
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.25);
+}
+
+.stat-extra::before {
+    background: linear-gradient(90deg, transparent, #ffc107, transparent);
+}
+
+.stat-faltante {
+    border-top: 4px solid #6c757d;
+}
+
+.stat-faltante:hover {
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.25);
+}
+
+.stat-faltante::before {
+    background: linear-gradient(90deg, transparent, #6c757d, transparent);
+}
+
+.stat-card-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.stat-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.gamified-stat-card:hover .stat-icon-wrapper {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.stat-icon-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
+.stat-icon-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: white;
+}
+
+.stat-icon-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+}
+
+.stat-card-body {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-exacto .stat-value {
+    color: #28a745;
+}
+
+.stat-parcial .stat-value {
+    color: #17a2b8;
+}
+
+.stat-extra .stat-value {
+    color: #ffc107;
+}
+
+.stat-faltante .stat-value {
+    color: #6c757d;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.5rem;
+}
+
+.stat-points {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    display: inline-block;
+}
+
+.stat-exacto .stat-points {
+    color: #28a745;
+}
+
+.stat-exacto .stat-points i {
+    color: #ffc107;
+}
+
+.stat-parcial .stat-points {
+    color: #17a2b8;
+}
+
+.stat-parcial .stat-points i {
+    color: #ffc107;
+}
+
+.stat-points-info {
+    color: #6c757d !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+.stat-points-info i {
+    color: #6c757d !important;
+}
+
+.gamified-stat-card:hover .stat-points {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
 
@@ -1050,6 +1447,34 @@ function loadAIAnalysis() {
   `;
 }
 
+// Función para animar valores numéricos
+function animateValue(elementId, start, end, duration, suffix = '') {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  
+  const startTime = performance.now();
+  const range = end - start;
+  
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Easing function (ease-out)
+    const easeProgress = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(start + range * easeProgress);
+    
+    element.textContent = current + suffix;
+    
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      element.textContent = end + suffix;
+    }
+  }
+  
+  requestAnimationFrame(update);
+}
+
 function calculateMetrics() {
   // Usar score gamificado si está disponible
   if (gamifiedReport && gamifiedReport.resumen_global) {
@@ -1061,13 +1486,14 @@ function calculateMetrics() {
     const puntosTotales = resumen.puntos_totales || 0;
     const scoreFinal = resumen.score_final || 0;
     
-    // Mostrar solo score final
-    document.getElementById('total-score').textContent = Math.round(scoreFinal) + '%';
+    // Mostrar solo score final con animación
+    animateValue('total-score', 0, Math.round(scoreFinal), 1000, '%');
     
-    // Mostrar desglose
-    document.getElementById('breakdown-exactos').textContent = exactos;
-    document.getElementById('breakdown-parciales').textContent = parciales;
-    // extras y faltantes no se muestran en la UI
+    // Mostrar desglose con animación
+    animateValue('breakdown-exactos', 0, exactos, 800);
+    animateValue('breakdown-parciales', 0, parciales, 800);
+    animateValue('breakdown-extras', 0, extras, 800);
+    animateValue('breakdown-faltantes', 0, faltantes, 800);
     
     // Mostrar sección de desglose
     document.getElementById('score-breakdown-section').style.display = 'block';
