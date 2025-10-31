@@ -67,7 +67,7 @@
   transform: translateX(5px);
 }
 
-.sidebar .nav-link.active::before {
+  .sidebar .nav-link.active::before {
   content: '';
   position: absolute;
   left: -2rem;
@@ -77,6 +77,34 @@
   height: 20px;
   background: var(--violet-iris-color);
   border-radius: 2px;
+}
+
+/* Notification badge for unread contacts */
+.sidebar .nav-link .badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.65rem !important;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.35rem 0.5rem !important;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
   
 /* Enhanced Admin Content */
@@ -773,6 +801,23 @@
   background: #f59e0b;
   color: #ffffff;
   border-color: #f59e0b;
+}
+
+/* Contact Card - Purple/Violet Gradient */
+.admin-card-contact .card-header {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+}
+
+.admin-card-contact .card-header .card-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+}
+
+.admin-card-contact .card-btn:hover {
+  background: #7c3aed;
+  color: #ffffff;
+  border-color: #7c3aed;
 }
 
 /* Responsive Design */

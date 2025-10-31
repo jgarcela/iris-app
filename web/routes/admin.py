@@ -23,11 +23,15 @@ def admin_dashboard():
     total_users       = db.DB_USERS.count_documents({})
     total_roles       = db.DB_ROLES.count_documents({})
     total_permissions = db.DB_PERMISSIONS.count_documents({})
+    total_contacts    = db.DB_CONTACT.count_documents({})
+    unread_contacts   = db.DB_CONTACT.count_documents({'read': False})
     return render_template(
         'admin/admin_dashboard.html',
         total_users=total_users,
         total_roles=total_roles,
-        total_permissions=total_permissions
+        total_permissions=total_permissions,
+        total_contacts=total_contacts,
+        unread_contacts=unread_contacts
     )
 
 # ----------------- USERS -----------------
@@ -302,3 +306,56 @@ def delete_permission(perm_name):
     else:
         flash('No se encontró el permiso a eliminar.', 'warning')
     return redirect(url_for('admin.list_permissions'))
+
+
+# ----------------- CONTACT -----------------
+# Listar mensajes de contacto
+@bp.route('/contact')
+@login_required
+# @role_required('admin')
+def list_contact():
+    from datetime import datetime
+    # Obtener mensajes ordenados por fecha (más recientes primero)
+    raw_messages = list(db.DB_CONTACT.find({}).sort('created_at', -1))
+    
+    # Serializar ObjectId y formatear fecha
+    messages = []
+    for msg in raw_messages:
+        messages.append({
+            '_id': str(msg['_id']),
+            'name': msg.get('name', ''),
+            'email': msg.get('email', ''),
+            'message': msg.get('message', ''),
+            'created_at': msg.get('created_at'),
+            'read': msg.get('read', False)
+        })
+    
+    return render_template('admin/admin_contact.html', messages=messages)
+
+
+# Marcar mensaje como leído
+@bp.route('/contact/<message_id>/read', methods=['POST'])
+@login_required
+# @role_required('admin')
+def mark_contact_read(message_id):
+    from bson import ObjectId
+    db.DB_CONTACT.update_one(
+        {'_id': ObjectId(message_id)},
+        {'$set': {'read': True}}
+    )
+    flash('Mensaje marcado como leído.', 'success')
+    return redirect(url_for('admin.list_contact'))
+
+
+# Borrar mensaje de contacto
+@bp.route('/contact/<message_id>/delete', methods=['POST'])
+@login_required
+# @role_required('admin')
+def delete_contact(message_id):
+    from bson import ObjectId
+    result = db.DB_CONTACT.delete_one({'_id': ObjectId(message_id)})
+    if result.deleted_count:
+        flash('Mensaje eliminado.', 'info')
+    else:
+        flash('No se encontró el mensaje a eliminar.', 'warning')
+    return redirect(url_for('admin.list_contact'))

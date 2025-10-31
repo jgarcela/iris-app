@@ -1,0 +1,113 @@
+{% extends 'admin/admin_base.html' %}
+{% block title %}Admin · {{ _('Mensajes de contacto') }}{% endblock %}
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-envelope me-3 text-primary"></i>
+                    {{ _('Mensajes de contacto') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Gestiona los mensajes recibidos desde el formulario de contacto') }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Messages List -->
+    <div class="row">
+        <div class="col-12">
+            {% if messages %}
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{{ _('Fecha') }}</th>
+                                        <th>{{ _('Nombre') }}</th>
+                                        <th>{{ _('Email') }}</th>
+                                        <th>{{ _('Mensaje') }}</th>
+                                        <th>{{ _('Estado') }}</th>
+                                        <th>{{ _('Acciones') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for msg in messages %}
+                                    <tr class="{% if not msg.read %}table-warning{% endif %}">
+                                        <td>
+                                            {% if msg.created_at %}
+                                                {{ msg.created_at|to_madrid('%d/%m/%Y %H:%M') }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ msg.name or '-' }}</td>
+                                        <td>
+                                            {% if msg.email %}
+                                                <a href="mailto:{{ msg.email }}">{{ msg.email }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                {{ msg.message }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if msg.read %}
+                                                <span class="badge bg-success">{{ _('Leído') }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">{{ _('No leído') }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                {% if not msg.read %}
+                                                    <form method="post" action="{{ url_for('admin.mark_contact_read', message_id=msg._id) }}" style="display: inline;">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" title="{{ _('Marcar como leído') }}">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                                <form method="post" action="{{ url_for('admin.delete_contact', message_id=msg._id) }}" style="display: inline;" onsubmit="return confirm('{{ _('¿Estás seguro de que quieres eliminar este mensaje?') }}');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ _('Eliminar') }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {{ _('No hay mensajes de contacto aún.') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -4,6 +4,11 @@
 #  LIBRARIES 
 # ==================================
 from flask import Flask, current_app, redirect, request, render_template, jsonify, session, url_for
+from datetime import timezone
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+except Exception:
+    ZoneInfo = None
 import configparser
 from flask_cors import CORS
 from functools import wraps
@@ -86,6 +91,42 @@ def inject_config():
         'challenge_enabled': config.getboolean('CHALLENGE', 'ENABLED', fallback=False),
         'config': config
     }
+
+@app.context_processor
+def inject_admin_unread_contacts():
+    """Inject unread contacts count globally (used in navbar/Admin tab)."""
+    try:
+        from database.db import DB_CONTACT
+        unread_count = DB_CONTACT.count_documents({'read': False})
+        return {'admin_unread_contacts': int(unread_count)}
+    except Exception:
+        return {'admin_unread_contacts': 0}
+
+# ==============================
+#  JINJA FILTERS
+# ==============================
+def to_madrid(dt, fmt='%d/%m/%Y %H:%M'):
+    """Convert a datetime (assumed UTC if naive) to Europe/Madrid and format.
+    Usage in templates: {{ dt|to_madrid('%d/%m/%Y %H:%M') }}
+    """
+    if not dt:
+        return ''
+    try:
+        if ZoneInfo is None:
+            # Fallback: show as-is
+            return dt.strftime(fmt)
+        # Assume UTC if naive
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        madrid = dt.astimezone(ZoneInfo('Europe/Madrid'))
+        return madrid.strftime(fmt)
+    except Exception:
+        try:
+            return dt.strftime(fmt)
+        except Exception:
+            return ''
+
+app.jinja_env.filters['to_madrid'] = to_madrid
 
 
 # ----------------- CURRENT USER -----------------
