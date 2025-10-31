@@ -102,14 +102,14 @@
                         <!-- Table pane -->
                         <div class="tab-pane fade" id="score-table-pane" role="tabpanel" aria-labelledby="score-table-tab">
                             <div class="table-responsive">
-                                <table class="table table-sm table-hover align-middle" id="score-breakdown-table">
-                                    <thead>
+                                <table class="table table-sm align-middle mb-0" id="score-breakdown-table">
+                                    <thead class="table-light">
                                         <tr>
-                                            <th>{{ _('Categoría') }}</th>
-                                            <th>{{ _('Variable') }}</th>
-                                            <th>{{ _('Texto') }}</th>
-                                            <th class="text-center">{{ _('Tipo') }}</th>
-                                            <th class="text-end">{{ _('Puntos') }}</th>
+                                            <th style="border-top: none;"><i class="fas fa-tags text-primary me-2"></i>{{ _('Categoría') }}</th>
+                                            <th style="border-top: none;"><i class="fas fa-code text-primary me-2"></i>{{ _('Variable') }}</th>
+                                            <th style="border-top: none;"><i class="fas fa-align-left text-primary me-2"></i>{{ _('Texto') }}</th>
+                                            <th class="text-center" style="border-top: none;"><i class="fas fa-star text-primary me-2"></i>{{ _('Resultado') }}</th>
+                                            <th class="text-end" style="border-top: none;"><i class="fas fa-coins text-primary me-2"></i>{{ _('Puntos') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -529,6 +529,118 @@
     font-size: 0.75rem;
     color: #6c757d;
     margin-left: 0.5rem;
+}
+
+/* Gamified Table Styles */
+#score-breakdown-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#score-breakdown-table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+}
+
+#score-breakdown-table tbody tr {
+    border-bottom: 1px solid #f1f3f5;
+    transition: all 0.2s ease;
+}
+
+#score-breakdown-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#score-breakdown-table tbody td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+}
+
+.gamified-row {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Badge Styles */
+#score-breakdown-table .badge {
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#score-breakdown-table .badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#score-breakdown-table .badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    border: none;
+}
+
+#score-breakdown-table .badge.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+    border: none;
+}
+
+#score-breakdown-table .badge.bg-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    border: none;
+}
+
+/* Points Display */
+#score-breakdown-table td:last-child {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+}
+
+#score-breakdown-table .text-success {
+    color: #198754 !important;
+    text-shadow: 0 1px 2px rgba(25, 135, 84, 0.2);
+}
+
+#score-breakdown-table .text-info {
+    color: #0dcaf0 !important;
+    text-shadow: 0 1px 2px rgba(13, 202, 240, 0.2);
+}
+
+/* Category and Variable Badges */
+#score-breakdown-table .badge.bg-primary.bg-opacity-10 {
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#score-breakdown-table .badge.bg-primary.bg-opacity-10:hover {
+    background: rgba(13, 110, 253, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+#score-breakdown-table code {
+    background: rgba(13, 110, 253, 0.08);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(13, 110, 253, 0.15);
 }
 </style>
 
@@ -1035,6 +1147,7 @@ function buildScoreBreakdownTable() {
   });
 
   // 1) Filas para cada anotación del usuario
+  let rowIndex = 0;
   manualAnnotations.forEach(a => {
     const c = a.category, v = a.variable, tRaw = a.text, t = toKey(a.text);
     if (!c || !v || !t) return;
@@ -1043,10 +1156,18 @@ function buildScoreBreakdownTable() {
     const exactSet = (varsInCat.get(v) || new Set());
     let tipo = 'extra';
     let puntos = 0;
+    let icono = '';
+    let badgeClass = '';
+    let puntosClass = '';
+    let puntosIcon = '';
 
     if (exactSet.has(t)) {
       tipo = 'exacto';
       puntos = 100;
+      icono = '<i class="fas fa-check-circle me-1"></i>';
+      badgeClass = 'bg-success bg-gradient';
+      puntosClass = 'text-success';
+      puntosIcon = '<i class="fas fa-star me-1"></i>';
     } else {
       // ¿parcial? buscar en otra variable de la misma categoría
       let encontradoParcial = false;
@@ -1056,6 +1177,10 @@ function buildScoreBreakdownTable() {
           tipo = 'parcial';
           puntos = 50;
           encontradoParcial = true;
+          icono = '<i class="fas fa-info-circle me-1"></i>';
+          badgeClass = 'bg-info bg-gradient';
+          puntosClass = 'text-info';
+          puntosIcon = '<i class="fas fa-star-half-alt me-1"></i>';
           break;
         }
       }
@@ -1063,20 +1188,47 @@ function buildScoreBreakdownTable() {
       if (!encontradoParcial) {
         tipo = 'extra';
         puntos = 0;
+        icono = '<i class="fas fa-times-circle me-1"></i>';
+        badgeClass = 'bg-secondary bg-gradient';
+        puntosClass = 'text-muted';
+        puntosIcon = '';
       }
     }
 
     const tr = document.createElement('tr');
+    tr.style.opacity = '0';
+    tr.style.transform = 'translateY(-10px)';
+    tr.style.transition = 'all 0.3s ease';
+    tr.className = 'gamified-row';
     tr.innerHTML = `
-      <td>${c}</td>
-      <td>${v}</td>
-      <td>${escapeHtml(tRaw)}</td>
-      <td class="text-center">
-        <span class="badge ${tipo==='exacto' ? 'bg-success' : tipo==='parcial' ? 'bg-info' : 'bg-warning'}">${tipo}</span>
+      <td class="align-middle">
+        <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">${escapeHtml(c)}</span>
       </td>
-      <td class="text-end fw-bold ${puntos>0 ? 'text-success' : 'text-muted'}">${puntos}</td>
+      <td class="align-middle">
+        <code class="text-dark">${escapeHtml(v)}</code>
+      </td>
+      <td class="align-middle">
+        <span class="text-dark">${escapeHtml(tRaw)}</span>
+      </td>
+      <td class="text-center align-middle">
+        <span class="badge ${badgeClass} px-3 py-2 shadow-sm" style="font-size: 0.9rem; letter-spacing: 0.5px;">
+          ${icono}${tipo}
+        </span>
+      </td>
+      <td class="text-end align-middle">
+        <span class="fw-bold ${puntosClass}" style="font-size: 1.1rem;">
+          ${puntosIcon}${puntos}
+        </span>
+      </td>
     `;
     tbody.appendChild(tr);
+    
+    // Animación de entrada
+    setTimeout(() => {
+      tr.style.opacity = '1';
+      tr.style.transform = 'translateY(0)';
+    }, rowIndex * 30);
+    rowIndex++;
   });
 
   // 2) Faltantes: en IRIS y no en usuario, por misma variable
@@ -1086,14 +1238,37 @@ function buildScoreBreakdownTable() {
     const userSet = ((manualMap.get(c) || new Map()).get(v) || new Set());
     if (!userSet.has(t)) {
       const tr = document.createElement('tr');
+      tr.style.opacity = '0';
+      tr.style.transform = 'translateY(-10px)';
+      tr.style.transition = 'all 0.3s ease';
+      tr.className = 'gamified-row';
       tr.innerHTML = `
-        <td>${c}</td>
-        <td>${v}</td>
-        <td>${escapeHtml(tRaw)}</td>
-        <td class="text-center"><span class="badge bg-secondary">faltante</span></td>
-        <td class="text-end fw-bold text-muted">0</td>
+        <td class="align-middle">
+          <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">${escapeHtml(c)}</span>
+        </td>
+        <td class="align-middle">
+          <code class="text-dark">${escapeHtml(v)}</code>
+        </td>
+        <td class="align-middle">
+          <span class="text-muted">${escapeHtml(tRaw)}</span>
+        </td>
+        <td class="text-center align-middle">
+          <span class="badge bg-secondary bg-gradient px-3 py-2 shadow-sm" style="font-size: 0.9rem; letter-spacing: 0.5px;">
+            <i class="fas fa-minus-circle me-1"></i>faltante
+          </span>
+        </td>
+        <td class="text-end align-middle">
+          <span class="fw-bold text-muted" style="font-size: 1.1rem;">0</span>
+        </td>
       `;
       tbody.appendChild(tr);
+      
+      // Animación de entrada
+      setTimeout(() => {
+        tr.style.opacity = '1';
+        tr.style.transform = 'translateY(0)';
+      }, rowIndex * 30);
+      rowIndex++;
     }
   });
 }
