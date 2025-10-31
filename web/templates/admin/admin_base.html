@@ -49,6 +49,16 @@
               <i class="fas fa-key me-2"></i> {{ _('Permisos') }}
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="{{ url_for('admin.list_contact') }}">
+              <i class="fas fa-envelope me-2"></i> {{ _('Mensajes de contacto') }}
+              {% if admin_unread_contacts and admin_unread_contacts > 0 %}
+                <span class="badge rounded-pill bg-danger">
+                  {{ admin_unread_contacts }}
+                </span>
+              {% endif %}
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
