@@ -362,7 +362,15 @@
                 
                 <div class="text-content" id="analysis-text">
                     <div class="text-body">
-                        <p>{{ text_data.text }}</p>
+                        {% set lines = (text_data.text or '').split('\n') %}
+                        {% if lines and lines|length > 0 %}
+                            <div class="in-text-title">{{ lines[0] }}</div>
+                            {% if lines|length > 1 %}
+                                <p>{{ lines[1:]|join('\n') | replace('\n','<br>') | safe }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p>{{ text_data.text }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -561,6 +569,13 @@
     line-height: 1.8;
     font-size: 1.1rem;
     color: #495057;
+}
+
+.in-text-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 0.5rem;
 }
 
 .annotation-panel {
