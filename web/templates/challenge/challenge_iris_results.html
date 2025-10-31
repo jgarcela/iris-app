@@ -44,25 +44,66 @@
         <div class="col-12">
             <div class="metrics-compact">
                 <div class="metrics-header">
-                    <span class="metrics-title">{{ _('Métricas de Comparación') }}</span>
+                    <span class="metrics-title">{{ _('Puntuación Final') }}</span>
                 </div>
                 <div class="row g-2">
-                    <div class="col-md-4">
+                    <div class="col-12 text-center">
                         <div class="metric-compact-item">
-                            <span class="metric-compact-value" id="precision-score">0%</span>
-                            <span class="metric-compact-label">{{ _('Precisión') }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="metric-compact-item">
-                            <span class="metric-compact-value" id="recall-score">0%</span>
-                            <span class="metric-compact-label">{{ _('Cobertura') }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="metric-compact-item">
-                            <span class="metric-compact-value score-highlight" id="total-score">0%</span>
+                            <span class="metric-compact-value score-highlight" id="total-score" style="font-size: 3rem;">0%</span>
                             <span class="metric-compact-label">{{ _('Puntuación Total') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desglose de Puntuación -->
+    <div class="row mb-4" id="score-breakdown-section" style="display: none;">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>{{ _('Desglose de Puntuación') }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                                <div class="h3 text-success mb-1" id="breakdown-exactos">0</div>
+                                <div class="text-muted small">{{ _('Exactos') }}</div>
+                                <div class="text-success fw-bold">+100 pts c/u</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                                <div class="h3 text-info mb-1" id="breakdown-parciales">0</div>
+                                <div class="text-muted small">{{ _('Parciales') }}</div>
+                                <div class="text-info fw-bold">+50 pts c/u</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                                <div class="h3 text-warning mb-1" id="breakdown-extras">0</div>
+                                <div class="text-muted small">{{ _('Extras') }}</div>
+                                <div class="text-warning fw-bold">-20 pts c/u</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                                <div class="h3 text-danger mb-1" id="breakdown-faltantes">0</div>
+                                <div class="text-muted small">{{ _('Faltantes') }}</div>
+                                <div class="text-danger fw-bold">-10 pts c/u</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="text-center">
+                                <strong>{{ _('Puntos Totales') }}:</strong> 
+                                <span class="h5 ms-2" id="breakdown-puntos">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -483,6 +524,7 @@
 // Datos desde el backend
 const manualAnnotations = {{ manual_annotations | tojson | safe }};
 const originalAnnotations = {{ original_annotations | tojson | safe }};
+const gamifiedReport = {{ gamified_report | tojson | safe if gamified_report else 'null' }};
 
 // Variable descriptions for tooltips
 const VARIABLE_DESCRIPTIONS = {
@@ -885,52 +927,73 @@ function loadAIAnalysis() {
 }
 
 function calculateMetrics() {
-  // Comparar anotaciones manuales con anotaciones originales
-  const originalCount = originalAnnotations ? originalAnnotations.length : 0;
-  
-  if (originalCount === 0) {
-    document.getElementById('precision-score').textContent ='N/A';
-    document.getElementById('recall-score').textContent = 'N/A';
-    document.getElementById('total-score').textContent = 'N/A';
-    return;
-  }
-  
-  // Crear sets de identificadores únicos para comparar
-  const manualSet = new Set(manualAnnotations.map(a => `${a.category}_${a.variable}_${a.text}`));
-  const originalSet = new Set(originalAnnotations.map(a => `${a.category}_${a.variable}_${a.text}`));
-  
-  // TP (True Positives): anotaciones en ambos sets
-  let truePositives = 0;
-  manualSet.forEach(item => {
-    if (originalSet.has(item)) {
-      truePositives++;
+  // Usar score gamificado si está disponible
+  if (gamifiedReport && gamifiedReport.resumen_global) {
+    const resumen = gamifiedReport.resumen_global;
+    const exactos = resumen.exactos || 0;
+    const parciales = resumen.parciales || 0;
+    const extras = resumen.extras || 0;
+    const faltantes = resumen.faltantes || 0;
+    const puntosTotales = resumen.puntos_totales || 0;
+    const scoreFinal = resumen.score_final || 0;
+    
+    // Mostrar solo score final
+    document.getElementById('total-score').textContent = Math.round(scoreFinal) + '%';
+    
+    // Mostrar desglose
+    document.getElementById('breakdown-exactos').textContent = exactos;
+    document.getElementById('breakdown-parciales').textContent = parciales;
+    document.getElementById('breakdown-extras').textContent = extras;
+    document.getElementById('breakdown-faltantes').textContent = faltantes;
+    document.getElementById('breakdown-puntos').textContent = puntosTotales;
+    
+    // Mostrar sección de desglose
+    document.getElementById('score-breakdown-section').style.display = 'block';
+    
+    console.log('[GAMIFIED_SCORE] Exactos:', exactos, 'Parciales:', parciales, 'Extras:', extras, 'Faltantes:', faltantes, 'Puntos:', puntosTotales, 'Score:', scoreFinal);
+  } else {
+    // Fallback: Comparación exacta (sistema anterior)
+    const originalCount = originalAnnotations ? originalAnnotations.length : 0;
+    
+    if (originalCount === 0) {
+      document.getElementById('total-score').textContent = 'N/A';
+      return;
     }
-  });
-  
-  // FP (False Positives): anotaciones en manual pero no en original
-  let falsePositives = manualSet.size - truePositives;
-  
-  // FN (False Negatives): anotaciones en original pero no en manual
-  let falseNegatives = originalSet.size - truePositives;
-  
-  // Calcular Precisión: TP / (TP + FP)
-  const precision = truePositives + falsePositives > 0 
-    ? (truePositives / (truePositives + falsePositives)) * 100 
-    : 0;
-  
-  // Calcular Recall: TP / (TP + FN)
-  const recall = truePositives + falseNegatives > 0 
-    ? (truePositives / (truePositives + falseNegatives)) * 100 
-    : 0;
-  
-  // F1 Score (armonic mean)
-  const f1Score = precision + recall > 0 
-    ? (2 * precision * recall) / (precision + recall) 
-    : 0;
-  
-  document.getElementById('precision-score').textContent = Math.round(precision) + '%';
-  document.getElementById('recall-score').textContent = Math.round(recall) + '%';
-  document.getElementById('total-score').textContent = Math.round(f1Score) + '%';
+    
+    // Crear sets de identificadores únicos para comparar
+    const manualSet = new Set(manualAnnotations.map(a => `${a.category}_${a.variable}_${a.text}`));
+    const originalSet = new Set(originalAnnotations.map(a => `${a.category}_${a.variable}_${a.text}`));
+    
+    // TP (True Positives): anotaciones en ambos sets
+    let truePositives = 0;
+    manualSet.forEach(item => {
+      if (originalSet.has(item)) {
+        truePositives++;
+      }
+    });
+    
+    // FP (False Positives): anotaciones en manual pero no en original
+    let falsePositives = manualSet.size - truePositives;
+    
+    // FN (False Negatives): anotaciones en original pero no en manual
+    let falseNegatives = originalSet.size - truePositives;
+    
+    // F1 Score (armonic mean)
+    const precision = truePositives + falsePositives > 0 
+      ? (truePositives / (truePositives + falsePositives)) * 100 
+      : 0;
+    const recall = truePositives + falseNegatives > 0 
+      ? (truePositives / (truePositives + falseNegatives)) * 100 
+      : 0;
+    const f1Score = precision + recall > 0 
+      ? (2 * precision * recall) / (precision + recall) 
+      : 0;
+    
+    document.getElementById('total-score').textContent = Math.round(f1Score) + '%';
+    
+    // Ocultar desglose si no hay reporte gamificado
+    document.getElementById('score-breakdown-section').style.display = 'none';
+  }
 }
 </script>
 {% endblock %}

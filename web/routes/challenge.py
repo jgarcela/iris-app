@@ -282,6 +282,17 @@ def iris_results(text_id):
     original_annotations = text_doc.get('annotations', [])
     print(f"[CHALLENGE/IRIS-RESULTS] Original annotations count: {len(original_annotations)}")
 
+    # Calculate gamified score using embeddings
+    gamified_report = None
+    try:
+        from web.utils.gamified_score import gamified_score_detailed
+        gamified_report = gamified_score_detailed(manual_annotations, original_annotations, threshold=0.8)
+        print(f"[CHALLENGE/IRIS-RESULTS] Gamified score calculated: {gamified_report.get('resumen_global', {}).get('score_final', 0)}")
+    except Exception as e:
+        print(f"[CHALLENGE/IRIS-RESULTS] Error calculating gamified score: {e}")
+        import traceback
+        traceback.print_exc()
+
     print(analysis_data)
 
     # Minimal structure for template consumption
@@ -348,6 +359,7 @@ def iris_results(text_id):
         text_data=text_data,
         manual_annotations=manual_annotations,
         original_annotations=original_annotations,  # Ground truth annotations
+        gamified_report=gamified_report,  # Gamified score report
         next_text_id=next_text,  # Next text ID or None
         language=get_locale()
     )
