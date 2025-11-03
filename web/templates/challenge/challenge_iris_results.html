@@ -1091,6 +1091,63 @@ function loadAnalysisResults() {
   setupTextExpansion();
 }
 
+// Utilidades de coincidencia flexible (sin embeddings)
+function stripAccents(str) {
+  try {
+    return str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  } catch (e) {
+    return str;
+  }
+}
+
+function normalizeText(str) {
+  if (!str) return '';
+  let s = String(str).trim().toLowerCase();
+  s = stripAccents(s);
+  s = s.replace(/[^a-z0-9]+/g, ' ');
+  s = s.replace(/\s+/g, ' ').trim();
+  return s;
+}
+
+function similarityRatio(a, b) {
+  const na = normalizeText(a), nb = normalizeText(b);
+  const la = na.length, lb = nb.length;
+  if (la === 0 && lb === 0) return 1;
+  if (la === 0 || lb === 0) return 0;
+  const dp = new Array(lb + 1);
+  for (let j = 0; j <= lb; j++) dp[j] = j;
+  for (let i = 1; i <= la; i++) {
+    let prev = i - 1;
+    dp[0] = i;
+    for (let j = 1; j <= lb; j++) {
+      const temp = dp[j];
+      const cost = na[i - 1] === nb[j - 1] ? 0 : 1;
+      dp[j] = Math.min(
+        dp[j] + 1,
+        dp[j - 1] + 1,
+        prev + cost
+      );
+      prev = temp;
+    }
+  }
+  const dist = dp[lb];
+  const maxLen = Math.max(la, lb);
+  return 1 - (dist / maxLen);
+}
+
+function flexibleMatch(a, b, threshold = 0.6) {
+  const na = normalizeText(a);
+  const nb = normalizeText(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  if (na.includes(nb) || nb.includes(na)) {
+    const minLen = Math.min(na.length, nb.length);
+    const maxLen = Math.max(na.length, nb.length) || 1;
+    if ((minLen / maxLen) >= threshold) return true;
+  }
+  return similarityRatio(na, nb) >= threshold;
+}
+
 function setupTextExpansion() {
   // Add event listeners to all summary text items
   document.addEventListener('click', function(e) {
@@ -1552,11 +1609,11 @@ function buildScoreBreakdownTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  // Crear mapas por categoría/variable para matching exacto
-  const toKey = s => (s || '').toString().trim().toLowerCase();
+  // Crear mapas por categoría/variable guardando textos en bruto
+  const toRaw = s => (s || '').toString();
   const originalMap = new Map(); // cat -> var -> Set(text)
   originalAnnotations.forEach(a => {
-    const c = a.category, v = a.variable, t = toKey(a.text);
+    const c = a.category, v = a.variable, t = toRaw(a.text);
     if (!c || !v || !t) return;
     if (!originalMap.has(c)) originalMap.set(c, new Map());
     if (!originalMap.get(c).has(v)) originalMap.get(c).set(v, new Set());
@@ -1565,7 +1622,7 @@ function buildScoreBreakdownTable() {
 
   const manualMap = new Map(); // cat -> var -> Set(text)
   manualAnnotations.forEach(a => {
-    const c = a.category, v = a.variable, t = toKey(a.text);
+    const c = a.category, v = a.variable, t = toRaw(a.text);
     if (!c || !v || !t) return;
     if (!manualMap.has(c)) manualMap.set(c, new Map());
     if (!manualMap.get(c).has(v)) manualMap.get(c).set(v, new Set());
@@ -1575,11 +1632,11 @@ function buildScoreBreakdownTable() {
   // 1) Filas para cada anotación del usuario
   let rowIndex = 0;
   manualAnnotations.forEach(a => {
-    const c = a.category, v = a.variable, tRaw = a.text, t = toKey(a.text);
+    const c = a.category, v = a.variable, tRaw = a.text, t = toRaw(a.text);
     if (!c || !v || !t) return;
 
     const varsInCat = originalMap.get(c) || new Map();
-    const exactSet = (varsInCat.get(v) || new Set());
+    const sameVarSet = (varsInCat.get(v) || new Set());
     let tipo = 'extra';
     let puntos = 0;
     let icono = '';
@@ -1587,7 +1644,12 @@ function buildScoreBreakdownTable() {
     let puntosClass = '';
     let puntosIcon = '';
 
-    if (exactSet.has(t)) {
+    // Coincidencia flexible en misma variable
+    let foundExact = false;
+    for (const irisText of sameVarSet) {
+      if (flexibleMatch(tRaw, irisText)) { foundExact = true; break; }
+    }
+    if (foundExact) {
       tipo = 'exacto';
       puntos = 100;
       icono = '<i class="fas fa-check-circle me-1"></i>';
@@ -1599,14 +1661,19 @@ function buildScoreBreakdownTable() {
       let encontradoParcial = false;
       for (const [ov, setTexts] of varsInCat.entries()) {
         if (ov === v) continue;
-        if (setTexts.has(t)) {
-          tipo = 'parcial';
-          puntos = 50;
-          encontradoParcial = true;
-          icono = '<i class="fas fa-info-circle me-1"></i>';
-          badgeClass = 'bg-info bg-gradient';
-          puntosClass = 'text-info';
-          puntosIcon = '<i class="fas fa-star-half-alt me-1"></i>';
+        for (const irisText of setTexts) {
+          if (flexibleMatch(tRaw, irisText)) {
+            tipo = 'parcial';
+            puntos = 50;
+            encontradoParcial = true;
+            icono = '<i class="fas fa-info-circle me-1"></i>';
+            badgeClass = 'bg-info bg-gradient';
+            puntosClass = 'text-info';
+            puntosIcon = '<i class="fas fa-star-half-alt me-1"></i>';
+            break;
+          }
+        }
+        if (encontradoParcial) {
           break;
         }
       }
@@ -1659,10 +1726,14 @@ function buildScoreBreakdownTable() {
 
   // 2) Faltantes: en IRIS y no en usuario, por misma variable
   originalAnnotations.forEach(a => {
-    const c = a.category, v = a.variable, tRaw = a.text, t = toKey(a.text);
+    const c = a.category, v = a.variable, tRaw = a.text, t = toRaw(a.text);
     if (!c || !v || !t) return;
     const userSet = ((manualMap.get(c) || new Map()).get(v) || new Set());
-    if (!userSet.has(t)) {
+    let anyMatch = false;
+    for (const userText of userSet) {
+      if (flexibleMatch(userText, tRaw)) { anyMatch = true; break; }
+    }
+    if (!anyMatch) {
       const tr = document.createElement('tr');
       tr.style.opacity = '0';
       tr.style.transform = 'translateY(-10px)';
