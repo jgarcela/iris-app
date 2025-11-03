@@ -1,9 +1,15 @@
 # web/utils/gamified_score.py
 
 """
-Sistema de puntuación gamificada usando comparación exacta.
-Compara anotaciones del usuario con anotaciones de IRIS.
+Sistema de puntuación gamificada con coincidencia flexible (sin embeddings).
+Compara anotaciones del usuario con anotaciones de IRIS permitiendo pequeñas
+variaciones (mayúsculas/minúsculas, espacios, signos, tildes y ligeras
+diferen cias de caracteres).
 """
+
+from difflib import SequenceMatcher
+import re
+import unicodedata
 
 
 def convert_annotations_to_dict(annotations):
@@ -35,15 +41,70 @@ def convert_annotations_to_dict(annotations):
     return result
 
 
-def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.8):
+def _strip_accents(text: str) -> str:
+    """
+    Elimina tildes/acentos de un texto Unicode.
+    """
+    nfkd_form = unicodedata.normalize("NFKD", text)
+    return "".join([c for c in nfkd_form if not unicodedata.category(c) == "Mn"])
+
+
+def _normalize_text(text: str) -> str:
+    """
+    Normaliza texto para comparación flexible:
+    - lower
+    - trim
+    - quitar tildes
+    - colapsar espacios
+    - quitar puntuación
+    """
+    if text is None:
+        return ""
+    s = text.strip().lower()
+    s = _strip_accents(s)
+    # Reemplazar cualquier secuencia no alfanumérica por un único espacio
+    s = re.sub(r"[^a-z0-9]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def _flexible_match(a: str, b: str, threshold: float = 0.6) -> bool:
+    """
+    Coincidencia flexible basada en normalización + similitud por caracteres.
+    Considera match si:
+      - a == b tras normalizar, o
+      - a es substring de b o viceversa (tras normalizar) con ratio de longitudes >= threshold, o
+      - ratio de similitud (SequenceMatcher) >= threshold
+    """
+    na = _normalize_text(a)
+    nb = _normalize_text(b)
+    if not na or not nb:
+        return False
+
+    if na == nb:
+        return True
+
+    # Substring tolerante (para diferencias como puntos finales o pequeños añadidos)
+    if na in nb or nb in na:
+        min_len = min(len(na), len(nb))
+        max_len = max(len(na), len(nb)) or 1
+        if (min_len / max_len) >= threshold:
+            return True
+
+    # Similitud por caracteres
+    ratio = SequenceMatcher(None, na, nb).ratio()
+    return ratio >= threshold
+
+
+def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.6):
     """
     Calcula puntuación gamificada comparando anotaciones del usuario con IRIS.
-    Usa comparación exacta (sin embeddings).
+    Usa coincidencia flexible (sin embeddings; sin penalizaciones por extras/faltantes).
     
     Args:
         user_ann_list: Lista de anotaciones del usuario [{category, variable, text}, ...]
         iris_ann_list: Lista de anotaciones de IRIS [{category, variable, text}, ...]
-        threshold: No se usa (mantenido para compatibilidad)
+        threshold: Umbral de similitud para coincidencia flexible (0-1)
     
     Returns:
         dict: Reporte con categorías y resumen global
@@ -83,15 +144,14 @@ def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.8):
             # Comparar usuario → IRIS
             for u_text in vals_user:
                 found_match = False
-                u_text_clean = u_text.strip().lower()
+                u_text_clean = u_text  # Se usa normalización en _flexible_match
                 
-                # Buscar en la misma variable (exactos)
+                # Buscar en la misma variable (exactos con coincidencia flexible)
                 for idx, iris_text in enumerate(vals_iris_same_var):
                     if idx in matched_iris_same_var:
                         continue  # Ya fue matcheado
                     
-                    iris_text_clean = iris_text.strip().lower()
-                    if u_text_clean == iris_text_clean:
+                    if _flexible_match(u_text_clean, iris_text, threshold):
                         # Match exacto en la misma variable
                         exactos += 1
                         puntos += 100
@@ -106,8 +166,7 @@ def gamified_score_detailed(user_ann_list, iris_ann_list, threshold=0.8):
                             continue  # Ya lo buscamos arriba
                         
                         for iris_text in other_vals_iris:
-                            iris_text_clean = iris_text.strip().lower()
-                            if u_text_clean == iris_text_clean:
+                            if _flexible_match(u_text_clean, iris_text, threshold):
                                 # Match parcial en otra variable (mismo texto, diferente variable)
                                 parciales += 1
                                 puntos += 50
