@@ -15,7 +15,7 @@ from docx.enum.text import WD_COLOR_INDEX
 import io
 
 from web.utils.logger import logger
-from web.utils.decorators import login_required, challenge_restricted
+from web.utils.decorators import login_required, challenge_restricted, analyst_or_admin_required
 import database.db as db
 from bson import ObjectId
 
@@ -698,7 +698,7 @@ def analysis_history():
 
 @bp.route('/etiquetar_iris', methods=['GET'])
 @login_required
-@challenge_restricted
+@analyst_or_admin_required
 def etiquetar_iris():
     """Display news from iris_data_etiquetas collection for labeling"""
     logger.info(f"[/ANALYSIS/ETIQUETAR_IRIS] Request from {request.remote_addr} [{request.method}]")
