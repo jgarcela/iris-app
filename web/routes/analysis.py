@@ -708,6 +708,7 @@ def etiquetar_iris():
     search_query = request.args.get('search', '').strip()
     date_from = request.args.get('date_from', '').strip()
     date_to = request.args.get('date_to', '').strip()
+    medio_filter = request.args.get('medio', '').strip()
     
     # Prepare API call to get data from COLLECTION_DATA_ETIQUETAS
     api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
@@ -723,6 +724,13 @@ def etiquetar_iris():
     except Exception as e:
         all_news = []
         logger.warning(f"Failed to fetch news from iris_data_etiquetas: {e}")
+    
+    # Get unique medios (MMCC) for filter dropdown
+    medios_unicos = sorted(list(set([news.get('MMCC', '') for news in all_news if news.get('MMCC')])))
+    
+    # Filter by medio if provided
+    if medio_filter:
+        all_news = [news for news in all_news if news.get('MMCC') == medio_filter]
     
     # Filter by search query
     if search_query:
@@ -778,6 +786,8 @@ def etiquetar_iris():
         search_query=search_query,
         date_from=date_from,
         date_to=date_to,
+        medio_filter=medio_filter,
+        medios_unicos=medios_unicos,
         total_count=len(all_news)
     )
 

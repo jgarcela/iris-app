@@ -29,7 +29,7 @@
                     <div class="card-body">
                         <form method="GET" action="{{ url_for('analysis.etiquetar_iris') }}" class="row g-3">
                             <!-- Search Input -->
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="search" class="form-label">
                                     <i class="fas fa-search me-1"></i>
                                     {{ _('Buscar por título o contenido') }}
@@ -40,6 +40,22 @@
                                        name="search" 
                                        value="{{ search_query }}"
                                        placeholder="{{ _('Escribe para buscar...') }}">
+                            </div>
+
+                            <!-- Medio Filter -->
+                            <div class="col-md-2">
+                                <label for="medio" class="form-label">
+                                    <i class="fas fa-newspaper me-1"></i>
+                                    {{ _('Medio') }}
+                                </label>
+                                <select class="form-select" id="medio" name="medio">
+                                    <option value="">{{ _('Todos los medios') }}</option>
+                                    {% for medio in medios_unicos %}
+                                        <option value="{{ medio }}" {% if medio == medio_filter %}selected{% endif %}>
+                                            {{ medio }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </div>
 
                             <!-- Date From -->
@@ -69,7 +85,7 @@
                             </div>
 
                             <!-- Filter Buttons -->
-                            <div class="col-md-4 d-flex align-items-end">
+                            <div class="col-md-3 d-flex align-items-end">
                                 <div class="d-grid gap-2 w-100">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-filter me-1"></i>
@@ -93,7 +109,7 @@
                         <span class="badge bg-primary fs-6">
                             {{ total_count }} {{ _('noticias encontradas') }}
                         </span>
-                        {% if search_query or date_from or date_to %}
+                        {% if search_query or date_from or date_to or medio_filter %}
                             <span class="text-muted ms-2">
                                 <i class="fas fa-filter me-1"></i>
                                 {{ _('Filtros aplicados') }}
@@ -232,21 +248,21 @@
                             <i class="fas fa-newspaper fa-4x text-muted"></i>
                         </div>
                         <h4 class="text-muted mb-3">
-                            {% if search_query or date_from or date_to %}
+                            {% if search_query or date_from or date_to or medio_filter %}
                                 {{ _('No se encontraron noticias') }}
                             {% else %}
                                 {{ _('No hay noticias disponibles') }}
                             {% endif %}
                         </h4>
                         <p class="text-muted mb-4">
-                            {% if search_query or date_from or date_to %}
+                            {% if search_query or date_from or date_to or medio_filter %}
                                 {{ _('Intenta ajustar los filtros de búsqueda.') }}
                             {% else %}
                                 {{ _('No hay noticias en la base de datos para mostrar.') }}
                             {% endif %}
                         </p>
                         <div class="empty-state-actions">
-                            {% if search_query or date_from or date_to %}
+                            {% if search_query or date_from or date_to or medio_filter %}
                                 <a href="{{ url_for('analysis.etiquetar_iris') }}" class="btn btn-outline-secondary">
                                     <i class="fas fa-times me-1"></i>
                                     {{ _('Limpiar filtros') }}
