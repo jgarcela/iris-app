@@ -150,6 +150,17 @@
                                             <span class="badge bg-info me-2">
                                                 ID: {{ item.get('IdNoticia', 'N/A') }}
                                             </span>
+                                            {% if item.get('user_etiquetado') %}
+                                                <span class="badge bg-success me-2">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    {{ _('Etiquetado') }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger me-2">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ _('Pendiente') }}
+                                                </span>
+                                            {% endif %}
                                             <small class="text-muted">
                                                 <i class="fas fa-calendar me-1"></i>
                                                 {{ item.get('Fecha', item.get('MES', _('Sin fecha'))) }}
@@ -227,25 +238,42 @@
                                                 </div>
                                                 <div class="col-4">
                                                     <small class="text-muted d-block">{{ _('Mes') }}</small>
-                                                    <span class="badge bg-success">
+                                                    <span class="badge bg-secondary">
                                                         {{ item.get('MES', _('N/A')) }}
                                                     </span>
                                                 </div>
                                                 <div class="col-4">
-                                                    <small class="text-muted d-block">{{ _('Etiquetado') }}</small>
-                                                    <span class="badge bg-warning">
-                                                        {% if item.get('user_etiquetado') %}{{ _('Sí') }}{% else %}{{ _('No') }}{% endif %}
-                                                    </span>
+                                                    <small class="text-muted d-block">{{ _('Estado') }}</small>
+                                                    {% if item.get('user_etiquetado') %}
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>
+                                                            {{ _('Completado') }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            {{ _('Pendiente') }}
+                                                        </span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card-footer">
+                                    <div class="card-footer {% if item.get('user_etiquetado') %}bg-light border-success border-top-2{% else %}bg-light border-warning border-top-2{% endif %}">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">
-                                                <i class="fas fa-user me-1"></i>
-                                                {{ item.get('user_etiquetado', _('Sin etiquetar')) }}
-                                            </small>
+                                            <div>
+                                                {% if item.get('user_etiquetado') %}
+                                                    <small class="text-success fw-bold">
+                                                        <i class="fas fa-user-check me-1"></i>
+                                                        {{ _('Etiquetado por') }}: <strong>{{ item.get('user_etiquetado') }}</strong>
+                                                    </small>
+                                                {% else %}
+                                                    <small class="text-warning fw-bold">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        {{ _('Pendiente de etiquetar') }}
+                                                    </small>
+                                                {% endif %}
+                                            </div>
                                             <button class="btn btn-sm btn-primary" onclick="viewNews('{{ item.get('_id', '') }}')">
                                                 <i class="fas fa-eye me-1"></i>
                                                 {{ _('Ver') }}
@@ -346,8 +374,28 @@ function viewNews(newsId) {
     border-bottom: 1px solid #dee2e6;
 }
 
+.analysis-card .card-header .badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    font-weight: 600;
+}
+
 .analysis-meta .badge {
     font-size: 0.75rem;
+}
+
+.border-top-2 {
+    border-top-width: 3px !important;
+}
+
+.card-footer.bg-light.border-success {
+    border-top-color: #198754 !important;
+    background-color: #f8f9fa !important;
+}
+
+.card-footer.bg-light.border-warning {
+    border-top-color: #ffc107 !important;
+    background-color: #fffbf0 !important;
 }
 
 .analysis-stats .badge {
