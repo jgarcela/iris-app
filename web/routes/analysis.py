@@ -53,6 +53,7 @@ HIGHLIGHT_COLOR_MAP = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'
 CONTENIDO_GENERAL_VARIABLES = ast.literal_eval(config['CONTENIDO_GENERAL']['VARIABLES'])
 LENGUAJE_VARIABLES = ast.literal_eval(config['LENGUAJE']['VARIABLES'])
 FUENTES_VARIABLES = ast.literal_eval(config['FUENTES']['VARIABLES'])
+COLLECTION_DATA_ETIQUETAS = config['DATABASE']['COLLECTION_DATA_ETIQUETAS']
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
@@ -700,7 +701,7 @@ def analysis_history():
 @login_required
 @analyst_or_admin_required
 def etiquetar_iris():
-    """Display news from iris_data_etiquetas collection for labeling"""
+    """Display news from COLLECTION_DATA_ETIQUETAS for labeling"""
     logger.info(f"[/ANALYSIS/ETIQUETAR_IRIS] Request from {request.remote_addr} [{request.method}]")
     
     # Get search and filter parameters
@@ -708,8 +709,8 @@ def etiquetar_iris():
     date_from = request.args.get('date_from', '').strip()
     date_to = request.args.get('date_to', '').strip()
     
-    # Prepare API call to get data from iris_data_etiquetas collection
-    api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/iris_data_etiquetas"
+    # Prepare API call to get data from COLLECTION_DATA_ETIQUETAS
+    api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
     
     try:
         # Call API to get all news from iris_data_etiquetas
