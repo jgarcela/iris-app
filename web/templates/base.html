@@ -112,6 +112,12 @@
                   </a>
                 </li>
                 <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'analysis.etiquetar_iris' %}active{% endif %}"
+                    href="{{ url_for('analysis.etiquetar_iris') }}">
+                    <i class="fas fa-tags me-1"></i> {{ _('Etiquetar IRIS') }}
+                  </a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_iris' %}active{% endif %}"
                     href="{{ url_for('dashboard.dashboard_iris') }}">
                     <i class="fas fa-chart-bar me-1"></i> {{ _('Dashboard') }}

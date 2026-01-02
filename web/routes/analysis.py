@@ -696,6 +696,91 @@ def analysis_history():
     )
 
 
+@bp.route('/etiquetar_iris', methods=['GET'])
+@login_required
+@challenge_restricted
+def etiquetar_iris():
+    """Display news from iris_data_etiquetas collection for labeling"""
+    logger.info(f"[/ANALYSIS/ETIQUETAR_IRIS] Request from {request.remote_addr} [{request.method}]")
+    
+    # Get search and filter parameters
+    search_query = request.args.get('search', '').strip()
+    date_from = request.args.get('date_from', '').strip()
+    date_to = request.args.get('date_to', '').strip()
+    
+    # Prepare API call to get data from iris_data_etiquetas collection
+    api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/iris_data_etiquetas"
+    
+    try:
+        # Call API to get all news from iris_data_etiquetas
+        response = requests.get(api_url, headers=API_HEADERS, timeout=10)
+        if response.status_code == 200:
+            all_news = response.json()
+        else:
+            all_news = []
+            logger.warning(f"API returned status {response.status_code}, using empty list")
+    except Exception as e:
+        all_news = []
+        logger.warning(f"Failed to fetch news from iris_data_etiquetas: {e}")
+    
+    # Filter by search query
+    if search_query:
+        search_lower = search_query.lower()
+        all_news = [
+            news for news in all_news
+            if search_lower in (news.get('Titular', '') or '').lower()
+            or search_lower in (news.get('Contenido', '') or '').lower()
+            or search_lower in (news.get('textonoticia', '') or '').lower()
+            or search_lower in (news.get('Autor', '') or '').lower()
+        ]
+    
+    # Filter by date if provided
+    if date_from or date_to:
+        def parse_fecha(news_item):
+            """Parse date from news item - try different date formats"""
+            fecha_str = news_item.get('Fecha', '')
+            if not fecha_str:
+                return None
+            try:
+                # Try DD/MM/YYYY format
+                if '/' in fecha_str:
+                    return datetime.strptime(fecha_str, '%d/%m/%Y').date()
+                # Try YYYY-MM-DD format
+                elif '-' in fecha_str:
+                    return datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except:
+                pass
+            return None
+        
+        filtered_news = []
+        for news in all_news:
+            fecha = parse_fecha(news)
+            if fecha:
+                if date_from:
+                    dt_desde = datetime.strptime(date_from, '%Y-%m-%d').date()
+                    if fecha < dt_desde:
+                        continue
+                if date_to:
+                    dt_hasta = datetime.strptime(date_to, '%Y-%m-%d').date()
+                    if fecha > dt_hasta:
+                        continue
+                filtered_news.append(news)
+            else:
+                # If no date, include it if no date filters are set
+                if not date_from and not date_to:
+                    filtered_news.append(news)
+        all_news = filtered_news
+    
+    return render_template(
+        'analysis/etiquetar_iris.html',
+        news=all_news,
+        search_query=search_query,
+        date_from=date_from,
+        date_to=date_to,
+        total_count=len(all_news)
+    )
+
+
 @bp.route('/view/<analysis_id>', methods=['GET'])
 @login_required
 def view_analysis(analysis_id):

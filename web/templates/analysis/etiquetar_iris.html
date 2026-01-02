@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Etiquetar IRIS') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="history-header mb-4">
+                <h1 class="display-6 mb-3">
+                    <i class="fas fa-tags me-3 text-primary"></i>
+                    {{ _('Etiquetar IRIS') }}
+                </h1>
+                <p class="lead text-muted">
+                    {{ _('Consulta y gestiona las noticias de la base de datos para etiquetado') }}
+                </p>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="search-filters-panel mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            {{ _('Búsqueda y Filtros') }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ url_for('analysis.etiquetar_iris') }}" class="row g-3">
+                            <!-- Search Input -->
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">
+                                    <i class="fas fa-search me-1"></i>
+                                    {{ _('Buscar por título o contenido') }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="search" 
+                                       name="search" 
+                                       value="{{ search_query }}"
+                                       placeholder="{{ _('Escribe para buscar...') }}">
+                            </div>
+
+                            <!-- Date From -->
+                            <div class="col-md-2">
+                                <label for="date_from" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ _('Desde') }}
+                                </label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="date_from" 
+                                       name="date_from" 
+                                       value="{{ date_from }}">
+                            </div>
+
+                            <!-- Date To -->
+                            <div class="col-md-2">
+                                <label for="date_to" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ _('Hasta') }}
+                                </label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="date_to" 
+                                       name="date_to" 
+                                       value="{{ date_to }}">
+                            </div>
+
+                            <!-- Filter Buttons -->
+                            <div class="col-md-4 d-flex align-items-end">
+                                <div class="d-grid gap-2 w-100">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter me-1"></i>
+                                        {{ _('Filtrar') }}
+                                    </button>
+                                    <a href="{{ url_for('analysis.etiquetar_iris') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        {{ _('Limpiar') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Summary -->
+            <div class="results-summary mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-primary fs-6">
+                            {{ total_count }} {{ _('noticias encontradas') }}
+                        </span>
+                        {% if search_query or date_from or date_to %}
+                            <span class="text-muted ms-2">
+                                <i class="fas fa-filter me-1"></i>
+                                {{ _('Filtros aplicados') }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        {{ _('Última actualización') }}: <span id="current-time"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News List -->
+            <div class="analysis-list">
+                {% if news %}
+                    <div class="row">
+                        {% for item in news %}
+                            <div class="col-lg-6 col-xl-4 mb-4">
+                                <div class="card analysis-card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="analysis-meta">
+                                            <span class="badge bg-info me-2">
+                                                ID: {{ item.get('IdNoticia', 'N/A') }}
+                                            </span>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                {{ item.get('Fecha', item.get('MES', _('Sin fecha'))) }}
+                                            </small>
+                                        </div>
+                                        <div class="analysis-actions">
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                        type="button" 
+                                                        data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="viewNews('{{ item.get('_id', '') }}')">
+                                                            <i class="fas fa-eye me-2"></i>
+                                                            {{ _('Ver noticia') }}
+                                                        </a>
+                                                    </li>
+                                                    {% if item.get('Pagina') %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ item.get('Pagina') }}" target="_blank">
+                                                            <i class="fas fa-external-link-alt me-2"></i>
+                                                            {{ _('Abrir enlace') }}
+                                                        </a>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            {% if item.get('Titular') %}
+                                                {{ item.get('Titular')[:80] }}{% if item.get('Titular')|length > 80 %}...{% endif %}
+                                            {% else %}
+                                                <em class="text-muted">{{ _('Sin título') }}</em>
+                                            {% endif %}
+                                        </h6>
+                                        
+                                        {% if item.get('Autor') %}
+                                            <p class="card-text text-muted small mb-2">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ item.get('Autor') }}
+                                            </p>
+                                        {% endif %}
+
+                                        {% if item.get('MMCC') %}
+                                            <p class="card-text text-muted small mb-2">
+                                                <i class="fas fa-newspaper me-1"></i>
+                                                {{ item.get('MMCC') }}
+                                            </p>
+                                        {% endif %}
+
+                                        <div class="analysis-preview">
+                                            <p class="card-text small text-muted">
+                                                {% if item.get('Contenido') %}
+                                                    {{ item.get('Contenido')[:150] }}{% if item.get('Contenido')|length > 150 %}...{% endif %}
+                                                {% elif item.get('textonoticia') %}
+                                                    {{ item.get('textonoticia')[:150] }}{% if item.get('textonoticia')|length > 150 %}...{% endif %}
+                                                {% else %}
+                                                    {{ _('Sin contenido') }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+
+                                        <!-- News Stats -->
+                                        <div class="analysis-stats mt-3">
+                                            <div class="row text-center">
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block">{{ _('Caracteres') }}</small>
+                                                    <span class="badge bg-info">
+                                                        {{ item.get('Caracteres', 0) }}
+                                                    </span>
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block">{{ _('Mes') }}</small>
+                                                    <span class="badge bg-success">
+                                                        {{ item.get('MES', _('N/A')) }}
+                                                    </span>
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block">{{ _('Etiquetado') }}</small>
+                                                    <span class="badge bg-warning">
+                                                        {% if item.get('NombreUsuario') %}{{ _('Sí') }}{% else %}{{ _('No') }}{% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ item.get('NombreUsuario', _('Sin etiquetar')) }}
+                                            </small>
+                                            <button class="btn btn-sm btn-primary" onclick="viewNews('{{ item.get('_id', '') }}')">
+                                                <i class="fas fa-eye me-1"></i>
+                                                {{ _('Ver') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state text-center py-5">
+                        <div class="empty-state-icon mb-4">
+                            <i class="fas fa-newspaper fa-4x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">
+                            {% if search_query or date_from or date_to %}
+                                {{ _('No se encontraron noticias') }}
+                            {% else %}
+                                {{ _('No hay noticias disponibles') }}
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted mb-4">
+                            {% if search_query or date_from or date_to %}
+                                {{ _('Intenta ajustar los filtros de búsqueda.') }}
+                            {% else %}
+                                {{ _('No hay noticias en la base de datos para mostrar.') }}
+                            {% endif %}
+                        </p>
+                        <div class="empty-state-actions">
+                            {% if search_query or date_from or date_to %}
+                                <a href="{{ url_for('analysis.etiquetar_iris') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>
+                                    {{ _('Limpiar filtros') }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- News Actions JavaScript -->
+<script>
+// Set current time
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const timeString = now.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    const timeElement = document.getElementById('current-time');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
+});
+
+function viewNews(newsId) {
+    // TODO: Implement view news functionality
+    console.log('View news:', newsId);
+    alert('{{ _("Funcionalidad de visualización en desarrollo") }}');
+}
+</script>
+
+<!-- Custom CSS for Etiquetar IRIS -->
+<style>
+.history-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.search-filters-panel .card {
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.analysis-card {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.analysis-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.analysis-card .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.analysis-meta .badge {
+    font-size: 0.75rem;
+}
+
+.analysis-stats .badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+
+.results-summary {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+@media (max-width: 768px) {
+    .history-header {
+        padding: 1rem;
+    }
+    
+    .history-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .search-filters-panel .row > div {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
