@@ -801,6 +801,95 @@ def etiquetar_iris():
     )
 
 
+@bp.route('/etiquetar/<news_id>', methods=['GET'])
+@login_required
+@analyst_or_admin_required
+def etiquetar_news(news_id):
+    """Display a specific news item for labeling - uses same template as view_analysis"""
+    logger.info(f"[/ANALYSIS/ETIQUETAR/{news_id}] Request from {request.remote_addr} [{request.method}]")
+    
+    try:
+        # Get news from COLLECTION_DATA_ETIQUETAS
+        api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
+        response = requests.get(api_url, headers=API_HEADERS, timeout=10)
+        
+        if response.status_code == 200:
+            all_news = response.json()
+            # Find the specific news by _id
+            news_item = None
+            for news in all_news:
+                if str(news.get('_id')) == str(news_id):
+                    news_item = news
+                    break
+            
+            if news_item:
+                # Adapt news data to analysis.html template format
+                # Get text content from news
+                text_content = news_item.get('textonoticia') or news_item.get('contenido_articulo') or news_item.get('Contenido') or ''
+                
+                # Create data structure compatible with analysis.html
+                analysis_data = {
+                    '_id': news_item.get('_id'),
+                    'text': text_content,
+                    'title': news_item.get('Titular', ''),
+                    'authors': news_item.get('Autor', ''),
+                    'url': news_item.get('Pagina', ''),
+                    'model': 'manual',  # For news labeling, use manual mode
+                    'timestamp': news_item.get('Fecha', ''),
+                    'analysis': {
+                        'original': {
+                            'contenido_general': {},
+                            'lenguaje': {},
+                            'fuentes': {'fuentes': []},
+                            'inclusivity_score': 0,
+                            'contenido_general_score': 0,
+                            'lenguaje_score': 0,
+                            'fuentes_score': 0
+                        },
+                        'edited': {
+                            'contenido_general': None,
+                            'lenguaje': None,
+                            'fuentes': None
+                        }
+                    },
+                    'highlight': {
+                        'original': {
+                            'contenido_general': text_content,
+                            'lenguaje': text_content,
+                            'fuentes': text_content
+                        },
+                        'edited': {
+                            'contenido_general': None,
+                            'lenguaje': None,
+                            'fuentes': None
+                        }
+                    },
+                    'protagonist_analysis': {},
+                    'status': 'ok'
+                }
+                
+                # Render same template as view_analysis
+                return render_template(
+                    'analysis/analysis.html',
+                    language=get_locale(),
+                    data=analysis_data,
+                    highlight_map=HIGHLIGHT_COLOR_MAP,
+                    contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
+                    lenguaje_variables=LENGUAJE_VARIABLES,
+                    fuentes_variables=FUENTES_VARIABLES,
+                    api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
+                    api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
+                )
+            else:
+                abort(404, description="Noticia no encontrada")
+        else:
+            abort(502, description="Error al obtener la noticia")
+            
+    except Exception as e:
+        logger.error(f"Error viewing news {news_id}: {e}")
+        abort(500, description="Error interno del servidor")
+
+
 @bp.route('/view/<analysis_id>', methods=['GET'])
 @login_required
 def view_analysis(analysis_id):
