@@ -936,6 +936,10 @@
 let annotations = [];
 let selectedTopic = '';
 
+// Detectar si estamos en modo etiquetado IRIS
+const isIrisEtiquetas = {% if data and data.get('is_iris_etiquetas') %}true{% else %}false{% endif %};
+const newsId = {% if data and data.get('news_id') %}'{{ data.news_id }}'{% else %}null{% endif %};
+
 // Variables from config.ini - parse the string arrays
   const CHALLENGE_VARIABLES = {
       'contenido_general': ["cita_textual_titular", "genero_nombre_propio_titular", "genero_periodista", "genero_personas_mencionadas", "nombre_propio_titular", "personas_mencionadas", "tema"],
@@ -1975,9 +1979,25 @@ function addTopicAnnotation(value, text) {
           throw new Error('Error al guardar el análisis');
       })
       .then(data => {
-          alert(`Análisis guardado correctamente. ID: ${data.analysis_id}`);
-          // Redirigir a la página de resultados o historial
-          window.location.href = '/analysis/history';
+          if (isIrisEtiquetas) {
+              const annotationCount = annotations.length;
+              const message = `✅ Etiquetado guardado correctamente en iris_data_etiquetas\n\n` +
+                            `📰 Noticia ID: ${newsId || data.news_id || 'N/A'}\n` +
+                            `📝 Anotaciones: ${annotationCount}\n` +
+                            `💾 Colección: iris_data_etiquetas`;
+              alert(message);
+              console.log('✅ Guardado en iris_data_etiquetas:', {
+                  news_id: newsId || data.news_id,
+                  annotations_count: annotationCount,
+                  annotations: annotations
+              });
+              // Redirigir a la página de etiquetado IRIS
+              window.location.href = '/analysis/etiquetar_iris';
+          } else {
+              alert(`Análisis guardado correctamente. ID: ${data.analysis_id || 'N/A'}`);
+              // Redirigir a la página de resultados o historial
+              window.location.href = '/analysis/history';
+          }
       })
       .catch(error => {
           console.error('Error:', error);

@@ -801,13 +801,80 @@ def etiquetar_iris():
     )
 
 
-@bp.route('/etiquetar/<news_id>', methods=['GET'])
+@bp.route('/etiquetar/<news_id>', methods=['GET', 'POST'])
 @login_required
 @analyst_or_admin_required
 def etiquetar_news(news_id):
-    """Display a specific news item for labeling - uses same template as view_analysis"""
+    """Display a specific news item for labeling - uses manual_analysis.html template"""
     logger.info(f"[/ANALYSIS/ETIQUETAR/{news_id}] Request from {request.remote_addr} [{request.method}]")
     
+    # POST method - save annotations to iris_data_etiquetas
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            text = data.get('text', '')
+            title = data.get('title', '')
+            authors = data.get('authors', '')
+            url = data.get('url', '')
+            annotations = data.get('annotations', [])
+            selected_topic = data.get('selected_topic', '')
+            protagonist_analysis = data.get('protagonist_analysis', {})
+            timestamp = data.get('timestamp', datetime.now().isoformat())
+        else:
+            text = request.form.get('text', '')
+            title = request.form.get('title', '')
+            authors = request.form.get('authors', '')
+            url = request.form.get('url', '')
+            annotations = []
+            selected_topic = ''
+            protagonist_analysis = {}
+            timestamp = datetime.now().isoformat()
+
+        if not annotations:
+            return jsonify({"error": "Se requieren anotaciones para guardar"}), 400
+
+        try:
+            # Get user information
+            user = get_user_info()
+            user_id = user.get('id') if user else session.get('user_id')
+            user_email = user.get('email') if user else session.get('user_email', 'anonymous@example.com')
+            
+            # Prepare update data for iris_data_etiquetas
+            update_data = {
+                'user_etiquetado': user_email,
+                'etiquetado_at': datetime.now().isoformat(),
+                'annotations': annotations,
+                'selected_topic': selected_topic,
+                'protagonist_analysis': protagonist_analysis,
+                'metadata': {
+                    'total_annotations': len(annotations),
+                    'categories': list(set([ann.get('category', '') for ann in annotations])),
+                    'variables': list(set([ann.get('variable', '') for ann in annotations]))
+                }
+            }
+            
+            # Update document in iris_data_etiquetas
+            result = db.DB_DATA_ETIQUETAS.update_one(
+                {'_id': ObjectId(news_id)},
+                {'$set': update_data}
+            )
+            
+            if result.modified_count == 1 or result.matched_count == 1:
+                logger.info(f"News {news_id} labeled successfully by user {user_email}")
+                return jsonify({
+                    "success": True,
+                    "news_id": news_id,
+                    "message": "Etiquetado guardado correctamente"
+                })
+            else:
+                logger.warning(f"News {news_id} not found or not updated")
+                return jsonify({"error": "No se pudo actualizar la noticia"}), 404
+                
+        except Exception as e:
+            logger.error(f"Error saving labels for news {news_id}: {str(e)}")
+            return jsonify({"error": "Error al guardar el etiquetado"}), 500
+    
+    # GET method - display news for labeling
     try:
         # Get news from COLLECTION_DATA_ETIQUETAS
         api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
@@ -823,62 +890,32 @@ def etiquetar_news(news_id):
                     break
             
             if news_item:
-                # Adapt news data to analysis.html template format
+                # Adapt news data to manual_analysis.html template format
                 # Get text content from news
                 text_content = news_item.get('textonoticia') or news_item.get('contenido_articulo') or news_item.get('Contenido') or ''
                 
-                # Create data structure compatible with analysis.html
-                analysis_data = {
-                    '_id': news_item.get('_id'),
+                # Create data structure compatible with manual_analysis.html
+                manual_data = {
                     'text': text_content,
                     'title': news_item.get('Titular', ''),
                     'authors': news_item.get('Autor', ''),
                     'url': news_item.get('Pagina', ''),
-                    'model': 'manual',  # For news labeling, use manual mode
-                    'timestamp': news_item.get('Fecha', ''),
-                    'analysis': {
-                        'original': {
-                            'contenido_general': {},
-                            'lenguaje': {},
-                            'fuentes': {'fuentes': []},
-                            'inclusivity_score': 0,
-                            'contenido_general_score': 0,
-                            'lenguaje_score': 0,
-                            'fuentes_score': 0
-                        },
-                        'edited': {
-                            'contenido_general': None,
-                            'lenguaje': None,
-                            'fuentes': None
-                        }
-                    },
-                    'highlight': {
-                        'original': {
-                            'contenido_general': text_content,
-                            'lenguaje': text_content,
-                            'fuentes': text_content
-                        },
-                        'edited': {
-                            'contenido_general': None,
-                            'lenguaje': None,
-                            'fuentes': None
-                        }
-                    },
-                    'protagonist_analysis': {},
-                    'status': 'ok'
+                    'analysis_mode': 'manual',
+                    'status': 'ready_for_manual_analysis',
+                    'news_id': news_id,  # Flag to identify this is from iris_etiquetas
+                    'is_iris_etiquetas': True  # Flag for JavaScript
                 }
                 
-                # Render same template as view_analysis
+                # Render manual_analysis.html template
                 return render_template(
-                    'analysis/analysis.html',
+                    'analysis/manual_analysis.html',
+                    data=manual_data,
                     language=get_locale(),
-                    data=analysis_data,
                     highlight_map=HIGHLIGHT_COLOR_MAP,
                     contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
                     lenguaje_variables=LENGUAJE_VARIABLES,
                     fuentes_variables=FUENTES_VARIABLES,
-                    api_url_edit=URL_API_ENDPOINT_ANALYSIS_EDITS,
-                    api_url_save_annotations=URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS
+                    config=config
                 )
             else:
                 abort(404, description="Noticia no encontrada")
