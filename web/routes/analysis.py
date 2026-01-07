@@ -891,8 +891,11 @@ def etiquetar_news(news_id):
             
             if news_item:
                 # Adapt news data to manual_analysis.html template format
-                # Get text content from news
-                text_content = news_item.get('textonoticia') or news_item.get('contenido_articulo') or news_item.get('Contenido') or ''
+                # Use specific fields from iris_data_etiquetas:
+                # - Texto principal: contenido_articulo
+                # - Título: Titular
+                # - Autores: Autor
+                text_content = news_item.get('contenido_articulo') or news_item.get('textonoticia') or news_item.get('Contenido') or ''
                 
                 # Create data structure compatible with manual_analysis.html
                 manual_data = {
