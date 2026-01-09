@@ -111,6 +111,14 @@
                     <i class="fas fa-history me-1"></i> {{ _('Historial de Análisis') }}
                   </a>
                 </li>
+                {% if current_user and ('analyst' in current_user.roles or 'admin' in current_user.roles) %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.endpoint == 'analysis.etiquetar_iris' %}active{% endif %}"
+                    href="{{ url_for('analysis.etiquetar_iris') }}">
+                    <i class="fas fa-tags me-1"></i> {{ _('Etiquetar IRIS') }}
+                  </a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'dashboard.dashboard_iris' %}active{% endif %}"
                     href="{{ url_for('dashboard.dashboard_iris') }}">

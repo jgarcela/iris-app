@@ -15,7 +15,7 @@ from docx.enum.text import WD_COLOR_INDEX
 import io
 
 from web.utils.logger import logger
-from web.utils.decorators import login_required, challenge_restricted
+from web.utils.decorators import login_required, challenge_restricted, analyst_or_admin_required
 import database.db as db
 from bson import ObjectId
 
@@ -53,6 +53,7 @@ HIGHLIGHT_COLOR_MAP = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'
 CONTENIDO_GENERAL_VARIABLES = ast.literal_eval(config['CONTENIDO_GENERAL']['VARIABLES'])
 LENGUAJE_VARIABLES = ast.literal_eval(config['LENGUAJE']['VARIABLES'])
 FUENTES_VARIABLES = ast.literal_eval(config['FUENTES']['VARIABLES'])
+COLLECTION_DATA_ETIQUETAS = config['DATABASE']['COLLECTION_DATA_ETIQUETAS']
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
@@ -694,6 +695,239 @@ def analysis_history():
         analysis_modes=analysis_modes,
         total_count=len(analyses)
     )
+
+
+@bp.route('/etiquetar_iris', methods=['GET'])
+@login_required
+@analyst_or_admin_required
+def etiquetar_iris():
+    """Display news from COLLECTION_DATA_ETIQUETAS for labeling"""
+    logger.info(f"[/ANALYSIS/ETIQUETAR_IRIS] Request from {request.remote_addr} [{request.method}]")
+    
+    # Get search and filter parameters
+    search_query = request.args.get('search', '').strip()
+    date_from = request.args.get('date_from', '').strip()
+    date_to = request.args.get('date_to', '').strip()
+    medio_filter = request.args.get('medio', '').strip()
+    etiquetado_filter = request.args.get('etiquetado', '').strip()
+    
+    # Prepare API call to get data from COLLECTION_DATA_ETIQUETAS
+    api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
+    
+    try:
+        # Call API to get all news from iris_data_etiquetas
+        response = requests.get(api_url, headers=API_HEADERS, timeout=10)
+        if response.status_code == 200:
+            all_news = response.json()
+        else:
+            all_news = []
+            logger.warning(f"API returned status {response.status_code}, using empty list")
+    except Exception as e:
+        all_news = []
+        logger.warning(f"Failed to fetch news from iris_data_etiquetas: {e}")
+    
+    # Get unique medios (MMCC) for filter dropdown
+    medios_unicos = sorted(list(set([news.get('MMCC', '') for news in all_news if news.get('MMCC')])))
+    
+    # Filter by medio if provided
+    if medio_filter:
+        all_news = [news for news in all_news if news.get('MMCC') == medio_filter]
+    
+    # Filter by etiquetado status if provided
+    if etiquetado_filter:
+        if etiquetado_filter == 'si':
+            all_news = [news for news in all_news if news.get('user_etiquetado')]
+        elif etiquetado_filter == 'no':
+            all_news = [news for news in all_news if not news.get('user_etiquetado')]
+    
+    # Filter by search query
+    if search_query:
+        search_lower = search_query.lower()
+        all_news = [
+            news for news in all_news
+            if search_lower in (news.get('Titular', '') or '').lower()
+            or search_lower in (news.get('Contenido', '') or '').lower()
+            or search_lower in (news.get('textonoticia', '') or '').lower()
+            or search_lower in (news.get('Autor', '') or '').lower()
+        ]
+    
+    # Filter by date if provided
+    if date_from or date_to:
+        def parse_fecha(news_item):
+            """Parse date from news item - try different date formats"""
+            fecha_str = news_item.get('Fecha', '')
+            if not fecha_str:
+                return None
+            try:
+                # Try DD/MM/YYYY format
+                if '/' in fecha_str:
+                    return datetime.strptime(fecha_str, '%d/%m/%Y').date()
+                # Try YYYY-MM-DD format
+                elif '-' in fecha_str:
+                    return datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except:
+                pass
+            return None
+        
+        filtered_news = []
+        for news in all_news:
+            fecha = parse_fecha(news)
+            if fecha:
+                if date_from:
+                    dt_desde = datetime.strptime(date_from, '%Y-%m-%d').date()
+                    if fecha < dt_desde:
+                        continue
+                if date_to:
+                    dt_hasta = datetime.strptime(date_to, '%Y-%m-%d').date()
+                    if fecha > dt_hasta:
+                        continue
+                filtered_news.append(news)
+            else:
+                # If no date, include it if no date filters are set
+                if not date_from and not date_to:
+                    filtered_news.append(news)
+        all_news = filtered_news
+    
+    return render_template(
+        'analysis/etiquetar_iris.html',
+        news=all_news,
+        search_query=search_query,
+        date_from=date_from,
+        date_to=date_to,
+        medio_filter=medio_filter,
+        etiquetado_filter=etiquetado_filter,
+        medios_unicos=medios_unicos,
+        total_count=len(all_news)
+    )
+
+
+@bp.route('/etiquetar/<news_id>', methods=['GET', 'POST'])
+@login_required
+@analyst_or_admin_required
+def etiquetar_news(news_id):
+    """Display a specific news item for labeling - uses manual_analysis.html template"""
+    logger.info(f"[/ANALYSIS/ETIQUETAR/{news_id}] Request from {request.remote_addr} [{request.method}]")
+    
+    # POST method - save annotations to iris_data_etiquetas
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            text = data.get('text', '')
+            title = data.get('title', '')
+            authors = data.get('authors', '')
+            url = data.get('url', '')
+            annotations = data.get('annotations', [])
+            selected_topic = data.get('selected_topic', '')
+            protagonist_analysis = data.get('protagonist_analysis', {})
+            timestamp = data.get('timestamp', datetime.now().isoformat())
+        else:
+            text = request.form.get('text', '')
+            title = request.form.get('title', '')
+            authors = request.form.get('authors', '')
+            url = request.form.get('url', '')
+            annotations = []
+            selected_topic = ''
+            protagonist_analysis = {}
+            timestamp = datetime.now().isoformat()
+
+        if not annotations:
+            return jsonify({"error": "Se requieren anotaciones para guardar"}), 400
+
+        try:
+            # Get user information
+            user = get_user_info()
+            user_id = user.get('id') if user else session.get('user_id')
+            user_email = user.get('email') if user else session.get('user_email', 'anonymous@example.com')
+            
+            # Prepare update data for iris_data_etiquetas
+            update_data = {
+                'user_etiquetado': user_email,
+                'etiquetado_at': datetime.now().isoformat(),
+                'annotations': annotations,
+                'selected_topic': selected_topic,
+                'protagonist_analysis': protagonist_analysis,
+                'metadata': {
+                    'total_annotations': len(annotations),
+                    'categories': list(set([ann.get('category', '') for ann in annotations])),
+                    'variables': list(set([ann.get('variable', '') for ann in annotations]))
+                }
+            }
+            
+            # Update document in iris_data_etiquetas
+            result = db.DB_DATA_ETIQUETAS.update_one(
+                {'_id': ObjectId(news_id)},
+                {'$set': update_data}
+            )
+            
+            if result.modified_count == 1 or result.matched_count == 1:
+                logger.info(f"News {news_id} labeled successfully by user {user_email}")
+                return jsonify({
+                    "success": True,
+                    "news_id": news_id,
+                    "message": "Etiquetado guardado correctamente"
+                })
+            else:
+                logger.warning(f"News {news_id} not found or not updated")
+                return jsonify({"error": "No se pudo actualizar la noticia"}), 404
+                
+        except Exception as e:
+            logger.error(f"Error saving labels for news {news_id}: {str(e)}")
+            return jsonify({"error": "Error al guardar el etiquetado"}), 500
+    
+    # GET method - display news for labeling
+    try:
+        # Get news from COLLECTION_DATA_ETIQUETAS
+        api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
+        response = requests.get(api_url, headers=API_HEADERS, timeout=10)
+        
+        if response.status_code == 200:
+            all_news = response.json()
+            # Find the specific news by _id
+            news_item = None
+            for news in all_news:
+                if str(news.get('_id')) == str(news_id):
+                    news_item = news
+                    break
+            
+            if news_item:
+                # Adapt news data to manual_analysis.html template format
+                # Use specific fields from iris_data_etiquetas:
+                # - Texto principal: contenido_articulo
+                # - Título: Titular
+                # - Autores: Autor
+                text_content = news_item.get('contenido_articulo') or news_item.get('textonoticia') or news_item.get('Contenido') or ''
+                
+                # Create data structure compatible with manual_analysis.html
+                manual_data = {
+                    'text': text_content,
+                    'title': news_item.get('Titular', ''),
+                    'authors': news_item.get('Autor', ''),
+                    'url': news_item.get('Pagina', ''),
+                    'analysis_mode': 'manual',
+                    'status': 'ready_for_manual_analysis',
+                    'news_id': news_id,  # Flag to identify this is from iris_etiquetas
+                    'is_iris_etiquetas': True  # Flag for JavaScript
+                }
+                
+                # Render manual_analysis.html template
+                return render_template(
+                    'analysis/manual_analysis.html',
+                    data=manual_data,
+                    language=get_locale(),
+                    highlight_map=HIGHLIGHT_COLOR_MAP,
+                    contenido_general_variables=CONTENIDO_GENERAL_VARIABLES,
+                    lenguaje_variables=LENGUAJE_VARIABLES,
+                    fuentes_variables=FUENTES_VARIABLES,
+                    config=config
+                )
+            else:
+                abort(404, description="Noticia no encontrada")
+        else:
+            abort(502, description="Error al obtener la noticia")
+            
+    except Exception as e:
+        logger.error(f"Error viewing news {news_id}: {e}")
+        abort(500, description="Error interno del servidor")
 
 
 @bp.route('/view/<analysis_id>', methods=['GET'])
