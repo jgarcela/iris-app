@@ -10,7 +10,7 @@ from datetime import datetime
 
 from web.utils.logger import logger
 
-from web.utils.decorators import login_required, challenge_restricted
+from web.utils.decorators import login_required, challenge_restricted, evaluator_restricted
 
 # ----------------- BLUEPRINT -----------------
 bp = Blueprint(
@@ -47,6 +47,7 @@ URL_API_ENDPOINT_DATA_GET_CONTEXTO = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GE
 @bp.route("/iris")
 @login_required
 @challenge_restricted
+@evaluator_restricted
 def table_iris():
 
     logger.info(f"[/TABLE/IRIS] Request from {request.remote_addr} [{request.method}]")

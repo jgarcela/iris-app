@@ -48,6 +48,26 @@ def challenge_restricted(f):
     return decorated
 
 
+def evaluator_restricted(f):
+    """Decorator to restrict access for users with 'evaluator_avi2026' role"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get('access_token_cookie')
+        if token:
+            try:
+                headers = {'Authorization': f'Bearer {token}'}
+                resp = requests.get(f"http://{API_HOST}:{API_PORT}/auth/me", headers=headers, timeout=2)
+
+                if resp.ok:
+                    user = resp.json().get('user')
+                    if user and 'evaluator_avi2026' in user.get('roles', []):
+                        abort(403)  # Forbidden for evaluator users
+            except Exception:
+                pass
+        return f(*args, **kwargs)
+    return decorated
+
+
 def analyst_or_admin_required(f):
     """
     Decorator that requires the user to have 'analyst' or 'admin' role
