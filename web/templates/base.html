@@ -99,12 +99,14 @@
                     <i class="fas fa-book me-1"></i> {{ _('Glosario') }}
                   </a>
                 </li>
+                {% if 'evaluator_avi2026' not in current_user.roles %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'table.table_iris' %}active{% endif %}"
                     href="{{ url_for('table.table_iris') }}">
                     <i class="fas fa-database me-1"></i> {{ _('Base de Datos') }}
                   </a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.endpoint == 'analysis.analysis_history' %}active{% endif %}"
                     href="{{ url_for('analysis.analysis_history') }}">

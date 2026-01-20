@@ -17,6 +17,14 @@
                 </p>
             </div>
 
+            <!-- Warning Alert -->
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>{{ _('Importante:') }}</strong>
+                {{ _('Para etiquetar solo se tienen en cuenta las noticias que tengan lenguaje sexista.') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <!-- Search and Filter Section -->
             <div class="search-filters-panel mb-4">
                 <div class="card">
@@ -100,6 +108,46 @@
                                        name="date_to" 
                                        value="{{ date_to }}">
                             </div>
+
+                            <!-- Lenguaje sexista Filter -->
+                            <div class="col-md-2">
+                                <label class="form-label">
+                                    <i class="fas fa-exclamation me-1"></i>
+                                    {{ _('Lenguaje sexista') }}
+                                </label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lenguaje_sexista_2" name="lenguaje_sexista" value="2" {% if not lenguaje_sexista_filter or '2' in lenguaje_sexista_filter %}checked{% endif %}>
+                                    <label class="form-check-label" for="lenguaje_sexista_2">
+                                        {{ _('Sí') }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lenguaje_sexista_3" name="lenguaje_sexista" value="3" {% if not lenguaje_sexista_filter or '3' in lenguaje_sexista_filter %}checked{% endif %}>
+                                    <label class="form-check-label" for="lenguaje_sexista_3">
+                                        {{ _('Sí, además se observa un salto semántico') }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Sexismo social Filter -->
+                            <div class="col-md-2">
+                                <label class="form-label">
+                                    <i class="fas fa-users me-1"></i>
+                                    {{ _('Sexismo social') }}
+                                </label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sexismo_social_1" name="sexismo_social" value="1" {% if not sexismo_social_filter or '1' in sexismo_social_filter %}checked{% endif %}>
+                                    <label class="form-check-label" for="sexismo_social_1">
+                                        {{ _('No') }}
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sexismo_social_2" name="sexismo_social" value="2" {% if not sexismo_social_filter or '2' in sexismo_social_filter %}checked{% endif %}>
+                                    <label class="form-check-label" for="sexismo_social_2">
+                                        {{ _('Sí') }}
+                                    </label>
+                                </div>
+                            </div>
                             
                             <!-- Filter Buttons -->
                             <div class="col-12 d-flex justify-content-end gap-2 mt-2">
@@ -124,7 +172,7 @@
                         <span class="badge bg-primary fs-6">
                             {{ total_count }} {{ _('noticias encontradas') }}
                         </span>
-                        {% if search_query or date_from or date_to or medio_filter or etiquetado_filter %}
+                        {% if search_query or date_from or date_to or medio_filter or etiquetado_filter or (lenguaje_sexista_filter and lenguaje_sexista_filter|length > 0) or (sexismo_social_filter and sexismo_social_filter|length > 0) %}
                             <span class="text-muted ms-2">
                                 <i class="fas fa-filter me-1"></i>
                                 {{ _('Filtros aplicados') }}
@@ -299,21 +347,21 @@
                             <i class="fas fa-newspaper fa-4x text-muted"></i>
                         </div>
                         <h4 class="text-muted mb-3">
-                            {% if search_query or date_from or date_to or medio_filter or etiquetado_filter %}
+                            {% if search_query or date_from or date_to or medio_filter or etiquetado_filter or (lenguaje_sexista_filter and lenguaje_sexista_filter|length > 0) or (sexismo_social_filter and sexismo_social_filter|length > 0) %}
                                 {{ _('No se encontraron noticias') }}
                             {% else %}
                                 {{ _('No hay noticias disponibles') }}
                             {% endif %}
                         </h4>
                         <p class="text-muted mb-4">
-                            {% if search_query or date_from or date_to or medio_filter or etiquetado_filter %}
+                            {% if search_query or date_from or date_to or medio_filter or etiquetado_filter or (lenguaje_sexista_filter and lenguaje_sexista_filter|length > 0) or (sexismo_social_filter and sexismo_social_filter|length > 0) %}
                                 {{ _('Intenta ajustar los filtros de búsqueda.') }}
                             {% else %}
                                 {{ _('No hay noticias en la base de datos para mostrar.') }}
                             {% endif %}
                         </p>
                         <div class="empty-state-actions">
-                            {% if search_query or date_from or date_to or medio_filter or etiquetado_filter %}
+                            {% if search_query or date_from or date_to or medio_filter or etiquetado_filter or (lenguaje_sexista_filter and lenguaje_sexista_filter|length > 0) or (sexismo_social_filter and sexismo_social_filter|length > 0) %}
                                 <a href="{{ url_for('analysis.etiquetar_iris') }}" class="btn btn-outline-secondary">
                                     <i class="fas fa-times me-1"></i>
                                     {{ _('Limpiar filtros') }}

@@ -710,6 +710,17 @@ def etiquetar_iris():
     date_to = request.args.get('date_to', '').strip()
     medio_filter = request.args.get('medio', '').strip()
     etiquetado_filter = request.args.get('etiquetado', '').strip()
+    # Get multiple values for checkbox filters
+    # If no checkboxes are selected, default to all options selected
+    lenguaje_sexista_filter = request.args.getlist('lenguaje_sexista')  # List of selected values
+    if not lenguaje_sexista_filter:
+        # Default: both options selected (show all lenguaje sexista news)
+        lenguaje_sexista_filter = ['2', '3']
+    
+    sexismo_social_filter = request.args.getlist('sexismo_social')  # List of selected values
+    if not sexismo_social_filter:
+        # Default: both options selected (show all sexismo social news)
+        sexismo_social_filter = ['1', '2']
     
     # Prepare API call to get data from COLLECTION_DATA_ETIQUETAS
     api_url = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}/{COLLECTION_DATA_ETIQUETAS}"
@@ -739,6 +750,125 @@ def etiquetar_iris():
             all_news = [news for news in all_news if news.get('user_etiquetado')]
         elif etiquetado_filter == 'no':
             all_news = [news for news in all_news if not news.get('user_etiquetado')]
+
+    # Helper function to normalize numeric values (2.0 -> '2', 2 -> '2', '2' -> '2') for comparison
+    def normalize_value(value):
+        """Normalize numeric values (2.0 -> '2', 2 -> '2', '2' -> '2') for comparison"""
+        if value is None:
+            return ''
+        # If it's already a string that looks like a number, normalize it
+        if isinstance(value, str):
+            value = value.strip()
+            # If it's an empty string, return empty
+            if not value:
+                return ''
+            # Try to convert string to number first, then back to string
+            try:
+                return str(int(float(value)))
+            except (ValueError, TypeError):
+                # If it's a non-numeric string, return as is (trimmed)
+                return value
+        # If it's a number (int or float), convert to string
+        try:
+            return str(int(float(value)))
+        except (ValueError, TypeError):
+            return str(value).strip()
+    
+    # Filter by lenguaje_sexista if provided (values: '2' = Sí, '3' = Sí, además se observa un salto semántico)
+    if lenguaje_sexista_filter:
+        # Try different possible field names (the CSV uses "Lenguaje sexista" with space and capital)
+        def get_lenguaje_sexista_value(news_item):
+            """Get lenguaje_sexista value trying different field name variations"""
+            # Try CSV format first (most likely): "Lenguaje sexista"
+            if 'Lenguaje sexista' in news_item:
+                return news_item.get('Lenguaje sexista')
+            # Try with underscore
+            if 'lenguaje_sexista' in news_item:
+                return news_item.get('lenguaje_sexista')
+            if 'Lenguaje_sexista' in news_item:
+                return news_item.get('Lenguaje_sexista')
+            # Try lowercase with space
+            if 'lenguaje sexista' in news_item:
+                return news_item.get('lenguaje sexista')
+            return None
+        
+        # Map filter values to possible string representations
+        lenguaje_sexista_map = {
+            '2': ['2', '2.0', 'Sí', 'Si', 'si', 'sí'],
+            '3': ['3', '3.0', 'Sí, además se observa un salto semántico', 'Sí además se observa un salto semántico']
+        }
+        
+        filtered_news = []
+        for news in all_news:
+            value = get_lenguaje_sexista_value(news)
+            if value is None:
+                continue
+            
+            # Normalize the value from DB
+            normalized_db_value = normalize_value(value)
+            # Also check if it's a string match (like "Sí")
+            value_str = str(value).strip() if value is not None else ''
+            
+            # Check if it matches any of the selected filter values
+            matches = False
+            for filter_val in lenguaje_sexista_filter:
+                if (normalized_db_value == filter_val or 
+                    value_str in lenguaje_sexista_map.get(filter_val, [])):
+                    matches = True
+                    break
+            
+            if matches:
+                filtered_news.append(news)
+        all_news = filtered_news
+        logger.info(f"Filtered by lenguaje_sexista={lenguaje_sexista_filter}: {len(all_news)} news found")
+
+    # Filter by sexismo_social if provided (values: '1' = No, '2' = Sí)
+    if sexismo_social_filter:
+        # Try different possible field names (the CSV uses "Sexismo social" with space and capital)
+        def get_sexismo_social_value(news_item):
+            """Get sexismo_social value trying different field name variations"""
+            # Try CSV format first (most likely): "Sexismo social"
+            if 'Sexismo social' in news_item:
+                return news_item.get('Sexismo social')
+            # Try with underscore
+            if 'sexismo_social' in news_item:
+                return news_item.get('sexismo_social')
+            if 'Sexismo_social' in news_item:
+                return news_item.get('Sexismo_social')
+            # Try lowercase with space
+            if 'sexismo social' in news_item:
+                return news_item.get('sexismo social')
+            return None
+        
+        # Map filter values to possible string representations
+        sexismo_social_map = {
+            '1': ['1', '1.0', 'No', 'no', 'NO'],
+            '2': ['2', '2.0', 'Sí', 'Si', 'si', 'sí']
+        }
+        
+        filtered_news = []
+        for news in all_news:
+            value = get_sexismo_social_value(news)
+            if value is None:
+                continue
+            
+            # Normalize the value from DB
+            normalized_db_value = normalize_value(value)
+            # Also check if it's a string match (like "Sí" or "No")
+            value_str = str(value).strip() if value is not None else ''
+            
+            # Check if it matches any of the selected filter values
+            matches = False
+            for filter_val in sexismo_social_filter:
+                if (normalized_db_value == filter_val or 
+                    value_str in sexismo_social_map.get(filter_val, [])):
+                    matches = True
+                    break
+            
+            if matches:
+                filtered_news.append(news)
+        all_news = filtered_news
+        logger.info(f"Filtered by sexismo_social={sexismo_social_filter}: {len(all_news)} news found")
     
     # Filter by search query
     if search_query:
@@ -796,6 +926,8 @@ def etiquetar_iris():
         date_to=date_to,
         medio_filter=medio_filter,
         etiquetado_filter=etiquetado_filter,
+        lenguaje_sexista_filter=lenguaje_sexista_filter,  # Now a list
+        sexismo_social_filter=sexismo_social_filter,  # Now a list
         medios_unicos=medios_unicos,
         total_count=len(all_news)
     )
