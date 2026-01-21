@@ -17,6 +17,8 @@ from flask_babel import gettext as _
 import requests
 import ast
 
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
 
 
 # ==================================
@@ -43,18 +45,18 @@ ENDPOINT_AUTH_REFRESH = config['API']['ENDPOINT_AUTH_REFRESH']
 
 
 # ----------------- URLs -----------------
-URL_API_ENDPOINT_AUTH = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_AUTH}"
+URL_API_ENDPOINT_AUTH = f"/iris/api/{ENDPOINT_AUTH}"
 URL_API_ENDPOINT_AUTH_REGISTER = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_REGISTER}"
 URL_API_ENDPOINT_AUTH_LOGIN = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_LOGIN}"
 URL_API_ENDPOINT_AUTH_ME = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_ME}"
 URL_API_ENDPOINT_AUTH_REFRESH = f"{URL_API_ENDPOINT_AUTH}/{ENDPOINT_AUTH_REFRESH}"
-URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
+URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"/iris/api/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
 
 
 # ==================================
 #  APP 
 # ==================================
-app = Flask(__name__, static_url_path='/iris/static')
+app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = config['DEFAULT']['SECRET_KEY']
 app.secret_key = config['DEFAULT']['SECRET_KEY']
 
@@ -139,7 +141,9 @@ def inject_user():
 
     try:
         headers = {'Authorization': f'Bearer {token}'}
-        resp = requests.get(URL_API_ENDPOINT_AUTH_ME, headers=headers, timeout=2)
+        
+        resp = requests.get("http://163.117.137.135:8000/auth/me", headers=headers, timeout=2)
+        print(f"{resp=}")
         logger.info(f"{resp=}")
         if resp.ok:
             user = resp.json().get('user')
@@ -279,4 +283,10 @@ print("=========================\n")
 # Usa SECRET_KEY para Flask-WTF, sesiones, etc.
 # app.config['SECRET_KEY'] = config['JWT']['SECRET_KEY']  # o config['WEB']['SECRET_KEY']
 
-app.run(debug=True, host=WEB_HOST, port=WEB_PORT)
+#app.run(debug=True, host=WEB_HOST, port=WEB_PORT)
+
+# montamos la app bajo /iris 
+application = DispatcherMiddleware(Flask("root_dummy"), { "/iris": app })
+run_simple("0.0.0.0", 5000, application, use_reloader=True, use_debugger=True)
+
+
