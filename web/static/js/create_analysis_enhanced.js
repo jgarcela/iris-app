@@ -105,13 +105,12 @@ function updateUIForMode(mode) {
     const modelSelection = document.getElementById('model-selection');
     const analysisModeInfo = document.getElementById('analysis-mode-info');
     const modelInfo = document.getElementById('model-info');
-    
-    
+
     if (mode === 'automatic') {
         // Show model selection for automatic mode
         if (modelSelection) {
             modelSelection.style.display = 'block';
-            
+
         }
         
         // Update analysis mode info

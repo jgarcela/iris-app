@@ -22,7 +22,6 @@
 }
 
 .info-card::after,
-.actions-card::after,
 .text-input-section::after,
 #model-selection::after,
 .analysis-mode-modern::after {
@@ -34,35 +33,38 @@
   box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.03) inset;
 }
 
-/* Subtle dividers between stacked items on right column */
-.analysis-right-panel .content-input-section > * + * {
-  margin-top: 0.75rem;
+/* Subtle spacing between stacked items in the content panel */
+.content-input-section > * + * {
+  margin-top: 0.55rem;
 }
 /* Modern Create Analysis Page Styles */
 
 /* Modern Analysis Mode Selection */
 .analysis-mode-modern {
   background: var(--oat-light);
-  border-radius: 1rem;
-  padding: 1.25rem 1rem;
-  margin-bottom: 1rem;
+  border-radius: var(--radius-card);
+  padding: 0.85rem;
+  margin-bottom: 0.85rem;
   box-shadow: var(--clay-shadow);
 }
 
 .mode-card-modern {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
   background: white;
-  border-radius: 0.875rem;
-  padding: 1rem;
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.8rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1.5px solid transparent;
   position: relative;
   height: 100%;
   box-shadow: var(--clay-shadow);
 }
 
 .mode-card-modern:hover {
-  transform: translateY(-4px) rotateZ(-1deg);
+  transform: translateY(-2px);
   box-shadow: var(--clay-hard-shadow);
   border-color: var(--clay-black);
 }
@@ -74,35 +76,36 @@
 }
 
 .mode-icon-modern {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
   background: var(--ube-800);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.1rem;
-  margin: 0 auto 0.75rem;
+  font-size: 0.95rem;
   box-shadow: var(--clay-shadow);
 }
 
 .mode-content-modern {
-  text-align: center;
+  text-align: left;
+  min-width: 0;
 }
 
 .mode-title-modern {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--primary-color);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
 }
 
 .mode-desc-modern {
   color: var(--warm-charcoal);
-  font-size: 0.9rem;
-  line-height: 1.45;
-  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  margin-bottom: 0;
 }
 
 .mode-features {
@@ -124,31 +127,32 @@
 
 .mode-check {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 22px;
-  height: 22px;
+  top: 50%;
+  right: 0.7rem;
+  transform: translateY(-50%) scale(0);
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--primary-color);
+  background: var(--ube-800);
   color: white;
+  font-size: 0.7rem;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transform: scale(0);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .mode-card-modern.selected .mode-check {
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(-50%) scale(1);
 }
 
 /* Model Selection */
 .model-selection-modern {
   background: white;
-  border-radius: 0.75rem;
-  padding: 1rem;
+  border-radius: var(--radius-card);
+  padding: 0.85rem;
   box-shadow: var(--clay-shadow);
   border: 1px solid var(--oat-border);
 }
@@ -156,11 +160,11 @@
 .model-option {
   background: white;
   border: 1px solid var(--oat-border);
-  border-radius: 0.75rem;
-  padding: 1rem;
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.6rem;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .model-option:hover {
@@ -176,23 +180,23 @@
 }
 
 .model-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
   background: var(--ube-800);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1rem;
-  margin: 0 auto 0.5rem;
+  font-size: 0.85rem;
+  margin: 0 auto 0.35rem;
 }
 
 /* Content Input Section */
 .content-input-section {
   background: white;
-  border-radius: 1rem;
-  padding: 1.25rem;
+  border-radius: var(--radius-card);
+  padding: 0.85rem;
   box-shadow: var(--clay-shadow);
   border: 1px solid var(--oat-border);
 }
@@ -200,31 +204,33 @@
 /* Info Card */
 .info-card {
   background: var(--oat-light);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  margin-bottom: 0;
   border: 1px solid var(--oat-border);
 }
+.info-title { margin-bottom: 0.35rem; }
 
 .info-title {
   color: var(--primary-color);
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
 }
 
 .info-fields {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.5rem;
 }
+.info-fields .info-input { flex: 1; min-width: 0; }
 
 .info-input {
   border: 1px solid var(--oat-border);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-sharp);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background: white;
 }
 
@@ -234,38 +240,34 @@
   outline: none;
 }
 
-/* Actions Card */
+/* Actions Card — compact inline toolbar */
 .actions-card {
-  background: var(--oat-light);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  border: 1px solid var(--oat-border);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 0.75rem;
 }
 
-.actions-title {
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-}
+.actions-title { display: none; }
 
 .actions-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .action-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-pill);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   text-decoration: none;
 }
 
@@ -306,32 +308,30 @@
   transform: translateY(-2px);
 }
 
-/* Text Input Section */
+/* Text Input Section — the primary input, given visual weight */
 .text-input-section {
   background: white;
-  border-radius: 1rem;
-  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+  border: 2px solid var(--ube-800);
   overflow: hidden;
-  box-shadow: var(--clay-shadow);
+  box-shadow: var(--clay-shadow), 0 6px 18px rgba(67, 8, 159, 0.10);
 }
 
 .text-input-header {
-  background: var(--oat-light);
-  padding: 1rem;
+  background: rgba(67, 8, 159, 0.06);
+  padding: 0.7rem 0.95rem;
   border-bottom: 1px solid var(--oat-border);
 }
 
 .text-input-title {
-  color: var(--primary-color);
-  font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+  color: var(--ube-800);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0;
 }
 
 .text-input-subtitle {
-  color: var(--warm-charcoal);
-  margin: 0;
-  font-size: 0.9rem;
+  display: none;
 }
 
 .required-badge {
@@ -350,11 +350,12 @@
 
 .text-input {
   width: 100%;
-  min-height: 260px;
+  min-height: 200px;
+  height: 34vh;
   border: none;
-  padding: 1rem;
-  font-size: 1rem;
-  line-height: 1.6;
+  padding: 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
   resize: vertical;
   font-family: var(--font-body);
 }
@@ -366,11 +367,23 @@
 
 .text-input-footer {
   background: var(--oat-light);
-  padding: 0.75rem 1rem;
-  border-top: 1px solid var(--oat-light);
+  padding: 0.55rem 0.7rem;
+  border-top: 1px solid var(--oat-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.text-input-footer .actions-buttons {
+  flex: 1 1 auto;
+}
+.text-input-footer .action-btn {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+}
+.text-input-footer .btn-clear {
+  padding: 0.35rem 0.55rem;
 }
 
 .text-input-tip {
@@ -637,4 +650,166 @@
   .analysis-actionbar { flex-direction: column; align-items: stretch; }
   .analysis-actionbar-buttons { justify-content: space-between; }
   .analyze-cta { flex: 1; }
+}
+
+/* Compact layout responsive */
+@media (max-width: 480px) {
+  .info-fields { flex-direction: column; }
+  .actions-buttons .action-btn { flex: 1; justify-content: center; }
+}
+
+/* ===== Compact horizontal model options ===== */
+.model-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+}
+.model-option .model-icon {
+  margin: 0;
+  flex: 0 0 auto;
+}
+.model-text { min-width: 0; }
+.model-text h6 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clay-black);
+  line-height: 1.1;
+}
+.model-text small { font-size: 0.7rem; }
+
+/* ===== URL input block (Clay) ===== */
+.url-input-block {
+  background: white;
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+  padding: 0.85rem;
+  box-shadow: var(--clay-shadow);
+}
+.url-input-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.url-input-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clay-black);
+  margin: 0;
+}
+.btn-back-link {
+  background: transparent;
+  border: none;
+  color: var(--warm-charcoal);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.btn-back-link:hover { color: var(--ube-800); }
+.url-input-field {
+  width: 100%;
+  border: 1px solid #717989;
+  border-radius: var(--radius-sharp);
+  padding: 0.55rem 0.8rem;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  background: white;
+  color: var(--clay-black);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.url-input-field:focus {
+  outline: none;
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 2px rgba(20, 110, 245, 0.35);
+}
+.url-input-tip {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: var(--warm-silver);
+  display: flex;
+  align-items: center;
+}
+
+/* ===== Two-column layout: wide article + narrow config ===== */
+.analysis-content-panel,
+.analysis-config-panel { background: transparent; }
+
+/* Tipo + modelo in 2 columns to save vertical space */
+.mode-cards-stack,
+.model-options-stack {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* Vertical compact cards inside the 2-col grids */
+.mode-cards-stack .mode-card-modern {
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.3rem;
+  padding: 0.6rem 0.65rem;
+}
+.mode-cards-stack .mode-check {
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 18px;
+  height: 18px;
+  transform: scale(0);
+}
+.mode-cards-stack .mode-card-modern.selected .mode-check { transform: scale(1); }
+.mode-cards-stack .mode-desc-modern { font-size: 0.75rem; }
+
+.model-options-stack .model-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.3rem;
+  padding: 0.6rem 0.65rem;
+}
+.model-options-stack .model-icon { margin: 0; }
+
+/* Summary + CTA in the narrow config column */
+.analysis-actionbar--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+}
+.analysis-actionbar--stacked .analysis-actionbar-buttons {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+.analysis-actionbar--stacked .analyze-cta {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+.analysis-actionbar--stacked .btn-outline-secondary {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+@media (max-width: 991px) {
+  /* On stacked (mobile) layout put config above nothing special;
+     keep article first which is the natural reading order */
+  .analysis-config-panel { margin-top: 0.25rem; }
+}
+
+/* Make the config column fill the same height as the article column */
+.analysis-config-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.analysis-config-panel .analysis-actionbar--stacked {
+  margin-top: auto;
+  margin-bottom: 0;
 }

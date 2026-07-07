@@ -1838,30 +1838,31 @@
 /* History Header Styles */
 /* ==================== */
 .history-header {
-  background: var(--clay-white);
-  padding: 0.9rem 1.4rem;
-  border-radius: var(--radius-card);
-  border: 1px solid var(--oat-border);
-  box-shadow: var(--clay-shadow);
+  background: transparent;
+  padding: 0.35rem 0.25rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid var(--oat-border);
+  border-radius: 0;
+  box-shadow: none;
 }
 .history-header h1,
 .history-header .display-6 {
   font-family: var(--font-display);
   font-weight: var(--fw-heading);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   letter-spacing: -0.03em;
   color: var(--clay-black);
-  margin-bottom: 0.15rem !important;
+  margin-bottom: 0.1rem !important;
 }
 .history-header h1 i,
 .history-header .display-6 i {
-  margin-right: 0.6rem !important;
-  font-size: 1.1rem;
+  margin-right: 0.55rem !important;
+  font-size: 1.05rem;
 }
 .history-header .lead {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   margin-bottom: 0 !important;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 /* Minimalistic search filters panel */

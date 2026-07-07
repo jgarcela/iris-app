@@ -7,12 +7,12 @@
     <div class="row">
         <div class="col-12">
             <!-- Header -->
-            <div class="history-header mb-4">
-                <h1 class="display-6 mb-3">
+            <div class="history-header mb-3">
+                <h1 class="display-6 mb-1">
                     <i class="fas fa-search-plus me-3 text-primary"></i>
                     {{ _('Análisis de Texto') }}
                 </h1>
-                <p class="lead text-muted">
+                <p class="lead text-muted mb-0">
                     {{ _('Analiza contenido periodístico para detectar sesgos de género y mejorar la representación mediática') }}
                 </p>
             </div>
@@ -22,113 +22,25 @@
   <!-- Main Analysis Form -->
   <div class="row gx-4">
     <div class="col-12">
-      <div class="card-principal h-100 p-4" style="border-radius: var(--border-radius-xl); box-shadow: var(--shadow-lg);">
+      <div class="card-principal h-100 p-3" style="border-radius: var(--border-radius-xl); box-shadow: var(--shadow-lg);">
         <!-- FORMULARIO UNIFICADO -->
         <form id="analyzer-form" action="{{ url_for('analysis.analyze') }}" method="POST">
           <input type="hidden" id="analysis-mode" name="analysis_mode" value="automatic">
           <input type="hidden" id="model" name="model" value="avanzado">
           
           <div class="row g-3">
-            <!-- Left column: Mode + Model selection -->
-            <div class="col-lg-4 analysis-left-panel">
-              <!-- Modern Analysis Mode Selection -->
-              <div class="analysis-mode-modern mb-3">
-                <div class="step-head mb-3">
-                  <span class="step-num">1</span>
-                  <div class="step-head-text">
-                    <h5 class="step-title">{{ _('Elige el tipo de análisis') }}</h5>
-                    <p class="step-sub">{{ _('¿Quieres que lo haga la IA o anotarlo tú?') }}</p>
-                  </div>
-                </div>
-                
-                <div class="row g-3 justify-content-center">
-                  <div class="col-12">
-                    <div class="mode-card-modern" id="automatic-mode" data-mode="automatic">
-                      <div class="mode-icon-modern">
-                        <i class="fas fa-robot"></i>
-                      </div>
-                      <div class="mode-content-modern">
-                        <h4 class="mode-title-modern">{{ _('Análisis Automático') }}</h4>
-                        <p class="mode-desc-modern">{{ _('Nuestra IA analiza automáticamente el texto y detecta sesgos de género') }}</p>
-                        <div class="mode-features">
-                          <span class="feature-tag">{{ _('Rápido') }}</span>
-                          <span class="feature-tag">{{ _('Preciso') }}</span>
-                          <span class="feature-tag">{{ _('Completo') }}</span>
-                        </div>
-                      </div>
-                      <div class="mode-check">
-                        <i class="fas fa-check"></i>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="col-12">
-                    <div class="mode-card-modern" id="manual-mode" data-mode="manual">
-                      <div class="mode-icon-modern">
-                        <i class="fas fa-user-edit"></i>
-                      </div>
-                      <div class="mode-content-modern">
-                        <h4 class="mode-title-modern">{{ _('Análisis Manual') }}</h4>
-                        <p class="mode-desc-modern">{{ _('Tú seleccionas y anotas los elementos del texto que quieres analizar') }}</p>
-                        <div class="mode-features">
-                          <span class="feature-tag">{{ _('Personalizado') }}</span>
-                          <span class="feature-tag">{{ _('Interactivo') }}</span>
-                          <span class="feature-tag">{{ _('Educativo') }}</span>
-                        </div>
-                      </div>
-                      <div class="mode-check">
-                        <i class="fas fa-check"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Model Selection (only for automatic mode) -->
-              <div id="model-selection" class="model-selection-modern mb-3">
-                <div class="step-head mb-3">
-                  <span class="step-num">2</span>
-                  <div class="step-head-text">
-                    <h5 class="step-title">{{ _('Elige el modelo de IA') }}</h5>
-                    <p class="step-sub">{{ _('Más rápido o más preciso') }}</p>
-                  </div>
-                </div>
-                <div class="text-center">
-                  <div class="row g-2 justify-content-center">
-                    <div class="col-6">
-                      <div class="model-option" data-model="basico">
-                        <div class="model-icon">
-                          <i class="fas fa-cog"></i>
-                        </div>
-                        <h6>{{ _('Básico') }}</h6>
-                        <small class="text-muted">{{ _('Análisis estándar') }}</small>
-                      </div>
-                    </div>
-                    <div class="col-6">
-                      <div class="model-option selected" data-model="avanzado">
-                        <div class="model-icon">
-                          <i class="fas fa-rocket"></i>
-                        </div>
-                        <h6>{{ _('Avanzado') }}</h6>
-                        <small class="text-muted">{{ _('GPT-4 - Mayor precisión') }}</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right column: Metadata, actions, inputs, buttons -->
-            <div class="col-lg-8 analysis-right-panel">
+            <!-- Left column (wide): the article — step 1 -->
+            <div class="col-lg-8 analysis-content-panel">
               <!-- Content Input Section (stacked) -->
               <div class="content-input-section">
-                <div class="step-head mb-3">
-                  <span class="step-num">3</span>
+                <div class="step-head mb-2">
+                  <span class="step-num">1</span>
                   <div class="step-head-text">
                     <h5 class="step-title">{{ _('Añade el artículo') }}</h5>
                     <p class="step-sub">{{ _('Pega el texto (obligatorio) o carga un ejemplo para probar') }}</p>
                   </div>
                 </div>
+
                 <!-- Article Info -->
                 <div class="info-card">
                   <h6 class="info-title">
@@ -137,27 +49,6 @@
                   <div class="info-fields">
                     <input type="text" id="title" name="title" class="info-input" placeholder="{{ _('Título del artículo') }}">
                     <input type="text" id="authors" name="authors" class="info-input" placeholder="{{ _('Autoría') }}">
-                  </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="actions-card">
-                  <h6 class="actions-title">
-                    <i class="fas fa-bolt me-2"></i>{{ _('Acciones rápidas') }}
-                  </h6>
-                  <div class="actions-buttons">
-                    <button type="button" class="action-btn primary" id="load-example">
-                      <i class="fas fa-folder-open"></i>
-                      <span>{{ _('Cargar ejemplo') }}</span>
-                    </button>
-                    <button type="button" class="action-btn secondary" id="use-url">
-                      <i class="fas fa-link"></i>
-                      <span>{{ _('Usar URL') }}</span>
-                    </button>
-                    <a href="{{ url_for('glossary.glossary_home') }}" class="action-btn" style="text-decoration: none;">
-                      <i class="fas fa-book"></i>
-                      <span>{{ _('Glosario de variables') }}</span>
-                    </a>
                   </div>
                 </div>
 
@@ -173,13 +64,24 @@
                   <div class="text-input-container">
                     <textarea id="input-text" name="text" class="text-input" placeholder="{{ _('Escribe o pega aquí el texto del artículo que quieres analizar para detectar sesgos de género...') }}" required></textarea>
                     <div class="text-input-footer">
-                      <div class="text-input-tip">
-                        <i class="fas fa-lightbulb me-1"></i>
-                        {{ _('Contenido periodístico funciona mejor') }}
+                      <div class="actions-buttons">
+                        <button type="button" class="action-btn primary" id="load-example">
+                          <i class="fas fa-wand-magic-sparkles"></i>
+                          <span>{{ _('Rellenar con un ejemplo') }}</span>
+                        </button>
+                        <button type="button" class="action-btn secondary" id="use-url">
+                          <i class="fas fa-link"></i>
+                          <span>{{ _('Analizar desde una URL') }}</span>
+                        </button>
+                        <a href="{{ url_for('glossary.glossary_home') }}" target="_blank" rel="noopener" class="action-btn" style="text-decoration: none;">
+                          <i class="fas fa-book"></i>
+                          <span>{{ _('Glosario') }}</span>
+                          <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.6rem; opacity: 0.7;"></i>
+                        </a>
                       </div>
                       <div class="text-input-actions">
-                        <button type="button" class="btn-clear" id="clear-text">
-                          <i class="fas fa-eraser me-1"></i>{{ _('Limpiar') }}
+                        <button type="button" class="btn-clear" id="clear-text" title="{{ _('Limpiar texto') }}">
+                          <i class="fas fa-eraser"></i>
                         </button>
                       </div>
                     </div>
@@ -187,44 +89,103 @@
                 </div>
 
                 <!-- URL Input (hidden by default) -->
-                <div id="fields-url" class="mb-3" style="display:none;">
-                  <label for="url" class="form-label">
-                    <i class="fas fa-globe me-2"></i>{{ _('URL del artículo') }} <span class="req">*</span>
-                  </label>
-                  <div class="input-group">
-                    <input type="url" id="url" name="url" class="form-control" placeholder="{{ _('https://ejemplo.com/articulo') }}">
-                    <button type="button" class="btn btn-outline-secondary" id="back-to-text">
-                      <i class="fas fa-arrow-left me-1"></i>{{ _('Volver') }}
+                <div id="fields-url" class="url-input-block" style="display:none;">
+                  <div class="url-input-head">
+                    <h5 class="url-input-title">
+                      <i class="fas fa-globe me-2"></i>{{ _('URL del artículo') }}
+                      <span class="required-badge">*</span>
+                    </h5>
+                    <button type="button" class="btn-back-link" id="back-to-text">
+                      <i class="fas fa-arrow-left me-1"></i>{{ _('Volver al texto') }}
                     </button>
                   </div>
-                  <div class="form-text">
+                  <input type="url" id="url" name="url" class="url-input-field" placeholder="{{ _('https://ejemplo.com/articulo') }}">
+                  <p class="url-input-tip">
                     <i class="fas fa-info-circle me-1"></i>
                     {{ _('La URL debe apuntar a un artículo de noticias accesible públicamente') }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right column (narrow): config steps + summary -->
+            <div class="col-lg-4 analysis-config-panel">
+              <!-- Analysis Mode Selection — step 2 -->
+              <div class="analysis-mode-modern mb-3">
+                <div class="step-head mb-2">
+                  <span class="step-num">2</span>
+                  <div class="step-head-text">
+                    <h5 class="step-title">{{ _('Elige el tipo') }}</h5>
+                    <p class="step-sub">{{ _('¿Lo hace la IA o tú?') }}</p>
                   </div>
                 </div>
+                <div class="mode-cards-stack">
+                  <div class="mode-card-modern" id="automatic-mode" data-mode="automatic">
+                    <div class="mode-icon-modern"><i class="fas fa-robot"></i></div>
+                    <div class="mode-content-modern">
+                      <h4 class="mode-title-modern">{{ _('Automático') }}</h4>
+                      <p class="mode-desc-modern">{{ _('La IA detecta los sesgos por ti') }}</p>
+                    </div>
+                    <div class="mode-check"><i class="fas fa-check"></i></div>
+                  </div>
+                  <div class="mode-card-modern" id="manual-mode" data-mode="manual">
+                    <div class="mode-icon-modern"><i class="fas fa-user-edit"></i></div>
+                    <div class="mode-content-modern">
+                      <h4 class="mode-title-modern">{{ _('Manual') }}</h4>
+                      <p class="mode-desc-modern">{{ _('Tú anotas los elementos') }}</p>
+                    </div>
+                    <div class="mode-check"><i class="fas fa-check"></i></div>
+                  </div>
+                </div>
+              </div>
 
-                <!-- Action Bar -->
-                <div class="analysis-actionbar mt-3">
-                  <div class="analysis-summary">
-                    <span class="analysis-summary-label">{{ _('Vas a realizar') }}</span>
-                    <div class="analysis-info">
-                      <span id="analysis-mode-info" class="badge bg-primary">
-                        <i class="fas fa-robot me-1"></i>{{ _('Análisis Automático') }}
-                      </span>
-                      <span id="model-info" class="badge bg-success">
-                        <i class="fas fa-brain me-1"></i>{{ _('Modelo Avanzado') }}
-                      </span>
+              <!-- Model Selection (only for automatic mode) — step 3 -->
+              <div id="model-selection" class="model-selection-modern mb-3">
+                <div class="step-head mb-2">
+                  <span class="step-num">3</span>
+                  <div class="step-head-text">
+                    <h5 class="step-title">{{ _('Elige el modelo') }}</h5>
+                    <p class="step-sub">{{ _('Más rápido o más preciso') }}</p>
+                  </div>
+                </div>
+                <div class="model-options-stack">
+                  <div class="model-option" data-model="basico">
+                    <div class="model-icon"><i class="fas fa-cog"></i></div>
+                    <div class="model-text">
+                      <h6>{{ _('Básico') }}</h6>
+                      <small class="text-muted">{{ _('Estándar') }}</small>
                     </div>
                   </div>
-                  <div class="analysis-actionbar-buttons">
-                    <button type="reset" class="btn btn-outline-secondary">
-                      <i class="fas fa-eraser me-2"></i>{{ _('Limpiar') }}
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-lg analyze-cta" id="analyze-button">
-                      <i class="fas fa-search me-2"></i>{{ _('Iniciar Análisis') }}
-                      <i class="fas fa-arrow-right ms-2"></i>
-                    </button>
+                  <div class="model-option selected" data-model="avanzado">
+                    <div class="model-icon"><i class="fas fa-rocket"></i></div>
+                    <div class="model-text">
+                      <h6>{{ _('Avanzado') }}</h6>
+                      <small class="text-muted">{{ _('GPT-4 · Mayor precisión') }}</small>
+                    </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- Summary + CTA (always visible) -->
+              <div class="analysis-actionbar analysis-actionbar--stacked">
+                <div class="analysis-summary">
+                  <span class="analysis-summary-label">{{ _('Vas a realizar') }}</span>
+                  <div class="analysis-info">
+                    <span id="analysis-mode-info" class="badge bg-primary">
+                      <i class="fas fa-robot me-1"></i>{{ _('Análisis Automático') }}
+                    </span>
+                    <span id="model-info" class="badge bg-success">
+                      <i class="fas fa-brain me-1"></i>{{ _('Modelo Avanzado') }}
+                    </span>
+                  </div>
+                </div>
+                <div class="analysis-actionbar-buttons">
+                  <button type="reset" class="btn btn-outline-secondary" title="{{ _('Limpiar') }}">
+                    <i class="fas fa-eraser"></i>
+                  </button>
+                  <button type="submit" class="btn btn-primary btn-lg analyze-cta" id="analyze-button">
+                    <i class="fas fa-search me-2"></i>{{ _('Iniciar Análisis') }}
+                  </button>
                 </div>
               </div>
             </div>
