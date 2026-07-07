@@ -543,3 +543,98 @@
     font-size: 1rem;
   }
 }
+/* ===== Step-based UX ===== */
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: left;
+}
+.step-num {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ube-800);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--clay-shadow);
+}
+.step-head-text { line-height: 1.2; }
+.step-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: var(--clay-black);
+  margin: 0;
+}
+.step-sub {
+  margin: 0.1rem 0 0;
+  font-size: 0.82rem;
+  color: var(--warm-charcoal);
+}
+
+.optional-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--warm-silver);
+  background: var(--oat-light);
+  border: 1px solid var(--oat-border);
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius-pill);
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+/* ===== Final action bar ===== */
+.analysis-actionbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--oat-light);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+}
+.analysis-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.analysis-summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warm-silver);
+}
+.analysis-info { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.analysis-actionbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.analyze-cta {
+  font-weight: 600;
+  box-shadow: var(--clay-shadow);
+}
+.analyze-cta:hover {
+  transform: rotateZ(-2deg) translateY(-2px);
+  box-shadow: var(--clay-hard-shadow);
+}
+
+@media (max-width: 576px) {
+  .analysis-actionbar { flex-direction: column; align-items: stretch; }
+  .analysis-actionbar-buttons { justify-content: space-between; }
+  .analyze-cta { flex: 1; }
+}
