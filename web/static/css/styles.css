@@ -89,65 +89,117 @@
 /* --------------------------- */
 /* Enhanced Navbar */
 /* --------------------------- */
+/* Floating capsule navbar */
 .navbar {
   font-weight: var(--font-weight-medium);
-  background: var(--secondary-color);
-  box-shadow: var(--shadow-md);
-  border-bottom: 1px solid var(--medium-gray);
-  padding: 1rem 0;
+  background: #ffffff;
+  box-shadow: var(--clay-shadow), 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.75rem;
+  margin: 0.6rem 1rem;
+  top: 0.6rem !important;
+}
+
+/* keep the capsule width contained + override the global .container padding */
+.navbar > .container {
+  max-width: 1400px;
+  padding: 0.1rem 0.5rem;
 }
 
 .navbar-brand {
-  font-weight: var(--font-weight-bold);
-  font-size: 1.5rem;
-  color: var(--primary-color);
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+  color: var(--clay-black);
   text-decoration: none;
-  transition: all var(--transition-speed) ease;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+  transition: transform 0.18s var(--transition-bounce), color 0.18s ease;
+}
+
+/* IRIS logo — clean, no badge */
+.navbar-brand img {
+  width: 46px;
+  height: 46px;
+  transition: transform 0.18s var(--transition-bounce);
 }
 
 .navbar-brand:hover {
-  color: var(--violet-iris-color);
-  transform: scale(1.05);
+  color: var(--ube-800);
+  transform: rotateZ(-4deg);
+}
+.navbar-brand:hover img {
+  transform: rotateZ(8deg);
 }
 
 .navbar .nav-link {
-  color: var(--navbar-text);
-  font-weight: var(--font-weight-medium);
-  padding: 0.75rem 1rem;
-  border-radius: var(--border-radius-md);
-  transition: all var(--transition-speed) ease;
+  color: var(--dark-charcoal);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: var(--fw-ui);
+  line-height: 1.2;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-pill);
+  transition: color 0.16s ease, background-color 0.16s ease, transform 0.16s var(--transition-bounce);
   position: relative;
-  margin: 0 0.25rem;
+  margin: 0 0.05rem;
+  border: 1px solid transparent;
 }
 
 .navbar .nav-link:hover {
-  color: var(--blue-iris-color);
-  background: var(--light-gray);
+  color: var(--clay-black);
+  background: var(--oat-light);
+  border-color: var(--oat-border);
   transform: translateY(-1px);
 }
 
 .navbar .nav-link.active {
-  color: var(--violet-iris-color);
-  background: linear-gradient(135deg, rgba(160, 44, 147, 0.1) 0%, rgba(93, 224, 230, 0.1) 100%);
-  font-weight: var(--font-weight-semibold);
-  border-bottom: 3px solid var(--violet-iris-color);
+  color: #fff;
+  background: var(--ube-800);
+  border-color: var(--ube-800);
+  font-weight: var(--fw-ui);
+}
+.navbar .nav-link.active:hover {
+  color: #fff;
+  background: var(--ube-900);
+  border-color: var(--ube-900);
   transform: translateY(-1px);
 }
 
 .navbar .nav-link i {
-  margin-right: 0.5rem;
-  font-size: 0.9rem;
+  margin-right: 0.35rem;
+  font-size: 0.8rem;
+  opacity: 0.85;
 }
 
 /* User info styling */
 .navbar .d-flex .me-3 {
-  color: var(--dark-gray);
-  font-weight: var(--font-weight-medium);
+  color: var(--warm-charcoal);
+  font-weight: var(--fw-ui);
+  font-size: 0.85rem;
 }
 
 .navbar .d-flex .me-3 strong {
-  color: var(--primary-color);
-  font-weight: var(--font-weight-semibold);
+  color: var(--clay-black);
+  font-weight: var(--fw-heading);
+}
+
+/* Compact pill buttons inside the navbar */
+.navbar .btn-sm {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.85rem;
+}
+
+/* Navbar toggler — warm oat treatment */
+.navbar-toggler {
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-std);
+  padding: 0.25rem 0.5rem;
+}
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 2px rgba(20, 110, 245, 0.35);
 }
 
 
@@ -548,9 +600,26 @@
   }
 
   @media (max-width: 992px) {
+    .navbar {
+      border-radius: var(--radius-feature);
+      padding: 0.5rem 0.9rem;
+    }
+    .navbar-collapse {
+      margin-top: 0.75rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--oat-border);
+    }
     .navbar .nav-link {
-      padding: 0.5rem 0.75rem;
-      margin: 0.125rem 0;
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      padding: 0.45rem 0.85rem;
+      margin: 0.15rem 0;
+    }
+    .navbar .d-flex {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--oat-border);
     }
     
     .hero {
