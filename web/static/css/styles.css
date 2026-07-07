@@ -1221,73 +1221,130 @@
 /* Loading modal */
 /* --------------------------- */
 #loading-modal {
-  position: fixed; /* se fija respecto al viewport */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4); /* oscurecimiento */
+  background-color: rgba(26, 20, 15, 0.45);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999; /* debe estar encima de todo */
+  z-index: 9999;
 }
 
-.modal-content {
-  background: #fff;
-  padding: 2rem 3rem;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+/* Loading modal — scoped so it doesn't collide with the menu modals */
+#loading-modal .modal-content {
+  background: var(--clay-cream);
+  padding: 2rem 2.25rem;
+  border-radius: var(--radius-feature);
+  border: 1px solid var(--oat-border);
+  box-shadow: var(--clay-shadow), 0 25px 50px rgba(0,0,0,0.22);
   text-align: center;
   z-index: 10000;
   max-width: 90%;
-  width: 400px;
+  width: 420px;
   position: relative;
+  overflow: hidden;
 }
 
-.modal-content img {
-  width: 70px;
-  margin-bottom: 1rem;
+/* Swatch accent bar at the top */
+#loading-modal .modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--matcha-600) 0%, var(--slushie-500) 35%, var(--ube-800) 70%, var(--pomegranate-400) 100%);
 }
 
-.loading-steps {
+#loading-modal .modal-content img {
+  width: 64px;
+  margin-bottom: 0.75rem;
+  animation: iris-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes iris-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+#loading-modal .modal-content h2 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+  color: var(--clay-black);
+  margin-bottom: 1.25rem;
+}
+
+#loading-modal .loading-steps {
   list-style: none;
   padding: 0;
-  margin: 1rem 0;
+  margin: 1rem 0 1.25rem;
   text-align: left;
 }
 
-.loading-steps li {
-  padding: 0.4rem 0.5rem;
-  border-left: 4px solid #ccc;
+#loading-modal .loading-steps li {
+  position: relative;
+  padding: 0.55rem 0.75rem 0.55rem 2.1rem;
+  border: 1px solid var(--oat-border);
   margin-bottom: 0.5rem;
   transition: all 0.3s ease;
   font-weight: 500;
-  background-color: #f5f5f5;
-  border-radius: 5px;
+  font-size: 0.9rem;
+  color: var(--warm-charcoal);
+  background-color: var(--clay-white);
+  border-radius: var(--radius-std);
 }
 
-.loading-steps li.active {
-  background-color: #e9f5ff;
-  border-left-color: #007BFF;
-  font-weight: bold;
-  color: #003366;
-}
-
-.loading-steps li.completed {
-  color: #28a745;
-  border-left-color: #28a745;
-  text-decoration: line-through;
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  margin: 1rem auto 0;
-  border: 4px solid #ddd;
-  border-top: 4px solid #007BFF;
+/* Step status dot */
+#loading-modal .loading-steps li::before {
+  content: '';
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  border: 2px solid var(--oat-border);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+#loading-modal .loading-steps li.active {
+  background-color: rgba(67, 8, 159, 0.06);
+  border-color: var(--ube-800);
+  font-weight: 600;
+  color: var(--ube-800);
+}
+#loading-modal .loading-steps li.active::before {
+  border-color: var(--ube-800);
+  border-right-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+#loading-modal .loading-steps li.completed {
+  color: var(--matcha-800);
+  border-color: var(--matcha-600);
+  background-color: var(--matcha-300);
+}
+#loading-modal .loading-steps li.completed::before {
+  border-color: var(--matcha-600);
+  background: var(--matcha-600);
+}
+
+#loading-modal .spinner {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  border: 3px solid var(--oat-border);
+  border-top: 3px solid var(--ube-800);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {

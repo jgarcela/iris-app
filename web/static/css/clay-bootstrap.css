@@ -171,3 +171,40 @@ code, pre, kbd, samp, .font-monospace { font-family: var(--font-mono); }
 /* ---------- Radius utilities ---------- */
 .rounded { border-radius: var(--radius-card) !important; }
 .rounded-3, .rounded-4 { border-radius: var(--radius-feature) !important; }
+
+/* ---------- Navbar dropdowns (grouped menus) ---------- */
+.navbar .dropdown-menu {
+  background-color: var(--clay-cream);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--clay-shadow), 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 0.35rem;
+  margin-top: 0.4rem;
+  min-width: 12rem;
+}
+.navbar .dropdown-item {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: var(--fw-ui);
+  color: var(--dark-charcoal);
+  border-radius: var(--radius-std);
+  padding: 0.45rem 0.7rem;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.navbar .dropdown-item i { width: 1.1rem; opacity: 0.85; }
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+  background-color: var(--oat-light);
+  color: var(--clay-black);
+}
+.navbar .dropdown-item.active {
+  background-color: var(--ube-800);
+  color: #fff;
+}
+.navbar .dropdown-toggle::after {
+  margin-left: 0.4rem;
+  vertical-align: 0.15em;
+  opacity: 0.6;
+}
