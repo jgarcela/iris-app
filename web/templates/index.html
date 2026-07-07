@@ -5,81 +5,77 @@
 {% block content %}
 
 <!-- Hero Section -->
-<section class="hero text-white text-center py-5 fade-in" style="background: var(--primary-gradient); position: relative; overflow: hidden;">
-  <div class="hero-background"></div>
+<section class="hero-clay text-center fade-in">
+  <span class="hero-blob hero-blob--matcha"></span>
+  <span class="hero-blob hero-blob--ube"></span>
+  <span class="hero-blob hero-blob--lemon"></span>
   <div class="container position-relative">
-    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="{{ _('IRIS Logo') }}" class="logo mb-4 bounce-in" style="max-width:140px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
-    <h1 class="fw-bold mb-4 slide-up" style="font-family: var(--font-display); font-size: clamp(2.75rem, 7vw, 5rem); line-height: 1.0; letter-spacing: -0.04em; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{{ _('IRIS: Análisis de Medios de IA') }}</h1>
-    <p class="lead mb-5 slide-up" style="font-size: 1.25rem; line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ _('Estudio de la representación de mujeres y sesgos de género en la cobertura mediática de Inteligencia Artificial') }}</p>
+    <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="{{ _('IRIS Logo') }}" class="logo mb-4 bounce-in" style="max-width:120px;">
+    <p class="clay-label mb-3" style="color: var(--ube-800);">{{ _('Perspectiva de género · Medios · IA') }}</p>
+    <h1 class="hero-title slide-up">{{ _('Análisis de Medios de IA') }}</h1>
+    <p class="hero-subtitle slide-up mx-auto">{{ _('Estudio de la representación de mujeres y sesgos de género en la cobertura mediática de Inteligencia Artificial') }}</p>
     {% if not current_user %}
-      <div class="hero-buttons slide-up">
-        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-3 rounded-pill">{{ _('Crear cuenta') }}</a>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg rounded-pill">{{ _('Entrar') }}</a>
+      <div class="hero-buttons slide-up d-flex flex-wrap justify-content-center gap-3">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg rounded-pill px-4">{{ _('Crear cuenta') }}</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4">{{ _('Entrar') }}</a>
+      </div>
+    {% else %}
+      <div class="hero-buttons slide-up d-flex flex-wrap justify-content-center gap-3">
+        <a href="{{ url_for('analysis.create_analysis') }}" class="btn btn-primary btn-lg rounded-pill px-4">{{ _('Empezar análisis') }}</a>
       </div>
     {% endif %}
   </div>
 </section>
 
 <!-- Features Section -->
-<section class="features py-5" style="background: var(--clay-cream);">
+<section class="features py-5">
   <div class="container">
     <div class="text-center mb-5">
-      <h2 class="fw-bold mb-3" style="color: var(--primary-color); font-size: 2.5rem;">{{ _('Lo que puedes hacer') }}</h2>
-      <p class="lead" style="color: var(--dark-gray); max-width: 600px; margin: 0 auto;">{{ _('Descubre las potentes herramientas de análisis que IRIS pone a tu disposición') }}</p>
+      <p class="clay-label mb-2" style="color: var(--matcha-600);">{{ _('Herramientas') }}</p>
+      <h2 class="section-title mb-3">{{ _('Lo que puedes hacer') }}</h2>
+      <p class="section-lead mx-auto">{{ _('Descubre las potentes herramientas de análisis que IRIS pone a tu disposición') }}</p>
     </div>
     <div class="row g-4">
-      <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
-          <div class="feature-icon mb-3">
-            <i class="fas fa-file-alt fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-          </div>
-          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Analizar Texto o URL') }}</h5>
-          <p class="text-muted">{{ _('Carga tus textos o enlaces y recibe un análisis detallado al instante.') }}</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card card h-100 p-4 slide-up">
+          <div class="feature-badge feature-badge--matcha"><i class="fas fa-file-alt"></i></div>
+          <h5 class="feature-title">{{ _('Analizar Texto o URL') }}</h5>
+          <p class="feature-text">{{ _('Carga tus textos o enlaces y recibe un análisis detallado al instante.') }}</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
-          <div class="feature-icon mb-3">
-            <i class="fas fa-file-invoice fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-          </div>
-          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Generar Informes') }}</h5>
-          <p class="text-muted">{{ _('Descarga reportes personalizados en PDF con todos los hallazgos y métricas clave.') }}</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card card h-100 p-4 slide-up">
+          <div class="feature-badge feature-badge--slushie"><i class="fas fa-file-invoice"></i></div>
+          <h5 class="feature-title">{{ _('Generar Informes') }}</h5>
+          <p class="feature-text">{{ _('Descarga reportes personalizados en PDF con todos los hallazgos y métricas clave.') }}</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
-          <div class="feature-icon mb-3">
-            <i class="fas fa-chart-pie fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-          </div>
-          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Realizar Análisis') }}</h5>
-          <p class="text-muted">{{ _('Utiliza diferentes modelos de IA para profundizar en el significado y sesgos del texto.') }}</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card card h-100 p-4 slide-up">
+          <div class="feature-badge feature-badge--lemon"><i class="fas fa-chart-pie"></i></div>
+          <h5 class="feature-title">{{ _('Realizar Análisis') }}</h5>
+          <p class="feature-text">{{ _('Utiliza diferentes modelos de IA para profundizar en el significado y sesgos del texto.') }}</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
-          <div class="feature-icon mb-3">
-            <i class="fas fa-exchange-alt fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-          </div>
-          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Comparar con IA') }}</h5>
-          <p class="text-muted">{{ _('Contrasta resultados entre modelo básico y avanzado para elegir la mejor perspectiva.') }}</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card card h-100 p-4 slide-up">
+          <div class="feature-badge feature-badge--ube"><i class="fas fa-exchange-alt"></i></div>
+          <h5 class="feature-title">{{ _('Comparar con IA') }}</h5>
+          <p class="feature-text">{{ _('Contrasta resultados entre modelo básico y avanzado para elegir la mejor perspectiva.') }}</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
-          <div class="feature-icon mb-3">
-            <i class="fas fa-comment-dots fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-          </div>
-          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Dar Feedback') }}</h5>
-          <p class="text-muted">{{ _('Aporta tus comentarios sobre los análisis y mejora continuamente el modelo.') }}</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card card h-100 p-4 slide-up">
+          <div class="feature-badge feature-badge--pomegranate"><i class="fas fa-comment-dots"></i></div>
+          <h5 class="feature-title">{{ _('Dar Feedback') }}</h5>
+          <p class="feature-text">{{ _('Aporta tus comentarios sobre los análisis y mejora continuamente el modelo.') }}</p>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
-          <div class="feature-icon mb-3">
-            <i class="fas fa-edit fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-          </div>
-          <h5 class="fw-bold mb-3" style="color: var(--primary-color);">{{ _('Editar Resultados') }}</h5>
-          <p class="text-muted">{{ _('Modifica y ajusta manualmente los informes para perfeccionar tus conclusiones.') }}</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card card h-100 p-4 slide-up">
+          <div class="feature-badge feature-badge--blueberry"><i class="fas fa-edit"></i></div>
+          <h5 class="feature-title">{{ _('Editar Resultados') }}</h5>
+          <p class="feature-text">{{ _('Modifica y ajusta manualmente los informes para perfeccionar tus conclusiones.') }}</p>
         </div>
       </div>
     </div>
@@ -88,11 +84,12 @@
 
 <!-- Call to Action Section -->
 {% if not current_user %}
-<section class="cta text-center py-5">
-  <div class="container">
-    <h2 class="fw-bold mb-3">{{ _('¡Únete a la investigación!') }}</h2>
-    <p class="mb-4">{{ _('Regístrate y sé parte del análisis de sesgos de género en la cobertura de IA.') }}</p>
-    <a href="{{ url_for('auth.register') }}" class="btn primary btn-lg">{{ _('Crear cuenta gratuita') }}</a>
+<section class="container mb-5">
+  <div class="cta-clay text-center">
+    <p class="clay-label mb-3" style="color: var(--matcha-300);">{{ _('Sé parte del cambio') }}</p>
+    <h2 class="cta-title mb-3">{{ _('¡Únete a la investigación!') }}</h2>
+    <p class="cta-lead mb-4 mx-auto">{{ _('Regístrate y sé parte del análisis de sesgos de género en la cobertura de IA.') }}</p>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg rounded-pill px-4">{{ _('Crear cuenta gratuita') }}</a>
   </div>
 </section>
 {% endif %}
