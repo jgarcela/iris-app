@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Generación de Informes') }} - IRIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1100px;">
+
+  <!-- Header -->
+  <div class="history-header mb-3">
+    <h1 class="display-6 mb-1">
+      <i class="fas fa-file-word me-3 text-primary"></i>
+      {{ _('Generación de Informes') }}
+    </h1>
+    <p class="lead text-muted mb-0">
+      {{ _('Elige una base de datos, un periodo y las variables para generar un informe descriptivo en Word con vista previa.') }}
+    </p>
+  </div>
+
+  <!-- Form -->
+  <form method="get" action="{{ url_for('report.generate') }}" class="report-form card mb-4">
+    <div class="report-form-body">
+
+      <!-- Row 1: DB + dates -->
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label for="context" class="form-label report-label">
+            <i class="fas fa-database me-1"></i>{{ _('Base de datos') }}
+          </label>
+          <select class="form-select" id="context" name="context">
+            <option value="">{{ _('Todas') }}</option>
+            {% for ctx in contextos %}
+              <option value="{{ ctx }}" {% if ctx == selected_context %}selected{% endif %}>{{ ctx }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="fecha_desde" class="form-label report-label">
+            <i class="fas fa-calendar-alt me-1"></i>{{ _('Desde') }}
+          </label>
+          <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}">
+        </div>
+        <div class="col-md-3">
+          <label for="fecha_hasta" class="form-label report-label">
+            <i class="fas fa-calendar-alt me-1"></i>{{ _('Hasta') }}
+          </label>
+          <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}">
+        </div>
+      </div>
+
+      <!-- Row 2: variables -->
+      <label class="form-label report-label mb-2">
+        <i class="fas fa-list-check me-1"></i>{{ _('Variables a incluir') }}
+      </label>
+      <div class="report-vars mb-3">
+        {% for field, info in variables.items() %}
+          <label class="var-chip">
+            <input type="checkbox" name="vars" value="{{ field }}" {% if field in selected_vars %}checked{% endif %}>
+            <span>{{ info[0] }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <button type="submit" class="btn btn-primary rounded-pill px-4">
+          <i class="fas fa-eye me-2"></i>{{ _('Generar vista previa') }}
+        </button>
+        {% if tables %}
+          <a href="{{ url_for('report.download') }}?{{ request.query_string.decode('utf-8') }}"
+             class="btn btn-success rounded-pill px-4">
+            <i class="fas fa-download me-2"></i>{{ _('Descargar informe (.docx)') }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+
+  <!-- Preview -->
+  {% if tables is not none %}
+    {% if meta.total == 0 %}
+      <div class="alert alert-warning">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        {{ _('No hay noticias que coincidan con esos filtros.') }}
+      </div>
+    {% elif tables|length == 0 %}
+      <div class="alert alert-info">
+        <i class="fas fa-circle-info me-2"></i>
+        {{ _('Selecciona al menos una variable para ver la vista previa.') }}
+      </div>
+    {% else %}
+      <div class="report-preview">
+        <div class="report-preview-head">
+          <p class="clay-label mb-1" style="color: var(--ube-800);">{{ _('Vista previa del informe') }}</p>
+          <h2 class="section-title mb-2">{{ meta.context }}</h2>
+          <div class="report-meta">
+            <span class="report-pill"><i class="fas fa-calendar me-1"></i>{{ meta.fecha_desde or _('inicio') }} — {{ meta.fecha_hasta or _('hoy') }}</span>
+            <span class="report-pill"><i class="fas fa-newspaper me-1"></i>{{ meta.total }} {{ _('noticias') }}</span>
+          </div>
+        </div>
+
+        {% for tbl in tables %}
+          <div class="report-table-card card">
+            <div class="report-table-title">{{ tbl.title }}</div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>{{ _('Valor') }}</th>
+                  <th class="num">{{ _('Frecuencia') }}</th>
+                  <th class="num">{{ _('Porcentaje') }}</th>
+                  <th class="bar-col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for e in tbl.entries %}
+                  <tr>
+                    <td>{{ e.label }}</td>
+                    <td class="num">{{ e.count }}</td>
+                    <td class="num">{{ e.pct }}%</td>
+                    <td class="bar-col"><span class="report-bar" style="width: {{ e.pct }}%;"></span></td>
+                  </tr>
+                {% endfor %}
+                <tr class="total-row">
+                  <td>{{ _('Total') }}</td>
+                  <td class="num">{{ tbl.total }}</td>
+                  <td class="num">100%</td>
+                  <td class="bar-col"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}
