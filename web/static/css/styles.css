@@ -81,7 +81,7 @@
     transition: background-color var(--transition-speed),
                 color var(--transition-speed);
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
 
@@ -93,13 +93,17 @@
 /* Floating capsule navbar */
 .navbar {
   font-weight: var(--font-weight-medium);
-  background: #ffffff;
+  background: rgba(250, 249, 247, 0.78);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
   box-shadow: var(--clay-shadow), 0 8px 24px rgba(0, 0, 0, 0.06);
   border: 1px solid var(--oat-border);
   border-radius: var(--radius-pill);
   padding: 0.15rem 0.75rem;
   margin: 0.6rem 1rem;
-  top: 0.6rem !important;
+  position: sticky;
+  top: 0.6rem;
+  z-index: 1030;
 }
 
 /* keep the capsule width contained + override the global .container padding */
