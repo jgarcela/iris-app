@@ -9,19 +9,19 @@
   <div class="hero-background"></div>
   <div class="container position-relative">
     <img src="{{ url_for('static', filename='imgs/logo_iris.png') }}" alt="{{ _('IRIS Logo') }}" class="logo mb-4 bounce-in" style="max-width:140px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
-    <h1 class="display-4 fw-bold mb-4 slide-up" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{{ _('IRIS: Análisis de Medios de IA') }}</h1>
-    <p class="lead mb-5 slide-up" style="font-size: 1.25rem; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ _('Estudio de la representación de mujeres y sesgos de género en la cobertura mediática de Inteligencia Artificial') }}</p>
+    <h1 class="fw-bold mb-4 slide-up" style="font-family: var(--font-display); font-size: clamp(2.75rem, 7vw, 5rem); line-height: 1.0; letter-spacing: -0.04em; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{{ _('IRIS: Análisis de Medios de IA') }}</h1>
+    <p class="lead mb-5 slide-up" style="font-size: 1.25rem; line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ _('Estudio de la representación de mujeres y sesgos de género en la cobertura mediática de Inteligencia Artificial') }}</p>
     {% if not current_user %}
       <div class="hero-buttons slide-up">
-        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-3 shadow-lg">{{ _('Crear cuenta') }}</a>
-        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg shadow-lg">{{ _('Entrar') }}</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-3 rounded-pill">{{ _('Crear cuenta') }}</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg rounded-pill">{{ _('Entrar') }}</a>
       </div>
     {% endif %}
   </div>
 </section>
 
 <!-- Features Section -->
-<section class="features py-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+<section class="features py-5" style="background: var(--clay-cream);">
   <div class="container">
     <div class="text-center mb-5">
       <h2 class="fw-bold mb-3" style="color: var(--primary-color); font-size: 2.5rem;">{{ _('Lo que puedes hacer') }}</h2>
@@ -29,7 +29,7 @@
     </div>
     <div class="row g-4">
       <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
           <div class="feature-icon mb-3">
             <i class="fas fa-file-alt fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
           </div>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
           <div class="feature-icon mb-3">
             <i class="fas fa-file-invoice fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
           </div>
@@ -47,7 +47,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
           <div class="feature-icon mb-3">
             <i class="fas fa-chart-pie fa-3x" style="background: var(--violet-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
           </div>
@@ -56,7 +56,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
           <div class="feature-icon mb-3">
             <i class="fas fa-exchange-alt fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
           </div>
@@ -65,7 +65,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
           <div class="feature-icon mb-3">
             <i class="fas fa-comment-dots fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
           </div>
@@ -74,7 +74,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="feature-card card h-100 text-center p-4 border-0 shadow-sm slide-up">
+        <div class="feature-card card h-100 text-center p-4 shadow-sm slide-up">
           <div class="feature-icon mb-3">
             <i class="fas fa-edit fa-3x" style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
           </div>

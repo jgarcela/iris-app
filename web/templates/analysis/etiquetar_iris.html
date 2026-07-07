@@ -446,20 +446,20 @@ function etiquetarNews(newsId) {
 <!-- Custom CSS for Etiquetar IRIS -->
 <style>
 .history-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--oat-light) 0%, var(--oat-light) 100%);
     padding: 2rem;
     border-radius: 10px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
 }
 
 .search-filters-panel .card {
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .analysis-card {
     transition: all 0.3s ease;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -469,8 +469,8 @@ function etiquetarNews(newsId) {
 }
 
 .analysis-card .card-header {
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    background: var(--oat-light);
+    border-bottom: 1px solid var(--oat-border);
 }
 
 .analysis-card .card-header .badge {
@@ -488,12 +488,12 @@ function etiquetarNews(newsId) {
 }
 
 .card-footer.bg-light.border-success {
-    border-top-color: #198754 !important;
-    background-color: #f8f9fa !important;
+    border-top-color: var(--matcha-600) !important;
+    background-color: var(--oat-light) !important;
 }
 
 .card-footer.bg-light.border-warning {
-    border-top-color: #ffc107 !important;
+    border-top-color: var(--lemon-500) !important;
     background-color: #fffbf0 !important;
 }
 
@@ -503,16 +503,16 @@ function etiquetarNews(newsId) {
 }
 
 .empty-state {
-    background: #f8f9fa;
+    background: var(--oat-light);
     border-radius: 10px;
-    border: 2px dashed #dee2e6;
+    border: 2px dashed var(--oat-border);
 }
 
 .results-summary {
-    background: #f8f9fa;
+    background: var(--oat-light);
     padding: 1rem;
     border-radius: 6px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
 }
 
 @media (max-width: 768px) {

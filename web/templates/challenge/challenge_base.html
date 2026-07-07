@@ -45,10 +45,10 @@
         radial-gradient(2px 2px at 160px 30px, rgba(111, 66, 193, 0.3), transparent),
         /* Main scientific gradient */
         linear-gradient(135deg, 
-            #667eea 0%, 
-            #764ba2 25%, 
+            var(--ube-800) 0%, 
+            var(--ube-900) 25%, 
             #f093fb 50%, 
-            #f5576c 75%, 
+            var(--pomegranate-400) 75%, 
             #4facfe 100%);
     background-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px, 200px 200px, 100% 100%;
     animation: particleFloat 20s ease-in-out infinite;
@@ -145,7 +145,7 @@
     transform: translateY(-2px);
 }
 .challenge-footer {
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--oat-light);
 }
 @media (max-width: 768px) {
     .challenge-mini-nav .mx-2 { display: none; }

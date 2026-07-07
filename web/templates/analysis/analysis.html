@@ -161,7 +161,7 @@
                 <div class="annotation-content">
                     <div class="mb-3">
                         <label class="form-label">Texto seleccionado:</label>
-                        <div class="selected-text-preview bg-light p-2 rounded" id="selected-text-preview" style="font-style: italic; color: #6c757d; border: 1px solid #dee2e6;"></div>
+                        <div class="selected-text-preview bg-light p-2 rounded" id="selected-text-preview" style="font-style: italic; color: var(--warm-charcoal); border: 1px solid var(--oat-border);"></div>
                     </div>
                     
                     <form id="annotation-form">
@@ -1164,7 +1164,7 @@
 <style>
 /* Edit Mode Styles */
 .text-analysis-panel.edit-mode {
-    border: 3px solid #ffc107;
+    border: 3px solid var(--lemon-500);
     box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
     background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
     position: relative;
@@ -1175,7 +1175,7 @@
     position: absolute;
     top: -15px;
     left: 20px;
-    background: #ffc107;
+    background: var(--lemon-500);
     color: #000;
     padding: 4px 12px;
     border-radius: 4px;
@@ -1187,7 +1187,7 @@
 }
 
 .text-analysis-area.edit-mode {
-    border: 3px solid #ffc107;
+    border: 3px solid var(--lemon-500);
     box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
     background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
     position: relative;
@@ -1198,7 +1198,7 @@
     position: absolute;
     top: -15px;
     left: 20px;
-    background: #ffc107;
+    background: var(--lemon-500);
     color: #000;
     padding: 4px 12px;
     border-radius: 4px;
@@ -1210,10 +1210,10 @@
 }
 
 .edit-mode-section {
-    background: #f8f9fa;
+    background: var(--oat-light);
     border-radius: 8px;
     padding: 20px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--oat-light);
 }
 
 #edit-mode-btn {
@@ -1243,7 +1243,7 @@
 .annotation-mark.mark-contenido_general { 
     background-color: rgba(13, 110, 253, 0.1); 
     box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4);
-    color: #0d6efd;
+    color: var(--blueberry-800);
 }
 
 .annotation-mark.mark-contenido_general:hover {
@@ -1254,7 +1254,7 @@
 .annotation-mark.mark-lenguaje { 
     background-color: rgba(111, 66, 193, 0.1); 
     box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
-    color: #6f42c1;
+    color: var(--ube-800);
 }
 
 .annotation-mark.mark-lenguaje:hover {
@@ -1265,7 +1265,7 @@
 .annotation-mark.mark-fuentes { 
     background-color: rgba(13, 202, 240, 0.1); 
     box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4);
-    color: #0dcaf0;
+    color: var(--slushie-500);
 }
 
 .annotation-mark.mark-fuentes:hover {
@@ -1290,16 +1290,16 @@
 
 /* Modal improvements */
 .modal-body .form-control-plaintext {
-    border: 1px solid #dee2e6;
-    background-color: #f8f9fa !important;
+    border: 1px solid var(--oat-border);
+    background-color: var(--oat-light) !important;
     min-height: 40px;
     display: flex;
     align-items: center;
 }
 
 #compositeControls {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background-color: var(--oat-light);
+    border: 1px solid var(--oat-border);
     border-radius: 0.375rem;
     padding: 1rem;
     margin-top: 0.5rem;
@@ -1307,14 +1307,14 @@
 
 #compositeControls .form-label {
     font-weight: 500;
-    color: #495057;
+    color: var(--dark-charcoal);
     margin-bottom: 0.5rem;
 }
 
 /* Annotation Panel Styles */
 .annotation-panel {
     background: white;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--oat-light);
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     margin-bottom: 1rem;
@@ -1323,11 +1323,11 @@
 
 .annotation-header {
     padding: 1rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--oat-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #f8f9fa;
+    background: var(--oat-light);
     border-radius: 10px 10px 0 0;
 }
 
@@ -1335,7 +1335,7 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    color: #495057;
+    color: var(--dark-charcoal);
 }
 
 .annotation-content {
@@ -1354,7 +1354,7 @@
     justify-content: flex-end;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--oat-light);
 }
 
 .annotation-actions .btn {
@@ -1363,8 +1363,8 @@
 }
 
 #composite-controls {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background-color: var(--oat-light);
+    border: 1px solid var(--oat-border);
     border-radius: 0.375rem;
     padding: 1rem;
     margin-top: 0.5rem;
@@ -1372,7 +1372,7 @@
 
 #composite-controls .form-label {
     font-weight: 500;
-    color: #495057;
+    color: var(--dark-charcoal);
     margin-bottom: 0.5rem;
 }
 </style>

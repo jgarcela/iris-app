@@ -8,7 +8,7 @@
     height: 100vh;
   padding-top: 2rem;
   background: #ffffff;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--oat-border);
   box-shadow: none;
   position: sticky;
   top: 0;
@@ -110,7 +110,7 @@
 /* Enhanced Admin Content */
   .admin-content {
   padding: 2rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--oat-light) 0%, var(--oat-border) 100%);
   min-height: 100vh;
 }
 
@@ -221,11 +221,11 @@
 }
 
 .admin-content .bg-success {
-  background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%) !important;
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--matcha-600) 100%) !important;
 }
 
 .admin-content .bg-warning {
-  background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%) !important;
+  background: linear-gradient(135deg, var(--warning-color) 0%, var(--lemon-700) 100%) !important;
 }
   
 /* Clean Admin Tables */
@@ -244,7 +244,7 @@
   .admin-content table td {
     vertical-align: middle;
   padding: 1rem;
-  border-color: #f1f3f4;
+  border-color: var(--oat-light);
   }
 
   .admin-content table th {
@@ -267,7 +267,7 @@
 }
 
 .admin-content table tbody td {
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 1px solid var(--oat-light);
   color: var(--text-black-color);
 }
 
@@ -288,7 +288,7 @@
 }
 
   .admin-content table tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: var(--oat-light);
   cursor: pointer;
 }
 
@@ -297,7 +297,7 @@
 }
 
   .admin-content table tbody tr:nth-child(even):hover {
-    background-color: #f1f3f4;
+    background-color: var(--oat-light);
   }
 
 /* Minimalistic Bootstrap Table Styling for Admin */
@@ -311,7 +311,7 @@
 
 .admin-content .bootstrap-table .fixed-table-toolbar .search {
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--oat-border);
   padding: 0.5rem 0.875rem;
   font-size: 0.85rem;
   transition: all 0.2s ease;
@@ -414,7 +414,7 @@
   height: 2rem;
   font-size: 0.8rem;
   padding: 0.375rem 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--oat-border);
   border-radius: 4px;
   background: var(--secondary-color);
   color: var(--text-black-color);
@@ -440,7 +440,7 @@
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--warm-charcoal);
 }
 
 .role-name, .permission-name {
@@ -449,7 +449,7 @@
 }
 
 .permission-description {
-  color: #6b7280;
+  color: var(--warm-charcoal);
   font-size: 0.875rem;
 }
 
@@ -483,13 +483,13 @@
 
 .permission-delete {
   background: #fef2f2;
-  color: #dc2626;
+  color: var(--pomegranate-400);
   border: 1px solid #fecaca;
 }
 
 .permission-admin {
   background: #fffbeb;
-  color: #d97706;
+  color: var(--lemon-700);
   border: 1px solid #fed7aa;
 }
 
@@ -501,13 +501,13 @@
 
 .permission-update {
   background: #f5f3ff;
-  color: #7c3aed;
+  color: var(--ube-800);
   border: 1px solid #ddd6fe;
 }
 
 .permission-view {
   background: #f0fdf4;
-  color: #059669;
+  color: var(--matcha-600);
   border: 1px solid #a7f3d0;
 }
 
@@ -524,7 +524,7 @@
 
 .role-admin {
   background: #fef2f2;
-  color: #dc2626;
+  color: var(--pomegranate-400);
   border: 1px solid #fecaca;
 }
 
@@ -542,19 +542,19 @@
 
 .role-analyst-tester {
   background: #fffbeb;
-  color: #d97706;
+  color: var(--lemon-700);
   border: 1px solid #fed7aa;
 }
 
 .role-guest {
-  background: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background: var(--oat-light);
+  color: var(--warm-silver);
+  border: 1px solid var(--oat-border);
 }
 
 .role-moderator {
   background: #f5f3ff;
-  color: #7c3aed;
+  color: var(--ube-800);
   border: 1px solid #ddd6fe;
 }
 
@@ -583,13 +583,13 @@
 
 .permission-delete {
   background: #fef2f2;
-  color: #dc2626;
+  color: var(--pomegranate-400);
   border: 1px solid #fecaca;
 }
 
 .permission-admin {
   background: #fffbeb;
-  color: #d97706;
+  color: var(--lemon-700);
   border: 1px solid #fed7aa;
 }
 
@@ -601,19 +601,19 @@
 
 .permission-update {
   background: #f5f3ff;
-  color: #7c3aed;
+  color: var(--ube-800);
   border: 1px solid #ddd6fe;
 }
 
 .permission-view {
   background: #f0fdf4;
-  color: #059669;
+  color: var(--matcha-600);
   border: 1px solid #a7f3d0;
 }
 
 .permission-edit {
   background: #fef3c7;
-  color: #d97706;
+  color: var(--lemon-700);
   border: 1px solid #fde68a;
 }
 
@@ -625,7 +625,7 @@
 
 .permission-access {
   background: #ecfdf5;
-  color: #059669;
+  color: var(--matcha-600);
   border: 1px solid #a7f3d0;
 }
 
@@ -724,7 +724,7 @@
 }
 
 .admin-dashboard-card .card-description {
-  color: #6b7280;
+  color: var(--warm-charcoal);
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
   font-weight: 500;
@@ -732,8 +732,8 @@
 
 .admin-dashboard-card .card-btn {
   background: #ffffff;
-  color: #374151;
-  border: 2px solid #e5e7eb;
+  color: var(--dark-charcoal);
+  border: 2px solid var(--oat-border);
   border-radius: 8px;
   padding: 0.75rem 1.25rem;
   text-decoration: none;
@@ -771,7 +771,7 @@
 
 /* Roles Card - Green Gradient */
 .admin-card-roles .card-header {
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  background: linear-gradient(135deg, #10b981 0%, var(--matcha-600) 50%, #047857 100%);
 }
 
 .admin-card-roles .card-header .card-icon {
@@ -788,7 +788,7 @@
 
 /* Permissions Card - Orange Gradient */
 .admin-card-permissions .card-header {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, var(--lemon-700) 50%, #b45309 100%);
 }
 
 .admin-card-permissions .card-header .card-icon {
@@ -805,7 +805,7 @@
 
 /* Contact Card - Purple/Violet Gradient */
 .admin-card-contact .card-header {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--ube-800) 0%, var(--ube-800) 50%, #6d28d9 100%);
 }
 
 .admin-card-contact .card-header .card-icon {
@@ -815,9 +815,9 @@
 }
 
 .admin-card-contact .card-btn:hover {
-  background: #7c3aed;
+  background: var(--ube-800);
   color: #ffffff;
-  border-color: #7c3aed;
+  border-color: var(--ube-800);
 }
 
 /* Responsive Design */
@@ -882,14 +882,14 @@
 }
 
 .admin-content form .btn-success:hover {
-  background: #059669;
+  background: var(--matcha-600);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
   }
   
   /* Welcome text in header */
   .welcome-text {
-    color: #0d6efd;
+    color: var(--blueberry-800);
     font-weight: 500;
     font-style: italic;
   }
@@ -951,7 +951,7 @@
 }
 
 .btn-create-user:hover {
-  background: #059669;
+  background: var(--matcha-600);
   color: var(--text-white-color);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
@@ -963,7 +963,7 @@
   border-radius: 8px;
   padding: 1.25rem;
   box-shadow: none;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--oat-border);
   transition: all var(--transition-speed) ease;
   height: 100%;
   display: flex;
@@ -985,7 +985,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--warm-charcoal);
   font-size: 1.25rem;
   flex-shrink: 0;
 }
@@ -998,7 +998,7 @@
 }
 
 .stats-content p {
-  color: #6b7280;
+  color: var(--warm-charcoal);
   font-weight: 400;
   margin: 0.25rem 0 0 0;
   font-size: 0.875rem;
@@ -1009,18 +1009,18 @@
   background: #ffffff;
   border-radius: 8px;
   box-shadow: none;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--oat-border);
   overflow: hidden;
 }
 
 .table-header {
   background: #f9fafb;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--oat-border);
 }
 
 .table-title {
-  color: #374151;
+  color: var(--dark-charcoal);
   font-weight: 600;
   font-size: 1.25rem;
   margin: 0;
@@ -1037,7 +1037,7 @@
   border-radius: 6px;
   border: 1px solid #d1d5db;
   background: #ffffff;
-  color: #374151;
+  color: var(--dark-charcoal);
   font-weight: 500;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
@@ -1068,7 +1068,7 @@
   font-size: 0.8rem;
   padding: 0.75rem 0.875rem;
   border: none;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--oat-border);
   text-align: left;
   position: relative;
   letter-spacing: 0.025em;
@@ -1079,7 +1079,7 @@
   padding: 0.75rem 1rem;
   vertical-align: middle;
   border-bottom: 1px solid #f3f4f6;
-  color: #374151;
+  color: var(--dark-charcoal);
 }
 
 .admin-table tbody tr {
@@ -1097,7 +1097,7 @@
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--warm-charcoal);
 }
 
 .user-name, .user-lastname {
@@ -1106,7 +1106,7 @@
 }
 
 .user-email {
-  color: #6b7280;
+  color: var(--warm-charcoal);
   font-size: 0.875rem;
 }
 
@@ -1128,7 +1128,7 @@
 
 .role-admin {
   background: #fef2f2;
-  color: #dc2626;
+  color: var(--pomegranate-400);
   border: 1px solid #fecaca;
 }
 
@@ -1146,7 +1146,7 @@
 
 .role-analyst_tester {
   background: #fffbeb;
-  color: #d97706;
+  color: var(--lemon-700);
   border: 1px solid #fed7aa;
 }
 
@@ -1181,7 +1181,7 @@
 }
 
 .btn-delete {
-  color: #dc2626;
+  color: var(--pomegranate-400);
 }
 
 .btn-delete:hover {
@@ -1215,7 +1215,7 @@
 .search-input {
   padding-left: 2.5rem;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--oat-border);
   font-size: 0.875rem;
   transition: all 0.2s ease;
   background: var(--secondary-color);
@@ -1235,7 +1235,7 @@
 
 .filter-select {
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--oat-border);
   font-size: 0.875rem;
   transition: all 0.2s ease;
   min-width: 180px;
@@ -1273,7 +1273,7 @@
 .btn-pagination {
   background: transparent;
   color: var(--dark-gray);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--oat-border);
   border-radius: 6px;
   padding: 0.5rem 0.875rem;
   font-weight: 500;
@@ -1435,13 +1435,13 @@
 .admin-form-header {
   margin-bottom: 2rem;
   padding: 1.5rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--oat-border);
 }
 
 .form-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--violet-iris-color), #8b5cf6);
+  background: linear-gradient(135deg, var(--violet-iris-color), var(--ube-800));
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -1464,7 +1464,7 @@
 }
 
 .form-subtitle {
-  color: #64748b;
+  color: var(--warm-silver);
   font-size: 1rem;
   margin: 0;
   line-height: 1.5;
@@ -1475,7 +1475,7 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--oat-border);
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -1497,7 +1497,7 @@
 .section-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--oat-border);
 }
 
 .section-header h3 {
@@ -1515,7 +1515,7 @@
 }
 
 .section-description {
-  color: #64748b;
+  color: var(--warm-silver);
   font-size: 0.875rem;
   margin: 0.5rem 0 0 0;
 }
@@ -1527,7 +1527,7 @@
 
 .form-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--dark-charcoal);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -1542,14 +1542,14 @@
 
 .form-help {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--warm-charcoal);
   margin-top: 0.25rem;
   font-style: italic;
 }
 
 /* Modern Inputs */
 .modern-input {
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--oat-border);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
@@ -1566,7 +1566,7 @@
 
 .modern-input:read-only {
   background: #f9fafb;
-  color: #6b7280;
+  color: var(--warm-charcoal);
   cursor: not-allowed;
 }
 
@@ -1611,8 +1611,8 @@
 
 /* Role Cards (similar to permission cards) */
 .role-card {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  background: var(--oat-light);
+  border: 2px solid var(--oat-border);
   border-radius: 12px;
   padding: 1rem;
   display: flex;
@@ -1635,7 +1635,7 @@
 .role-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--violet-iris-color), #8b5cf6);
+  background: linear-gradient(135deg, var(--violet-iris-color), var(--ube-800));
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -1686,8 +1686,8 @@
 }
 
 .permission-card {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  background: var(--oat-light);
+  border: 2px solid var(--oat-border);
   border-radius: 12px;
   padding: 1rem;
   display: flex;
@@ -1710,7 +1710,7 @@
 .permission-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--violet-iris-color), #8b5cf6);
+  background: linear-gradient(135deg, var(--violet-iris-color), var(--ube-800));
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -1743,8 +1743,8 @@
 }
 
 .permission-preview-card {
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, var(--oat-light), #f1f5f9);
+  border: 2px solid var(--oat-border);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -1755,7 +1755,7 @@
 .permission-preview-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--violet-iris-color), #8b5cf6);
+  background: linear-gradient(135deg, var(--violet-iris-color), var(--ube-800));
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -1780,7 +1780,7 @@
 }
 
 .permission-preview-content p {
-  color: #64748b;
+  color: var(--warm-silver);
   margin: 0 0 0.75rem 0;
   font-size: 0.875rem;
 }
@@ -1788,15 +1788,15 @@
 /* Form Actions */
 .form-actions {
   padding: 2rem;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  background: var(--oat-light);
+  border-top: 1px solid var(--oat-border);
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
 }
 
 .btn-save {
-  background: linear-gradient(135deg, var(--violet-iris-color), #8b5cf6);
+  background: linear-gradient(135deg, var(--violet-iris-color), var(--ube-800));
   border: none;
   color: white;
   padding: 0.75rem 1.5rem;
@@ -1810,7 +1810,7 @@
 }
 
 .btn-save:hover {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  background: linear-gradient(135deg, var(--ube-800), #6d28d9);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
   color: white;
@@ -1818,8 +1818,8 @@
 
 .btn-cancel {
   background: #f1f5f9;
-  border: 2px solid #e2e8f0;
-  color: #64748b;
+  border: 2px solid var(--oat-border);
+  color: var(--warm-silver);
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
@@ -1832,7 +1832,7 @@
 }
 
 .btn-cancel:hover {
-  background: #e2e8f0;
+  background: var(--oat-border);
   border-color: #cbd5e1;
   color: #475569;
   transform: translateY(-1px);

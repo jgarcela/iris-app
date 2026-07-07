@@ -102,15 +102,15 @@ body {
 }
 
 .difficulty-card[data-level="facil"]:hover {
-    border-color: #28a745;
+    border-color: var(--matcha-600);
 }
 
 .difficulty-card[data-level="medio"]:hover {
-    border-color: #ffc107;
+    border-color: var(--lemon-500);
 }
 
 .difficulty-card[data-level="dificil"]:hover {
-    border-color: #dc3545;
+    border-color: var(--pomegranate-400);
 }
 
 .difficulty-icon {
@@ -154,15 +154,15 @@ body {
 }
 
 .difficulty-facil .difficulty-features-preview {
-    border-left-color: #28a745;
+    border-left-color: var(--matcha-600);
 }
 
 .difficulty-medio .difficulty-features-preview {
-    border-left-color: #ffc107;
+    border-left-color: var(--lemon-500);
 }
 
 .difficulty-dificil .difficulty-features-preview {
-    border-left-color: #dc3545;
+    border-left-color: var(--pomegranate-400);
 }
 
 .difficulty-section-header {
@@ -178,7 +178,7 @@ body {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: conic-gradient(#4CAF50 0deg, #4CAF50 0deg, #e0e0e0 0deg);
+    background: conic-gradient(var(--matcha-600) 0deg, var(--matcha-600) 0deg, #e0e0e0 0deg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -225,15 +225,15 @@ body {
 }
 
 .difficulty-facil:hover {
-    border-color: #28a745;
+    border-color: var(--matcha-600);
 }
 
 .difficulty-medio:hover {
-    border-color: #ffc107;
+    border-color: var(--lemon-500);
 }
 
 .difficulty-dificil:hover {
-    border-color: #dc3545;
+    border-color: var(--pomegranate-400);
 }
 
 /* Button Enhancements */
@@ -297,19 +297,19 @@ body {
 }
 
 .difficulty-selector .btn-group .btn[data-level="facil"].active {
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: var(--matcha-600);
+    border-color: var(--matcha-600);
 }
 
 .difficulty-selector .btn-group .btn[data-level="medio"].active {
-    background-color: #ffc107;
-    border-color: #ffc107;
+    background-color: var(--lemon-500);
+    border-color: var(--lemon-500);
     color: #000;
 }
 
 .difficulty-selector .btn-group .btn[data-level="dificil"].active {
-    background-color: #dc3545;
-    border-color: #dc3545;
+    background-color: var(--pomegranate-400);
+    border-color: var(--pomegranate-400);
 }
 
 /* Responsive adjustments */
@@ -372,7 +372,7 @@ body {
 }
 
 .step-icon i {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--ube-800), var(--ube-900));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -394,7 +394,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+    background: linear-gradient(90deg, var(--ube-800), var(--ube-900), #f093fb, var(--pomegranate-400), #4facfe);
     background-size: 200% 100%;
     animation: gradientShift 3s ease infinite;
 }
@@ -424,17 +424,17 @@ body {
 }
 
 .text-card .badge.bg-success {
-    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    background: linear-gradient(135deg, var(--matcha-600), var(--matcha-600)) !important;
     color: white;
 }
 
 .text-card .badge.bg-warning {
-    background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+    background: linear-gradient(135deg, var(--lemon-500), var(--lemon-700)) !important;
     color: white;
 }
 
 .text-card .badge.bg-danger {
-    background: linear-gradient(135deg, #dc3545, #e83e8c) !important;
+    background: linear-gradient(135deg, var(--pomegranate-400), #e83e8c) !important;
     color: white;
 }
 
@@ -452,7 +452,7 @@ body {
 }
 
 .stat-item i {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--ube-800), var(--ube-900));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -461,7 +461,7 @@ body {
 .categories .badge {
     font-size: 0.75rem;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
-    color: #667eea !important;
+    color: var(--ube-800) !important;
     border: 1px solid rgba(102, 126, 234, 0.2);
     border-radius: 15px;
     padding: 0.4rem 0.8rem;
@@ -469,7 +469,7 @@ body {
 
 .start-analysis-btn {
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    background: linear-gradient(135deg, var(--ube-800), var(--ube-900)) !important;
     border: none;
     border-radius: 25px;
     padding: 0.75rem 1.5rem;
@@ -511,7 +511,7 @@ body {
 
 /* Section headers */
 h2, h3, h4, h5 {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--ube-800), var(--ube-900));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -534,7 +534,7 @@ h2, h3, h4, h5 {
 }
 
 .question-title {
-    color: #667eea;
+    color: var(--ube-800);
     font-weight: 600;
     margin-bottom: 1.5rem;
     font-size: 1.25rem;
@@ -586,7 +586,7 @@ h2, h3, h4, h5 {
 }
 
 .option-card.selected {
-    border-color: #667eea;
+    border-color: var(--ube-800);
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
     box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
     transform: translateY(-5px) scale(1.01);
@@ -600,14 +600,14 @@ h2, h3, h4, h5 {
 
 .option-title {
     font-weight: 600;
-    color: #667eea;
+    color: var(--ube-800);
     margin-bottom: 0.5rem;
     font-size: 1.1rem;
 }
 
 .option-desc {
     font-size: 0.9rem;
-    color: #495057;
+    color: var(--dark-charcoal);
     line-height: 1.4;
     margin-bottom: 0;
     font-weight: 400;
@@ -620,7 +620,7 @@ h2, h3, h4, h5 {
 .option-details small {
     font-size: 0.85rem;
     font-style: italic;
-    color: #6c757d;
+    color: var(--warm-charcoal);
 }
 
 .selected-options {
@@ -736,7 +736,7 @@ h2, h3, h4, h5 {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 2rem;
-    color: #6c757d;
+    color: var(--warm-charcoal);
     background: white;
     padding: 1rem;
     border-radius: 50%;
@@ -744,7 +744,7 @@ h2, h3, h4, h5 {
 }
 
 .text-card.recommended {
-    border: 2px solid #28a745;
+    border: 2px solid var(--matcha-600);
     position: relative;
 }
 
@@ -753,7 +753,7 @@ h2, h3, h4, h5 {
     position: absolute;
     top: -10px;
     right: 10px;
-    background: #28a745;
+    background: var(--matcha-600);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 15px;
@@ -763,7 +763,7 @@ h2, h3, h4, h5 {
 }
 
 .text-card.new {
-    border: 2px solid #17a2b8;
+    border: 2px solid var(--slushie-800);
     position: relative;
 }
 
@@ -772,7 +772,7 @@ h2, h3, h4, h5 {
     position: absolute;
     top: -10px;
     right: 10px;
-    background: #17a2b8;
+    background: var(--slushie-800);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 15px;

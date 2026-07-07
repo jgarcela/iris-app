@@ -356,20 +356,20 @@ function deleteAnalysis(analysisId) {
 <!-- Custom CSS for Analysis History -->
 <style>
 .history-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--oat-light) 0%, var(--oat-light) 100%);
     padding: 2rem;
     border-radius: 10px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
 }
 
 .search-filters-panel .card {
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .analysis-card {
     transition: all 0.3s ease;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -379,8 +379,8 @@ function deleteAnalysis(analysisId) {
 }
 
 .analysis-card .card-header {
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    background: var(--oat-light);
+    border-bottom: 1px solid var(--oat-border);
 }
 
 .analysis-meta .badge {
@@ -393,16 +393,16 @@ function deleteAnalysis(analysisId) {
 }
 
 .empty-state {
-    background: #f8f9fa;
+    background: var(--oat-light);
     border-radius: 10px;
-    border: 2px dashed #dee2e6;
+    border: 2px dashed var(--oat-border);
 }
 
 .results-summary {
-    background: #f8f9fa;
+    background: var(--oat-light);
     padding: 1rem;
     border-radius: 6px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--oat-border);
 }
 
 @media (max-width: 768px) {

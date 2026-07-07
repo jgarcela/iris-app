@@ -1,0 +1,113 @@
+/* ============================================================
+   IRIS Design Tokens — Clay-inspired system
+   Single source of truth. Loaded FIRST, before Bootstrap.
+   See redesign/DESIGN.md
+   ============================================================ */
+
+:root {
+  /* --- Core surfaces --- */
+  --clay-cream: #faf9f7;      /* warm page canvas */
+  --clay-white: #ffffff;
+  --clay-black: #000000;
+
+  /* --- Swatch palette --- */
+  --matcha-300: #84e7a5;
+  --matcha-600: #078a52;
+  --matcha-800: #02492a;
+
+  --slushie-500: #3bd3fd;
+  --slushie-800: #0089ad;
+
+  --lemon-400: #f8cc65;
+  --lemon-500: #fbbd41;
+  --lemon-700: #d08a11;
+  --lemon-800: #9d6a09;
+
+  --ube-300: #c1b0ff;
+  --ube-800: #43089f;
+  --ube-900: #32037d;
+
+  --pomegranate-400: #fc7981;
+  --blueberry-800: #01418d;
+  --dragonfruit: #e0218a;
+
+  /* --- Warm neutral scale --- */
+  --warm-silver: #9f9b93;      /* muted / secondary text */
+  --warm-charcoal: #55534e;    /* tertiary text */
+  --dark-charcoal: #333333;    /* link text on light */
+
+  /* --- Borders --- */
+  --oat-border: #dad4c8;       /* primary warm border */
+  --oat-light: #eee9df;        /* secondary lighter border */
+  --cool-border: #e6e8ec;
+  --dark-border: #525a69;      /* borders on dark sections */
+  --light-frost: #eff1f3;
+
+  /* --- Badges / focus --- */
+  --badge-blue-bg: #f0f8ff;
+  --badge-blue-text: #3859f9;
+  --focus-ring-color: rgb(20, 110, 245);
+
+  /* --- Shadows --- */
+  --clay-shadow: rgba(0,0,0,0.1) 0px 1px 1px,
+                 rgba(0,0,0,0.04) 0px -1px 1px inset,
+                 rgba(0,0,0,0.05) 0px -0.5px 1px;
+  --clay-hard-shadow: rgb(0,0,0) -7px 7px;
+
+  /* --- Radius scale --- */
+  --radius-sharp: 4px;    /* ghost buttons, inputs */
+  --radius-std: 8px;      /* small cards, images */
+  --radius-badge: 11px;
+  --radius-card: 12px;    /* standard cards, buttons */
+  --radius-feature: 24px; /* feature cards, panels */
+  --radius-section: 40px; /* large sections, footer */
+  --radius-pill: 1584px;  /* pill CTAs */
+
+  /* --- Typography --- */
+  --font-display: 'Space Grotesk', 'Roobert', Arial, sans-serif;
+  --font-body: 'Space Grotesk', 'Roobert', Arial, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
+
+  --fw-body: 400;
+  --fw-ui: 500;
+  --fw-heading: 600;
+
+  /* Type scale (size / line-height / tracking) */
+  --type-display-hero: 5rem;      /* 80px, lh 1.0, -3.2px */
+  --type-display-sec: 3.75rem;    /* 60px, lh 1.0, -2.4px */
+  --type-section: 2.75rem;        /* 44px, lh 1.1 */
+  --type-card-heading: 2rem;      /* 32px, lh 1.1, -0.64px */
+  --type-feature-title: 1.25rem;  /* 20px */
+  --type-body: 1.125rem;          /* 18px, lh 1.6 */
+  --type-body-std: 1rem;          /* 16px */
+  --type-nav: 0.9375rem;          /* 15px */
+  --type-caption: 0.875rem;       /* 14px */
+  --type-small: 0.75rem;          /* 12px */
+
+  /* --- Spacing base --- */
+  --space-unit: 8px;
+}
+
+/* Clay hover interaction — apply .clay-hover to any button/link */
+.clay-hover {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease,
+              background-color 0.18s ease,
+              color 0.18s ease;
+}
+.clay-hover:hover {
+  transform: rotateZ(-8deg) translateY(-12%);
+  box-shadow: var(--clay-hard-shadow);
+}
+
+/* Uppercase wayfinding label */
+.clay-label {
+  font-family: var(--font-body);
+  font-size: var(--type-small);
+  font-weight: var(--fw-heading);
+  text-transform: uppercase;
+  letter-spacing: 1.08px;
+}
+
+/* Dashed craft border helper */
+.clay-dashed { border: 1px dashed var(--oat-border) !important; }

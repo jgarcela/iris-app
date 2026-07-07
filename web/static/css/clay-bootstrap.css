@@ -1,0 +1,173 @@
+/* ============================================================
+   Clay override layer for Bootstrap 5.3 primitives
+   Loaded AFTER bootstrap, BEFORE styles.css.
+   Retunes Bootstrap defaults to the Clay system.
+   ============================================================ */
+
+/* Map Bootstrap's own theme variables to Clay tokens */
+:root {
+  --bs-body-bg: var(--clay-cream);
+  --bs-body-color: var(--clay-black);
+  --bs-body-font-family: var(--font-body);
+  --bs-border-color: var(--oat-border);
+  --bs-primary: var(--ube-800);
+  --bs-primary-rgb: 67, 8, 159;
+  --bs-secondary-color: var(--warm-charcoal);
+  --bs-link-color: var(--dark-charcoal);
+  --bs-link-hover-color: var(--ube-800);
+  --bs-border-radius: var(--radius-card);
+  --bs-border-radius-sm: var(--radius-std);
+  --bs-border-radius-lg: var(--radius-feature);
+}
+
+body { font-family: var(--font-body); background-color: var(--clay-cream); }
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.02em;
+}
+
+code, pre, kbd, samp, .font-monospace { font-family: var(--font-mono); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: var(--font-body);
+  font-weight: var(--fw-ui);
+  border-radius: var(--radius-card);
+  letter-spacing: -0.16px;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+/* Signature playful hover: tilt + hard offset shadow */
+.btn:hover {
+  transform: rotateZ(-8deg) translateY(-10%);
+  box-shadow: var(--clay-hard-shadow);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background-color: var(--ube-800);
+  border-color: var(--ube-800);
+  color: #fff;
+}
+.btn-primary:hover, .btn-primary:active {
+  background-color: var(--ube-900);
+  border-color: var(--ube-900);
+  color: #fff;
+}
+.btn-outline-primary {
+  color: var(--clay-black);
+  border-color: #717989;
+  border-radius: var(--radius-sharp);
+}
+.btn-outline-primary:hover {
+  background-color: var(--ube-800);
+  border-color: var(--ube-800);
+  color: #fff;
+}
+.btn-success { background-color: var(--matcha-600); border-color: var(--matcha-600); }
+.btn-success:hover { background-color: var(--matcha-800); border-color: var(--matcha-800); }
+.btn-danger, .btn-outline-danger:hover { background-color: var(--pomegranate-400); border-color: var(--pomegranate-400); color:#fff; }
+.btn-outline-danger { color: var(--pomegranate-400); border-color: var(--pomegranate-400); }
+.btn-warning { background-color: var(--lemon-500); border-color: var(--lemon-500); color: var(--clay-black); }
+.btn-info { background-color: var(--slushie-500); border-color: var(--slushie-500); color: var(--clay-black); }
+
+/* Pill CTAs opt-in */
+.btn.rounded-pill { border-radius: var(--radius-pill); }
+
+/* ---------- Cards ---------- */
+.card {
+  background-color: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+}
+.card-header, .card-footer {
+  background-color: transparent;
+  border-color: var(--oat-light);
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  background-color: var(--clay-cream) !important;
+  border-bottom: 1px solid var(--oat-border);
+}
+.navbar .nav-link {
+  font-family: var(--font-body);
+  font-size: var(--type-nav);
+  font-weight: var(--fw-ui);
+  color: var(--dark-charcoal);
+}
+.navbar .nav-link:hover, .navbar .nav-link.active { color: var(--ube-800); }
+.navbar-brand { font-family: var(--font-display); font-weight: var(--fw-heading); }
+
+/* ---------- Badges ---------- */
+.badge {
+  font-family: var(--font-body);
+  font-weight: var(--fw-heading);
+  border-radius: var(--radius-badge);
+}
+.badge.bg-primary { background-color: var(--ube-800) !important; }
+.badge.bg-success { background-color: var(--matcha-600) !important; }
+.badge.bg-info { background-color: var(--slushie-800) !important; }
+.badge.bg-warning { background-color: var(--lemon-500) !important; color: var(--clay-black) !important; }
+.badge.bg-danger { background-color: var(--pomegranate-400) !important; }
+
+/* ---------- Forms ---------- */
+.form-control, .form-select {
+  border: 1px solid #717989;
+  border-radius: var(--radius-sharp);
+  background-color: var(--clay-white);
+  color: var(--clay-black);
+  font-family: var(--font-body);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 2px rgba(20, 110, 245, 0.35);
+}
+
+/* ---------- Modals ---------- */
+.modal-content {
+  background-color: var(--clay-cream);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+}
+.modal-header, .modal-footer { border-color: var(--oat-light); }
+
+/* ---------- Tables ---------- */
+.table {
+  --bs-table-border-color: var(--oat-border);
+  --bs-table-color: var(--clay-black);
+}
+.table > thead {
+  font-family: var(--font-body);
+  color: var(--warm-charcoal);
+}
+
+/* ---------- Alerts ---------- */
+.alert { border-radius: var(--radius-card); border: 1px solid var(--oat-border); }
+.alert-success { background-color: var(--matcha-300); color: var(--matcha-800); border-color: var(--matcha-600); }
+.alert-info { background-color: #d6f4fd; color: var(--slushie-800); border-color: var(--slushie-500); }
+.alert-warning { background-color: var(--lemon-400); color: var(--lemon-800); border-color: var(--lemon-700); }
+.alert-danger { background-color: #ffe0e2; color: #a3232b; border-color: var(--pomegranate-400); }
+
+/* ---------- Background / text utility remaps ---------- */
+.bg-light { background-color: var(--oat-light) !important; }
+.bg-white { background-color: var(--clay-white) !important; }
+.bg-primary { background-color: var(--ube-800) !important; }
+.bg-success { background-color: var(--matcha-600) !important; }
+.bg-info { background-color: var(--slushie-500) !important; }
+.bg-secondary { background-color: var(--warm-charcoal) !important; }
+.text-muted { color: var(--warm-silver) !important; }
+.text-primary { color: var(--ube-800) !important; }
+.text-success { color: var(--matcha-600) !important; }
+
+/* ---------- Radius utilities ---------- */
+.rounded { border-radius: var(--radius-card) !important; }
+.rounded-3, .rounded-4 { border-radius: var(--radius-feature) !important; }

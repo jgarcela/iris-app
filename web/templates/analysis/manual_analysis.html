@@ -199,7 +199,7 @@
                         </div>
                       </div>
                         <div class="variables-category mt-3">
-                          <h6 class="small mb-2" style="color: #6f42c1;">
+                          <h6 class="small mb-2" style="color: var(--ube-800);">
                             <i class="fas fa-language me-2"></i>
                             {{ _('Lenguaje') }}
                           </h6>
@@ -240,7 +240,7 @@
                     <i class="fas fa-file-text me-1"></i>
                     {{ _('General') }}
                   </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-filter="lenguaje" style="border-color: #6f42c1; color: #6f42c1;">
+                <button type="button" class="btn btn-outline-secondary btn-sm filter-btn" data-filter="lenguaje" style="border-color: var(--ube-800); color: var(--ube-800);">
                   <i class="fas fa-language me-1"></i>
                   {{ _('Lenguaje') }}
                 </button>
@@ -315,7 +315,7 @@
 <style>
   .analysis-panel {
       background: white;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--oat-light);
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   height: fit-content;
@@ -325,7 +325,7 @@
   
   .panel-header {
       padding: 1rem;
-      border-bottom: 1px solid #e9ecef;
+      border-bottom: 1px solid var(--oat-light);
       display: flex;
       justify-content: between;
       align-items: center;
@@ -333,7 +333,7 @@
 
 .panel-title {
       margin: 0;
-      color: #495057;
+      color: var(--dark-charcoal);
   }
   
   .panel-content {
@@ -348,7 +348,7 @@
   }
   
   .edit-mode-section h6 {
-      color: #667eea;
+      color: var(--ube-800);
       font-weight: 600;
       margin-bottom: 0.25rem;
   }
@@ -366,7 +366,7 @@
   }
   
   .section-title {
-      color: #6c757d;
+      color: var(--warm-charcoal);
   font-size: 0.9rem;
       font-weight: 600;
   margin-bottom: 0.75rem;
@@ -374,7 +374,7 @@
 
   .text-analysis-area {
       background: white;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--oat-light);
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       transition: all 0.3s ease;
@@ -383,7 +383,7 @@
   
   /* Edit mode indicator */
   .text-analysis-area.edit-mode {
-      border: 3px solid #ffc107;
+      border: 3px solid var(--lemon-500);
       box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
       background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
   }
@@ -393,7 +393,7 @@
       position: absolute;
       top: -15px;
       left: 20px;
-      background: #ffc107;
+      background: var(--lemon-500);
       color: #000;
       padding: 4px 12px;
       border-radius: 4px;
@@ -406,13 +406,13 @@
   
   .text-header {
   padding: 1.5rem;
-      border-bottom: 1px solid #e9ecef;
-      background: #f8f9fa;
+      border-bottom: 1px solid var(--oat-light);
+      background: var(--oat-light);
   }
   
   .text-title {
       margin: 0 0 0.5rem 0;
-      color: #495057;
+      color: var(--dark-charcoal);
   }
   
   .text-content {
@@ -422,7 +422,7 @@
   .text-body {
       line-height: 1.8;
       font-size: 1.1rem;
-      color: #495057;
+      color: var(--dark-charcoal);
   }
   
   .annotation-panel {
@@ -430,7 +430,7 @@
       width: 100%;
       max-width: 100%;
       background: white;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--oat-light);
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       margin-top: 0.5rem;
@@ -438,11 +438,11 @@
   
   .annotation-header {
   padding: 1rem;
-      border-bottom: 1px solid #e9ecef;
+      border-bottom: 1px solid var(--oat-light);
   display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f8f9fa;
+      background: var(--oat-light);
   }
   
   .annotation-content {
@@ -467,8 +467,8 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #e9ecef;
-      color: #6c757d;
+      background: var(--oat-light);
+      color: var(--warm-charcoal);
   display: flex;
       align-items: center;
       justify-content: center;
@@ -478,12 +478,12 @@
   }
   
   .step.active .step-number {
-      background: #007bff;
+      background: var(--blueberry-800);
       color: white;
   }
   
   .step.completed .step-number {
-      background: #28a745;
+      background: var(--matcha-600);
       color: white;
   }
   
@@ -505,12 +505,12 @@
       left: 60px;
       right: -50%;
       height: 2px;
-      background: #e9ecef;
+      background: var(--oat-light);
       z-index: -1;
   }
   
   .step.completed:not(:last-child)::after {
-      background: #28a745;
+      background: var(--matcha-600);
   }
   
 .annotations-list {
@@ -544,27 +544,27 @@
 }
 
 .annotation-filters .filter-btn[data-filter="all"].active {
-    background-color: #6c757d;
+    background-color: var(--warm-charcoal);
     color: white;
-    border-color: #6c757d;
+    border-color: var(--warm-charcoal);
 }
 
 .annotation-filters .filter-btn[data-filter="contenido_general"].active {
-    background-color: #0d6efd;
+    background-color: var(--blueberry-800);
     color: white;
-    border-color: #0d6efd;
+    border-color: var(--blueberry-800);
 }
 
 .annotation-filters .filter-btn[data-filter="lenguaje"].active {
-    background-color: #ffc107;
-    color: #212529;
-    border-color: #ffc107;
+    background-color: var(--lemon-500);
+    color: var(--clay-black);
+    border-color: var(--lemon-500);
 }
 
 .annotation-filters .filter-btn[data-filter="fuentes"].active {
-    background-color: #0dcaf0;
-    color: #212529;
-    border-color: #0dcaf0;
+    background-color: var(--slushie-500);
+    color: var(--clay-black);
+    border-color: var(--slushie-500);
 }
 
 .annotation-item {
@@ -585,17 +585,17 @@
 .annotations-stats {
     text-align: center;
     padding: 0.25rem 0;
-    border-top: 1px solid #e9ecef;
-    background-color: #f8f9fa;
+    border-top: 1px solid var(--oat-light);
+    background-color: var(--oat-light);
     border-radius: 0 0 0.375rem 0.375rem;
 }
   
 .annotation-item {
-    background: #f8f9fa;
+    background: var(--oat-light);
     padding: 0.75rem;
     border-radius: 6px;
     margin-bottom: 0.5rem;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid var(--blueberry-800);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -610,17 +610,17 @@
 /* Category-specific colors for annotation items */
 .annotation-item.annotation-contenido_general {
     background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.1) 100%);
-    border-left: 4px solid #0d6efd;
+    border-left: 4px solid var(--blueberry-800);
 }
 
 .annotation-item.annotation-lenguaje {
     background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(111, 66, 193, 0.1) 100%);
-    border-left: 4px solid #6f42c1;
+    border-left: 4px solid var(--ube-800);
 }
 
 .annotation-item.annotation-fuentes {
     background: linear-gradient(135deg, rgba(13, 202, 240, 0.05) 0%, rgba(13, 202, 240, 0.1) 100%);
-    border-left: 4px solid #0dcaf0;
+    border-left: 4px solid var(--slushie-500);
 }
 
 .annotation-content {
@@ -642,45 +642,45 @@
 }
 
 .delete-annotation:hover {
-    background-color: #dc3545;
+    background-color: var(--pomegranate-400);
     color: white;
     transform: scale(1.1);
 }
   
   .annotation-text {
       font-size: 0.9rem;
-      color: #495057;
+      color: var(--dark-charcoal);
   margin-bottom: 0.25rem;
 }
 
   .annotation-meta {
       font-size: 0.8rem;
-      color: #6c757d;
+      color: var(--warm-charcoal);
 }
 
 .action-buttons {
       margin-top: 1rem;
       padding-top: 1rem;
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid var(--oat-light);
   }
   
 /* Protagonist Analysis Styles */
 .protagonist-section .card {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--ube-800);
 }
 
 /* Topic Section Styles */
 .topic-section .card {
     background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(20, 108, 67, 0.05) 100%);
-    border-left: 4px solid #198754;
+    border-left: 4px solid var(--matcha-600);
 }
 
 .topic-section .topic-selection {
     background: white;
     border-radius: 0.5rem;
   padding: 0.75rem;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--oat-light);
     transition: all 0.3s ease;
 }
 
@@ -691,7 +691,7 @@
 
 .topic-section .form-label {
     font-weight: 500;
-    color: #495057;
+    color: var(--dark-charcoal);
   margin-bottom: 0.5rem;
 }
 
@@ -722,7 +722,7 @@
 }
 
 .protagonist-details h6 {
-    color: #667eea;
+    color: var(--ube-800);
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
@@ -734,8 +734,8 @@
 
 /* Variables Section Styles */
 .variables-section .card {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-left: 4px solid #007bff;
+    background: linear-gradient(135deg, var(--oat-light) 0%, var(--oat-light) 100%);
+    border-left: 4px solid var(--blueberry-800);
 }
 
 .variables-collapsible .btn {
@@ -762,7 +762,7 @@
 
 .variables-content {
     background: white;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--oat-light);
     border-radius: 6px;
     padding: 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -783,23 +783,23 @@
     display: flex;
     align-items: center;
     padding: 0.25rem 0.5rem;
-    background: #f8f9fa;
+    background: var(--oat-light);
     border-radius: 4px;
     font-size: 0.75rem;
-    color: #495057;
-    border: 1px solid #e9ecef;
+    color: var(--dark-charcoal);
+    border: 1px solid var(--oat-light);
     transition: all 0.2s ease;
 }
 
 .variables-list .variable-item:hover {
-    background: #e9ecef;
+    background: var(--oat-light);
     transform: translateY(-1px);
 }
 
 .variables-list .variable-item i {
     width: 12px;
     margin-right: 0.5rem;
-    color: #28a745;
+    color: var(--matcha-600);
 }
   
   .variables-section .variable-category-info {
@@ -807,7 +807,7 @@
       border-radius: 0.5rem;
       padding: 0.75rem;
   margin-bottom: 0.5rem;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--oat-light);
   transition: all 0.3s ease;
   }
   
@@ -842,17 +842,17 @@
   .annotation-mark.mark-contenido_general { 
       background-color: rgba(13, 110, 253, 0.1); 
       box-shadow: inset 0 -6px 0 rgba(13, 110, 253, 0.4);
-      color: #0d6efd;
+      color: var(--blueberry-800);
   }
   .annotation-mark.mark-lenguaje { 
       background-color: rgba(111, 66, 193, 0.1); 
       box-shadow: inset 0 -6px 0 rgba(111, 66, 193, 0.4);
-      color: #6f42c1;
+      color: var(--ube-800);
   }
   .annotation-mark.mark-fuentes { 
       background-color: rgba(13, 202, 240, 0.1); 
       box-shadow: inset 0 -6px 0 rgba(13, 202, 240, 0.4);
-      color: #0dcaf0;
+      color: var(--slushie-500);
   }
   
   /* Lightweight tooltip for annotations */
@@ -874,7 +874,7 @@
 .article-title {
   font-size: 1.75rem;
     font-weight: 700;
-    color: #495057;
+    color: var(--dark-charcoal);
   line-height: 1.2;
     margin: 0 0 0.5rem 0;
   text-align: left;
@@ -882,7 +882,7 @@
 
 .article-authors {
   font-size: 1.1rem;
-    color: #6c757d;
+    color: var(--warm-charcoal);
   font-style: italic;
     margin: 0 0 1rem 0;
     font-weight: 500;
@@ -913,10 +913,10 @@
     display: flex;
     flex-direction: column;
   }
-  .modal-card-header { padding: 0.75rem 1rem; border-bottom: 1px solid #e9ecef; }
+  .modal-card-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--oat-light); }
   .modal-card-title { margin: 0; font-weight: 600; }
   .modal-card-body { padding: 0.75rem 1rem; }
-  .modal-card-footer { padding: 0.75rem 1rem; border-top: 1px solid #e9ecef; display: flex; gap: 0.5rem; justify-content: flex-end; }
+  .modal-card-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--oat-light); display: flex; gap: 0.5rem; justify-content: flex-end; }
   #edit-textarea { width: 100%; height: 55vh; font-family: inherit; font-size: 1rem; line-height: 1.5; }
 </style>
 
