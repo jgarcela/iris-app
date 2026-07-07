@@ -119,31 +119,66 @@ def _filter_rows(rows, context, fd, fh):
     return out
 
 
+def _year_of(it):
+    f = _parse_fecha(it.get('Fecha'))
+    return f.year if f else None
+
+
 def _build_tables(rows, variables):
-    """For each variable, a distribution table: label → (count, pct)."""
+    """For each variable, a contingency table (value x year) with % col. and % fila."""
     tables = []
     for field in variables:
         if field not in REPORT_VARIABLES:
             continue
         label, cfg_key = REPORT_VARIABLES[field]
         value_map = _load_map(cfg_key)
-        counter = Counter()
+
+        freq = {}          # value -> {year -> count}
+        years_set = set()
         for it in rows:
             v = it.get(field)
             if v is None or str(v).strip() in ('', 'None', 'nan', '-1'):
                 continue
-            counter[str(v)] += 1
-        total = sum(counter.values())
-        entries = []
-        for key, cnt in counter.most_common():
-            name = value_map.get(key, f"Código {key}")
-            pct = (cnt / total * 100) if total else 0
-            entries.append({'label': name, 'count': cnt, 'pct': round(pct, 1)})
+            y = _year_of(it)
+            if y is None:
+                continue
+            v = str(v)
+            freq.setdefault(v, {})
+            freq[v][y] = freq[v].get(y, 0) + 1
+            years_set.add(y)
+
+        years = sorted(years_set)
+        col_totals = {y: sum(freq[v].get(y, 0) for v in freq) for y in years}
+        row_totals = {v: sum(freq[v].values()) for v in freq}
+        grand = sum(row_totals.values())
+        if grand == 0:
+            continue
+
+        ordered = sorted(freq.keys(), key=lambda v: row_totals[v], reverse=True)
+        data_rows = []
+        for v in ordered:
+            cells = []
+            for y in years:
+                fr = freq[v].get(y, 0)
+                pc = (fr / col_totals[y] * 100) if col_totals[y] else 0
+                pf = (fr / row_totals[v] * 100) if row_totals[v] else 0
+                cells.append({'pct_col': f"{pc:.2f}", 'pct_fila': f"{pf:.2f}"})
+            data_rows.append({
+                'label': value_map.get(v, f"Código {v}"),
+                'cells': cells,
+                'total_pct_col': f"{(row_totals[v] / grand * 100):.2f}",
+                'total_frec': row_totals[v],
+            })
+
+        total_cells = [{'pct_col': '100', 'pct_fila': f"{(col_totals[y] / grand * 100):.2f}"} for y in years]
+
         tables.append({
             'field': field,
             'title': label,
-            'total': total,
-            'entries': entries,
+            'years': [str(y) for y in years],
+            'rows': data_rows,
+            'total_cells': total_cells,
+            'grand': grand,
         })
     return tables
 
@@ -236,21 +271,55 @@ def download():
 
     for tbl in tables:
         doc.add_heading(tbl['title'], level=1)
-        t = doc.add_table(rows=1, cols=3)
+        years = tbl['years']
+        ncols = 1 + 2 * len(years) + 2
+        t = doc.add_table(rows=2, cols=ncols)
         t.style = 'Table Grid'
-        hdr = t.rows[0].cells
-        hdr[0].text = tbl['title']
-        hdr[1].text = 'Frecuencia'
-        hdr[2].text = 'Porcentaje'
-        for e in tbl['entries']:
+
+        # Header row 1: variable name + year group labels (merged 2 cells) + Total
+        h1 = t.rows[0].cells
+        h1[0].text = tbl['title']
+        h1[0].merge(t.rows[1].cells[0])
+        idx = 1
+        for y in years + ['Total']:
+            left = h1[idx]
+            left.merge(h1[idx + 1])
+            left.text = y
+            idx += 2
+
+        # Header row 2: % col. / % fila (and Total: % col. / Frec.)
+        h2 = t.rows[1].cells
+        idx = 1
+        for _ in years:
+            h2[idx].text = '% col.'
+            h2[idx + 1].text = '% fila'
+            idx += 2
+        h2[idx].text = '% col.'
+        h2[idx + 1].text = 'Frec.'
+
+        # Data rows
+        for r in tbl['rows']:
             cells = t.add_row().cells
-            cells[0].text = str(e['label'])
-            cells[1].text = str(e['count'])
-            cells[2].text = f"{e['pct']}%"
-        tot = t.add_row().cells
-        tot[0].text = 'Total'
-        tot[1].text = str(tbl['total'])
-        tot[2].text = '100%'
+            cells[0].text = str(r['label'])
+            idx = 1
+            for c in r['cells']:
+                cells[idx].text = f"{c['pct_col']}%"
+                cells[idx + 1].text = f"{c['pct_fila']}%"
+                idx += 2
+            cells[idx].text = f"{r['total_pct_col']}%"
+            cells[idx + 1].text = str(r['total_frec'])
+
+        # Total row
+        tr = t.add_row().cells
+        tr[0].text = 'Total'
+        idx = 1
+        for c in tbl['total_cells']:
+            tr[idx].text = f"{c['pct_col']}%"
+            tr[idx + 1].text = f"{c['pct_fila']}%"
+            idx += 2
+        tr[idx].text = '100%'
+        tr[idx + 1].text = str(tbl['grand'])
+
         doc.add_paragraph()
 
     buf = BytesIO()

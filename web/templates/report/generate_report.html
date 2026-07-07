@@ -101,32 +101,43 @@
         {% for tbl in tables %}
           <div class="report-table-card card">
             <div class="report-table-title">{{ tbl.title }}</div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>{{ _('Valor') }}</th>
-                  <th class="num">{{ _('Frecuencia') }}</th>
-                  <th class="num">{{ _('Porcentaje') }}</th>
-                  <th class="bar-col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for e in tbl.entries %}
+            <div class="report-table-scroll">
+              <table class="report-table crosstab">
+                <thead>
                   <tr>
-                    <td>{{ e.label }}</td>
-                    <td class="num">{{ e.count }}</td>
-                    <td class="num">{{ e.pct }}%</td>
-                    <td class="bar-col"><span class="report-bar" style="width: {{ e.pct }}%;"></span></td>
+                    <th rowspan="2" class="rowhead">{{ tbl.title }}</th>
+                    {% for y in tbl.years %}<th colspan="2" class="yeargroup">{{ y }}</th>{% endfor %}
+                    <th colspan="2" class="yeargroup">{{ _('Total') }}</th>
                   </tr>
-                {% endfor %}
-                <tr class="total-row">
-                  <td>{{ _('Total') }}</td>
-                  <td class="num">{{ tbl.total }}</td>
-                  <td class="num">100%</td>
-                  <td class="bar-col"></td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr>
+                    {% for y in tbl.years %}<th class="num sub">% col.</th><th class="num sub">% fila</th>{% endfor %}
+                    <th class="num sub">% col.</th><th class="num sub">{{ _('Frec.') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for r in tbl.rows %}
+                    <tr>
+                      <td class="rowhead">{{ r.label }}</td>
+                      {% for c in r.cells %}
+                        <td class="num">{{ c.pct_col }}%</td>
+                        <td class="num muted">{{ c.pct_fila }}%</td>
+                      {% endfor %}
+                      <td class="num">{{ r.total_pct_col }}%</td>
+                      <td class="num strong">{{ r.total_frec }}</td>
+                    </tr>
+                  {% endfor %}
+                  <tr class="total-row">
+                    <td class="rowhead">{{ _('Total') }}</td>
+                    {% for c in tbl.total_cells %}
+                      <td class="num">{{ c.pct_col }}%</td>
+                      <td class="num muted">{{ c.pct_fila }}%</td>
+                    {% endfor %}
+                    <td class="num">100%</td>
+                    <td class="num strong">{{ tbl.grand }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         {% endfor %}
       </div>
