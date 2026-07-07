@@ -228,6 +228,12 @@ def home():
     return render_template('index.html')
 
 
+@app.route('/proyecto', methods=['GET'])
+def proyecto():
+    logger.info("[/PROYECTO] Rendering project info template...")
+    return render_template('proyecto.html')
+
+
 
 @app.route('/test', methods=['GET'])
 @login_required

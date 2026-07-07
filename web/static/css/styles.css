@@ -1995,3 +1995,110 @@
     margin-bottom: 1rem;
   }
 }
+
+/* ==================== */
+/* Project page (proyecto.html) */
+/* ==================== */
+.papers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.paper-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+  text-decoration: none;
+  transition: transform 0.2s var(--transition-bounce), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.paper-card:hover {
+  transform: translateY(-3px) rotateZ(-0.5deg);
+  box-shadow: var(--clay-hard-shadow);
+  border-color: var(--clay-black);
+}
+.paper-icon {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  box-shadow: var(--clay-shadow);
+}
+.paper-icon--ube { background: var(--ube-800); }
+.paper-icon--matcha { background: var(--matcha-600); }
+.paper-icon--pomegranate { background: var(--pomegranate-400); }
+
+.paper-body { flex: 1; min-width: 0; }
+.paper-date {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--warm-silver);
+  margin-bottom: 0.2rem;
+}
+.paper-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--clay-black);
+  margin: 0 0 0.3rem;
+}
+.paper-venue {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--warm-charcoal);
+}
+.paper-ext {
+  flex: 0 0 auto;
+  color: var(--warm-silver);
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+.paper-card:hover .paper-ext { color: var(--ube-800); }
+
+/* Funding card */
+.funding-card {
+  background: var(--clay-white);
+  border: 1px dashed var(--oat-border);
+  border-radius: var(--radius-section);
+  padding: 2rem 2rem 2.25rem;
+  text-align: center;
+}
+.funding-text {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--warm-charcoal);
+  max-width: 640px;
+  margin: 0 auto 1.75rem;
+}
+.funding-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+}
+.funding-logos img {
+  height: 68px;
+  width: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 576px) {
+  .paper-title { font-size: 0.95rem; }
+  .funding-logos { gap: 1.5rem; }
+  .funding-logos img { height: 52px; }
+}

@@ -99,6 +99,11 @@
                 <i class="fas fa-home me-1"></i> {{ _('Inicio') }}
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.endpoint == 'proyecto' %}active{% endif %}" href="{{ url_for('proyecto') }}">
+                <i class="fas fa-circle-info me-1"></i> {{ _('El Proyecto') }}
+              </a>
+            </li>
             {% if current_user %}
               {% if 'challenge' not in current_user.roles %}
                 {% set analizar_active = request.endpoint in ['analysis.create_analysis', 'analysis.analysis_history', 'analysis.etiquetar_iris'] %}
