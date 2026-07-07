@@ -1966,6 +1966,21 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Inputs and buttons share one height so they align on a single line */
+.search-filters-panel .form-select,
+.search-filters-panel .form-control,
+.search-filters-panel .btn {
+  height: 40px;
+}
+.search-filters-panel .btn {
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* compact rows */
 .search-filters-panel .card-body .row { --bs-gutter-y: 0.5rem; }
 

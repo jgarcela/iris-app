@@ -35,7 +35,7 @@
             <div class="search-filters-panel mb-3">
                 <div class="card">
                     <div class="card-body">
-                        <form method="get" action="{{ url_for('dashboard.dashboard_iris') }}" class="row g-2 align-items-end">
+                        <form method="get" action="{{ url_for('dashboard.dashboard_iris') }}" class="row g-2">
                             <!-- Context Filter -->
                             <div class="col-md-5">
                                 <label for="context" class="form-label">
@@ -79,8 +79,9 @@
                             </div>
 
                             <!-- Filter Buttons (inline with the filters) -->
-                            <div class="col-md-3 d-flex align-items-end">
-                                <div class="d-flex gap-2 w-100">
+                            <div class="col-md-3">
+                                <label class="form-label" aria-hidden="true" style="visibility:hidden;">&nbsp;</label>
+                                <div class="d-flex gap-2">
                                     <button type="submit" class="btn btn-primary flex-grow-1">
                                         <i class="fas fa-filter me-1"></i>
                                         {{ _('Filtrar') }}
