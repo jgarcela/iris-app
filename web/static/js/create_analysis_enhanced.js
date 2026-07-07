@@ -128,7 +128,7 @@ function updateUIForMode(mode) {
         // Update form action for automatic analysis
         const form = document.getElementById('analyzer-form');
         if (form) {
-            form.action = '/analysis/analyze';
+            form.action = '/iris/analysis/analyze';
         }
         
     } else if (mode === 'manual') {
