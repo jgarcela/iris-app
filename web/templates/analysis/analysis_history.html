@@ -341,17 +341,27 @@ document.addEventListener('DOMContentLoaded', function () {
     if (pages <= 1) return;
     let current = 1;
 
+    function pageList() {
+        const range = new Set([1, pages, current, current - 1, current + 1]);
+        const sorted = [...range].filter(p => p >= 1 && p <= pages).sort((a, b) => a - b);
+        const out = [];
+        let prev = 0;
+        for (const p of sorted) { if (p - prev > 1) out.push('...'); out.push(p); prev = p; }
+        return out;
+    }
     function render() {
         items.forEach((el, i) => {
             const page = Math.floor(i / perPage) + 1;
             el.style.display = (page === current) ? '' : 'none';
         });
-        let html = '';
-        html += `<button class="page-btn nav-arrow" data-go="${current - 1}" ${current === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
-        for (let p = 1; p <= pages; p++) {
-            html += `<button class="page-btn ${p === current ? 'active' : ''}" data-go="${p}">${p}</button>`;
+        let html = `<button class="page-btn nav-arrow" data-go="${current - 1}" ${current === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+        for (const p of pageList()) {
+            html += (p === '...')
+                ? `<span class="page-ellipsis">…</span>`
+                : `<button class="page-btn ${p === current ? 'active' : ''}" data-go="${p}">${p}</button>`;
         }
         html += `<button class="page-btn nav-arrow" data-go="${current + 1}" ${current === pages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+        html += `<span class="page-total">${items.length} · ${pages} pág.</span>`;
         nav.innerHTML = html;
     }
 
@@ -479,6 +489,8 @@ function deleteAnalysis(analysisId) {
     color: #fff;
 }
 .analysis-pagination .page-btn:disabled { opacity: 0.45; cursor: default; }
+.analysis-pagination .page-ellipsis { align-self: center; color: var(--warm-silver); padding: 0 0.15rem; }
+.analysis-pagination .page-total { align-self: center; margin-left: 0.5rem; font-size: 0.78rem; color: var(--warm-silver); }
 
 @media (max-width: 768px) {
     .search-filters-panel .row > div { margin-bottom: 0.5rem; }

@@ -2551,3 +2551,21 @@
   color: #fff;
 }
 .fixed-table-container { border-radius: var(--radius-card); border-color: var(--oat-border); }
+
+/* Admin button in the right navbar cluster */
+.navbar-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: var(--fw-ui);
+  color: var(--warm-charcoal);
+  text-decoration: none;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-pill);
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.navbar-admin-btn i { font-size: 0.8rem; opacity: 0.85; }
+.navbar-admin-btn:hover { color: var(--clay-black); background: var(--oat-light); border-color: var(--clay-black); }
+.navbar-admin-btn.active { color: #fff; background: var(--ube-800); border-color: var(--ube-800); }
