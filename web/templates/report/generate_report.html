@@ -65,10 +65,20 @@
             {% endfor %}
           </div>
 
-          <!-- AI toggle -->
-          <label class="var-chip ai-toggle mb-3">
-            <input type="checkbox" name="ai" value="1" {% if request.args.get('ai') == '1' %}checked{% endif %}>
-            <span><i class="fas fa-wand-magic-sparkles me-1" style="color: var(--ube-800);"></i>{{ _('Incluir análisis descriptivo con IA') }}</span>
+          <!-- AI toggle (distinct from the variable chips) -->
+          <hr class="report-divider">
+          <label class="ai-option mb-3">
+            <span class="ai-option-main">
+              <span class="ai-option-icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+              <span class="ai-option-text">
+                <span class="ai-option-title">{{ _('Análisis descriptivo con IA') }}</span>
+                <span class="ai-option-desc">{{ _('Añade un comentario por variable (opcional)') }}</span>
+              </span>
+            </span>
+            <span class="ai-switch">
+              <input type="checkbox" name="ai" value="1" {% if request.args.get('ai') == '1' %}checked{% endif %}>
+              <span class="ai-switch-track"></span>
+            </span>
           </label>
 
           <!-- Actions -->
@@ -113,11 +123,20 @@
               <span class="report-pill"><i class="fas fa-calendar me-1"></i>{{ meta.fecha_desde or _('inicio') }} — {{ meta.fecha_hasta or _('hoy') }}</span>
               <span class="report-pill"><i class="fas fa-newspaper me-1"></i>{{ meta.total }} {{ _('noticias') }}</span>
             </div>
+            {% if tables|length > 1 %}
+              <button type="button" class="report-toggle-all" id="report-toggle-all" data-expanded="1">
+                <i class="fas fa-compress me-1"></i>{{ _('Colapsar todo') }}
+              </button>
+            {% endif %}
           </div>
 
           {% for tbl in tables %}
-            <div class="report-table-card card">
-              <div class="report-table-title">{{ tbl.title }}</div>
+            <details class="report-table-card card" open>
+              <summary class="report-table-title">
+                <i class="fas fa-chevron-right report-chevron"></i>
+                <span>{{ tbl.title }}</span>
+                <span class="report-table-badge">{{ tbl.grand }}</span>
+              </summary>
               <div class="report-table-scroll">
                 <table class="report-table crosstab">
                   <thead>
@@ -165,7 +184,7 @@
                   <i class="fas fa-circle-info me-1"></i>{{ _('No se pudo generar el análisis con IA para esta variable.') }}
                 </div>
               {% endif %}
-            </div>
+            </details>
           {% endfor %}
         </div>
       {% endif %}
@@ -184,6 +203,20 @@
     };
     wrap.addEventListener('change', update);
     update();
+  })();
+
+  (function () {
+    const btn = document.getElementById('report-toggle-all');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const details = document.querySelectorAll('.report-table-card');
+      const expand = btn.dataset.expanded !== '1';
+      details.forEach(d => { d.open = expand; });
+      btn.dataset.expanded = expand ? '1' : '0';
+      btn.innerHTML = expand
+        ? '<i class="fas fa-compress me-1"></i>{{ _("Colapsar todo") }}'
+        : '<i class="fas fa-expand me-1"></i>{{ _("Expandir todo") }}';
+    });
   })();
 </script>
 {% endblock %}
