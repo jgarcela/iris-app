@@ -1111,3 +1111,110 @@ mark.accepted { outline: 1px solid rgba(0,0,0,0.08); }
     font-size: 0.75rem;
   }
 }
+/* ==================== */
+/* Glossary page — Clay styling (scoped) */
+/* ==================== */
+.glossary-group.analysis-tools-panel {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+  padding: 0;
+  overflow: hidden;
+}
+.glossary-group .collapsible-header {
+  margin: 0;
+  padding: 0.8rem 1.05rem;
+  border-radius: 0;
+  border-left: 4px solid var(--ube-800);
+  background: var(--oat-light);
+  gap: 0.6rem;
+}
+.glossary-group .collapsible-header:hover { background: var(--oat-border); opacity: 1; }
+.glossary-group .panel-title {
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1rem;
+  color: var(--clay-black);
+}
+.glossary-group .panel-title i { color: var(--ube-800); }
+.glossary-group .toggle-icon { color: var(--warm-charcoal); }
+.glossary-count {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--warm-charcoal);
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-pill);
+  padding: 0.05rem 0.55rem;
+}
+.glossary-group .collapsible-content { margin: 0; padding: 1rem 1.05rem; }
+.glossary-group .variables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.7rem;
+}
+.glossary-group .variable-card {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-left: 3px solid var(--ube-800);
+  border-radius: var(--radius-card);
+  padding: 0.85rem 0.95rem;
+  transition: transform 0.18s var(--transition-bounce), box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.glossary-group .variable-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--clay-shadow);
+  border-color: var(--clay-black);
+  border-left-color: var(--ube-800);
+}
+.glossary-group .variable-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 0.95rem;
+  color: var(--clay-black);
+}
+.glossary-group .variable-description {
+  font-size: 0.85rem;
+  color: var(--warm-charcoal);
+  line-height: 1.5;
+}
+.glossary-group .variable-options .fw-semibold { color: var(--clay-black); }
+.glossary-group .variable-options .badge {
+  background: var(--oat-light) !important;
+  color: var(--clay-black) !important;
+  border: 1px solid var(--oat-border) !important;
+  font-weight: 500;
+  font-size: 0.72rem;
+  border-radius: var(--radius-std);
+  padding: 0.3rem 0.5rem;
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.glossary-group .variable-options .d-flex { min-width: 0; }
+.glossary-group .variable-options code {
+  color: var(--ube-800);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  background: transparent;
+  padding: 0;
+}
+
+/* Per-category accent colors for glossary blocks */
+.glossary-group[data-category="contenido_general"] { --cat: var(--matcha-600); --cat-tint: var(--matcha-300); }
+.glossary-group[data-category="lenguaje"]          { --cat: var(--ube-800);    --cat-tint: var(--ube-300); }
+.glossary-group[data-category="fuentes"]           { --cat: var(--slushie-800); --cat-tint: var(--slushie-500); }
+
+.glossary-group[data-category] .collapsible-header { border-left-color: var(--cat, var(--ube-800)); }
+.glossary-group[data-category] .panel-title i      { color: var(--cat, var(--ube-800)); }
+.glossary-group[data-category] .glossary-count     { color: var(--cat, var(--warm-charcoal)); }
+.glossary-group[data-category] .variable-card      { border-left-color: var(--cat, var(--ube-800)); }
+.glossary-group[data-category] .variable-card:hover{ border-left-color: var(--cat, var(--ube-800)); }
+.glossary-group[data-category] .variable-options code { color: var(--cat, var(--ube-800)); }
