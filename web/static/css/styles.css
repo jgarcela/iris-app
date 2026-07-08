@@ -2241,3 +2241,34 @@
   border-bottom: none;
   background: var(--oat-light);
 }
+
+/* Report AI narrative */
+.ai-toggle { font-weight: 500; }
+.report-analysis {
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: rgba(67, 8, 159, 0.05);
+  border: 1px dashed var(--ube-800);
+  border-radius: var(--radius-card);
+}
+.report-analysis-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ube-800);
+  margin: 0 0 0.35rem;
+}
+.report-analysis-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--clay-black);
+  white-space: pre-line;
+}
+.report-analysis--empty {
+  background: var(--oat-light);
+  border: 1px dashed var(--oat-border);
+  color: var(--warm-charcoal);
+  font-size: 0.85rem;
+}

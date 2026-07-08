@@ -60,6 +60,12 @@
         {% endfor %}
       </div>
 
+      <!-- AI toggle -->
+      <label class="var-chip ai-toggle mb-3">
+        <input type="checkbox" name="ai" value="1" {% if request.args.get('ai') == '1' %}checked{% endif %}>
+        <span><i class="fas fa-wand-magic-sparkles me-1" style="color: var(--ube-800);"></i>{{ _('Incluir análisis descriptivo con IA') }}</span>
+      </label>
+
       <!-- Actions -->
       <div class="d-flex flex-wrap gap-2 align-items-center">
         <button type="submit" class="btn btn-primary rounded-pill px-4">
@@ -138,6 +144,16 @@
                 </tbody>
               </table>
             </div>
+            {% if tbl.analysis %}
+              <div class="report-analysis">
+                <p class="report-analysis-label"><i class="fas fa-wand-magic-sparkles me-1"></i>{{ _('Análisis descriptivo (IA)') }}</p>
+                <p class="report-analysis-text">{{ tbl.analysis }}</p>
+              </div>
+            {% elif meta.include_ai %}
+              <div class="report-analysis report-analysis--empty">
+                <i class="fas fa-circle-info me-1"></i>{{ _('No se pudo generar el análisis con IA para esta variable.') }}
+              </div>
+            {% endif %}
           </div>
         {% endfor %}
       </div>

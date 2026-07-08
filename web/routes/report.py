@@ -34,6 +34,8 @@ ENDPOINT_ANALYSIS_ANALYZE = config['API']['ENDPOINT_ANALYSIS_ANALYZE']
 ENDPOINT_DATA = config['API']['ENDPOINT_DATA']
 ENDPOINT_DATA_GET_CONTEXTO = config['API']['ENDPOINT_DATA_GET_CONTEXTO']
 COLLECTION_DATA = config['DATABASE']['COLLECTION_DATA']
+OPENAI_API_KEY = config['API'].get('OPENAI_API_KEY', '')
+OPENAI_MODEL = config['API'].get('OPENAI_MODEL', 'gpt-4o-mini') or 'gpt-4o-mini'
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
@@ -183,23 +185,83 @@ def _build_tables(rows, variables):
     return tables
 
 
+def _table_to_text(tbl):
+    """Plain-text rendering of a contingency table for the LLM prompt."""
+    header = [tbl['title']]
+    for y in tbl['years']:
+        header += [f"{y} %col.", f"{y} %fila"]
+    header += ["Total %col.", "Total Frec."]
+    lines = [" | ".join(header)]
+    for r in tbl['rows']:
+        row = [str(r['label'])]
+        for c in r['cells']:
+            row += [f"{c['pct_col']}%", f"{c['pct_fila']}%"]
+        row += [f"{r['total_pct_col']}%", str(r['total_frec'])]
+        lines.append(" | ".join(row))
+    trow = ["Total"]
+    for c in tbl['total_cells']:
+        trow += [f"{c['pct_col']}%", f"{c['pct_fila']}%"]
+    trow += ["100%", str(tbl['grand'])]
+    lines.append(" | ".join(trow))
+    return "\n".join(lines)
+
+
+def _ai_narrative(tbl, context, periodo):
+    """1–2 paragraph descriptive analysis of a table via OpenAI (optional)."""
+    if not OPENAI_API_KEY:
+        return None
+    try:
+        from openai import OpenAI
+    except Exception as e:
+        logger.warning(f"[/REPORT] openai no disponible: {e}")
+        return None
+    try:
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        table_txt = _table_to_text(tbl)
+        prompt = (
+            "Actúa como un experto sociólogo y analista de datos con perspectiva de género. "
+            "Te paso una tabla de contingencia de una variable por año, con porcentajes por columna (% col.) "
+            "y por fila (% fila). Escribe 1 o 2 párrafos concisos y profesionales, en español, analizando los "
+            "resultados más destacables para un informe formal. Responde directamente, sin preámbulos ni títulos.\n\n"
+            f"Variable: {tbl['title']}\nBase de datos: {context}\nPeriodo: {periodo}\n\nTabla:\n{table_txt}"
+        )
+        completion = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception as e:
+        logger.warning(f"[/REPORT] Error IA narrative: {e}")
+        return None
+
+
 def _prepare_report(args):
     context = (args.get('context') or '').strip()
     fd = args.get('fecha_desde') or ''
     fh = args.get('fecha_hasta') or ''
+    include_ai = (args.get('ai') == '1')
     variables = args.getlist('vars') if hasattr(args, 'getlist') else args.get('vars', [])
     variables = [v for v in variables if v in REPORT_VARIABLES]
 
     rows = _fetch_data()
     filtered = _filter_rows(rows, context, fd, fh)
     tables = _build_tables(filtered, variables)
+
     meta = {
         'context': context or 'Todas las bases de datos',
         'fecha_desde': fd,
         'fecha_hasta': fh,
         'total': len(filtered),
         'variables': variables,
+        'include_ai': include_ai,
     }
+
+    if include_ai:
+        periodo = f"{fd or 'inicio'} — {fh or 'hoy'}"
+        for t in tables:
+            t['analysis'] = _ai_narrative(t, meta['context'], periodo)
+
     return meta, tables
 
 
@@ -321,6 +383,11 @@ def download():
         tr[idx + 1].text = str(tbl['grand'])
 
         doc.add_paragraph()
+
+        if tbl.get('analysis'):
+            doc.add_heading('Análisis descriptivo', level=2)
+            doc.add_paragraph(tbl['analysis'])
+            doc.add_paragraph()
 
     buf = BytesIO()
     doc.save(buf)
