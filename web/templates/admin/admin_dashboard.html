@@ -6,86 +6,62 @@
     <div class="row">
         <div class="col-12">
             <!-- Header -->
-            <div class="history-header mb-4">
-                <h1 class="display-6 mb-3">
+            <div class="history-header mb-3">
+                <h1 class="display-6 mb-1">
                     <i class="fas fa-cogs me-3 text-primary"></i>
                     {{ _('Panel de control') }}
                 </h1>
-                <p class="lead text-muted">
+                <p class="lead text-muted mb-0">
                     {{ _('Administra usuarios, roles y permisos del sistema') }}
                 </p>
             </div>
         </div>
     </div>
-    <div class="row my-4">
-  <div class="col-md-4">
-    <div class="admin-dashboard-card admin-card-users">
-      <div class="card-header">
-        <div class="card-icon">
-          <i class="fas fa-users"></i>
+    <div class="admin-stats">
+      <a href="{{ url_for('admin.list_users') }}" class="admin-stat admin-stat--users">
+        <div class="admin-stat-icon"><i class="fas fa-users"></i></div>
+        <div class="admin-stat-body">
+          <div class="admin-stat-number">{{ total_users }}</div>
+          <div class="admin-stat-label">{{ _('Personas Usuarias') }}</div>
+          <div class="admin-stat-sub">{{ _('Registrados') }}</div>
         </div>
-        <h3>{{ _('Personas Usuarias') }}</h3>
-      </div>
-      <div class="card-body">
-        <div class="card-number">{{ total_users }}</div>
-        <p class="card-description">{{ _('Registrados') }}</p>
-        <a href="{{ url_for('admin.list_users') }}" class="card-btn">
-          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
-        </a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="admin-dashboard-card admin-card-roles">
-      <div class="card-header">
-        <div class="card-icon">
-          <i class="fas fa-user-tag"></i>
+        <i class="fas fa-arrow-right admin-stat-arrow"></i>
+      </a>
+
+      <a href="{{ url_for('admin.list_roles') }}" class="admin-stat admin-stat--roles">
+        <div class="admin-stat-icon"><i class="fas fa-user-tag"></i></div>
+        <div class="admin-stat-body">
+          <div class="admin-stat-number">{{ total_roles }}</div>
+          <div class="admin-stat-label">{{ _('Roles') }}</div>
+          <div class="admin-stat-sub">{{ _('Definidos') }}</div>
         </div>
-        <h3>{{ _('Roles') }}</h3>
-      </div>
-      <div class="card-body">
-        <div class="card-number">{{ total_roles }}</div>
-        <p class="card-description">{{ _('Definidos') }}</p>
-        <a href="{{ url_for('admin.list_roles') }}" class="card-btn">
-          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
-        </a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="admin-dashboard-card admin-card-permissions">
-      <div class="card-header">
-        <div class="card-icon">
-          <i class="fas fa-key"></i>
+        <i class="fas fa-arrow-right admin-stat-arrow"></i>
+      </a>
+
+      <a href="{{ url_for('admin.list_permissions') }}" class="admin-stat admin-stat--permissions">
+        <div class="admin-stat-icon"><i class="fas fa-key"></i></div>
+        <div class="admin-stat-body">
+          <div class="admin-stat-number">{{ total_permissions }}</div>
+          <div class="admin-stat-label">{{ _('Permisos') }}</div>
+          <div class="admin-stat-sub">{{ _('Disponibles') }}</div>
         </div>
-        <h3>{{ _('Permisos') }}</h3>
-      </div>
-      <div class="card-body">
-        <div class="card-number">{{ total_permissions }}</div>
-        <p class="card-description">{{ _('Disponibles') }}</p>
-        <a href="{{ url_for('admin.list_permissions') }}" class="card-btn">
-          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
-        </a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4 mt-4">
-    <div class="admin-dashboard-card admin-card-contact">
-      <div class="card-header">
-        <div class="card-icon">
-          <i class="fas fa-envelope"></i>
+        <i class="fas fa-arrow-right admin-stat-arrow"></i>
+      </a>
+
+      <a href="{{ url_for('admin.list_contact') }}" class="admin-stat admin-stat--contact">
+        <div class="admin-stat-icon"><i class="fas fa-envelope"></i></div>
+        <div class="admin-stat-body">
+          <div class="admin-stat-number">
+            {{ total_contacts }}
+            {% if unread_contacts and unread_contacts > 0 %}
+              <span class="admin-stat-pill">{{ unread_contacts }} {{ _('sin leer') }}</span>
+            {% endif %}
+          </div>
+          <div class="admin-stat-label">{{ _('Mensajes de contacto') }}</div>
+          <div class="admin-stat-sub">{{ _('Recibidos') }}</div>
         </div>
-        <h3>{{ _('Mensajes de contacto') }}</h3>
-      </div>
-      <div class="card-body">
-        <div class="card-number">{{ total_contacts }}</div>
-        <p class="card-description">{{ _('No leídos') }}: {{ unread_contacts }}</p>
-        <a href="{{ url_for('admin.list_contact') }}" class="card-btn">
-          <i class="fas fa-arrow-right me-2"></i>{{ _('Ver lista') }}
-        </a>
-      </div>
+        <i class="fas fa-arrow-right admin-stat-arrow"></i>
+      </a>
     </div>
-  </div>
-</div>
 </div>
 {% endblock %}
