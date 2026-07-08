@@ -63,5 +63,63 @@
         <i class="fas fa-arrow-right admin-stat-arrow"></i>
       </a>
     </div>
+
+    <div class="row g-3">
+      <!-- Quick actions -->
+      <div class="col-lg-8">
+        <div class="admin-panel">
+          <p class="clay-label mb-2" style="color: var(--ube-800);">{{ _('Acciones rápidas') }}</p>
+          <h2 class="admin-panel-title">{{ _('¿Qué quieres hacer?') }}</h2>
+          <div class="admin-actions">
+            <a href="{{ url_for('admin.create_user') }}" class="admin-action">
+              <span class="admin-action-icon" style="background: var(--blueberry-800);"><i class="fas fa-user-plus"></i></span>
+              <span class="admin-action-text">
+                <span class="admin-action-title">{{ _('Nueva persona usuaria') }}</span>
+                <span class="admin-action-sub">{{ _('Alta de cuenta') }}</span>
+              </span>
+            </a>
+            <a href="{{ url_for('admin.create_role') }}" class="admin-action">
+              <span class="admin-action-icon" style="background: var(--matcha-600);"><i class="fas fa-user-tag"></i></span>
+              <span class="admin-action-text">
+                <span class="admin-action-title">{{ _('Nuevo rol') }}</span>
+                <span class="admin-action-sub">{{ _('Grupo de permisos') }}</span>
+              </span>
+            </a>
+            <a href="{{ url_for('admin.create_permission') }}" class="admin-action">
+              <span class="admin-action-icon" style="background: var(--lemon-500); color: var(--clay-black);"><i class="fas fa-key"></i></span>
+              <span class="admin-action-text">
+                <span class="admin-action-title">{{ _('Nuevo permiso') }}</span>
+                <span class="admin-action-sub">{{ _('Acción del sistema') }}</span>
+              </span>
+            </a>
+            <a href="{{ url_for('admin.list_contact') }}" class="admin-action">
+              <span class="admin-action-icon" style="background: var(--ube-800);"><i class="fas fa-envelope-open-text"></i></span>
+              <span class="admin-action-text">
+                <span class="admin-action-title">{{ _('Revisar mensajes') }}</span>
+                <span class="admin-action-sub">{{ _('Buzón de contacto') }}</span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlight / status -->
+      <div class="col-lg-4">
+        <div class="admin-panel admin-panel--accent h-100">
+          {% if unread_contacts and unread_contacts > 0 %}
+            <div class="admin-highlight-icon"><i class="fas fa-bell"></i></div>
+            <h2 class="admin-panel-title">{{ unread_contacts }} {{ _('mensajes sin leer') }}</h2>
+            <p class="admin-highlight-text">{{ _('Tienes mensajes de contacto pendientes de revisar.') }}</p>
+            <a href="{{ url_for('admin.list_contact') }}" class="btn btn-light rounded-pill px-3">
+              <i class="fas fa-arrow-right me-2"></i>{{ _('Ir al buzón') }}
+            </a>
+          {% else %}
+            <div class="admin-highlight-icon"><i class="fas fa-circle-check"></i></div>
+            <h2 class="admin-panel-title">{{ _('Todo al día') }}</h2>
+            <p class="admin-highlight-text">{{ _('No hay mensajes de contacto pendientes.') }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
 </div>
 {% endblock %}

@@ -1972,3 +1972,92 @@
 
 @media (max-width: 991px) { .admin-stats { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .admin-stats { grid-template-columns: 1fr; } }
+
+/* ==================== */
+/* Admin dashboard — quick actions & highlight panels */
+/* ==================== */
+.admin-panel {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+  padding: 1.25rem 1.35rem;
+}
+.admin-panel-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+  color: var(--clay-black);
+  margin-bottom: 1rem;
+}
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.7rem;
+}
+.admin-action {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+  background: var(--clay-white);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s var(--transition-bounce), box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.admin-action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--clay-hard-shadow);
+  border-color: var(--clay-black);
+  text-decoration: none;
+}
+.admin-action-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  box-shadow: var(--clay-shadow);
+}
+.admin-action-text { display: flex; flex-direction: column; min-width: 0; }
+.admin-action-title { font-weight: 600; font-size: 0.9rem; color: var(--clay-black); }
+.admin-action-sub { font-size: 0.75rem; color: var(--warm-silver); }
+
+/* Highlight panel */
+.admin-panel--accent {
+  background: var(--ube-800);
+  border-color: var(--ube-800);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.admin-panel--accent .admin-panel-title { color: #fff; margin-bottom: 0.5rem; }
+.admin-highlight-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 0.9rem;
+}
+.admin-highlight-text {
+  color: var(--ube-300);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.1rem;
+}
+.admin-panel--accent .btn-light { color: var(--ube-800); font-weight: 600; }
+
+@media (max-width: 575px) { .admin-actions { grid-template-columns: 1fr; } }
