@@ -4,7 +4,7 @@
   // 1) Inicializar Bootstrap Table con configuración mejorada
   $("#tabla-noticias").bootstrapTable({
     search: false,
-    showColumns: true,
+    showColumns: false,
     showExport: false,
     pagination: true,
     pageSize: 10,
@@ -15,11 +15,17 @@
     clickToSelect: true,
     sortName: 'IdNoticia',
     sortOrder: 'asc',
-    // No searchText/placeholder because search is disabled
-    showToggle: true,
-    showRefresh: true,
-    showFullscreen: true,
+    // Built-in toolbar buttons removed (they rendered as an empty dropdown)
+    showToggle: false,
+    showRefresh: false,
+    showFullscreen: false,
     toolbar: '#toolbar',
+    iconsPrefix: 'fa-solid',
+    icons: {
+      paginationSwitchDown: 'fa-caret-down',
+      paginationSwitchUp: 'fa-caret-up',
+      clearSearch: 'fa-xmark'
+    },
     onSearch: function (text) {},
     onRefresh: function () {}
   });

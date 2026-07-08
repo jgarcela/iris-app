@@ -81,16 +81,26 @@ def table_iris():
         data = raw_data
     
     def parse_fecha_str(s):
-        # Asume que en data['Fecha'] está en 'DD/MM/YYYY'
-        return datetime.strptime(s, '%d/%m/%Y').date()
+        # La mayoría de registros no tienen fecha o vienen en distintos formatos;
+        # devolvemos None en vez de lanzar una excepción (evita 500 al filtrar).
+        if not s:
+            return None
+        for fmt in ('%d/%m/%Y', '%Y-%m-%d'):
+            try:
+                return datetime.strptime(str(s), fmt).date()
+            except (ValueError, TypeError):
+                continue
+        return None
 
-    # 5) Filtrar por fechas si se proporcionan
+    # 5) Filtrar por fechas si se proporcionan (excluye registros sin fecha válida)
     if fd:
         dt_desde = datetime.strptime(fd, '%Y-%m-%d').date()
-        data = [d for d in data if parse_fecha_str(d['Fecha']) >= dt_desde]
+        data = [d for d in data if (parse_fecha_str(d.get('Fecha')) is not None
+                                    and parse_fecha_str(d.get('Fecha')) >= dt_desde)]
     if fh:
         dt_hasta = datetime.strptime(fh, '%Y-%m-%d').date()
-        data = [d for d in data if parse_fecha_str(d['Fecha']) <= dt_hasta]
+        data = [d for d in data if (parse_fecha_str(d.get('Fecha')) is not None
+                                    and parse_fecha_str(d.get('Fecha')) <= dt_hasta)]
 
 
     # 6) Modificar formato de las columnas a mostrar o ocultar y el orden

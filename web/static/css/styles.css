@@ -1675,18 +1675,21 @@
 
 /* Enhanced Bootstrap Table toolbar */
 .bootstrap-table .fixed-table-toolbar {
-  background: var(--secondary-color);
-  border-radius: var(--border-radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--medium-gray);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0.4rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem;
+  min-height: 0;
 }
+/* The custom export toolbar lives inside; keep it full-width to the left */
+.bootstrap-table .fixed-table-toolbar > #toolbar { flex: 1 1 100%; order: -1; }
 
 /* Minimalistic search input styling */
 .bootstrap-table .fixed-table-toolbar .search {
@@ -2410,3 +2413,141 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .report-toggle-all:hover { border-color: var(--ube-800); color: var(--ube-800); }
+
+/* ==================== */
+/* bootstrap-table — Clay styling (Base de Datos page) */
+/* ==================== */
+.bootstrap-table .fixed-table-toolbar .columns .btn,
+.bootstrap-table .fixed-table-toolbar .btn {
+  border-radius: var(--radius-std) !important;
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  color: var(--dark-charcoal);
+}
+#toolbar.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+#toolbar .btn { border-radius: var(--radius-pill); font-size: 0.8rem; }
+.toolbar-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--warm-silver);
+  font-weight: 600;
+}
+.toolbar-meta { font-size: 0.75rem; color: var(--warm-silver); white-space: nowrap; }
+.table-panel { padding: 0; }
+
+/* Table shell */
+#tabla-noticias.table {
+  --bs-table-bg: var(--clay-white);
+  font-size: 0.82rem;
+  border-color: var(--oat-border);
+}
+#tabla-noticias thead th {
+  background: var(--oat-light);
+  color: var(--clay-black);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--oat-border) !important;
+  vertical-align: middle;
+}
+#tabla-noticias tbody td {
+  color: var(--clay-black);
+  border-color: var(--oat-light);
+  vertical-align: middle;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-bg-type: rgba(250, 249, 247, 0.6);
+}
+#tabla-noticias tbody tr:hover > * { background: rgba(67, 8, 159, 0.04) !important; }
+
+/* Per-column filter controls */
+.bootstrap-table .filter-control input,
+.bootstrap-table .filter-control select {
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-sharp);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+}
+.bootstrap-table .filter-control input:focus,
+.bootstrap-table .filter-control select:focus {
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 2px rgba(20, 110, 245, 0.3);
+  outline: none;
+}
+
+/* Pagination */
+.fixed-table-pagination .pagination .page-link {
+  color: var(--dark-charcoal);
+  border-color: var(--oat-border);
+  border-radius: var(--radius-std);
+  margin: 0 2px;
+  font-size: 0.8rem;
+}
+.fixed-table-pagination .pagination .page-item.active .page-link {
+  background: var(--ube-800);
+  border-color: var(--ube-800);
+  color: #fff;
+}
+/* Pagination detail (count + rows-per-page) */
+.fixed-table-pagination > .pagination-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--warm-charcoal);
+}
+.fixed-table-pagination .pagination-info { color: var(--warm-silver); }
+.fixed-table-pagination .page-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--warm-silver);
+}
+.fixed-table-pagination .page-list .btn.dropdown-toggle {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-pill);
+  color: var(--clay-black);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.7rem;
+  box-shadow: none;
+}
+.fixed-table-pagination .page-list .btn.dropdown-toggle:hover {
+  border-color: var(--ube-800);
+  color: var(--ube-800);
+  transform: none;
+}
+.fixed-table-pagination .page-list .dropdown-menu {
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--clay-shadow);
+  padding: 0.25rem;
+  min-width: auto;
+}
+.fixed-table-pagination .page-list .dropdown-item {
+  border-radius: var(--radius-std);
+  font-size: 0.82rem;
+  padding: 0.3rem 0.7rem;
+}
+.fixed-table-pagination .page-list .dropdown-item.active,
+.fixed-table-pagination .page-list .dropdown-item:active {
+  background: var(--ube-800);
+  color: #fff;
+}
+.fixed-table-container { border-radius: var(--radius-card); border-color: var(--oat-border); }

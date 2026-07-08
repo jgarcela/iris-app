@@ -21,12 +21,12 @@
     <div class="row">
         <div class="col-12">
             <!-- Header -->
-            <div class="history-header mb-4">
-                <h1 class="display-6 mb-3">
+            <div class="history-header mb-3">
+                <h1 class="display-6 mb-1">
                     <i class="fas fa-database me-3 text-primary"></i>
                     {{ _('Listado completo de Noticias') }}
                 </h1>
-                <p class="lead text-muted">
+                <p class="lead text-muted mb-0">
                     {% if selected_context %}
                         {{ _('Base de datos de noticias para') }} <em>{{ selected_context }}</em>
                     {% else %}
@@ -41,20 +41,14 @@
             </div>
 
             <!-- Search and Filter Section -->
-            <div class="search-filters-panel mb-4">
+            <div class="search-filters-panel mb-3">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-search me-2"></i>
-                            {{ _('Búsqueda y Filtros') }}
-                        </h5>
-                    </div>
                     <div class="card-body">
-                        <form method="get" action="{{ url_for('table.table_iris') }}" class="row g-3">
+                        <form method="get" action="{{ url_for('table.table_iris') }}" class="row g-2">
                             <!-- Context Filter -->
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <label for="context" class="form-label">
-                                    <i class="fas fa-layer-group me-1"></i>
+                                    <i class="fas fa-search me-1" style="color: var(--ube-800);"></i>
                                     {{ _('Contexto') }}
                                 </label>
                                 <select class="form-select" id="context" name="context">
@@ -73,11 +67,7 @@
                                     <i class="fas fa-calendar-alt me-1"></i>
                                     {{ _('Desde') }}
                                 </label>
-                                <input type="date" 
-                                       class="form-control" 
-                                       id="fecha_desde" 
-                                       name="fecha_desde" 
-                                       value="{{ fd }}">
+                                <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fd }}">
                             </div>
 
                             <!-- Date To -->
@@ -86,23 +76,18 @@
                                     <i class="fas fa-calendar-alt me-1"></i>
                                     {{ _('Hasta') }}
                                 </label>
-                                <input type="date" 
-                                       class="form-control" 
-                                       id="fecha_hasta" 
-                                       name="fecha_hasta" 
-                                       value="{{ fh }}">
+                                <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fh }}">
                             </div>
 
-                            <!-- Filter Buttons -->
-                            <div class="col-md-4 d-flex align-items-end">
-                                <div class="d-grid gap-2 w-100">
-                                    <button type="submit" class="btn btn-primary text-start">
-                                        <i class="fas fa-filter me-1"></i>
-                                        {{ _('Filtrar') }}
+                            <!-- Filter Buttons (inline with the filters) -->
+                            <div class="col-md-3">
+                                <label class="form-label" aria-hidden="true" style="visibility:hidden;">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-filter me-1"></i>{{ _('Filtrar') }}
                                     </button>
-                                    <a href="{{ url_for('table.table_iris') }}" class="btn btn-outline-secondary text-start">
-                                        <i class="fas fa-times me-1"></i>
-                                        {{ _('Limpiar') }}
+                                    <a href="{{ url_for('table.table_iris') }}" class="btn btn-outline-secondary" title="{{ _('Limpiar') }}">
+                                        <i class="fas fa-times"></i>
                                     </a>
                                 </div>
                             </div>
@@ -111,39 +96,30 @@
                 </div>
             </div>
 
-            <!-- Results Summary -->
-            <div class="results-summary mb-3">
-                <div class="d-flex justify-content-end align-items-center">
-                    <div class="text-muted">
-                        <i class="fas fa-clock me-1"></i>
-                        {{ _('Última actualización') }}: <span id="current-time"></span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Table Content -->
-            <div class="container-fluid p-3">
+            <div class="table-panel">
                 <!-- ====== TOOLBAR PERSONALIZADO ====== -->
-                <div id="toolbar" class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex gap-2">
-                        <button id="exportar-csv" class="btn btn-outline-primary">
+                <div id="toolbar" class="table-toolbar">
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <span class="toolbar-label">{{ _('Exportar:') }}</span>
+                        <button id="exportar-csv" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-file-csv me-1"></i>{{ _('CSV') }}
                         </button>
-                        <button id="exportar-excel" class="btn btn-outline-success">
+                        <button id="exportar-excel" class="btn btn-outline-success btn-sm">
                             <i class="fas fa-file-excel me-1"></i>{{ _('Excel') }}
                         </button>
-                        <button id="exportar-json" class="btn btn-outline-secondary">
+                        <button id="exportar-json" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-file-code me-1"></i>{{ _('JSON') }}
                         </button>
-                        <button id="exportar-pdf" class="btn btn-outline-danger">
+                        <button id="exportar-pdf" class="btn btn-outline-danger btn-sm">
                             <i class="fas fa-file-pdf me-1"></i>{{ _('PDF') }}
                         </button>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small">{{ _('Filtros activos:') }}</span>
                         <button id="clear-filters" class="btn btn-sm btn-outline-warning">
-                            <i class="fas fa-times me-1"></i>{{ _('Limpiar') }}
+                            <i class="fas fa-filter-circle-xmark me-1"></i>{{ _('Limpiar filtros') }}
                         </button>
+                    </div>
+                    <div class="toolbar-meta">
+                        <i class="fas fa-clock me-1"></i>{{ _('Actualizado') }} <span id="current-time"></span>
                     </div>
                 </div>
 
