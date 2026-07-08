@@ -3,7 +3,7 @@
 {% block title %}{{ _('Generación de Informes') }} - IRIS{% endblock %}
 
 {% block content %}
-<div class="container-fluid" style="max-width: 1100px;">
+<div class="container-fluid" style="max-width: 1300px;">
 
   <!-- Header -->
   <div class="history-header mb-3">
@@ -16,149 +16,174 @@
     </p>
   </div>
 
-  <!-- Form -->
-  <form method="get" action="{{ url_for('report.generate') }}" class="report-form card mb-4">
-    <div class="report-form-body">
+  <div class="row g-3">
+    <!-- LEFT: form (narrow) -->
+    <div class="col-lg-4">
+      <form method="get" action="{{ url_for('report.generate') }}" class="report-form card report-form-sticky">
+        <div class="report-form-body">
 
-      <!-- Row 1: DB + dates -->
-      <div class="row g-2 mb-3">
-        <div class="col-md-6">
-          <label for="context" class="form-label report-label">
-            <i class="fas fa-database me-1"></i>{{ _('Base de datos') }}
+          <!-- Database -->
+          <div class="mb-3">
+            <label for="context" class="form-label report-label">
+              <i class="fas fa-database me-1"></i>{{ _('Base de datos') }}
+            </label>
+            <select class="form-select" id="context" name="context">
+              <option value="">{{ _('Todas') }}</option>
+              {% for ctx in contextos %}
+                <option value="{{ ctx }}" {% if ctx == selected_context %}selected{% endif %}>{{ ctx }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Dates -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="fecha_desde" class="form-label report-label">
+                <i class="fas fa-calendar-alt me-1"></i>{{ _('Desde') }}
+              </label>
+              <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}">
+            </div>
+            <div class="col-6">
+              <label for="fecha_hasta" class="form-label report-label">
+                <i class="fas fa-calendar-alt me-1"></i>{{ _('Hasta') }}
+              </label>
+              <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}">
+            </div>
+          </div>
+
+          <!-- Variables -->
+          <label class="form-label report-label mb-2 d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-list-check me-1"></i>{{ _('Variables a incluir') }}</span>
+            <span class="var-count" id="var-count">{{ selected_vars|length }}</span>
           </label>
-          <select class="form-select" id="context" name="context">
-            <option value="">{{ _('Todas') }}</option>
-            {% for ctx in contextos %}
-              <option value="{{ ctx }}" {% if ctx == selected_context %}selected{% endif %}>{{ ctx }}</option>
+          <div class="report-vars mb-3" id="report-vars">
+            {% for field, info in variables.items() %}
+              <label class="var-chip">
+                <input type="checkbox" name="vars" value="{{ field }}" {% if field in selected_vars %}checked{% endif %}>
+                <span>{{ info[0] }}</span>
+              </label>
             {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="fecha_desde" class="form-label report-label">
-            <i class="fas fa-calendar-alt me-1"></i>{{ _('Desde') }}
+          </div>
+
+          <!-- AI toggle -->
+          <label class="var-chip ai-toggle mb-3">
+            <input type="checkbox" name="ai" value="1" {% if request.args.get('ai') == '1' %}checked{% endif %}>
+            <span><i class="fas fa-wand-magic-sparkles me-1" style="color: var(--ube-800);"></i>{{ _('Incluir análisis descriptivo con IA') }}</span>
           </label>
-          <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" value="{{ fecha_desde }}">
-        </div>
-        <div class="col-md-3">
-          <label for="fecha_hasta" class="form-label report-label">
-            <i class="fas fa-calendar-alt me-1"></i>{{ _('Hasta') }}
-          </label>
-          <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta" value="{{ fecha_hasta }}">
-        </div>
-      </div>
 
-      <!-- Row 2: variables -->
-      <label class="form-label report-label mb-2">
-        <i class="fas fa-list-check me-1"></i>{{ _('Variables a incluir') }}
-      </label>
-      <div class="report-vars mb-3">
-        {% for field, info in variables.items() %}
-          <label class="var-chip">
-            <input type="checkbox" name="vars" value="{{ field }}" {% if field in selected_vars %}checked{% endif %}>
-            <span>{{ info[0] }}</span>
-          </label>
-        {% endfor %}
-      </div>
-
-      <!-- AI toggle -->
-      <label class="var-chip ai-toggle mb-3">
-        <input type="checkbox" name="ai" value="1" {% if request.args.get('ai') == '1' %}checked{% endif %}>
-        <span><i class="fas fa-wand-magic-sparkles me-1" style="color: var(--ube-800);"></i>{{ _('Incluir análisis descriptivo con IA') }}</span>
-      </label>
-
-      <!-- Actions -->
-      <div class="d-flex flex-wrap gap-2 align-items-center">
-        <button type="submit" class="btn btn-primary rounded-pill px-4">
-          <i class="fas fa-eye me-2"></i>{{ _('Generar vista previa') }}
-        </button>
-        {% if tables %}
-          <a href="{{ url_for('report.download') }}?{{ request.query_string.decode('utf-8') }}"
-             class="btn btn-success rounded-pill px-4">
-            <i class="fas fa-download me-2"></i>{{ _('Descargar informe (.docx)') }}
-          </a>
-        {% endif %}
-      </div>
-    </div>
-  </form>
-
-  <!-- Preview -->
-  {% if tables is not none %}
-    {% if meta.total == 0 %}
-      <div class="alert alert-warning">
-        <i class="fas fa-triangle-exclamation me-2"></i>
-        {{ _('No hay noticias que coincidan con esos filtros.') }}
-      </div>
-    {% elif tables|length == 0 %}
-      <div class="alert alert-info">
-        <i class="fas fa-circle-info me-2"></i>
-        {{ _('Selecciona al menos una variable para ver la vista previa.') }}
-      </div>
-    {% else %}
-      <div class="report-preview">
-        <div class="report-preview-head">
-          <p class="clay-label mb-1" style="color: var(--ube-800);">{{ _('Vista previa del informe') }}</p>
-          <h2 class="section-title mb-2">{{ meta.context }}</h2>
-          <div class="report-meta">
-            <span class="report-pill"><i class="fas fa-calendar me-1"></i>{{ meta.fecha_desde or _('inicio') }} — {{ meta.fecha_hasta or _('hoy') }}</span>
-            <span class="report-pill"><i class="fas fa-newspaper me-1"></i>{{ meta.total }} {{ _('noticias') }}</span>
+          <!-- Actions -->
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary rounded-pill">
+              <i class="fas fa-eye me-2"></i>{{ _('Generar vista previa') }}
+            </button>
+            {% if tables %}
+              <a href="{{ url_for('report.download') }}?{{ request.query_string.decode('utf-8') }}"
+                 class="btn btn-success rounded-pill">
+                <i class="fas fa-download me-2"></i>{{ _('Descargar (.docx)') }}
+              </a>
+            {% endif %}
           </div>
         </div>
+      </form>
+    </div>
 
-        {% for tbl in tables %}
-          <div class="report-table-card card">
-            <div class="report-table-title">{{ tbl.title }}</div>
-            <div class="report-table-scroll">
-              <table class="report-table crosstab">
-                <thead>
-                  <tr>
-                    <th rowspan="2" class="rowhead">{{ tbl.title }}</th>
-                    {% for y in tbl.years %}<th colspan="2" class="yeargroup">{{ y }}</th>{% endfor %}
-                    <th colspan="2" class="yeargroup">{{ _('Total') }}</th>
-                  </tr>
-                  <tr>
-                    {% for y in tbl.years %}<th class="num sub">% col.</th><th class="num sub">% fila</th>{% endfor %}
-                    <th class="num sub">% col.</th><th class="num sub">{{ _('Frec.') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for r in tbl.rows %}
+    <!-- RIGHT: preview (wide) -->
+    <div class="col-lg-8">
+      {% if tables is none %}
+        <div class="report-empty">
+          <i class="fas fa-file-lines"></i>
+          <p>{{ _('Configura los filtros y pulsa «Generar vista previa» para ver aquí tu informe.') }}</p>
+        </div>
+      {% elif meta.total == 0 %}
+        <div class="alert alert-warning">
+          <i class="fas fa-triangle-exclamation me-2"></i>
+          {{ _('No hay noticias que coincidan con esos filtros.') }}
+        </div>
+      {% elif tables|length == 0 %}
+        <div class="alert alert-info">
+          <i class="fas fa-circle-info me-2"></i>
+          {{ _('Selecciona al menos una variable para ver la vista previa.') }}
+        </div>
+      {% else %}
+        <div class="report-preview">
+          <div class="report-preview-head">
+            <p class="clay-label mb-1" style="color: var(--ube-800);">{{ _('Vista previa del informe') }}</p>
+            <h2 class="section-title mb-2">{{ meta.context }}</h2>
+            <div class="report-meta">
+              <span class="report-pill"><i class="fas fa-calendar me-1"></i>{{ meta.fecha_desde or _('inicio') }} — {{ meta.fecha_hasta or _('hoy') }}</span>
+              <span class="report-pill"><i class="fas fa-newspaper me-1"></i>{{ meta.total }} {{ _('noticias') }}</span>
+            </div>
+          </div>
+
+          {% for tbl in tables %}
+            <div class="report-table-card card">
+              <div class="report-table-title">{{ tbl.title }}</div>
+              <div class="report-table-scroll">
+                <table class="report-table crosstab">
+                  <thead>
                     <tr>
-                      <td class="rowhead">{{ r.label }}</td>
-                      {% for c in r.cells %}
+                      <th rowspan="2" class="rowhead">{{ tbl.title }}</th>
+                      {% for y in tbl.years %}<th colspan="2" class="yeargroup">{{ y }}</th>{% endfor %}
+                      <th colspan="2" class="yeargroup">{{ _('Total') }}</th>
+                    </tr>
+                    <tr>
+                      {% for y in tbl.years %}<th class="num sub">% col.</th><th class="num sub">% fila</th>{% endfor %}
+                      <th class="num sub">% col.</th><th class="num sub">{{ _('Frec.') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for r in tbl.rows %}
+                      <tr>
+                        <td class="rowhead">{{ r.label }}</td>
+                        {% for c in r.cells %}
+                          <td class="num">{{ c.pct_col }}%</td>
+                          <td class="num muted">{{ c.pct_fila }}%</td>
+                        {% endfor %}
+                        <td class="num">{{ r.total_pct_col }}%</td>
+                        <td class="num strong">{{ r.total_frec }}</td>
+                      </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                      <td class="rowhead">{{ _('Total') }}</td>
+                      {% for c in tbl.total_cells %}
                         <td class="num">{{ c.pct_col }}%</td>
                         <td class="num muted">{{ c.pct_fila }}%</td>
                       {% endfor %}
-                      <td class="num">{{ r.total_pct_col }}%</td>
-                      <td class="num strong">{{ r.total_frec }}</td>
+                      <td class="num">100%</td>
+                      <td class="num strong">{{ tbl.grand }}</td>
                     </tr>
-                  {% endfor %}
-                  <tr class="total-row">
-                    <td class="rowhead">{{ _('Total') }}</td>
-                    {% for c in tbl.total_cells %}
-                      <td class="num">{{ c.pct_col }}%</td>
-                      <td class="num muted">{{ c.pct_fila }}%</td>
-                    {% endfor %}
-                    <td class="num">100%</td>
-                    <td class="num strong">{{ tbl.grand }}</td>
-                  </tr>
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
+              {% if tbl.analysis %}
+                <div class="report-analysis">
+                  <p class="report-analysis-label"><i class="fas fa-wand-magic-sparkles me-1"></i>{{ _('Análisis descriptivo (IA)') }}</p>
+                  <p class="report-analysis-text">{{ tbl.analysis }}</p>
+                </div>
+              {% elif meta.include_ai %}
+                <div class="report-analysis report-analysis--empty">
+                  <i class="fas fa-circle-info me-1"></i>{{ _('No se pudo generar el análisis con IA para esta variable.') }}
+                </div>
+              {% endif %}
             </div>
-            {% if tbl.analysis %}
-              <div class="report-analysis">
-                <p class="report-analysis-label"><i class="fas fa-wand-magic-sparkles me-1"></i>{{ _('Análisis descriptivo (IA)') }}</p>
-                <p class="report-analysis-text">{{ tbl.analysis }}</p>
-              </div>
-            {% elif meta.include_ai %}
-              <div class="report-analysis report-analysis--empty">
-                <i class="fas fa-circle-info me-1"></i>{{ _('No se pudo generar el análisis con IA para esta variable.') }}
-              </div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
 
 </div>
+
+<script>
+  (function () {
+    const wrap = document.getElementById('report-vars');
+    const counter = document.getElementById('var-count');
+    if (!wrap || !counter) return;
+    const update = () => {
+      counter.textContent = wrap.querySelectorAll('input[type="checkbox"]:checked').length;
+    };
+    wrap.addEventListener('change', update);
+    update();
+  })();
+</script>
 {% endblock %}
