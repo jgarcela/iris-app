@@ -1,8 +1,9 @@
 /* ============================================================
  *  IRIS · Vista fusionada (Opción 2)
- *  Un solo cuerpo de texto con todas las capas + panel de regiones.
- *  Lee window.data (texto canónico + highlights por categoría),
- *  fusiona las marcas por offsets en el navegador. Sin cambios de backend.
+ *  Un solo cuerpo de texto (columna izquierda) + panel de
+ *  regiones en el rail derecho, sincronizados.
+ *  Lee window.data (texto canónico + highlights por categoría)
+ *  y fusiona las marcas por offsets en el navegador. Sin backend.
  * ============================================================ */
 (function () {
   'use strict';
@@ -14,7 +15,9 @@
   };
   const CAT_ORDER = ['contenido_general', 'fuentes', 'lenguaje'];
 
-  // color-N -> variable (reverse of highlight_color_map)
+  const $  = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
   function buildColorToVar() {
     const map = window.highlight_color_map || {};
     const rev = {};
@@ -26,8 +29,8 @@
     return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   }
 
-  // Extract marked spans from one category's HTML string, measuring offsets
-  // against its own plain text. Nested duplicate <mark> collapse to the outer.
+  // Extract marked spans from one category's HTML, measuring offsets
+  // against its plain text. Nested duplicate <mark> collapse to the outer.
   function extractSpans(html, category) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html || '';
@@ -52,8 +55,6 @@
     return spans;
   }
 
-  // Align a span's offsets to the canonical text (defensive against
-  // whitespace differences between the three category strings).
   function fixSpan(canonical, s) {
     if (canonical.substr(s.start, s.end - s.start) === s.text) return s;
     let idx = canonical.indexOf(s.text, Math.max(0, s.start - 25));
@@ -65,15 +66,12 @@
 
   function build() {
     const data = window.data;
-    const root = document.getElementById('merged-view');
-    if (!data || !root) return;
+    if (!data || !$('#merged-text')) return;
     const hl = (data.highlight && data.highlight.original) || {};
     const canonical = (data.text || '').replace(/\r/g, '');
-    if (!canonical.trim()) { root.style.display = 'none'; return; }
+    if (!canonical.trim()) return;
 
     const colorToVar = buildColorToVar();
-
-    // Collect + align spans from all three categories
     let spans = [];
     CAT_ORDER.forEach(cat => {
       extractSpans(hl[cat], cat).forEach(s => {
@@ -81,7 +79,6 @@
         if (f) spans.push(f);
       });
     });
-    // Dedupe identical (same start/end/category)
     const seen = new Set();
     spans = spans.filter(s => {
       const k = `${s.category}:${s.start}:${s.end}`;
@@ -95,16 +92,14 @@
     });
     window.__mergedSpans = spans;
 
-    renderText(root, canonical, spans);
-    renderRegions(root, spans);
-    wireLayers(root);
-    updateCounts(root);
+    renderText(canonical, spans);
+    renderRegions(spans);
+    wireLayers();
+    updateCounts();
   }
 
-  // Build the single text body: split into segments where the covering
-  // set of spans is constant, wrap covered segments in a <mark>.
-  function renderText(root, canonical, spans) {
-    const area = root.querySelector('#merged-text');
+  function renderText(canonical, spans) {
+    const area = $('#merged-text');
     const N = canonical.length;
     const points = new Set([0, N]);
     spans.forEach(s => { points.add(s.start); points.add(s.end); });
@@ -125,21 +120,21 @@
     }
     area.innerHTML = html;
 
-    // hover sync text -> regions
     area.querySelectorAll('.mv-mark').forEach(m => {
-      m.addEventListener('mouseenter', () => setActive(root, m.dataset.spans.split(' '), true));
-      m.addEventListener('mouseleave', () => setActive(root, m.dataset.spans.split(' '), false));
-      m.addEventListener('click', e => { openPopover(root, m); e.stopPropagation(); });
+      m.addEventListener('mouseenter', () => setActive(m.dataset.spans.split(' '), true));
+      m.addEventListener('mouseleave', () => setActive(m.dataset.spans.split(' '), false));
+      m.addEventListener('click', e => { openPopover(m); e.stopPropagation(); });
     });
     document.addEventListener('click', e => {
-      const pop = root.querySelector('#mv-pop');
+      const pop = $('#mv-pop');
       if (pop && !pop.contains(e.target) && !e.target.closest('.mv-mark') && !e.target.closest('.mv-region'))
         pop.classList.remove('show');
     });
   }
 
-  function renderRegions(root, spans) {
-    const list = root.querySelector('#mv-regions');
+  function renderRegions(spans) {
+    const list = $('#mv-regions');
+    if (!list) return;
     list.innerHTML = '';
     spans.forEach(s => {
       const meta = CAT_META[s.category];
@@ -153,54 +148,54 @@
         `<div class="mv-body"><div class="mv-txt">${escapeHtml(s.text)}</div>` +
         `<div class="mv-lbl">${escapeHtml(varLabel)}</div></div>` +
         `<span class="mv-st" data-state="${s.state}">pendiente</span>`;
-      row.addEventListener('mouseenter', () => setActive(root, [s.id], true));
-      row.addEventListener('mouseleave', () => setActive(root, [s.id], false));
+      row.addEventListener('mouseenter', () => setActive([s.id], true));
+      row.addEventListener('mouseleave', () => setActive([s.id], false));
       row.addEventListener('click', () => {
-        const m = root.querySelector(`.mv-mark[data-spans~="${s.id}"]`);
-        if (m) { m.scrollIntoView({ block: 'center', behavior: 'smooth' }); openPopover(root, m); }
+        const m = $(`.mv-mark[data-spans~="${s.id}"]`);
+        if (m) { m.scrollIntoView({ block: 'center', behavior: 'smooth' }); openPopover(m); }
       });
       list.appendChild(row);
     });
   }
 
-  function setActive(root, ids, on) {
+  function setActive(ids, on) {
     ids.forEach(id => {
-      root.querySelectorAll(`.mv-mark[data-spans~="${id}"]`).forEach(m => m.classList.toggle('active', on));
-      const r = root.querySelector(`.mv-region[data-span="${id}"]`);
+      $$(`.mv-mark[data-spans~="${id}"]`).forEach(m => m.classList.toggle('active', on));
+      const r = $(`.mv-region[data-span="${id}"]`);
       if (r) r.classList.toggle('active', on);
     });
   }
 
-  // ---- Popover (aceptar / editar / rechazar) ----
-  function openPopover(root, mark) {
-    const pop = root.querySelector('#mv-pop');
+  // ---- Popover ----
+  function openPopover(mark) {
+    const pop = $('#mv-pop');
+    const wrap = mark.closest('.mv-textwrap');
+    if (!pop || !wrap) return;
     const ids = mark.dataset.spans.split(' ');
-    const spans = ids.map(id => window.__mergedSpans.find(s => s.id === id)).filter(Boolean);
+    const spans = ids.map(id => (window.__mergedSpans || []).find(s => s.id === id)).filter(Boolean);
     pop.dataset.spans = mark.dataset.spans;
     const cats = [...new Set(spans.map(s => s.category))];
     pop.querySelector('#mv-pop-cat').innerHTML = cats.map(c =>
       `<span class="mv-chip" style="--c:${CAT_META[c].color}">${CAT_META[c].label}</span>`).join('');
     pop.querySelector('#mv-pop-txt').textContent = mark.textContent;
-    const allOk = spans.every(s => s.state === 'confirmed');
+    const allOk = spans.length && spans.every(s => s.state === 'confirmed');
     pop.querySelector('#mv-pop-hint').textContent = allOk ? 'Confirmado por ti'
       : 'Detectado por el modelo · pendiente de revisión';
     pop.querySelector('#mv-pop-edit').style.display = 'none';
 
-    const r = mark.getBoundingClientRect(); const rr = root.getBoundingClientRect();
-    let left = r.left - rr.left; left = Math.min(left, root.clientWidth - 285);
-    pop.style.left = Math.max(8, left) + 'px';
-    pop.style.top = (r.bottom - rr.top + 8) + 'px';
+    const r = mark.getBoundingClientRect(); const wr = wrap.getBoundingClientRect();
+    let left = r.left - wr.left; left = Math.min(left, wrap.clientWidth - 285);
+    pop.style.left = Math.max(0, left) + 'px';
+    pop.style.top = (r.bottom - wr.top + 8) + 'px';
     pop.classList.add('show');
   }
 
-  function applyState(root, ids, state) {
+  function applyState(ids, state) {
     ids.forEach(id => {
-      const s = window.__mergedSpans.find(x => x.id === id);
+      const s = (window.__mergedSpans || []).find(x => x.id === id);
       if (s) s.state = state;
-      root.querySelectorAll(`.mv-mark[data-spans~="${id}"]`).forEach(m => {
-        m.dataset.state = state;
-      });
-      const r = root.querySelector(`.mv-region[data-span="${id}"]`);
+      $$(`.mv-mark[data-spans~="${id}"]`).forEach(m => { m.dataset.state = state; });
+      const r = $(`.mv-region[data-span="${id}"]`);
       if (r) {
         if (state === 'rejected') { r.remove(); }
         else {
@@ -210,16 +205,17 @@
         }
       }
     });
-    updateCounts(root);
+    updateCounts();
   }
 
-  function wirePopoverButtons(root) {
-    const pop = root.querySelector('#mv-pop');
+  function wirePopoverButtons() {
+    const pop = $('#mv-pop');
+    if (!pop) return;
     pop.querySelector('#mv-accept').addEventListener('click', () => {
-      applyState(root, pop.dataset.spans.split(' '), 'confirmed'); pop.classList.remove('show');
+      applyState(pop.dataset.spans.split(' '), 'confirmed'); pop.classList.remove('show');
     });
     pop.querySelector('#mv-reject').addEventListener('click', () => {
-      applyState(root, pop.dataset.spans.split(' '), 'rejected'); pop.classList.remove('show');
+      applyState(pop.dataset.spans.split(' '), 'rejected'); pop.classList.remove('show');
     });
     pop.querySelector('#mv-edit-btn').addEventListener('click', () => {
       const box = pop.querySelector('#mv-pop-edit');
@@ -229,11 +225,11 @@
       if (e.key === 'Enter') {
         const val = e.target.value;
         pop.dataset.spans.split(' ').forEach(id => {
-          root.querySelectorAll(`.mv-mark[data-spans~="${id}"]`).forEach(m => { m.textContent = val; });
-          const r = root.querySelector(`.mv-region[data-span="${id}"] .mv-txt`);
+          $$(`.mv-mark[data-spans~="${id}"]`).forEach(m => { m.textContent = val; });
+          const r = $(`.mv-region[data-span="${id}"] .mv-txt`);
           if (r) r.textContent = val;
         });
-        applyState(root, pop.dataset.spans.split(' '), 'confirmed');
+        applyState(pop.dataset.spans.split(' '), 'confirmed');
         pop.classList.remove('show');
       }
     });
@@ -241,31 +237,28 @@
 
   // ---- Layer toggles ----
   const hidden = new Set();
-  function wireLayers(root) {
-    root.querySelectorAll('.mv-layer').forEach(btn => {
+  function wireLayers() {
+    $$('.mv-layer').forEach(btn => {
       btn.addEventListener('click', () => {
         const l = btn.dataset.layer;
         if (hidden.has(l)) { hidden.delete(l); btn.classList.remove('off'); }
         else { hidden.add(l); btn.classList.add('off'); }
-        applyLayers(root);
+        applyLayers();
       });
     });
   }
-  function applyLayers(root) {
-    root.querySelectorAll('.mv-mark').forEach(m => {
+  function applyLayers() {
+    $$('.mv-mark').forEach(m => {
       const cats = m.dataset.cats.split(',');
-      const allHidden = cats.every(c => hidden.has(c));
-      m.classList.toggle('dim', allHidden);
+      m.classList.toggle('dim', cats.every(c => hidden.has(c)));
     });
-    root.querySelectorAll('.mv-region').forEach(r => {
-      r.style.display = hidden.has(r.dataset.cat) ? 'none' : '';
-    });
+    $$('.mv-region').forEach(r => { r.style.display = hidden.has(r.dataset.cat) ? 'none' : ''; });
   }
 
-  function updateCounts(root) {
+  function updateCounts() {
     const spans = (window.__mergedSpans || []).filter(s => s.state !== 'rejected');
     const ok = spans.filter(s => s.state === 'confirmed').length;
-    const set = (id, v) => { const el = root.querySelector(id); if (el) el.textContent = v; };
+    const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
     set('#mv-c-total', spans.length);
     set('#mv-c-ok', ok);
     set('#mv-c-pend', spans.length - ok);
@@ -273,9 +266,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const root = document.getElementById('merged-view');
-    if (!root) return;
-    wirePopoverButtons(root);
+    if (!$('#merged-text')) return;
+    wirePopoverButtons();
     build();
   });
 })();

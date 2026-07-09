@@ -1984,7 +1984,11 @@ mark.mark-linked {
 .mv-mark[data-cat="lenguaje"].active          { color: var(--ube-800, #43089f); }
 
 /* regions panel */
-.mv-regions-panel { border-left: 1px solid var(--oat-border); align-self: stretch; position: sticky; top: 12px; }
+.mv-regions-panel {
+  background: var(--clay-white); border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature); box-shadow: var(--clay-shadow);
+  margin-bottom: 18px; overflow: hidden;
+}
 .mv-regions-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 8px; }
 .mv-regions-head h6 { margin: 0; font-size: .92rem; }
 .mv-regions-list { padding: 6px 10px 14px; display: flex; flex-direction: column; gap: 6px; max-height: 62vh; overflow-y: auto; }

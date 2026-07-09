@@ -163,6 +163,15 @@
                 </div>
             </div>
 
+            <!-- Detecciones (regiones de la vista fusionada) -->
+            <div class="mv-regions-panel">
+                <div class="mv-regions-head">
+                    <h6>{{ _('Detecciones') }}</h6>
+                    <span class="mv-count" id="mv-r-count"></span>
+                </div>
+                <div id="mv-regions" class="mv-regions-list"></div>
+            </div>
+
             <!-- Annotation Panel -->
             <div class="annotation-panel" id="annotation-panel" style="display: none;">
                 <div class="annotation-header">
@@ -212,64 +221,6 @@
                     <div class="annotation-actions">
                         <button type="button" class="btn btn-secondary" id="cancel-annotation">Cancelar</button>
                         <button type="button" class="btn btn-primary" id="add-annotation">Agregar</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Categories Section -->
-            <div class="categories-section">
-                <div class="categories-header">
-                    <h6 class="categories-title">
-                        <i class="fas fa-list-ul me-2"></i>
-                        {{ _('Categorías') }}
-                    </h6>
-                </div>
-                
-                <!-- Contenido General -->
-                <div class="analysis-tools-panel">
-                    <div class="collapsible-header" data-target="contenido-content">
-                        <h5 class="panel-title mb-0">
-                            <i class="fas fa-newspaper me-2"></i>
-                            {{ _('Contenido General') }}
-                        </h5>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                    <div id="contenido-content" class="collapsible-content">
-                        <div id="contenido-variables" class="variables-grid">
-                            <!-- Variables will be rendered by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lenguaje y Análisis del discurso -->
-                <div class="analysis-tools-panel">
-                    <div class="collapsible-header" data-target="lenguaje-content">
-                        <h5 class="panel-title mb-0">
-                            <i class="fas fa-language me-2"></i>
-                            {{ _('Lenguaje y Análisis del discurso') }}
-                        </h5>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                    <div id="lenguaje-content" class="collapsible-content">
-                        <div id="lenguaje-variables" class="variables-grid">
-                            <!-- Variables will be rendered by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fuentes de información -->
-                <div class="analysis-tools-panel">
-                    <div class="collapsible-header" data-target="fuentes-content">
-                        <h5 class="panel-title mb-0">
-                            <i class="fas fa-users me-2"></i>
-                            {{ _('Fuentes de información') }}
-                        </h5>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                    <div id="fuentes-content" class="collapsible-content">
-                        <div id="fuentes-sources" class="sources-grid">
-                            <!-- Sources will be rendered by JavaScript -->
-                        </div>
                     </div>
                 </div>
             </div>
@@ -490,32 +441,22 @@
                     <button type="button" class="mv-layer" data-layer="lenguaje"><span class="mv-sw" style="background:var(--ube-800,#43089f)"></span>{{ _('Lenguaje') }}</button>
                 </div>
 
-                <div class="mv-grid">
-                    <div class="mv-textwrap">
-                        {% if titular_html %}<h2 class="mv-title">{{ titular_html | safe }}</h2>{% endif %}
-                        {% if autoria_html %}<div class="mv-author"><i class="fas fa-user-pen me-1"></i>{{ autoria_html | safe }}</div>{% endif %}
-                        <div id="merged-text" class="mv-text"></div>
+                <div class="mv-textwrap">
+                    {% if titular_html %}<h2 class="mv-title">{{ titular_html | safe }}</h2>{% endif %}
+                    {% if autoria_html %}<div class="mv-author"><i class="fas fa-user-pen me-1"></i>{{ autoria_html | safe }}</div>{% endif %}
+                    <div id="merged-text" class="mv-text"></div>
 
-                        <div class="mv-pop" id="mv-pop">
-                            <span class="mv-pop-cat" id="mv-pop-cat"></span>
-                            <div class="mv-pop-txt" id="mv-pop-txt"></div>
-                            <div class="mv-pop-hint" id="mv-pop-hint"></div>
-                            <input class="mv-pop-edit" id="mv-pop-edit" type="text" aria-label="{{ _('Editar texto') }}">
-                            <div class="mv-pop-actions">
-                                <button type="button" class="mv-btn primary" id="mv-accept">{{ _('Aceptar') }}</button>
-                                <button type="button" class="mv-btn" id="mv-edit-btn">{{ _('Editar') }}</button>
-                                <button type="button" class="mv-btn danger" id="mv-reject">{{ _('Rechazar') }}</button>
-                            </div>
+                    <div class="mv-pop" id="mv-pop">
+                        <span class="mv-pop-cat" id="mv-pop-cat"></span>
+                        <div class="mv-pop-txt" id="mv-pop-txt"></div>
+                        <div class="mv-pop-hint" id="mv-pop-hint"></div>
+                        <input class="mv-pop-edit" id="mv-pop-edit" type="text" aria-label="{{ _('Editar texto') }}">
+                        <div class="mv-pop-actions">
+                            <button type="button" class="mv-btn primary" id="mv-accept">{{ _('Aceptar') }}</button>
+                            <button type="button" class="mv-btn" id="mv-edit-btn">{{ _('Editar') }}</button>
+                            <button type="button" class="mv-btn danger" id="mv-reject">{{ _('Rechazar') }}</button>
                         </div>
                     </div>
-
-                    <aside class="mv-regions-panel">
-                        <div class="mv-regions-head">
-                            <h6>{{ _('Regiones detectadas') }}</h6>
-                            <span class="mv-count" id="mv-r-count"></span>
-                        </div>
-                        <div id="mv-regions" class="mv-regions-list"></div>
-                    </aside>
                 </div>
             </div>
             </div>
