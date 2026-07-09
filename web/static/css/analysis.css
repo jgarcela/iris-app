@@ -1875,3 +1875,53 @@ mark.mark-linked {
 
 /* Lenguaje: hide the Sí/No label — a variable only appears if it was detected */
 .variable-card:has(.value-structure) .sub-item--tag { display: none !important; }
+
+/* Paired variable card: names + aggregate group gender badge */
+.variable-card--pair .variable-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.pair-gender-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--matcha-800);
+  background: var(--matcha-300);
+  border: 1px solid var(--matcha-600);
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.6rem;
+  white-space: nowrap;
+}
+.variable-card--pair .value-list { flex: 0 1 auto; }
+/* In the compact contenido rows, keep name chips + gender badge inline after the title */
+.variable-card--pair.variable-card:not(:has(.value-structure)) .variable-value { order: 2; }
+
+/* Article title / authorship in the text column */
+.article-meta {
+  padding: 0 0.2rem 0.85rem;
+  margin-bottom: 0.85rem;
+  border-bottom: 1px solid var(--oat-border);
+}
+.article-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--clay-black);
+  margin: 0 0 0.35rem;
+}
+.article-meta-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  font-size: 0.85rem;
+}
+.article-author { color: var(--warm-charcoal); font-weight: 600; }
+.article-author i { color: var(--ube-800); }
+.article-url { color: var(--ube-800); text-decoration: none; font-weight: 600; }
+.article-url:hover { text-decoration: underline; }

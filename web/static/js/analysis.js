@@ -40,6 +40,111 @@ function convertValueToLabel(variableName, value) {
     return value; // Return original value if no mapping found
 }
 
+// Paired variables in Contenido General: a name list + the group's aggregate gender
+const CONTENIDO_PAIRS = {
+    'personas_mencionadas':  { gender: 'genero_personas_mencionadas',  label: 'Personas mencionadas' },
+    'nombre_propio_titular': { gender: 'genero_nombre_propio_titular', label: 'Nombre propio en el titular' },
+    'nombre_periodista':     { gender: 'genero_periodista',            label: 'Autoría' }
+};
+
+// Render a combined card: names + aggregate group gender badge
+function renderPairCard(nameKey, pair, data) {
+    const namesRaw = data[nameKey];
+    const namesArr = Array.isArray(namesRaw) ? namesRaw : (namesRaw ? [namesRaw] : []);
+    const genderRaw = data[pair.gender];
+    const genderVal = Array.isArray(genderRaw) ? genderRaw[0] : genderRaw;
+    const genderLabel = (genderVal === undefined || genderVal === null || genderVal === '')
+        ? '' : convertValueToLabel(pair.gender, genderVal);
+
+    const nameChips = namesArr.length
+        ? namesArr.map(n => `<span class="value-item">${n}</span>`).join('')
+        : '<span class="value-empty">Sin nombres</span>';
+    const genderBadge = genderLabel
+        ? `<span class="pair-gender-badge" title="Género del grupo">${genderLabel}</span>` : '';
+
+    return `
+        <div class="variable-card variable-card--pair" data-pair-name="${nameKey}">
+            <div class="variable-header">
+                <div class="variable-title">${pair.label}</div>
+                <div class="ms-auto d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-secondary" data-action="edit-pair" data-key="${nameKey}" title="Editar"><i class="fas fa-pen"></i></button>
+                </div>
+            </div>
+            <div class="variable-value">
+                <div class="value-list">${nameChips}</div>
+                ${genderBadge}
+            </div>
+        </div>
+    `;
+}
+
+// Composite modal: edit the names AND the group's gender together
+function openPairModal(nameKey, pair) {
+    const data = window.data.analysis.original.contenido_general;
+    const titleEl = document.getElementById('editModalTitle');
+    const singleGroup = document.getElementById('singleInputGroup');
+    const singleInput = document.getElementById('singleInput');
+    const singleLabel = document.getElementById('singleInputLabel');
+    const selectGroup = document.getElementById('selectInputGroup');
+    const selectInput = document.getElementById('selectInput');
+    const selectLabel = document.getElementById('selectInputLabel');
+    const selectHelp = document.getElementById('selectHelp');
+    const fuenteForm = document.getElementById('fuenteForm');
+    const saveBtn = document.getElementById('editModalSave');
+    if (!titleEl || !singleGroup || !singleInput || !selectGroup || !selectInput || !saveBtn) return;
+
+    titleEl.textContent = 'Editar ' + pair.label.toLowerCase();
+    fuenteForm && (fuenteForm.style.display = 'none');
+
+    // Names field (comma-separated)
+    const namesRaw = data[nameKey];
+    const namesArr = Array.isArray(namesRaw) ? namesRaw : (namesRaw ? [namesRaw] : []);
+    singleGroup.style.display = 'block';
+    singleLabel.textContent = pair.label;
+    singleInput.value = namesArr.join(', ');
+    singleInput.placeholder = 'Separa varios con comas';
+
+    // Gender select (aggregate for the group)
+    selectGroup.style.display = 'block';
+    selectLabel.textContent = 'Género del grupo';
+    selectInput.multiple = false;
+    if (selectHelp) selectHelp.style.display = 'none';
+    const genderRaw = data[pair.gender];
+    const genderVal = String(Array.isArray(genderRaw) ? (genderRaw[0] ?? '') : (genderRaw ?? ''));
+    selectInput.innerHTML = '<option value="">—</option>';
+    (getValuesForVariable(pair.gender) || []).forEach(v => {
+        const o = document.createElement('option');
+        o.value = String(v.key);
+        o.textContent = v.label;
+        if (String(v.key) === genderVal) o.selected = true;
+        selectInput.appendChild(o);
+    });
+
+    saveBtn.onclick = () => {
+        const names = singleInput.value.split(',').map(s => s.trim()).filter(Boolean);
+        const gender = selectInput.value;
+        data[nameKey] = names;
+        data[pair.gender] = gender ? [gender] : [];
+        renderContent();
+        const modalEl = document.getElementById('editModal');
+        if (window.bootstrap && modalEl) window.bootstrap.Modal.getInstance(modalEl)?.hide();
+    };
+    const modalEl = document.getElementById('editModal');
+    if (window.bootstrap && modalEl) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function bindContenidoPairHandlers() {
+    const container = document.getElementById('contenido-variables');
+    if (!container) return;
+    container.querySelectorAll('[data-action="edit-pair"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const nameKey = btn.getAttribute('data-key');
+            const pair = CONTENIDO_PAIRS[nameKey];
+            if (pair) openPairModal(nameKey, pair);
+        });
+    });
+}
+
 // Function to render variable card
 function renderVariableCard(key, value, color) {
     const title = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -137,8 +242,19 @@ function renderContent() {
     if (contenidoGeneral && contenidoContainer) {
         let html = '';
         Object.keys(contenidoGeneral).forEach(key => {
+            // Skip the gender field of a pair — it is shown inside the combined card
+            const isPairedGender = Object.values(CONTENIDO_PAIRS).some(p =>
+                p.gender === key && (p.name in contenidoGeneral));
+            if (isPairedGender) return;
+
+            // Combined "name + group gender" card
+            if (CONTENIDO_PAIRS[key] && (CONTENIDO_PAIRS[key].gender in contenidoGeneral)) {
+                html += renderPairCard(key, CONTENIDO_PAIRS[key], contenidoGeneral);
+                return;
+            }
+
             const value = contenidoGeneral[key];
-            const convertedValue = Array.isArray(value) 
+            const convertedValue = Array.isArray(value)
                 ? value.map(item => convertValueToLabel(key, item))
                 : convertValueToLabel(key, value);
             const color = window.highlight_color_map[key] || '#ffffff';
@@ -146,6 +262,7 @@ function renderContent() {
         });
         contenidoContainer.innerHTML = html;
         bindContenidoGeneralHandlers();
+        bindContenidoPairHandlers();
     }
     
     // Render lenguaje

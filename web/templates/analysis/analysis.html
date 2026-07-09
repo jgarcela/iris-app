@@ -426,7 +426,27 @@
                     <i class="fas fa-file-alt me-2"></i>
                     {{ _('Análisis del Texto') }}
                 </h5>
-                
+
+                <!-- Article title / authorship (highlighted version from backend if available) -->
+                {% set hl = data.highlight.original if data.highlight and data.highlight.original else {} %}
+                {% set titular_html = hl.get('titular') if hl.get('titular') else data.title %}
+                {% set autoria_html = hl.get('autoria') if hl.get('autoria') else data.authors %}
+                {% if titular_html or autoria_html or data.url %}
+                <div class="article-meta highlight-text">
+                    {% if titular_html %}
+                        <h2 class="article-title markup-area">{{ titular_html | safe }}</h2>
+                    {% endif %}
+                    <div class="article-meta-sub">
+                        {% if autoria_html %}
+                            <span class="article-author markup-area"><i class="fas fa-user-pen me-1"></i>{{ autoria_html | safe }}</span>
+                        {% endif %}
+                        {% if data.url %}
+                            <a class="article-url" href="{{ data.url }}" target="_blank" rel="noopener"><i class="fas fa-link me-1"></i>{{ _('Ver original') }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Highlighted Text Content -->
                 <div class="highlight-text">
                     <div class="small text-muted mb-2"><i class="fas fa-mouse-pointer me-1"></i>Haz clic sobre un resaltado para editar, aceptar o eliminar la anotación.</div>
@@ -1286,7 +1306,7 @@
       if (!chip) return;
       const card = chip.closest('.variable-card');
       if (!card) return;
-      const editBtn = card.querySelector('[data-action="edit-variable"], [data-action="add-etiqueta"]');
+      const editBtn = card.querySelector('[data-action="edit-pair"], [data-action="edit-variable"], [data-action="add-etiqueta"]');
       if (editBtn) editBtn.click();
     });
   })();
