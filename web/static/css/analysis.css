@@ -1509,3 +1509,63 @@ mark.accepted { outline: 1px solid rgba(0,0,0,0.08); }
     align-self: flex-start;
   }
 }
+
+/* ==================== */
+/* Nested variable sub-items (Lenguaje: ejemplos / etiqueta) */
+/* ==================== */
+.value-structure { display: flex; flex-direction: column; gap: 0.6rem; }
+.sub-item {
+  background: transparent !important;
+  border: none !important;
+  border-left: 2px solid var(--oat-border) !important;
+  border-radius: 0 !important;
+  padding: 0.1rem 0 0.1rem 0.75rem !important;
+}
+.sub-label {
+  color: var(--warm-silver) !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+}
+
+/* Example sentences → quote blocks (not giant pills) */
+.sub-item--examples .sub-value-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.sub-item--examples .sub-value-item {
+  display: block !important;
+  position: relative;
+  background: rgba(67, 8, 159, 0.045) !important;
+  color: var(--clay-black) !important;
+  border: 1px solid var(--oat-border) !important;
+  border-left: 3px solid var(--ube-800) !important;
+  border-radius: var(--radius-std) !important;
+  padding: 0.55rem 2rem 0.55rem 0.8rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 400 !important;
+  font-style: italic;
+  line-height: 1.5;
+}
+.sub-item--examples .sub-value-item::before {
+  content: '\201C';
+  color: var(--ube-800);
+  opacity: 0.5;
+  font-weight: 700;
+  margin-right: 0.15rem;
+}
+.sub-item--examples .sub-value-item [data-action="delete-subitem"] {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.35rem;
+  margin: 0 !important;
+}
+
+/* Etiqueta → small pill chip */
+.sub-item--tag .sub-value-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.sub-item--tag .sub-value-item {
+  border-radius: var(--radius-pill) !important;
+  font-style: normal !important;
+}
+
+/* Variable icon dot — hide (redundant with the card accent) */
+.variable-header .variable-icon { display: none !important; }

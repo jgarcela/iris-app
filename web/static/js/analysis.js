@@ -161,7 +161,7 @@ function renderContent() {
                         // Convert etiqueta array values
                         const convertedEtiqueta = subValue.map(item => convertValueToLabel(key, item));
                         subItems += `
-                            <div class="sub-item">
+                            <div class="sub-item sub-item--tag">
                                 <span class="sub-label">${subKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
                                 <div class="sub-value-list">${convertedEtiqueta.map(item => `<span class="sub-value-item">${item}</span>`).join('')}</div>
                             </div>
@@ -169,7 +169,7 @@ function renderContent() {
                     } else if (subKey === 'ejemplos_articulo' && Array.isArray(subValue)) {
                         // Keep ejemplos_articulo as is (these are text examples)
                         subItems += `
-                            <div class="sub-item">
+                            <div class="sub-item sub-item--examples">
                                 <span class="sub-label">${subKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</span>
                                 <div class="sub-value-list">${subValue.map(item => `<span class="sub-value-item">${item}</span>`).join('')}</div>
                             </div>
