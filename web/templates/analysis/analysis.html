@@ -470,6 +470,54 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ============================================================
+                 Vista fusionada (Opción 2): texto único + panel de regiones
+                 ============================================================ -->
+            <div id="merged-view" class="merged-view">
+                <div class="mv-head">
+                    <div>
+                        <div class="mv-kicker">{{ _('Análisis del Texto') }}</div>
+                        <div class="mv-sub">{{ _('Texto único con todas las capas · pasa el ratón para sincronizar con el panel') }}</div>
+                    </div>
+                </div>
+
+                <div class="mv-toolbar" role="toolbar" aria-label="{{ _('Capas y estado') }}">
+                    <span class="mv-count">{{ _('Detecciones') }}: <b id="mv-c-total">0</b> · {{ _('aceptadas') }} <b id="mv-c-ok">0</b> · {{ _('pendientes') }} <b id="mv-c-pend">0</b></span>
+                    <span class="mv-spacer"></span>
+                    <button type="button" class="mv-layer" data-layer="contenido_general"><span class="mv-sw" style="background:var(--blueberry-800,#01418d)"></span>{{ _('Contenido') }}</button>
+                    <button type="button" class="mv-layer" data-layer="fuentes"><span class="mv-sw" style="background:var(--slushie-800,#0089ad)"></span>{{ _('Fuentes') }}</button>
+                    <button type="button" class="mv-layer" data-layer="lenguaje"><span class="mv-sw" style="background:var(--ube-800,#43089f)"></span>{{ _('Lenguaje') }}</button>
+                </div>
+
+                <div class="mv-grid">
+                    <div class="mv-textwrap">
+                        {% if titular_html %}<h2 class="mv-title">{{ titular_html | safe }}</h2>{% endif %}
+                        {% if autoria_html %}<div class="mv-author"><i class="fas fa-user-pen me-1"></i>{{ autoria_html | safe }}</div>{% endif %}
+                        <div id="merged-text" class="mv-text"></div>
+
+                        <div class="mv-pop" id="mv-pop">
+                            <span class="mv-pop-cat" id="mv-pop-cat"></span>
+                            <div class="mv-pop-txt" id="mv-pop-txt"></div>
+                            <div class="mv-pop-hint" id="mv-pop-hint"></div>
+                            <input class="mv-pop-edit" id="mv-pop-edit" type="text" aria-label="{{ _('Editar texto') }}">
+                            <div class="mv-pop-actions">
+                                <button type="button" class="mv-btn primary" id="mv-accept">{{ _('Aceptar') }}</button>
+                                <button type="button" class="mv-btn" id="mv-edit-btn">{{ _('Editar') }}</button>
+                                <button type="button" class="mv-btn danger" id="mv-reject">{{ _('Rechazar') }}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <aside class="mv-regions-panel">
+                        <div class="mv-regions-head">
+                            <h6>{{ _('Regiones detectadas') }}</h6>
+                            <span class="mv-count" id="mv-r-count"></span>
+                        </div>
+                        <div id="mv-regions" class="mv-regions-list"></div>
+                    </aside>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -1285,6 +1333,7 @@
 <script type="module" src="{{ url_for('static', filename='js/highlight_tooltip.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_human.js') }}"></script>
 <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+<script src="{{ url_for('static', filename='js/analysis-merged.js') }}"></script>
 
 <script>
   // Auto-open the first category on load so the highlighted text is visible immediately
