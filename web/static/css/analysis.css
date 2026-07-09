@@ -1788,3 +1788,90 @@ mark.mark-linked {
   padding: 0.15rem 0.5rem !important;
   font-size: 0.82rem;
 }
+
+/* Remove the per-row "+" add buttons (adding is done via text selection) */
+.variable-card [data-action^="add"],
+.source-card [data-action^="add"] { display: none !important; }
+
+/* Remove per-value delete "x" (add/remove is done from the article text) */
+.variable-card [data-action="delete-item"],
+.variable-card [data-action="delete-subitem"],
+.sub-value-item [data-action="delete-subitem"],
+.value-item [data-action="delete-item"] { display: none !important; }
+/* reclaim the space the "x" used inside example quotes */
+.sub-item--examples .sub-value-item { padding-right: 0.8rem !important; }
+.value-item, .sub-item--tag .sub-value-item { padding-right: 0.6rem !important; }
+
+/* ==================== */
+/* Edit modal — Clay polish */
+/* ==================== */
+#editModal .modal-content {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow), 0 24px 60px rgba(0,0,0,0.22);
+  overflow: hidden;
+}
+#editModal .modal-content::before {
+  content: '';
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, var(--matcha-600) 0%, var(--slushie-500) 35%, var(--ube-800) 70%, var(--pomegranate-400) 100%);
+}
+#editModal .modal-header {
+  border-bottom: 1px solid var(--oat-light);
+  padding: 1rem 1.25rem 0.85rem;
+}
+#editModal .modal-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  color: var(--clay-black);
+}
+#editModal .modal-body { padding: 1.25rem; }
+#editModal .modal-footer {
+  border-top: 1px solid var(--oat-light);
+  padding: 0.85rem 1.25rem;
+  gap: 0.5rem;
+}
+#editModal .form-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--warm-silver);
+  margin-bottom: 0.35rem;
+}
+#editModal .form-control,
+#editModal .form-select {
+  border: 1px solid #717989;
+  border-radius: var(--radius-sharp);
+  font-size: 0.9rem;
+  padding: 0.5rem 0.7rem;
+}
+#editModal .form-control:focus,
+#editModal .form-select:focus {
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 0 2px rgba(20, 110, 245, 0.35);
+}
+#editModal select[multiple] { min-height: 9rem; }
+#editModal select[multiple] option {
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-std);
+  margin-bottom: 2px;
+}
+#editModal select[multiple] option:checked {
+  background: var(--ube-800) linear-gradient(0deg, var(--ube-800), var(--ube-800));
+  color: #fff;
+}
+#editModal #editModalSave {
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 1.4rem;
+  font-weight: 600;
+}
+#editModal .btn-outline-secondary { border-radius: var(--radius-pill); padding: 0.45rem 1.1rem; }
+#editModal #selectHelp { font-size: 0.75rem; color: var(--warm-silver); }
+
+/* Lenguaje: hide the Sí/No label — a variable only appears if it was detected */
+.variable-card:has(.value-structure) .sub-item--tag { display: none !important; }
