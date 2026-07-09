@@ -77,7 +77,13 @@ function renderVariableCard(key, value, color) {
 // Function to render source card
 function renderSourceCard(fuente, index) {
     let sourceDetails = '';
-    Object.keys(fuente).forEach(key => {
+    // Always render fields in a consistent order
+    const FIELD_ORDER = ['nombre_fuente', 'declaracion_fuente', 'tipo_fuente', 'genero_fuente'];
+    const orderedKeys = [
+        ...FIELD_ORDER.filter(k => k in fuente),
+        ...Object.keys(fuente).filter(k => !FIELD_ORDER.includes(k))
+    ];
+    orderedKeys.forEach(key => {
         const color = window.highlight_color_map[key] || '#ffffff';
         const title = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         
@@ -1436,12 +1442,30 @@ function handleCategoryChange() {
     if (category) {
         // Get variables for the selected category from config.ini
         let variables = getVariablesForCategory(category);
-        // Restrict Fuentes to declaracion_fuente (the others appear as composite controls)
+        // Fuentes: open the same "nueva fuente" form, prefilled with the selected text
         if (category === 'fuentes') {
-            variables = ['declaracion_fuente'];
-            // Show selects
-            variableSelect.style.display = 'block';
-            valueSelect.style.display = 'block';
+            const selText = (
+                (document.getElementById('selected-text-preview') && document.getElementById('selected-text-preview').textContent) ||
+                (document.getElementById('selected-text-content') && document.getElementById('selected-text-content').textContent) ||
+                (window.getSelection && window.getSelection().toString()) || ''
+            ).trim();
+            const panel = document.getElementById('annotation-panel');
+            if (panel) panel.style.display = 'none';
+            const catSel = document.getElementById('annotation-category');
+            if (catSel) catSel.value = '';
+            openFuenteFormModal({ declaracion_fuente: selText }, (val) => {
+                const list = (window.data.analysis.original.fuentes && window.data.analysis.original.fuentes.fuentes) || [];
+                list.push({
+                    nombre_fuente: val.nombre_fuente,
+                    declaracion_fuente: val.declaracion_fuente,
+                    tipo_fuente: val.tipo_fuente,
+                    genero_fuente: val.genero_fuente
+                });
+                if (!window.data.analysis.original.fuentes) window.data.analysis.original.fuentes = {};
+                window.data.analysis.original.fuentes.fuentes = list;
+                renderContent();
+            });
+            return;
         } else if (category === 'lenguaje') {
             // Use checkboxes for lenguaje
             variableSelect.style.display = 'none';
@@ -2194,10 +2218,22 @@ function openFuenteFormModal(initial, onSave) {
     singleGroup && (singleGroup.style.display = 'none');
     selectGroup && (selectGroup.style.display = 'none');
     fuenteForm.style.display = 'block';
+    // Populate the tipo / género selects from the value catalog
+    const fillFuenteSelect = (sel, variable, current) => {
+        if (!sel) return;
+        sel.innerHTML = '<option value="">—</option>';
+        (getValuesForVariable(variable) || []).forEach(v => {
+            const o = document.createElement('option');
+            o.value = String(v.key);
+            o.textContent = v.label;
+            if (String(v.key) === String(current)) o.selected = true;
+            sel.appendChild(o);
+        });
+    };
     nombre.value = initial?.nombre_fuente ?? '';
     declaracion.value = initial?.declaracion_fuente ?? '';
-    tipo.value = initial?.tipo_fuente ?? '';
-    genero.value = initial?.genero_fuente ?? '';
+    fillFuenteSelect(tipo, 'tipo_fuente', initial?.tipo_fuente ?? '');
+    fillFuenteSelect(genero, 'genero_fuente', initial?.genero_fuente ?? '');
     saveBtn.onclick = () => {
         const val = {
             nombre_fuente: nombre.value.trim(),
@@ -2275,58 +2311,10 @@ function attachHighlightSelectionHandler() {
         const text = sel.toString().trim();
         if (!text) return;
         
-        // Use the new manual annotation panel system only if in edit mode
+        // Only annotate from a selection when in edit mode; otherwise let the
+        // user select text freely (no modal pops up in review mode).
         if (typeof showAnnotationPanel === 'function' && document.body.classList.contains('edit-mode')) {
             showAnnotationPanel(text, sel.getRangeAt(0));
-        } else {
-            // Fallback to old system if new system not available
-            // Determine current category from visible block
-            const visibleBlock = document.querySelector('.highlight-text .highlight-block[style*="display: block"]');
-            let currentCategory = null;
-            if (visibleBlock) {
-                if (visibleBlock.id === 'highlight-contenido') currentCategory = 'contenido_general';
-                else if (visibleBlock.id === 'highlight-lenguaje') currentCategory = 'lenguaje';
-                else if (visibleBlock.id === 'highlight-fuentes') currentCategory = 'fuentes';
-            }
-            // Step 1: pick variable for category
-            const variableOptions = getVariablesForCategory(currentCategory).map(v => ({ value: v, label: v.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase()) }));
-            openSelectModal({
-                title: 'Nueva anotación',
-                label: 'Variable',
-                options: variableOptions,
-                multiple: false,
-                initial: [],
-                onSave: (variable) => {
-                    if (!variable) return;
-                    // Step 2: pick value for variable
-                    const valueOptions = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
-                    openSelectModal({
-                        title: 'Selecciona valor',
-                        label: 'Valor',
-                        options: valueOptions,
-                        multiple: false,
-                        initial: [],
-                        onSave: (value) => {
-                            if (!value) return;
-                            // Integrate into data
-                            const annotation = { text, category: currentCategory, variable, value };
-                            integrateAnnotationIntoAnalysis(annotation);
-                            // Wrap selection in mark with default styling
-                            const range = sel.getRangeAt(0);
-                            const mark = document.createElement('mark');
-                            mark.setAttribute('data-variable', variable);
-                            mark.textContent = text;
-                            try {
-                                range.deleteContents();
-                                range.insertNode(mark);
-                            } catch (_) {}
-                            window.getSelection().removeAllRanges();
-                            // Re-run highlight processing
-                            processHighlights();
-                        }
-                    });
-                }
-            });
         }
     };
     area.addEventListener('mouseup', handler);
