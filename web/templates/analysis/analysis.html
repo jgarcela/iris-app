@@ -1228,6 +1228,95 @@
       if (first && !alreadyOpen) first.click();
     }, 500);
   });
+
+  // ===== Click a value chip to edit it directly (like clicking a highlight) =====
+  (function () {
+    document.addEventListener('click', function (e) {
+      // don't hijack the delete "x" or the action buttons
+      if (e.target.closest('[data-action]')) return;
+      const chip = e.target.closest('.value-item, .value-single, .sub-item--tag .sub-value-item');
+      if (!chip) return;
+      const card = chip.closest('.variable-card');
+      if (!card) return;
+      const editBtn = card.querySelector('[data-action="edit-variable"], [data-action="add-etiqueta"]');
+      if (editBtn) editBtn.click();
+    });
+  })();
+
+  // ===== #4: link variable cards <-> text highlights on hover =====
+  (function () {
+    const colorMap = window.highlight_color_map || {};
+    function marksForKey(key) {
+      const area = document.querySelector('.highlight-text .markup-area');
+      if (!area || !key) return [];
+      const sels = [];
+      if (colorMap[key]) sels.push('mark.' + colorMap[key]);
+      sels.push('mark[data-variable="' + key + '"]');
+      return Array.from(area.querySelectorAll(sels.join(',')));
+    }
+    document.addEventListener('mouseover', function (e) {
+      const card = e.target.closest('.variable-card');
+      if (!card) return;
+      const keyEl = card.querySelector('[data-key]');
+      const key = keyEl && keyEl.getAttribute('data-key');
+      const marks = marksForKey(key);
+      if (!marks.length) return;
+      marks.forEach(function (m) { m.classList.add('mark-linked'); });
+    });
+    document.addEventListener('mouseout', function (e) {
+      if (!e.target.closest('.variable-card')) return;
+      document.querySelectorAll('mark.mark-linked').forEach(function (m) { m.classList.remove('mark-linked'); });
+    });
+  })();
+
+  // ===== #3: floating "+ Anotar" button on text selection =====
+  (function () {
+    let btn = null;
+    function ensureBtn() {
+      if (btn) return btn;
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'annotate-float-btn';
+      btn.innerHTML = '<i class="fas fa-plus me-1"></i>Anotar';
+      btn.style.display = 'none';
+      document.body.appendChild(btn);
+      // keep the selection alive when pressing the button
+      btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      btn.addEventListener('click', function () {
+        hide();
+        if (!document.body.classList.contains('edit-mode')) {
+          const editBtn = document.getElementById('edit-analysis-btn');
+          if (editBtn) editBtn.click();
+        }
+        setTimeout(function () {
+          if (typeof window.handleTextSelection === 'function') {
+            window.handleTextSelection();
+          } else if (typeof window.showAnnotationPanel === 'function') {
+            window.showAnnotationPanel();
+          }
+        }, 60);
+      });
+      return btn;
+    }
+    function hide() { if (btn) btn.style.display = 'none'; }
+    document.addEventListener('mouseup', function (e) {
+      if (e.target.closest('.annotate-float-btn')) return;
+      const sel = window.getSelection();
+      const text = sel ? sel.toString().trim() : '';
+      const inText = e.target.closest && e.target.closest('.markup-area');
+      if (text && text.length > 2 && inText && sel.rangeCount) {
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        const b = ensureBtn();
+        b.style.display = 'inline-flex';
+        b.style.position = 'fixed';
+        b.style.top = Math.max(8, rect.top - 42) + 'px';
+        b.style.left = (rect.left + rect.width / 2 - 45) + 'px';
+      } else {
+        hide();
+      }
+    });
+    document.addEventListener('scroll', hide, true);
+  })();
 </script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">

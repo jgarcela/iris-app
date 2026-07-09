@@ -720,13 +720,11 @@ function ensureMarkActionsPopover() {
     if (document.getElementById('mark-actions-popover')) return;
     const div = document.createElement('div');
     div.id = 'mark-actions-popover';
-    div.style.cssText = 'display:none; background:#fff; border:1px solid #dee2e6; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:6px; z-index:10000;';
+    div.style.display = 'none';
     div.innerHTML = `
-      <div class="btn-group">
-        <button class="btn btn-sm btn-outline-primary" data-action="mark-edit" title="Editar"><i class="fas fa-pen"></i></button>
-        <button class="btn btn-sm btn-outline-success" data-action="mark-accept" title="Aceptar"><i class="fas fa-check"></i></button>
-        <button class="btn btn-sm btn-outline-danger" data-action="mark-delete" title="Eliminar"><i class="fas fa-trash"></i></button>
-      </div>
+      <button class="mark-action mark-action--accept" data-action="mark-accept"><i class="fas fa-check"></i><span>Aceptar</span></button>
+      <button class="mark-action mark-action--edit" data-action="mark-edit"><i class="fas fa-pen"></i><span>Editar</span></button>
+      <button class="mark-action mark-action--delete" data-action="mark-delete"><i class="fas fa-trash"></i><span>Eliminar</span></button>
     `;
     document.body.appendChild(div);
     document.addEventListener('click', (e) => {
@@ -757,7 +755,9 @@ function ensureMarkActionsPopover() {
             }
             pop.style.display = 'none';
         } else if (action === 'mark-delete') {
-            // Delete only DOM, keep data untouched
+            // Remove the accepted tick if present, then unwrap the mark
+            const sib = mark.nextElementSibling;
+            if (sib && sib.classList && sib.classList.contains('tick-icon')) sib.remove();
             unwrapMark(mark);
             pop.style.display = 'none';
         }
@@ -806,10 +806,18 @@ function resolveVariablesForMark(mark, currentCategory) {
 }
 
 function handleEditMark(mark, category) {
+    const pop = document.getElementById('mark-actions-popover');
     const candidates = resolveVariablesForMark(mark, category);
-    const variable = candidates[0] || '';
-    if (!variable) return;
+    const variable = candidates[0] || (pop && pop.dataset.variable) || '';
+    if (!variable) {
+        alert('No se pudo determinar la variable de este resaltado. Edítalo desde el panel de categorías (derecha).');
+        return;
+    }
     const options = getValuesForVariable(variable).map(v => ({ value: v.key, label: v.label }));
+    if (!options.length) {
+        alert('Esta anotación es de texto libre y no tiene valores para elegir. Edítala o elimínala desde el panel de categorías.');
+        return;
+    }
     openSelectModal({
         title: 'Editar anotación',
         label: 'Selecciona valor',
@@ -2145,11 +2153,6 @@ function setupEditModalHelpers() {
 }
 
 function openSingleInputModal(title, label, initialValue, onSave) {
-    // Don't open modal if we're in annotation mode
-    if (document.body.classList.contains('annotation-mode')) {
-        console.log('Modal blocked - in annotation mode');
-        return;
-    }
     
     const titleEl = document.getElementById('editModalTitle');
     const singleGroup = document.getElementById('singleInputGroup');
@@ -2176,11 +2179,6 @@ function openSingleInputModal(title, label, initialValue, onSave) {
 }
 
 function openFuenteFormModal(initial, onSave) {
-    // Don't open modal if we're in annotation mode
-    if (document.body.classList.contains('annotation-mode')) {
-        console.log('Modal blocked - in annotation mode');
-        return;
-    }
     
     const titleEl = document.getElementById('editModalTitle');
     const singleGroup = document.getElementById('singleInputGroup');
@@ -2216,12 +2214,7 @@ function openFuenteFormModal(initial, onSave) {
 }
 
 function openSelectModal({ title, label, options, multiple = false, initial = [], onSave }) {
-    // Don't open modal if we're in annotation mode
-    if (document.body.classList.contains('annotation-mode')) {
-        console.log('Modal blocked - in annotation mode');
-        return;
-    }
-    
+
     const titleEl = document.getElementById('editModalTitle');
     const singleGroup = document.getElementById('singleInputGroup');
     const selectGroup = document.getElementById('selectInputGroup');

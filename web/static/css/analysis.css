@@ -1569,3 +1569,222 @@ mark.accepted { outline: 1px solid rgba(0,0,0,0.08); }
 
 /* Variable icon dot — hide (redundant with the card accent) */
 .variable-header .variable-icon { display: none !important; }
+
+/* ==================== */
+/* Mark actions popover (correct a highlight) */
+/* ==================== */
+#mark-actions-popover {
+  display: none;
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--clay-shadow), 0 8px 24px rgba(0,0,0,0.12);
+  padding: 0.3rem;
+  z-index: 10000;
+  gap: 0.2rem;
+  flex-direction: column;
+  min-width: 130px;
+}
+#mark-actions-popover[style*="block"] { display: flex !important; }
+.mark-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-std);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--dark-charcoal);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.mark-action i { width: 1rem; text-align: center; font-size: 0.8rem; }
+.mark-action:hover { background: var(--oat-light); }
+.mark-action--accept:hover { background: var(--matcha-300); color: var(--matcha-800); }
+.mark-action--edit:hover { background: rgba(67,8,159,0.08); color: var(--ube-800); }
+.mark-action--delete:hover { background: #ffe0e2; color: #a3232b; }
+
+/* Accepted marks (reviewed & validated) */
+mark.accepted { outline: 1.5px solid var(--matcha-600); outline-offset: 0; }
+.tick-icon {
+  color: var(--matcha-600);
+  font-size: 0.75rem;
+  vertical-align: super;
+}
+
+
+/* #4: linked marks when hovering a variable card */
+mark.mark-linked {
+  outline: 2px solid var(--ube-800);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(67, 8, 159, 0.18);
+  border-radius: 3px;
+}
+.variable-card { cursor: default; }
+
+/* #3: floating "+ Anotar" button on selection */
+.annotate-float-btn {
+  display: none;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--ube-800);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.8rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: var(--clay-shadow), 0 6px 16px rgba(67, 8, 159, 0.35);
+  cursor: pointer;
+  z-index: 10001;
+  animation: annotate-pop 0.12s ease;
+}
+.annotate-float-btn:hover { background: var(--ube-900); }
+@keyframes annotate-pop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Value chips are clickable to edit (like clicking a highlight) */
+.variable-card .value-item,
+.variable-card .value-single,
+.sub-item--tag .sub-value-item {
+  cursor: pointer;
+}
+.variable-card .value-item:hover,
+.variable-card .value-single:hover,
+.sub-item--tag .sub-value-item:hover {
+  border-color: var(--ube-800) !important;
+  background: rgba(67, 8, 159, 0.12) !important;
+}
+/* keep the delete "x" comfortable to hit */
+.variable-card .value-item [data-action],
+.sub-value-item [data-action] { cursor: pointer; }
+
+/* ==================== */
+/* Annotation "log": compact variable -> value rows (Contenido) */
+/* ==================== */
+.variables-grid .variable-card:not(:has(.value-structure)) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 0.4rem;
+  background: transparent;
+  border: none;
+  border-left: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--oat-light);
+  box-shadow: none;
+}
+.variables-grid .variable-card:not(:has(.value-structure)):last-child { border-bottom: none; }
+.variables-grid .variable-card:not(:has(.value-structure)):hover { background: rgba(67,8,159,0.03); }
+
+.variable-card:not(:has(.value-structure)) .variable-header {
+  display: contents;
+}
+.variable-card:not(:has(.value-structure)) .variable-icon { display: none; }
+.variable-card:not(:has(.value-structure)) .variable-title {
+  order: 1;
+  flex: 0 0 auto;
+  min-width: 10rem;
+  font-size: 0.85rem;
+  color: var(--warm-charcoal) !important;
+}
+.variable-card:not(:has(.value-structure)) .variable-value {
+  order: 2;
+  flex: 1 1 auto;
+  margin: 0;
+}
+.variable-card:not(:has(.value-structure)) .value-list { gap: 0.3rem; }
+.variable-card:not(:has(.value-structure)) .ms-auto {
+  order: 3;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.variable-card:not(:has(.value-structure)):hover .ms-auto,
+.variable-card:not(:has(.value-structure)):focus-within .ms-auto { opacity: 1; }
+
+/* The category panel already boxes these rows; drop the inner grid gaps */
+#contenido-variables.variables-grid,
+#fuentes-sources.sources-grid { gap: 0; }
+
+/* Smaller action icons in the compact rows */
+.variable-card:not(:has(.value-structure)) .ms-auto [data-action] {
+  width: 26px; height: 26px;
+}
+@media (max-width: 480px) {
+  .variable-card:not(:has(.value-structure)) .variable-title { min-width: 100%; }
+  .variable-card:not(:has(.value-structure)) .ms-auto { opacity: 1; }
+}
+
+/* ==================== */
+/* Log look for Lenguaje (nested) and Fuentes */
+/* ==================== */
+
+/* Lenguaje entries: flat rows, not boxed cards */
+.variable-card:has(.value-structure) {
+  background: transparent !important;
+  border: none !important;
+  border-left: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--oat-light) !important;
+  padding: 0.65rem 0.4rem !important;
+}
+.variable-card:has(.value-structure):hover { background: rgba(67,8,159,0.03) !important; transform: none !important; }
+.variable-card:has(.value-structure) .variable-header { margin-bottom: 0.4rem; }
+.variable-card:has(.value-structure) .ms-auto {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.variable-card:has(.value-structure):hover .ms-auto,
+.variable-card:has(.value-structure):focus-within .ms-auto { opacity: 1; }
+#lenguaje-variables.variables-grid { gap: 0; }
+
+/* Etiqueta shown first and prominent (the actual label of the annotation) */
+.value-structure { gap: 0.45rem; }
+.sub-item--tag { order: -1; border-left: none !important; padding-left: 0 !important; }
+.sub-item--tag .sub-label { display: none; }
+.sub-item--tag .sub-value-item {
+  background: rgba(67,8,159,0.08) !important;
+  color: var(--ube-800) !important;
+  border: 1px solid var(--ube-800) !important;
+  font-weight: 700 !important;
+  text-transform: none;
+}
+
+/* Fuentes: flat source rows + compact field -> value */
+.source-card {
+  background: transparent !important;
+  border: none !important;
+  border-left: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid var(--oat-border) !important;
+  padding: 0.6rem 0.4rem !important;
+}
+.source-card:hover { transform: none !important; box-shadow: none !important; }
+#fuentes-sources.sources-grid { gap: 0; }
+.source-header { margin-bottom: 0.4rem; }
+.source-title { font-family: var(--font-display); font-weight: var(--fw-heading); font-size: 0.9rem; color: var(--clay-black); }
+.source-icon { display: none; }
+
+.source-details { display: flex; flex-direction: column; gap: 0.25rem; }
+.source-item { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.1rem 0; border: none; background: transparent; }
+.source-item-header { display: contents; }
+.source-item-icon { display: none; }
+.source-item-label {
+  order: 1; flex: 0 0 auto; min-width: 8.5rem;
+  font-size: 0.78rem; font-weight: 600; color: var(--warm-charcoal);
+}
+.source-item-value { order: 2; flex: 1 1 auto; }
+.source-value-item, .source-value-single {
+  background: var(--oat-light) !important;
+  color: var(--clay-black) !important;
+  border: 1px solid var(--oat-border) !important;
+  border-radius: var(--radius-std) !important;
+  padding: 0.15rem 0.5rem !important;
+  font-size: 0.82rem;
+}
