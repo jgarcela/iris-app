@@ -1218,3 +1218,294 @@ mark.accepted { outline: 1px solid rgba(0,0,0,0.08); }
 .glossary-group[data-category] .variable-card      { border-left-color: var(--cat, var(--ube-800)); }
 .glossary-group[data-category] .variable-card:hover{ border-left-color: var(--cat, var(--ube-800)); }
 .glossary-group[data-category] .variable-options code { color: var(--cat, var(--ube-800)); }
+
+/* ==================== */
+/* Analysis results — UX redesign */
+/* ==================== */
+.result-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.75rem;
+  align-items: center;
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+  padding: 1.25rem 1.5rem;
+}
+.score-ring {
+  --size: 118px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: conic-gradient(var(--ube-800) calc(var(--score) * 1%), var(--oat-light) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.score-ring-inner {
+  width: calc(var(--size) - 18px);
+  height: calc(var(--size) - 18px);
+  background: var(--clay-white);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.score-ring-num {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 1.9rem;
+  letter-spacing: -0.03em;
+  color: var(--clay-black);
+  line-height: 1;
+}
+.score-ring-num small { font-size: 1rem; color: var(--warm-silver); }
+.score-ring-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--warm-silver);
+  margin-top: 0.2rem;
+}
+.result-hero-breakdown { min-width: 0; }
+.subscore { margin-bottom: 0.55rem; }
+.subscore:last-child { margin-bottom: 0; }
+.subscore-top { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.2rem; }
+.subscore-name { color: var(--dark-charcoal); font-weight: 500; }
+.subscore-val { color: var(--clay-black); font-weight: 700; }
+.subscore-bar { height: 7px; background: var(--oat-light); border-radius: var(--radius-pill); overflow: hidden; }
+.subscore-bar span { display: block; height: 100%; border-radius: var(--radius-pill); transition: width 0.6s ease; }
+.result-hero-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem; white-space: nowrap; }
+.result-model { font-size: 0.8rem; color: var(--warm-charcoal); }
+.result-hero-buttons { display: flex; gap: 0.4rem; }
+
+@media (max-width: 767px) {
+  .result-hero { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  .result-hero-actions { align-items: center; }
+}
+
+/* Clay polish for the left tool panels */
+.analysis-tools-panel {
+  background: var(--clay-white) !important;
+  border: 1px solid var(--oat-border) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--clay-shadow) !important;
+  margin-bottom: 0.75rem;
+}
+.panel-title, .panel-title-minimal { color: var(--clay-black); font-family: var(--font-display); }
+.categories-title, .button-group-title { color: var(--warm-silver); }
+
+/* Instructions / steps panel */
+.instructions-panel {
+  background: var(--clay-white);
+  border: 1px dashed var(--oat-border);
+  border-radius: var(--radius-feature);
+}
+.instructions-title { font-family: var(--font-display); font-weight: var(--fw-heading); color: var(--clay-black); }
+.step-number {
+  background: var(--ube-800) !important;
+  color: #fff !important;
+}
+
+/* Compact tools column (now on the right) */
+.analysis-tools-panel { padding: 0.7rem 0.85rem !important; margin-bottom: 0.6rem !important; }
+.tools-panel-minimal .panel-header-minimal { margin-bottom: 0.5rem; }
+.panel-title-minimal { font-size: 0.9rem; }
+.model-info-minimal { padding: 0.35rem 0.55rem; font-size: 0.8rem; margin-bottom: 0.5rem; }
+.button-group { margin-bottom: 0.5rem; }
+.button-group-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.3rem; }
+.btn-minimal {
+  font-size: 0.82rem !important;
+  padding: 0.4rem 0.7rem !important;
+  border-radius: var(--radius-std) !important;
+  border: 1px solid var(--oat-border) !important;
+}
+.action-buttons-minimal { gap: 0.35rem; }
+.categories-header { margin: 0.4rem 0 0.3rem; }
+.categories-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.analysis-tools-panel .collapsible-header { padding: 0.5rem 0.6rem; margin: -0.2rem 0; }
+.analysis-tools-panel .panel-title { font-size: 0.88rem; }
+.score-value { font-size: 1.6rem; }
+
+/* Give the text (now the left, main column) prominence */
+.text-analysis-panel {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-feature);
+  box-shadow: var(--clay-shadow);
+  padding: 1.1rem 1.25rem;
+}
+.text-analysis-panel .panel-title { font-family: var(--font-display); font-weight: var(--fw-heading); }
+.markup-area {
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: var(--clay-black);
+}
+.highlight-block h6 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  color: var(--ube-800);
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--oat-light);
+}
+
+/* ==================== */
+/* Category variable cards — Clay aesthetics */
+/* ==================== */
+.variables-grid .variable-card {
+  background: var(--clay-white);
+  border: 1px solid var(--oat-border);
+  border-left: 3px solid var(--ube-800);
+  border-radius: var(--radius-card);
+  padding: 0.65rem 0.8rem;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.variables-grid .variable-card:hover {
+  box-shadow: var(--clay-shadow);
+  border-color: var(--clay-black);
+  border-left-color: var(--ube-800);
+}
+.variable-card .variable-title {
+  font-family: var(--font-display);
+  font-weight: var(--fw-heading);
+  font-size: 0.9rem;
+  color: var(--clay-black);
+}
+
+/* Value chips (were solid black) */
+.value-item, .source-value-item, .sub-value-item {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(67, 8, 159, 0.08) !important;
+  color: var(--ube-800) !important;
+  border: 1px solid rgba(67, 8, 159, 0.22);
+  padding: 0.2rem 0.6rem !important;
+  border-radius: var(--radius-pill) !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.value-single, .source-value-single, .sub-value-single {
+  display: inline-block;
+  background: var(--oat-light);
+  border: 1px solid var(--oat-border);
+  color: var(--clay-black) !important;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+/* Delete "x" inside a value chip */
+.value-item .btn-link,
+.value-item [data-action="delete-item"],
+.sub-value-item .btn-link {
+  color: var(--pomegranate-400) !important;
+  opacity: 0.65;
+  line-height: 1;
+}
+.value-item .btn-link:hover,
+.sub-value-item .btn-link:hover { opacity: 1; }
+
+/* Add / edit icon buttons in variable cards */
+.variable-card [data-action] {
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--oat-border) !important;
+  background: var(--clay-white) !important;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.variable-card [data-action^="add"] { color: var(--matcha-600) !important; }
+.variable-card [data-action="edit-variable"] { color: var(--warm-charcoal) !important; }
+.variable-card [data-action]:hover { background: var(--oat-light) !important; border-color: var(--clay-black) !important; }
+
+/* Score panel (now below TEMA) */
+.score-value { font-family: var(--font-display); font-weight: var(--fw-heading); color: var(--ube-800); letter-spacing: -0.03em; }
+.score-bar { background: var(--oat-light); border-radius: var(--radius-pill); overflow: hidden; }
+.score-bar .fill { background: var(--ube-800); }
+.metrics .metric .value { font-weight: 700; color: var(--clay-black); }
+
+.score-unavailable {
+  font-size: 0.82rem;
+  color: var(--warm-charcoal);
+  background: var(--oat-light);
+  border: 1px dashed var(--oat-border);
+  border-radius: var(--radius-std);
+  padding: 0.55rem 0.7rem;
+}
+
+/* ==================== */
+/* Tools panel — tighter & clearer */
+/* ==================== */
+.tools-panel-minimal .panel-header-minimal {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--oat-light);
+}
+.panel-title-minimal { font-size: 0.85rem; font-weight: 700; }
+
+.model-info-minimal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--oat-light);
+  border: 1px solid var(--oat-border);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.65rem;
+  font-size: 0.76rem;
+  margin-bottom: 0.6rem;
+  width: fit-content;
+}
+.model-info-minimal .model-label { color: var(--warm-silver); }
+.model-info-minimal .model-value { font-weight: 700; color: var(--clay-black); text-transform: capitalize; }
+
+.button-group { margin-bottom: 0.55rem; }
+.button-group-title { font-size: 0.64rem; margin-bottom: 0.3rem; }
+
+.action-buttons-minimal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+.btn-minimal {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  padding: 0.4rem 0.45rem !important;
+  border-radius: var(--radius-std) !important;
+  border: 1px solid var(--oat-border) !important;
+  background: var(--clay-white) !important;
+  color: var(--dark-charcoal) !important;
+  line-height: 1.15;
+  min-height: 36px;
+  text-align: center;
+}
+.btn-minimal i { font-size: 0.78rem; opacity: 0.9; }
+.btn-minimal:hover { background: var(--oat-light) !important; border-color: var(--clay-black) !important; }
+.btn-minimal:disabled { opacity: 0.5; }
+
+/* Accent the key actions so it's clear what they do */
+.btn-minimal.btn-finish { color: var(--pomegranate-400) !important; border-color: rgba(252,121,129,0.5) !important; }
+.btn-minimal.btn-finish:hover { background: var(--pomegranate-400) !important; color: #fff !important; border-color: var(--pomegranate-400) !important; }
+.btn-minimal.btn-save { color: var(--matcha-600) !important; border-color: rgba(7,138,82,0.5) !important; }
+.btn-minimal.btn-edit-mode, .btn-minimal.btn-edit-text { color: var(--ube-800) !important; }
+.btn-minimal.btn-warning { color: var(--lemon-700) !important; background: rgba(251,189,65,0.12) !important; border-color: var(--lemon-500) !important; }
+
+/* Keep the text (Análisis del Texto) column visible while scrolling the tools/categories */
+@media (min-width: 768px) {
+  .analysis-text-col {
+    position: sticky;
+    top: 5rem;
+    align-self: flex-start;
+  }
+}

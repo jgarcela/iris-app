@@ -7,20 +7,65 @@
     <div class="row">
         <div class="col-12">
             <!-- Header -->
-            <div class="history-header mb-4">
-                <h1 class="display-6 mb-3">
+            <div class="history-header mb-3">
+                <h1 class="display-6 mb-1">
                     <i class="fas fa-file-alt me-3 text-primary"></i>
-                    {{ _('Análisis Automático') }}
+                    {{ _('Resultado del Análisis') }}
                 </h1>
-                <p class="lead text-muted">
-                    {{ _('Análisis automático del contenido con herramientas de edición y anotación') }}
+                <p class="lead text-muted mb-0">
+                    {{ _('Revisa la puntuación, explora las categorías a la izquierda y edita las anotaciones sobre el texto.') }}
                 </p>
             </div>
+
+            <!-- Result summary hero (only when the inclusivity score is defined) -->
+            {% set score = data.analysis.original.get('inclusivity_score') %}
+            {% if score not in [none, '', 'None'] %}
+            <div class="result-hero mb-3">
+                <div class="result-hero-score">
+                    <div class="score-ring" style="--score: {{ score }};">
+                        <div class="score-ring-inner">
+                            <span class="score-ring-num">{{ score }}<small>%</small></span>
+                            <span class="score-ring-label">{{ _('Inclusividad') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-hero-breakdown">
+                    <p class="clay-label mb-2" style="color: var(--ube-800);">{{ _('Puntuación por categoría') }}</p>
+                    {% set subs = [
+                        (_('Contenido General'), data.analysis.original.contenido_general_score, 'var(--blueberry-800)'),
+                        (_('Lenguaje'), data.analysis.original.lenguaje_score, 'var(--ube-800)'),
+                        (_('Fuentes'), data.analysis.original.fuentes_score, 'var(--slushie-800)')
+                    ] %}
+                    {% for name, val, color in subs %}
+                        <div class="subscore">
+                            <div class="subscore-top">
+                                <span class="subscore-name">{{ name }}</span>
+                                <span class="subscore-val">{{ val }}%</span>
+                            </div>
+                            <div class="subscore-bar"><span style="width: {{ val }}%; background: {{ color }};"></span></div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="result-hero-actions">
+                    <span class="result-model">
+                        <i class="fas fa-microchip me-1"></i>{{ _('Modelo') }}: <strong>{{ data.model }}</strong>
+                    </span>
+                    <div class="result-hero-buttons">
+                        <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="generatePDF()">
+                            <i class="fas fa-file-pdf me-1"></i>{{ _('PDF') }}
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="generateWord()">
+                            <i class="fas fa-file-word me-1"></i>{{ _('Word') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
     <div class="row">
-        <!-- Left Column - Analysis Tools -->
-        <div class="col-md-4">
+        <!-- Analysis Tools column (moved to the right) -->
+        <div class="col-md-4 order-md-2">
             <!-- Analysis Tools Panel -->
             <div class="analysis-tools-panel tools-panel-minimal">
                 <div class="panel-header-minimal">
@@ -96,37 +141,6 @@
                         <div class="mb-2"><strong>{{ _('Crear anotaciones nuevas') }}:</strong> {{ _('selecciona un fragmento del texto y elige la variable/valor desde el panel; se abrirá un selector con opciones válidas.') }}</div>
                         <div class="mb-2"><strong>{{ _('Nota') }}:</strong> {{ _('No es necesario anotar cada una de las variables; marca solo las que identifiques en el texto. Es normal que un texto no contenga todas las variables posibles.') }}</div>
                         <div class="mb-0"><strong>{{ _('Guardar cambios') }}:</strong> {{ _('usa el botón Guardar del panel para persistir las anotaciones.') }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Inclusivity Score as dropdown -->
-            <div class="analysis-tools-panel">
-                <div class="collapsible-header" data-target="score-content">
-                    <h5 class="panel-title mb-0">
-                        <i class="fas fa-chart-line me-2"></i>
-                        {{ _('Puntuación de Inclusividad') }}
-                    </h5>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div id="score-content" class="collapsible-content">
-                    <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
-                    <div class="score-bar">
-                        <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
-                    </div>
-                    <div class="metrics">
-                        <div class="metric">
-                            <span class="label">{{ _('Contenido General') }}</span>
-                            <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
-                        </div>
-                        <div class="metric">
-                            <span class="label">{{ _('Lenguaje') }}</span>
-                            <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
-                        </div>
-                        <div class="metric">
-                            <span class="label">{{ _('Fuentes') }}</span>
-                            <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -318,11 +332,56 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Inclusivity Score (below TEMA) -->
+            <div class="categories-section">
+                <div class="categories-header">
+                    <h6 class="categories-title">
+                        <i class="fas fa-chart-line me-2"></i>
+                        {{ _('PUNTUACIÓN') }}
+                    </h6>
+                </div>
+                <div class="analysis-tools-panel">
+                    <div class="collapsible-header" data-target="score-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            {{ _('Puntuación de Inclusividad') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="score-content" class="collapsible-content">
+                        {% if data.analysis.original.get('inclusivity_score') not in [none, '', 'None'] %}
+                        <div class="score-value">{{ data.analysis.original.inclusivity_score }}%</div>
+                        <div class="score-bar">
+                            <div class="fill" style="width: {{ data.analysis.original.inclusivity_score }}%"></div>
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <span class="label">{{ _('Contenido General') }}</span>
+                                <span class="value">{{ data.analysis.original.contenido_general_score }}%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="label">{{ _('Lenguaje') }}</span>
+                                <span class="value">{{ data.analysis.original.lenguaje_score }}%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="label">{{ _('Fuentes') }}</span>
+                                <span class="value">{{ data.analysis.original.fuentes_score }}%</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="score-unavailable">
+                            <i class="fas fa-circle-info me-1"></i>{{ _('La puntuación de inclusividad no está disponible para este análisis.') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Right Column - Text Analysis -->
-        <div class="col-md-8">
+        <!-- Text column (moved to the left, main focus) -->
+        <div class="col-md-8 order-md-1 analysis-text-col">
             <!-- Instructions Panel (shown by default) -->
             <div class="plain-text">
                 <div class="instructions-panel">
@@ -1158,6 +1217,18 @@
 <script type="module" src="{{ url_for('static', filename='js/highlight_tooltip.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/highlight_human.js') }}"></script>
 <script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+
+<script>
+  // Auto-open the first category on load so the highlighted text is visible immediately
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      const first = document.querySelector('.collapsible-header[data-target="contenido-content"]');
+      const content = document.getElementById('contenido-content');
+      const alreadyOpen = content && content.style.display === 'block';
+      if (first && !alreadyOpen) first.click();
+    }, 500);
+  });
+</script>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis.css') }}">
 
