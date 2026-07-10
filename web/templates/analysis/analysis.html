@@ -793,9 +793,15 @@
     function updateVariableOptions(category) {
         const variableSelect = document.getElementById('annotation-variable');
         if (!variableSelect) return;
-        
+
         variableSelect.innerHTML = '<option value="">Seleccionar variable...</option>';
-        
+
+        // Reset dependent fields from the previous variable
+        const valueSelect = document.getElementById('annotation-value');
+        if (valueSelect) valueSelect.innerHTML = '<option value="">Seleccionar valor...</option>';
+        const composite = document.getElementById('composite-controls');
+        if (composite) { composite.style.display = 'none'; composite.innerHTML = ''; }
+
         const variables = CHALLENGE_VARIABLES;
         let availableVariables = [];
         
@@ -1187,7 +1193,7 @@
         }
     }
     
-    function showAnnotationPanel(selectedText, range) {
+    function showAnnotationPanelManual(selectedText, range) {
         currentAnnotationSelection = {
             text: selectedText,
             range: range
@@ -1323,8 +1329,11 @@
   })();
 
   // ===== #3: floating "+ Anotar" button on text selection =====
+  // Sólo en modo análisis activo; abre el flujo manual (panel estático) con el
+  // grupo de variables (contenido / lenguaje / fuentes) y luego variable/valor.
   (function () {
     let btn = null;
+    let lastSel = null; // { text, range }
     function ensureBtn() {
       if (btn) return btn;
       btn = document.createElement('button');
@@ -1337,27 +1346,35 @@
       btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
       btn.addEventListener('click', function () {
         hide();
-        if (!document.body.classList.contains('edit-mode')) {
-          const editBtn = document.getElementById('edit-analysis-btn');
-          if (editBtn) editBtn.click();
+        if (!lastSel) return;
+        // Open the manual annotation flow (sets currentAnnotationSelection, resets selects)
+        if (typeof window.showAnnotationPanelManual === 'function') {
+          try { window.showAnnotationPanelManual(lastSel.text, lastSel.range); } catch (err) { console.error('showAnnotationPanelManual', err); }
         }
-        setTimeout(function () {
-          if (typeof window.handleTextSelection === 'function') {
-            window.handleTextSelection();
-          } else if (typeof window.showAnnotationPanel === 'function') {
-            window.showAnnotationPanel();
-          }
-        }, 60);
+        // Ensure the panel is visible and in view even if the flow changed
+        var panel = document.getElementById('annotation-panel');
+        if (panel) {
+          panel.style.display = 'block';
+          var prev = document.getElementById('selected-text-preview');
+          if (prev) prev.textContent = lastSel.text;
+          panel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        } else {
+          console.warn('#annotation-panel no encontrado');
+        }
       });
       return btn;
     }
     function hide() { if (btn) btn.style.display = 'none'; }
     document.addEventListener('mouseup', function (e) {
       if (e.target.closest('.annotate-float-btn')) return;
+      // Only when analysis (edit) mode is active
+      if (!document.body.classList.contains('annotation-mode') &&
+          !document.body.classList.contains('edit-mode')) { hide(); return; }
       const sel = window.getSelection();
       const text = sel ? sel.toString().trim() : '';
-      const inText = e.target.closest && e.target.closest('.markup-area');
+      const inText = e.target.closest && (e.target.closest('.markup-area') || e.target.closest('#merged-text'));
       if (text && text.length > 2 && inText && sel.rangeCount) {
+        lastSel = { text: text, range: sel.getRangeAt(0).cloneRange() };
         const rect = sel.getRangeAt(0).getBoundingClientRect();
         const b = ensureBtn();
         b.style.display = 'inline-flex';

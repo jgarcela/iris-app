@@ -2066,3 +2066,16 @@ mark.mark-linked {
 #editTextModal .modal-content { width: auto; max-width: none; padding: 0; text-align: left; }
 #editTextModal .modal-body { max-height: 70vh; overflow-y: auto; }
 #editTextModal #edit-text-area { width: 100%; }
+
+/* ---- Modo análisis activo sobre la vista fusionada ---- */
+.merged-view.edit-mode {
+  position: relative; overflow: visible; margin-top: 30px;
+  box-shadow: var(--clay-shadow), 0 0 0 2px var(--lemon-500);
+}
+.merged-view.edit-mode::before {
+  content: "MODO ANÁLISIS ACTIVO"; position: absolute; top: -13px; left: 20px;
+  background: var(--lemon-500); color: #000; padding: 3px 12px; border-radius: 6px;
+  font-size: .72rem; font-weight: 700; letter-spacing: .5px; z-index: 5;
+  box-shadow: 0 2px 4px rgba(0,0,0,.12);
+}
+.merged-view.edit-mode .mv-text { cursor: text; }

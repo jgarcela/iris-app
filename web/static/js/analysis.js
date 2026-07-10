@@ -1203,27 +1203,30 @@ function editAnalysis() {
         if (saveButton) {
             saveButton.style.display = 'flex';
         }
-        
-        // Show annotation controls
-        showAnnotationControls();
-        
-        // Enable text selection
+
+        // Active-mode badge on the merged text view
+        document.getElementById('merged-view')?.classList.add('edit-mode');
+        document.body.classList.add('edit-mode');
+
+        // Enable text selection (adds body.annotation-mode)
         enableTextSelection();
-        
+
     } else {
         // Exit annotation mode
-        editButton.innerHTML = '<i class="fas fa-edit me-1"></i> Editar Análisis';
+        editButton.innerHTML = '<i class="fas fa-edit me-1"></i> Editar análisis';
         editButton.classList.remove('btn-danger');
         editButton.classList.add('btn-edit-mode');
-        
+
         // Hide save button
         if (saveButton) {
             saveButton.style.display = 'none';
         }
-        
-        // Hide annotation controls
-        hideAnnotationControls();
-        
+
+        // Remove active-mode badge
+        document.getElementById('merged-view')?.classList.remove('edit-mode');
+        document.body.classList.remove('edit-mode');
+        if (typeof hideAnnotationPanel === 'function') hideAnnotationPanel();
+
         // Disable text selection
         disableTextSelection();
     }
