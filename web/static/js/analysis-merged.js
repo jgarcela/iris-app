@@ -118,6 +118,9 @@
       const multi = cats.length > 1 ? ' multi' : '';
       html += `<mark class="mv-mark${multi}" data-cat="${primary}" data-cats="${cats.join(',')}" data-spans="${ids}">${text}</mark>`;
     }
+    // Split into paragraphs on newlines and justify (handled via CSS)
+    html = '<p>' + html.replace(/\n+/g, '</p><p>') + '</p>';
+    html = html.replace(/<p>\s*<\/p>/g, '');
     area.innerHTML = html;
 
     area.querySelectorAll('.mv-mark').forEach(m => {
@@ -265,9 +268,32 @@
     set('#mv-r-count', spans.length + ' regiones');
   }
 
+  // ---- Editar texto del artículo (corregir errores del propio texto) ----
+  // Abre una modal con el texto plano; al guardar se re-fusionan las capas
+  // sobre el texto corregido (las marcas cuyo texto siga existiendo se re-anclan).
+  window.editArticleText = function () {
+    const ta = $('#edit-text-area');
+    const modalEl = $('#editTextModal');
+    if (ta && window.data) ta.value = (window.data.text || '').replace(/\r/g, '');
+    if (modalEl && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  };
+
+  function wireEditTextModal() {
+    const saveBtn = $('#edit-text-save');
+    if (!saveBtn) return;
+    saveBtn.addEventListener('click', () => {
+      const ta = $('#edit-text-area');
+      if (window.data && ta) window.data.text = ta.value;
+      const modalEl = $('#editTextModal');
+      if (modalEl && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      build(); // re-fusiona las capas sobre el texto corregido
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     if (!$('#merged-text')) return;
     wirePopoverButtons();
+    wireEditTextModal();
     build();
   });
 })();

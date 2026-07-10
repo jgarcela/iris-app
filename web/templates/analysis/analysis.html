@@ -66,63 +66,38 @@
     <div class="row">
         <!-- Analysis Tools column (moved to the right) -->
         <div class="col-md-4 order-md-2">
-            <!-- Analysis Tools Panel -->
-            <div class="analysis-tools-panel tools-panel-minimal">
-                <div class="panel-header-minimal">
-                    <h6 class="panel-title-minimal">
-                        <i class="fas fa-tools me-2"></i>
-                        {{ _('Herramientas de Análisis') }}
+            <!-- Analysis Tools Panel (compact) -->
+            <div class="analysis-tools-panel tools-panel-compact">
+                <div class="tools-compact-head">
+                    <h6 class="panel-title-minimal mb-0">
+                        <i class="fas fa-tools me-2"></i>{{ _('Herramientas') }}
                     </h6>
+                    <span class="model-chip" title="{{ _('Modelo') }}"><i class="fas fa-microchip me-1"></i><span id="selected-model">{{ data.model }}</span></span>
                 </div>
-                
-                <!-- Model Info Minimal -->
-                <div class="model-info-minimal">
-                    <span class="model-label">{{ _('Modelo') }}:</span>
-                    <span class="model-value" id="selected-model">{{ data.model }}</span>
+                <div class="tools-compact-grid">
+                    <button class="btn-minimal btn-edit-text" id="edit-text-btn" onclick="editArticleText()">
+                        <i class="fas fa-pen-to-square"></i><span>{{ _('Editar texto') }}</span>
+                    </button>
+                    <button class="btn-minimal btn-edit-mode" id="edit-analysis-btn" onclick="editAnalysis()">
+                        <i class="fas fa-edit"></i><span>{{ _('Editar análisis') }}</span>
+                    </button>
+                    <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
+                        <i class="fas fa-save"></i><span>{{ _('Guardar') }}</span>
+                    </button>
+                    <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
+                        <i class="fas fa-check"></i><span>{{ _('Finalizar') }}</span>
+                    </button>
                 </div>
-                
-                <!-- Export Buttons -->
-                <div class="button-group">
-                    <div class="button-group-title">
-                        <i class="fas fa-download me-1"></i>
-                        {{ _('Exportar') }}
-                    </div>
-                    <div class="action-buttons-minimal">
-                        <button class="btn-minimal btn-export" onclick="generatePDF()">
-                            <i class="fas fa-file-pdf me-2"></i>
-                            {{ _('PDF') }}
-                        </button>
-                        <button class="btn-minimal btn-export" onclick="generateWord()">
-                            <i class="fas fa-file-word me-2"></i>
-                            {{ _('Word') }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="button-group">
-                    <div class="button-group-title">
-                        <i class="fas fa-cogs me-1"></i>
-                        {{ _('Acciones') }}
-                    </div>
-                    <div class="action-buttons-minimal">
-                        <button class="btn-minimal btn-edit-mode" id="edit-analysis-btn" onclick="editAnalysis()" disabled>
-                            <i class="fas fa-edit me-2"></i>
-                            {{ _('Editar Análisis') }}
-                        </button>
-                        <a class="btn-minimal" href="{{ url_for('glossary.glossary_home') }}">
-                            <i class="fas fa-book me-2"></i>
-                            {{ _('Glosario de variables') }}
-                        </a>
-                        <button class="btn-minimal btn-save" onclick="saveAnalysisToDatabase()" id="save-analysis-btn" style="display: none;">
-                            <i class="fas fa-save me-2"></i>
-                            {{ _('Guardar') }}
-                        </button>
-                        <button class="btn-minimal btn-finish" onclick="finishAnalysis()">
-                            <i class="fas fa-check me-2"></i>
-                            {{ _('Finalizar') }}
-                        </button>
-                    </div>
+                <div class="tools-mini-row">
+                    <button class="btn-mini btn-export" onclick="generatePDF()" title="{{ _('Exportar PDF') }}">
+                        <i class="fas fa-file-pdf"></i><span>PDF</span>
+                    </button>
+                    <button class="btn-mini btn-export" onclick="generateWord()" title="{{ _('Exportar Word') }}">
+                        <i class="fas fa-file-word"></i><span>Word</span>
+                    </button>
+                    <a class="btn-mini" href="{{ url_for('glossary.glossary_home') }}" target="_blank" rel="noopener" title="{{ _('Glosario de variables') }}">
+                        <i class="fas fa-book"></i><span>{{ _('Glosario') }}</span>
+                    </a>
                 </div>
             </div>
 
@@ -333,44 +308,44 @@
 
         <!-- Text column (moved to the left, main focus) -->
         <div class="col-md-8 order-md-1 analysis-text-col">
-            <!-- Instructions Panel (shown by default) -->
+            <!-- Instructions (collapsible dropdown) -->
             <div class="plain-text">
-                <div class="instructions-panel">
-                    <div class="instructions-content">
-                        <div class="instructions-header">
-                            <h4 class="instructions-title">¿Cómo proceder?</h4>
-                            <p class="instructions-subtitle">Elige una categoría del menú de la izquierda para comenzar</p>
-                        </div>
-                        
+                <div class="analysis-tools-panel howto-panel">
+                    <div class="collapsible-header" data-target="howto-content">
+                        <h5 class="panel-title mb-0">
+                            <i class="fas fa-compass me-2"></i>
+                            {{ _('¿Cómo proceder?') }}
+                        </h5>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="howto-content" class="collapsible-content">
                         <div class="instructions-steps">
                             <div class="step">
                                 <div class="step-number">1</div>
                                 <div class="step-content">
-                                    <h6 class="step-title">Selecciona una categoría</h6>
-                                    <p class="step-description">Contenido General, Lenguaje o Fuentes</p>
+                                    <h6 class="step-title">{{ _('Revisa los resaltados') }}</h6>
+                                    <p class="step-description">{{ _('El modelo marca personas, fuentes y lenguaje en el texto.') }}</p>
                                 </div>
                             </div>
-                            
                             <div class="step">
                                 <div class="step-number">2</div>
                                 <div class="step-content">
-                                    <h6 class="step-title">Revisa las anotaciones</h6>
-                                    <p class="step-description">Observa los resaltados en el texto</p>
+                                    <h6 class="step-title">{{ _('Corrige') }}</h6>
+                                    <p class="step-description">{{ _('Haz clic en un resaltado para aceptar, editar o rechazar.') }}</p>
                                 </div>
                             </div>
-                            
                             <div class="step">
                                 <div class="step-number">3</div>
                                 <div class="step-content">
-                                    <h6 class="step-title">Edita y valida</h6>
-                                    <p class="step-description">Haz clic en los resaltados para editar</p>
+                                    <h6 class="step-title">{{ _('Añade lo que falte') }}</h6>
+                                    <p class="step-description">{{ _('Selecciona un fragmento del texto para anotarlo.') }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Text Analysis Panel (shown when categories are expanded) -->
             <div class="text-analysis-panel" style="display: none;">
                 <h5 class="panel-title">
@@ -465,6 +440,26 @@
 </div>
 
 <!-- Edit / annotation modal (used by openSelectModal / openSingleInputModal / openFuenteFormModal) -->
+<!-- Editar texto del artículo -->
+<div class="modal fade" id="editTextModal" tabindex="-1" aria-labelledby="editTextModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editTextModalTitle"><i class="fas fa-pen-to-square me-2"></i>{{ _('Editar texto del artículo') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('Cerrar') }}"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-2">{{ _('Corrige errores del texto original. Al guardar, los resaltados se vuelven a aplicar sobre el texto corregido.') }}</p>
+        <textarea class="form-control" id="edit-text-area" rows="14" style="font-size:.92rem; line-height:1.6;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('Cancelar') }}</button>
+        <button type="button" class="btn btn-primary" id="edit-text-save">{{ _('Guardar texto') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">

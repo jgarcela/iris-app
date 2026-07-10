@@ -1963,7 +1963,9 @@ mark.mark-linked {
 .mv-textwrap { position: relative; padding: 18px 22px 24px; }
 .mv-title { font-size: 1.28rem; font-weight: 700; letter-spacing: -.02em; margin: 0 0 4px; text-wrap: balance; }
 .mv-author { font-size: .84rem; color: var(--warm-charcoal); margin-bottom: 14px; }
-.mv-text { font-size: 1.02rem; line-height: 1.6; max-width: 66ch; white-space: pre-wrap; }
+.mv-text { font-size: 1.02rem; line-height: 1.7; max-width: 72ch; text-align: justify; hyphens: auto; }
+.mv-text p { margin: 0 0 1em; }
+.mv-text p:last-child { margin-bottom: 0; }
 
 .mv-mark {
   background: transparent; color: inherit; padding: 1px 1px; border-radius: 4px;
@@ -2026,3 +2028,41 @@ mark.mark-linked {
    (reversible: elimina esta regla para volver al comportamiento anterior). */
 .text-analysis-panel { display: none !important; }
 .merged-view { margin-top: 0; }
+
+/* ---- Compact tools panel ---- */
+.tools-panel-compact { padding: 12px 14px; }
+.tools-compact-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.tools-compact-head .panel-title-minimal { font-size: .92rem; }
+.model-chip {
+  display: inline-flex; align-items: center; font-size: .7rem; font-weight: 600;
+  color: var(--warm-charcoal); background: var(--clay-cream); border: 1px solid var(--oat-border);
+  padding: 2px 9px; border-radius: var(--radius-pill); text-transform: capitalize; white-space: nowrap;
+}
+.tools-compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tools-compact-grid .btn-minimal {
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: 7px;
+  width: 100%; margin: 0; padding: 7px 10px; font-size: .8rem; font-weight: 600;
+  border-radius: var(--radius-std); white-space: nowrap;
+}
+.tools-compact-grid .btn-minimal i { width: 14px; text-align: center; font-size: .82rem; }
+/* Full-width primary actions on their own row */
+.tools-compact-grid .btn-finish { grid-column: 1 / -1; justify-content: center; }
+
+/* ---- Mini export/glossary row + editar texto ---- */
+.tools-mini-row { display: flex; gap: 6px; margin-top: 6px; }
+.btn-mini {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 5px 8px; font-size: .74rem; font-weight: 600; text-decoration: none;
+  color: var(--warm-charcoal); background: var(--clay-cream); border: 1px solid var(--oat-border);
+  border-radius: var(--radius-std); cursor: pointer; transition: background .12s, border-color .12s;
+}
+.btn-mini:hover { background: var(--clay-white); border-color: var(--warm-charcoal); color: var(--clay-black); }
+.btn-mini i { font-size: .82rem; }
+.btn-edit-text.active { background: var(--matcha-600); border-color: var(--matcha-600); color: #fff; }
+.mv-text.editing { outline: 2px dashed var(--matcha-600); outline-offset: 6px; border-radius: 6px; background: rgba(7,138,82,.04); }
+
+/* Fix: la regla global .modal-content { width:380px } de styles.css pisa
+   el ancho de esta modal Bootstrap. Dejar que modal-dialog (xl) mande. */
+#editTextModal .modal-content { width: auto; max-width: none; padding: 0; text-align: left; }
+#editTextModal .modal-body { max-height: 70vh; overflow-y: auto; }
+#editTextModal #edit-text-area { width: 100%; }
