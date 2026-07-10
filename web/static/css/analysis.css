@@ -1937,23 +1937,49 @@ mark.mark-linked {
   box-shadow: var(--clay-shadow);
   overflow: hidden;
 }
-.mv-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--oat-border); }
+.mv-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--oat-border); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mv-help-btn {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--oat-border); background: var(--clay-cream); color: var(--warm-charcoal);
+  font-size: .78rem; display: inline-flex; align-items: center; justify-content: center;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.mv-help-btn:hover { background: var(--matcha-800, #078a52); border-color: var(--matcha-800, #078a52); color: #fff; }
+/* Onboarding modal */
+#howtoModal .modal-content { width: auto; max-width: none; padding: 0; text-align: left; }
+.howto-grid { display: flex; flex-direction: column; gap: 14px; }
+.howto-step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: start; }
+.howto-num {
+  width: 28px; height: 28px; border-radius: 999px; background: var(--matcha-800, #078a52); color: #fff;
+  font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center;
+}
+.howto-step h6 { margin: 2px 0 2px; font-size: .95rem; font-weight: 700; }
+.howto-step p { margin: 0; font-size: .86rem; color: var(--warm-charcoal); line-height: 1.5; }
+.howto-note { margin: 16px 0 0; padding: 10px 12px; font-size: .8rem; color: var(--warm-charcoal); background: var(--clay-cream); border: 1px solid var(--oat-border); border-radius: var(--radius-std); }
 .mv-kicker { font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; color: var(--matcha-800, #078a52); font-weight: 600; }
 .mv-sub { font-size: .84rem; color: var(--warm-charcoal); margin-top: 2px; }
 
 .mv-toolbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
-  padding: 10px 20px; border-bottom: 1px solid var(--oat-border);
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 12px 20px; padding: 12px 20px; border-bottom: 1px solid var(--oat-border);
 }
-.mv-count { font-size: .82rem; color: var(--warm-charcoal); }
-.mv-count b { color: var(--clay-black); font-variant-numeric: tabular-nums; }
-.mv-spacer { flex: 1; }
+/* left: categories */
+.mv-layers-title { font-size: .8rem; font-weight: 700; color: var(--clay-black); }
+.mv-layers-desc { font-size: .74rem; color: var(--warm-charcoal); margin: 1px 0 7px; max-width: 42ch; }
+.mv-layers-btns { display: flex; flex-wrap: wrap; gap: 6px; }
 .mv-layer {
   display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
   font-size: .8rem; padding: 5px 11px; border-radius: 999px;
   border: 1px solid var(--oat-border); background: transparent; color: var(--clay-black);
   transition: opacity .15s;
 }
+/* right: compact counts */
+.mv-counts-box { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; text-align: right; }
+.mv-count-item { font-size: .72rem; color: var(--warm-charcoal); font-variant-numeric: tabular-nums; }
+.mv-count-item b { color: var(--clay-black); font-size: .78rem; }
+.mv-count-item.ok b { color: var(--matcha-800, #078a52); }
+.mv-count-item.edit b { color: var(--slushie-800, #0089ad); }
+.mv-count-item.rej b { color: var(--pomegranate-400, #fc7981); }
 .mv-layer .mv-sw { width: 11px; height: 11px; border-radius: 3px; }
 .mv-layer.off { opacity: .4; text-decoration: line-through; }
 
@@ -1977,8 +2003,10 @@ mark.mark-linked {
 .mv-mark[data-cat="fuentes"]           { background: rgba(0,137,173,.12); border-bottom-color: var(--slushie-800, #0089ad); }
 .mv-mark[data-cat="lenguaje"]          { background: rgba(67,8,159,.10);  border-bottom-color: var(--ube-800, #43089f); }
 .mv-mark.multi { border-bottom-style: double; border-bottom-width: 3px; }
-.mv-mark[data-state="confirmed"] { border-bottom-style: solid; }
+.mv-mark[data-state="confirmed"], .mv-mark[data-state="edited"] { border-bottom-style: solid; }
 .mv-mark[data-state="confirmed"]::after { content: "✓"; font-size: .6em; vertical-align: super; margin-left: 1px; opacity: .6; font-weight: 700; }
+/* Rejected: strip the highlight in the text (plain text) */
+.mv-mark[data-state="rejected"] { background: transparent !important; border-bottom-color: transparent !important; box-shadow: none !important; }
 .mv-mark.dim { background: transparent !important; border-bottom-color: transparent !important; }
 .mv-mark.active { box-shadow: 0 0 0 2px var(--clay-white), 0 0 0 4px currentColor; }
 .mv-mark[data-cat="contenido_general"].active { color: var(--blueberry-800, #01418d); }
@@ -2005,6 +2033,10 @@ mark.mark-linked {
 .mv-body .mv-lbl { font-size: .72rem; color: var(--warm-charcoal); text-transform: capitalize; }
 .mv-st { font-size: .66rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; white-space: nowrap; background: var(--oat-border); color: var(--warm-charcoal); }
 .mv-st[data-state="confirmed"] { background: rgba(7,138,82,.14); color: var(--matcha-800, #078a52); }
+.mv-st[data-state="edited"] { background: rgba(0,137,173,.14); color: var(--slushie-800, #0089ad); }
+.mv-st[data-state="rejected"] { background: rgba(252,121,129,.16); color: var(--pomegranate-400, #fc7981); }
+.mv-region.rejected { opacity: .6; }
+.mv-region.rejected .mv-txt { text-decoration: line-through; }
 
 /* popover */
 .mv-pop {
@@ -2079,3 +2111,12 @@ mark.mark-linked {
   box-shadow: 0 2px 4px rgba(0,0,0,.12);
 }
 .merged-view.edit-mode .mv-text { cursor: text; }
+
+/* ---- Compact Protagonista / Tema ---- */
+.mini-result { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; }
+.mini-badge { font-size: .82rem !important; font-weight: 600; padding: 5px 12px !important; border-radius: var(--radius-pill) !important; }
+.mini-counts { flex-basis: 100%; display: flex; justify-content: center; gap: 14px; font-size: .78rem; color: var(--warm-charcoal); }
+.mini-counts b { font-size: .9rem; }
+.mini-code { font-size: .74rem; }
+/* tighter panels for these two mini cards */
+#topic-analysis, #protagonist-analysis { padding-top: .4rem !important; padding-bottom: .4rem !important; }

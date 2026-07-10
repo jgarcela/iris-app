@@ -193,6 +193,8 @@
     pop.classList.add('show');
   }
 
+  const STATE_LABEL = { suggested: 'pendiente', confirmed: '✓ aceptado', edited: 'editado', rejected: 'rechazado' };
+
   function applyState(ids, state) {
     ids.forEach(id => {
       const s = (window.__mergedSpans || []).find(x => x.id === id);
@@ -200,12 +202,11 @@
       $$(`.mv-mark[data-spans~="${id}"]`).forEach(m => { m.dataset.state = state; });
       const r = $(`.mv-region[data-span="${id}"]`);
       if (r) {
-        if (state === 'rejected') { r.remove(); }
-        else {
-          const st = r.querySelector('.mv-st');
-          st.dataset.state = state;
-          st.textContent = state === 'confirmed' ? '✓ ok' : 'pendiente';
-        }
+        // Rejected stays in the list, marked as such (highlight removed in the text via CSS)
+        r.classList.toggle('rejected', state === 'rejected');
+        const st = r.querySelector('.mv-st');
+        st.dataset.state = state;
+        st.textContent = STATE_LABEL[state] || 'pendiente';
       }
     });
     updateCounts();
@@ -232,7 +233,7 @@
           const r = $(`.mv-region[data-span="${id}"] .mv-txt`);
           if (r) r.textContent = val;
         });
-        applyState(pop.dataset.spans.split(' '), 'confirmed');
+        applyState(pop.dataset.spans.split(' '), 'edited');
         pop.classList.remove('show');
       }
     });
@@ -259,12 +260,14 @@
   }
 
   function updateCounts() {
-    const spans = (window.__mergedSpans || []).filter(s => s.state !== 'rejected');
-    const ok = spans.filter(s => s.state === 'confirmed').length;
+    const spans = window.__mergedSpans || [];
+    const c = st => spans.filter(s => s.state === st).length;
     const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
     set('#mv-c-total', spans.length);
-    set('#mv-c-ok', ok);
-    set('#mv-c-pend', spans.length - ok);
+    set('#mv-c-ok', c('confirmed'));
+    set('#mv-c-pend', c('suggested'));
+    set('#mv-c-edit', c('edited'));
+    set('#mv-c-rej', c('rejected'));
     set('#mv-r-count', spans.length + ' regiones');
   }
 
@@ -290,10 +293,25 @@
     });
   }
 
+  // ---- Onboarding "Cómo funciona": first visit + help button ----
+  function wireHowto() {
+    const el = $('#howtoModal');
+    if (!el || !window.bootstrap) return;
+    const modal = bootstrap.Modal.getOrCreateInstance(el);
+    const KEY = 'iris_howto_seen_v1';
+    if (!localStorage.getItem(KEY)) {
+      setTimeout(() => modal.show(), 700);
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    }
+    const btn = $('#mv-help-btn');
+    if (btn) btn.addEventListener('click', () => modal.show());
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     if (!$('#merged-text')) return;
     wirePopoverButtons();
     wireEditTextModal();
+    wireHowto();
     build();
   });
 })();

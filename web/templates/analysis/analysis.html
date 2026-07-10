@@ -101,25 +101,6 @@
                 </div>
             </div>
 
-            <!-- Help / Info Panel as dropdown -->
-            <div class="analysis-tools-panel">
-                <div class="collapsible-header" data-target="help-content">
-                    <h5 class="panel-title mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        {{ _('Cómo editar anotaciones') }}
-                    </h5>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div id="help-content" class="collapsible-content">
-                    <div class="small">
-                        <div class="mb-2"><strong>{{ _('Editar/aceptar/eliminar') }}:</strong> {{ _('haz clic en cualquier texto resaltado para abrir el menú de acciones. Al aceptar verás un check junto al fragmento.') }}</div>
-                        <div class="mb-2"><strong>{{ _('Crear anotaciones nuevas') }}:</strong> {{ _('selecciona un fragmento del texto y elige la variable/valor desde el panel; se abrirá un selector con opciones válidas.') }}</div>
-                        <div class="mb-2"><strong>{{ _('Nota') }}:</strong> {{ _('No es necesario anotar cada una de las variables; marca solo las que identifiques en el texto. Es normal que un texto no contenga todas las variables posibles.') }}</div>
-                        <div class="mb-0"><strong>{{ _('Guardar cambios') }}:</strong> {{ _('usa el botón Guardar del panel para persistir las anotaciones.') }}</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Recomendaciones -->
             <div class="analysis-tools-panel">
                 <div class="collapsible-header" data-target="recomendaciones-content">
@@ -202,24 +183,17 @@
 
             <!-- Protagonismo Section -->
             <div class="categories-section">
-                <div class="categories-header">
-                    <h6 class="categories-title">
-                        <i class="fas fa-list-ul me-2"></i>
-                        {{ _('PROTAGONISMO') }}
-                    </h6>
-                </div>
-                
-                 <!-- Protagonist Analysis Dropdown -->
+                <!-- Protagonist Analysis Dropdown -->
                 <div class="analysis-tools-panel">
                     <div class="collapsible-header" data-target="protagonist-content">
                         <h5 class="panel-title mb-0">
                             <i class="fas fa-user-star me-2"></i>
-                            {{ _('Protagonista de la Noticia') }}
+                            {{ _('Protagonista') }}
                         </h5>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
                     <div id="protagonist-content" class="collapsible-content">
-                        <div id="protagonist-analysis" class="text-center py-3">
+                        <div id="protagonist-analysis" class="text-center py-2">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">{{ _('Analizando...') }}</span>
                             </div>
@@ -232,24 +206,17 @@
            
             <!-- Tema Section -->
             <div class="categories-section">
-                <div class="categories-header">
-                    <h6 class="categories-title">
-                        <i class="fas fa-list-ul me-2"></i>
-                        {{ _('TEMA') }}
-                    </h6>
-                </div>
-
                 <!-- Topic Analysis Dropdown -->
                 <div class="analysis-tools-panel">
                     <div class="collapsible-header" data-target="topic-content">
                         <h5 class="panel-title mb-0">
                             <i class="fas fa-tag me-2"></i>
-                            {{ _('Tema de la Noticia') }}
+                            {{ _('Tema') }}
                         </h5>
                         <i class="fas fa-chevron-down toggle-icon"></i>
                     </div>
                     <div id="topic-content" class="collapsible-content">
-                        <div id="topic-analysis" class="text-center py-3">
+                        <div id="topic-analysis" class="text-center py-2">
                             <div class="spinner-border text-success" role="status">
                                 <span class="visually-hidden">{{ _('Analizando...') }}</span>
                             </div>
@@ -308,44 +275,6 @@
 
         <!-- Text column (moved to the left, main focus) -->
         <div class="col-md-8 order-md-1 analysis-text-col">
-            <!-- Instructions (collapsible dropdown) -->
-            <div class="plain-text">
-                <div class="analysis-tools-panel howto-panel">
-                    <div class="collapsible-header" data-target="howto-content">
-                        <h5 class="panel-title mb-0">
-                            <i class="fas fa-compass me-2"></i>
-                            {{ _('¿Cómo proceder?') }}
-                        </h5>
-                        <i class="fas fa-chevron-down toggle-icon"></i>
-                    </div>
-                    <div id="howto-content" class="collapsible-content">
-                        <div class="instructions-steps">
-                            <div class="step">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <h6 class="step-title">{{ _('Revisa los resaltados') }}</h6>
-                                    <p class="step-description">{{ _('El modelo marca personas, fuentes y lenguaje en el texto.') }}</p>
-                                </div>
-                            </div>
-                            <div class="step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <h6 class="step-title">{{ _('Corrige') }}</h6>
-                                    <p class="step-description">{{ _('Haz clic en un resaltado para aceptar, editar o rechazar.') }}</p>
-                                </div>
-                            </div>
-                            <div class="step">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <h6 class="step-title">{{ _('Añade lo que falte') }}</h6>
-                                    <p class="step-description">{{ _('Selecciona un fragmento del texto para anotarlo.') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Text Analysis Panel (shown when categories are expanded) -->
             <div class="text-analysis-panel" style="display: none;">
                 <h5 class="panel-title">
@@ -402,18 +331,27 @@
                  ============================================================ -->
             <div id="merged-view" class="merged-view">
                 <div class="mv-head">
-                    <div>
-                        <div class="mv-kicker">{{ _('Análisis del Texto') }}</div>
-                        <div class="mv-sub">{{ _('Texto único con todas las capas · pasa el ratón para sincronizar con el panel') }}</div>
-                    </div>
+                    <div class="mv-kicker">{{ _('Análisis del Texto') }}</div>
+                    <button type="button" class="mv-help-btn" id="mv-help-btn" title="{{ _('Cómo funciona') }}" aria-label="{{ _('Cómo funciona') }}"><i class="fas fa-question"></i></button>
                 </div>
 
                 <div class="mv-toolbar" role="toolbar" aria-label="{{ _('Capas y estado') }}">
-                    <span class="mv-count">{{ _('Detecciones') }}: <b id="mv-c-total">0</b> · {{ _('aceptadas') }} <b id="mv-c-ok">0</b> · {{ _('pendientes') }} <b id="mv-c-pend">0</b></span>
-                    <span class="mv-spacer"></span>
-                    <button type="button" class="mv-layer" data-layer="contenido_general"><span class="mv-sw" style="background:var(--blueberry-800,#01418d)"></span>{{ _('Contenido') }}</button>
-                    <button type="button" class="mv-layer" data-layer="fuentes"><span class="mv-sw" style="background:var(--slushie-800,#0089ad)"></span>{{ _('Fuentes') }}</button>
-                    <button type="button" class="mv-layer" data-layer="lenguaje"><span class="mv-sw" style="background:var(--ube-800,#43089f)"></span>{{ _('Lenguaje') }}</button>
+                    <div class="mv-layers">
+                        <div class="mv-layers-title">{{ _('Categorías') }}</div>
+                        <div class="mv-layers-desc">{{ _('Selecciona una categoría para mostrar u ocultar sus resaltados') }}</div>
+                        <div class="mv-layers-btns">
+                            <button type="button" class="mv-layer" data-layer="contenido_general"><span class="mv-sw" style="background:var(--blueberry-800,#01418d)"></span>{{ _('Contenido') }}</button>
+                            <button type="button" class="mv-layer" data-layer="fuentes"><span class="mv-sw" style="background:var(--slushie-800,#0089ad)"></span>{{ _('Fuentes') }}</button>
+                            <button type="button" class="mv-layer" data-layer="lenguaje"><span class="mv-sw" style="background:var(--ube-800,#43089f)"></span>{{ _('Lenguaje') }}</button>
+                        </div>
+                    </div>
+                    <div class="mv-counts-box">
+                        <span class="mv-count-item"><b id="mv-c-total">0</b> {{ _('detecciones') }}</span>
+                        <span class="mv-count-item ok"><b id="mv-c-ok">0</b> {{ _('aceptadas') }}</span>
+                        <span class="mv-count-item edit"><b id="mv-c-edit">0</b> {{ _('editadas') }}</span>
+                        <span class="mv-count-item rej"><b id="mv-c-rej">0</b> {{ _('rechazadas') }}</span>
+                        <span class="mv-count-item pend"><b id="mv-c-pend">0</b> {{ _('pendientes') }}</span>
+                    </div>
                 </div>
 
                 <div class="mv-textwrap">
@@ -437,6 +375,61 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Onboarding: cómo funciona (primera vez + botón ?) -->
+<div class="modal fade" id="howtoModal" tabindex="-1" aria-labelledby="howtoModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="howtoModalTitle"><i class="fas fa-compass me-2"></i>{{ _('Cómo revisar el análisis') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('Cerrar') }}"></button>
+      </div>
+      <div class="modal-body">
+        <div class="howto-grid">
+          <div class="howto-step">
+            <div class="howto-num">1</div>
+            <div>
+              <h6>{{ _('Revisa los resaltados') }}</h6>
+              <p>{{ _('El modelo marca personas, fuentes y lenguaje en el texto. Usa las pastillas de categoría para mostrar u ocultar cada capa.') }}</p>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-num">2</div>
+            <div>
+              <h6>{{ _('Corrige cada detección') }}</h6>
+              <p>{{ _('Haz clic en un resaltado y elige Aceptar, Editar o Rechazar. Lo verás reflejado en el panel de Detecciones.') }}</p>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-num">3</div>
+            <div>
+              <h6>{{ _('Añade lo que falte') }}</h6>
+              <p>{{ _('Pulsa «Editar análisis», selecciona un fragmento del texto y pulsa «Anotar» para elegir categoría, variable y valor.') }}</p>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-num">4</div>
+            <div>
+              <h6>{{ _('Corrige el texto original') }}</h6>
+              <p>{{ _('Si la noticia tiene erratas, usa «Editar texto» para arreglarlas; los resaltados se reaplican sobre el texto corregido.') }}</p>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-num">5</div>
+            <div>
+              <h6>{{ _('Guarda o exporta') }}</h6>
+              <p>{{ _('Cuando termines, guarda el análisis o expórtalo a PDF/Word desde el panel de Herramientas.') }}</p>
+            </div>
+          </div>
+        </div>
+        <p class="howto-note"><i class="fas fa-circle-info me-1"></i>{{ _('No hace falta anotar todas las variables: marca solo las que identifiques. Es normal que un texto no contenga todas.') }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ _('Entendido') }}</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Edit / annotation modal (used by openSelectModal / openSingleInputModal / openFuenteFormModal) -->
@@ -598,49 +591,53 @@
             return;
         }
         
-        // Get protagonist analysis from data
-        const protagonistData = window.data.protagonist_analysis || {};
+        // Prefer server-computed value; otherwise compute from the analysis data
+        let protagonistData = window.data.protagonist_analysis;
+        if (!protagonistData || !protagonistData.counts) {
+            protagonistData = computeProtagonist(window.data);
+        }
         const protagonist = protagonistData.protagonist || 'No identificado';
-        const confidence = protagonistData.confidence || 0;
         const counts = protagonistData.counts || { masculino: 0, femenino: 0, mixto: 0 };
-        
-        // Create protagonist display
-        const confidencePercentage = Math.round(confidence * 100);
-        const confidenceClass = confidence > 0.7 ? 'text-success' : confidence > 0.4 ? 'text-warning' : 'text-danger';
-        
+
+        const ICONS = { 'Masculino': 'fa-mars', 'Femenino': 'fa-venus', 'Mixto': 'fa-venus-mars', 'No identificado': 'fa-user-slash' };
+        const icon = ICONS[protagonist] || 'fa-user';
+
         protagonistDiv.innerHTML = `
-            <div class="protagonist-result">
-                <div class="protagonist-badge mb-3">
-                    <span class="badge bg-primary fs-6 px-3 py-2">
-                        <i class="fas fa-user me-2"></i>
-                        ${protagonist}
-                    </span>
-                </div>
-                
-                <div class="gender-counts">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="count-item">
-                                <div class="count-number text-primary fw-bold">${counts.masculino}</div>
-                                <div class="count-label small text-muted">Masculino</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="count-item">
-                                <div class="count-number text-success fw-bold">${counts.femenino}</div>
-                                <div class="count-label small text-muted">Femenino</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="count-item">
-                                <div class="count-number text-info fw-bold">${counts.mixto}</div>
-                                <div class="count-label small text-muted">Mixto</div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="mini-result">
+                <span class="badge bg-primary mini-badge"><i class="fas ${icon} me-1"></i>${protagonist}</span>
+                <div class="mini-counts">
+                    <span><b class="text-primary">${counts.masculino}</b> Masc.</span>
+                    <span><b class="text-success">${counts.femenino}</b> Fem.</span>
+                    <span><b class="text-info">${counts.mixto}</b> Mixto</span>
                 </div>
             </div>
         `;
+    }
+
+    // Client-side replica of analyze_protagonist_from_api_data (analysis.py)
+    function computeProtagonist(data) {
+        const original = (data.analysis && data.analysis.original) || {};
+        let male = 0, female = 0, mixed = 0;
+        const gpm = (original.contenido_general || {}).genero_personas_mencionadas;
+        if (Array.isArray(gpm)) gpm.forEach(v => {
+            if (v === 1 || v === 2) male++; else if (v === 3) female++; else if (v === 4) mixed++;
+        });
+        const gp = (original.contenido_general || {}).genero_periodista;
+        if (gp === 1) male++; else if (gp === 2) female++; else if (gp === 3) { male++; female++; }
+        const fuentes = (original.fuentes || {}).fuentes || [];
+        fuentes.forEach(f => {
+            const g = f.genero_fuente;
+            if (g === 1 || g === 2) male++; else if (g === 3) female++; else if (g === 4) mixed++;
+        });
+        const total = male + female + mixed;
+        const counts = { masculino: male, femenino: female, mixto: mixed };
+        let protagonist = 'No identificado';
+        if (total > 0) {
+            if (female > male && female > mixed) protagonist = 'Femenino';
+            else if (male > female && male > mixed) protagonist = 'Masculino';
+            else if (mixed > 0) protagonist = 'Mixto';
+        }
+        return { protagonist, counts };
     }
     
     function updateTopicAnalysis() {
@@ -677,16 +674,9 @@
             const topicName = topicNames[tema] || 'Tema no identificado';
             
             topicDiv.innerHTML = `
-                <div class="topic-result">
-                    <div class="topic-badge mb-3">
-                        <span class="badge bg-success fs-6 px-3 py-2">
-                            <i class="fas fa-tag me-2"></i>
-                            ${topicName}
-                        </span>
-                    </div>
-                    <div class="topic-code">
-                        <small class="text-muted">Código: ${tema}</small>
-                    </div>
+                <div class="mini-result">
+                    <span class="badge bg-success mini-badge"><i class="fas fa-tag me-1"></i>${topicName}</span>
+                    <span class="mini-code text-muted">cód. ${tema}</span>
                 </div>
             `;
         } else {
