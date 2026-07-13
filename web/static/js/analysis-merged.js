@@ -68,6 +68,30 @@
   function build() {
     const data = window.data;
     if (!data || !$('#merged-text')) return;
+
+    // Rehydrate from a previously saved review (accept/edit/reject preserved)
+    const review = data.review;
+    if (review && Array.isArray(review.detections) && review.detections.length) {
+      const canon = (review.text || data.text || '').replace(/\r/g, '');
+      const spans = review.detections.map((d, i) => ({
+        id: d.id || ('sp' + i),
+        category: d.category,
+        variable: d.variable || '',
+        value: d.value != null ? String(d.value) : '',
+        text: d.text,
+        start: d.start, end: d.end,
+        state: d.state || 'suggested',
+        origin: d.origin || 'model'
+      }));
+      window.__mergedSpans = spans;
+      CANON = canon;
+      renderText(canon, spans);
+      renderRegions(spans);
+      wireLayers();
+      updateCounts();
+      return;
+    }
+
     const hl = (data.highlight && data.highlight.original) || {};
     const canonical = (data.text || '').replace(/\r/g, '');
     if (!canonical.trim()) return;
@@ -395,6 +419,26 @@
     rerender(); // rebuild marks + regions from spans (preserves states)
   }
 
+  // Add a brand-new manual detection (from the "Anotar" panel) as a merged span
+  function addMergedSpanFromAnnotation(cat, variable, value, text) {
+    let idx = CANON.indexOf(text);
+    if (idx < 0) return; // fragment not found in the article text
+    const span = {
+      id: 'm' + Date.now(),
+      category: cat,
+      variable: variable || '',
+      value: value != null ? String(value) : '',
+      text: text,
+      start: idx, end: idx + text.length,
+      state: 'confirmed',
+      origin: 'manual'
+    };
+    (window.__mergedSpans = window.__mergedSpans || []).push(span);
+    window.__mergedSpans.sort((a, b) => a.start - b.start || a.end - b.end);
+    // Re-render AFTER the inline flow finishes mutating the DOM
+    setTimeout(rerender, 0);
+  }
+
   function wireEditDetection() {
     const addBtn = $('#add-annotation');
     if (!addBtn) return;
@@ -411,22 +455,26 @@
         }
       }, 10);
     });
-    // Capture phase so we handle the edit and STOP the inline add-flow, which
-    // would otherwise insert its own (duplicate) highlight into the text.
+    // Capture phase. For EDIT: handle it and stop the inline add-flow (which would
+    // duplicate the highlight). For a NEW annotation: let the inline flow run and
+    // ALSO add a matching span to the merged view so it persists in `review`.
     addBtn.addEventListener('click', function (e) {
-      if (!editingSpanId) return;
       const cat = ($('#annotation-category') || {}).value;
       const variable = ($('#annotation-variable') || {}).value;
       const value = ($('#annotation-value') || {}).value;
       if (!cat || !variable || !value) return; // let the panel's own validation alert
-      e.stopImmediatePropagation();
       const prev = $('#selected-text-preview');
       const text = prev ? (prev.textContent || '').trim() : null;
-      updateSpanClassification(editingSpanId, cat, variable, value, text);
-      // Close the annotation panel (inline handler won't run now)
-      if (typeof window.hideAnnotationPanel === 'function') window.hideAnnotationPanel();
-      const panel = $('#annotation-panel'); if (panel) panel.style.display = 'none';
-      endEditDetection();
+      if (editingSpanId) {
+        e.stopImmediatePropagation();
+        updateSpanClassification(editingSpanId, cat, variable, value, text);
+        if (typeof window.hideAnnotationPanel === 'function') window.hideAnnotationPanel();
+        const panel = $('#annotation-panel'); if (panel) panel.style.display = 'none';
+        endEditDetection();
+      } else if (text) {
+        // New manual detection: add to merged spans (after the inline flow runs)
+        addMergedSpanFromAnnotation(cat, variable, value, text);
+      }
     }, true);
     // Reset editing state if the panel is cancelled/closed
     ['cancel-annotation', 'close-annotation-panel'].forEach(id => {
@@ -434,6 +482,26 @@
       if (b) b.addEventListener('click', endEditDetection);
     });
   }
+
+  // ---- Build the "review" payload for persistence ----
+  window.buildReviewPayload = function () {
+    const spans = window.__mergedSpans || [];
+    return {
+      text: (window.data && window.data.text) || '',
+      detections: spans.map(s => ({
+        id: s.id,
+        category: s.category,
+        variable: s.variable || '',
+        value: s.value != null ? String(s.value) : '',
+        text: s.text,
+        start: s.start,
+        end: s.end,
+        state: s.state || 'suggested',
+        origin: s.origin || 'model'
+      })),
+      updated_at: new Date().toISOString()
+    };
+  };
 
   // ---- Onboarding "Cómo funciona": first visit + help button ----
   function wireHowto() {

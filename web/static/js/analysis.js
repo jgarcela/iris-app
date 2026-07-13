@@ -2162,6 +2162,8 @@ async function saveAnalysisToDatabase() {
                 lenguaje: document.querySelector('#highlight-lenguaje .markup-area')?.innerHTML || '',
                 fuentes: document.querySelector('#highlight-fuentes .markup-area')?.innerHTML || ''
             },
+            // Merged-view review state (accept/edit/reject + new detections + corrected text)
+            review: (typeof window.buildReviewPayload === 'function') ? window.buildReviewPayload() : undefined,
             timestamp: new Date().toISOString()
         };
         

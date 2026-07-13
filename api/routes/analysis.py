@@ -182,6 +182,7 @@ def save_annotations():
         analysis = data.get('analysis')
         annotations = data.get('annotations', [])
         highlight_html = data.get('highlight_html', {})
+        review = data.get('review')
         timestamp = data.get('timestamp')
         
         print(f"[SAVE_ANNOTATIONS] Received data:")
@@ -200,6 +201,9 @@ def save_annotations():
             'highlight.edited': highlight_html,
             'updated_at': datetime.now(timezone.utc)
         }
+        # Merged-view review state (detections with accept/edit/reject + corrected text)
+        if review is not None:
+            update_data['review'] = review
         
         # Get user information from request headers
         user_id = request.headers.get('X-User-ID', 'anonymous')
@@ -220,6 +224,7 @@ def save_annotations():
                     'original': {},
                     'edited': highlight_html
                 },
+                'review': review,
                 'created_at': datetime.now(timezone.utc),
                 'updated_at': datetime.now(timezone.utc),
                 'status': 'draft'
