@@ -131,6 +131,26 @@ def to_madrid(dt, fmt='%d/%m/%Y %H:%M'):
 app.jinja_env.filters['to_madrid'] = to_madrid
 
 
+def iso_dmy(value, with_time=True):
+    """Format an ISO datetime string (or datetime) as dd/mm/YYYY [HH:MM] in Europe/Madrid.
+    Usage: {{ analysis.timestamp|iso_dmy }} or {{ ...|iso_dmy(False) }}"""
+    if not value:
+        return ''
+    try:
+        from datetime import datetime as _dt
+        dt = value if isinstance(value, _dt) else _dt.fromisoformat(str(value).replace('Z', '+00:00'))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        if ZoneInfo is not None:
+            dt = dt.astimezone(ZoneInfo('Europe/Madrid'))
+        return dt.strftime('%d/%m/%Y %H:%M' if with_time else '%d/%m/%Y')
+    except Exception:
+        s = str(value)
+        return s[:16].replace('T', ' ') if with_time else s[:10]
+
+app.jinja_env.filters['iso_dmy'] = iso_dmy
+
+
 # ----------------- CURRENT USER -----------------
 @app.context_processor
 def inject_user():

@@ -36,6 +36,7 @@ SIGNIFICADO_IA               = ast.literal_eval(config['CONTENIDO_GENERAL']['SIG
 GENERO_PERSONAS_MENCIONADAS  = ast.literal_eval(config['CONTENIDO_GENERAL']['GENERO_PERSONAS_MENCIONADAS'])
 EXTENSION_NOTICIA            = ast.literal_eval(config['CONTENIDO_GENERAL']['EXTENSION_NOTICIA'])
 GENERO_PERIODISTA            = ast.literal_eval(config['CONTENIDO_GENERAL']['GENERO_PERIODISTA'])
+HIGHLIGHT_COLOR_MAP          = ast.literal_eval(config['VARIABLES']['HIGHLIGHT_COLOR_MAP'])
 
 
 # ==================================

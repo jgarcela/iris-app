@@ -172,6 +172,54 @@ def save_edits():
         return jsonify(success=False, error='No se pudo actualizar el documento')
 
 
+import html as _html_lib
+
+
+def _marks_html(text, dets, color_map):
+    """Rebuild highlighted HTML for one category from review detections."""
+    n = len(text)
+    dets = sorted(
+        [d for d in dets if isinstance(d.get('start'), int) and isinstance(d.get('end'), int)
+         and 0 <= d['start'] < d['end'] <= n],
+        key=lambda d: (d['start'], -d['end'])
+    )
+    parts, cursor = [], 0
+    for d in dets:
+        s, e = d['start'], d['end']
+        if s < cursor:  # overlapping mark → skip to keep valid HTML
+            continue
+        parts.append(_html_lib.escape(text[cursor:s]))
+        cls = color_map.get(d.get('variable'), '')
+        clsattr = ' class="%s"' % cls if cls else ''
+        parts.append('<mark%s>%s</mark>' % (clsattr, _html_lib.escape(text[s:e])))
+        cursor = e
+    parts.append(_html_lib.escape(text[cursor:]))
+    return ''.join(parts)
+
+
+def build_edited_from_review(review):
+    """Derive (highlight_edited, analysis_edited) from the human review.
+    Rejected detections are dropped. highlight_edited feeds the report;
+    analysis_edited is a best-effort grouped summary."""
+    if not review or not isinstance(review, dict):
+        return None, None
+    text = review.get('text') or ''
+    dets = [d for d in (review.get('detections') or [])
+            if d.get('state') != 'rejected' and d.get('category')]
+    color_map = getattr(api, 'HIGHLIGHT_COLOR_MAP', {})
+
+    cats = ['contenido_general', 'fuentes', 'lenguaje']
+    highlight_edited = {c: _marks_html(text, [d for d in dets if d.get('category') == c], color_map)
+                        for c in cats}
+
+    analysis_edited = {c: {} for c in cats}
+    for d in dets:
+        c, v = d['category'], (d.get('variable') or 'otros')
+        analysis_edited[c].setdefault(v, []).append({'text': d.get('text'), 'value': d.get('value')})
+
+    return highlight_edited, analysis_edited
+
+
 @bp.route('/save_annotations', methods=['POST'])
 # @role_required('user','admin')
 def save_annotations():
@@ -184,7 +232,16 @@ def save_annotations():
         highlight_html = data.get('highlight_html', {})
         review = data.get('review')
         timestamp = data.get('timestamp')
-        
+
+        # Parse the client timestamp (falls back to now). Used so the just-saved
+        # analysis surfaces at the top of the history (which sorts by `timestamp`).
+        saved_ts = datetime.now(timezone.utc)
+        if timestamp:
+            try:
+                saved_ts = datetime.fromisoformat(str(timestamp).replace('Z', '+00:00'))
+            except Exception:
+                pass
+
         print(f"[SAVE_ANNOTATIONS] Received data:")
         print(f"  - doc_id: {doc_id}")
         print(f"  - annotations count: {len(annotations)}")
@@ -194,37 +251,50 @@ def save_annotations():
         if not doc_id:
             return jsonify(success=False, error='Document ID is required'), 400
         
+        # Get user information from request headers (owner of this save)
+        user_id = request.headers.get('X-User-ID', 'anonymous')
+        user_email = request.headers.get('X-User-Email', 'anonymous@example.com')
+
         # Prepare update data
         update_data = {
             'analysis.original': analysis,
             'annotations': annotations,
             'highlight.edited': highlight_html,
+            'timestamp': saved_ts,
             'updated_at': datetime.now(timezone.utc)
         }
-        # Merged-view review state (detections with accept/edit/reject + corrected text)
+        # Attribute the analysis to the user who saved it (private per-user history).
+        # Only overwrite with a real user, never clobber an owner with 'anonymous'.
+        if user_id and user_id != 'anonymous':
+            update_data['user_id'] = user_id
+            update_data['user_email'] = user_email
+        # Merged-view review state (detections with accept/edit/reject + corrected text).
+        # Also derive analysis.edited + highlight.edited so the report reflects it.
         if review is not None:
             update_data['review'] = review
-        
-        # Get user information from request headers
-        user_id = request.headers.get('X-User-ID', 'anonymous')
-        user_email = request.headers.get('X-User-Email', 'anonymous@example.com')
-        
+            hl_edited, an_edited = build_edited_from_review(review)
+            if hl_edited is not None:
+                update_data['highlight.edited'] = hl_edited
+                update_data['analysis.edited'] = an_edited
+
         # If it's a new document (no existing doc_id), create it
         if doc_id == 'new' or not ObjectId.is_valid(doc_id):
             # Create new document
+            new_hl_edited, new_an_edited = build_edited_from_review(review) if review is not None else (highlight_html, None)
             new_doc = {
                 'user_id': user_id,
                 'user_email': user_email,
                 'analysis': {
                     'original': analysis,
-                    'edited': None
+                    'edited': new_an_edited
                 },
                 'annotations': annotations,
                 'highlight': {
                     'original': {},
-                    'edited': highlight_html
+                    'edited': new_hl_edited
                 },
                 'review': review,
+                'timestamp': saved_ts,
                 'created_at': datetime.now(timezone.utc),
                 'updated_at': datetime.now(timezone.utc),
                 'status': 'draft'
@@ -388,10 +458,16 @@ def get_analysis_by_id(analysis_id):
                 'error': 'ID de análisis inválido'
             }), 400
         
-        # Find analysis by ID and user
+        # Find analysis by ID and user (user_id may be stored as str or ObjectId)
+        user_id_variants = [user_id]
+        try:
+            if user_id != 'anonymous' and len(user_id) == 24:
+                user_id_variants.append(ObjectId(user_id))
+        except Exception:
+            pass
         analysis = db.DB_ANALYSIS.find_one({
             '_id': ObjectId(analysis_id),
-            'user_id': user_id
+            'user_id': {'$in': user_id_variants}
         })
         
         if not analysis:
@@ -400,14 +476,13 @@ def get_analysis_by_id(analysis_id):
                 'error': 'Análisis no encontrado o no tienes permisos para verlo'
             }), 404
         
-        # Convert ObjectId to string and format timestamps
+        # Convert ObjectId to string and format timestamps (guard nulls/non-dates)
         analysis['_id'] = str(analysis['_id'])
-        if 'timestamp' in analysis:
-            analysis['timestamp'] = analysis['timestamp'].isoformat()
-        if 'created_at' in analysis:
-            analysis['created_at'] = analysis['created_at'].isoformat()
-        if 'updated_at' in analysis:
-            analysis['updated_at'] = analysis['updated_at'].isoformat()
+        if 'user_id' in analysis:
+            analysis['user_id'] = str(analysis['user_id'])
+        for f in ('timestamp', 'created_at', 'updated_at'):
+            if hasattr(analysis.get(f), 'isoformat'):
+                analysis[f] = analysis[f].isoformat()
         
         return jsonify({
             'success': True,

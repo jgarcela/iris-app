@@ -130,7 +130,7 @@
                                             </span>
                                             <small class="text-muted">
                                                 <i class="fas fa-calendar me-1"></i>
-                                                {{ analysis.timestamp[:10] if analysis.timestamp else _('Sin fecha') }}
+                                                {{ analysis.timestamp|iso_dmy(False) if analysis.timestamp else _('Sin fecha') }}
                                             </small>
                                         </div>
                                         <div class="analysis-actions">
@@ -241,7 +241,7 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <small class="text-muted">
                                                 <i class="fas fa-clock me-1"></i>
-                                                {{ analysis.timestamp[:16] if analysis.timestamp else _('Sin fecha') }}
+                                                {{ analysis.timestamp|iso_dmy if analysis.timestamp else _('Sin fecha') }}
                                             </small>
                                             <button class="btn btn-sm btn-primary" onclick="viewAnalysis('{{ analysis._id }}')">
                                                 <i class="fas fa-eye me-1"></i>

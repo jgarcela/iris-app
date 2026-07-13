@@ -146,7 +146,7 @@
   {% endif %}
 
   <!-- Secciones destacadas -->
-  {% for section, html in data.highlight.original.items() %}
+  {% for section, html in (highlight_render if highlight_render else data.highlight.original).items() %}
     <div class="section" id="sec-{{ loop.index }}">
       <h3>{{ section.replace('_',' ').capitalize() }}</h3>
       <div class="markup-area">

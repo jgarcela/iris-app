@@ -57,8 +57,10 @@ COLLECTION_DATA_ETIQUETAS = config['DATABASE']['COLLECTION_DATA_ETIQUETAS']
 
 # ----------------- URLs -----------------
 URL_API_ENDPOINT_ANALYSIS_ANALYZE = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_ANALYZE}"
-URL_API_ENDPOINT_ANALYSIS_EDITS = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_EDITS}"
-URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_ANALYSIS}/save_annotations"
+# Browser-facing URLs: use the same-origin proxied path (/iris/api/...) so they
+# work over HTTPS (avoids Mixed Content when the page is served via HTTPS).
+URL_API_ENDPOINT_ANALYSIS_EDITS = f"/iris/api/{ENDPOINT_ANALYSIS}/{ENDPOINT_ANALYSIS_EDITS}"
+URL_API_ENDPOINT_ANALYSIS_SAVE_ANNOTATIONS = f"/iris/api/{ENDPOINT_ANALYSIS}/save_annotations"
 
 URL_API_ENDPOINT_DATA = f"http://{API_HOST}:{API_PORT}/{ENDPOINT_DATA}"
 URL_API_ENDPOINT_DATA_GET_DOCUMENT = f"{URL_API_ENDPOINT_DATA}/{ENDPOINT_DATA_GET_DOCUMENT}"
@@ -286,6 +288,16 @@ def get_user_info():
             pass
     return None
 
+def _report_highlight(data):
+    """Return the highlight HTML to render in the report: the human-reviewed
+    version (highlight.edited) when present and non-empty, else highlight.original."""
+    hl = data.get('highlight', {}) or {}
+    edited = hl.get('edited')
+    if isinstance(edited, dict) and any(edited.get(k) for k in ('contenido_general', 'fuentes', 'lenguaje')):
+        return {k: v for k, v in edited.items() if v}
+    return hl.get('original', {}) or {}
+
+
 #  ----------------- ENDPOINTS -----------------
 @bp.route('/generate_report/<doc_id>', methods=['GET'])
 @login_required
@@ -299,13 +311,15 @@ def generate_report(doc_id):
         abort(resp.status_code, description="Error al obtener el documento")
     data = resp.json()
 
-    # 2) Listado de secciones para el índice
-    sections = list(data.get('highlight', {}).get('original', {}).keys())
+    # 2) Preferir los resaltados revisados por humano (highlight.edited) si existen
+    highlight_render = _report_highlight(data)
+    sections = list(highlight_render.keys())
 
     # 3) Renderizar HTML con fecha y secciones
     html = render_template(
         'analysis/report.html',
         data=data,
+        highlight_render=highlight_render,
         highlight_map=HIGHLIGHT_COLOR_MAP,
         generation_date=datetime.now(),
         sections=sections
@@ -369,14 +383,17 @@ def generate_report_word(doc_id):
     doc.add_paragraph(f"Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
     doc.add_page_break()
 
+    # Preferir resaltados revisados (highlight.edited) si existen
+    highlight_render = _report_highlight(data)
+
     # 4. Índice
     doc.add_heading("Índice", level=1)
-    for i, section in enumerate(data.get("highlight", {}).get("original", {}).keys(), 1):
+    for i, section in enumerate(highlight_render.keys(), 1):
         doc.add_paragraph(f"{i}. {section.replace('_', ' ').capitalize()}", style='List Number')
     doc.add_page_break()
 
     # 5. Secciones
-    for i, (section, html) in enumerate(data["highlight"]["original"].items(), 1):
+    for i, (section, html) in enumerate(highlight_render.items(), 1):
         doc.add_heading(f"{i}. {section.replace('_',' ').capitalize()}", level=2)
         soup = BeautifulSoup(html, "html.parser")
         paragraph = doc.add_paragraph()
