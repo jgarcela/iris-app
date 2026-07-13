@@ -442,8 +442,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('Cerrar') }}"></button>
       </div>
       <div class="modal-body">
-        <p class="small text-muted mb-2">{{ _('Corrige errores del texto original. Al guardar, los resaltados se vuelven a aplicar sobre el texto corregido.') }}</p>
-        <textarea class="form-control" id="edit-text-area" rows="14" style="font-size:.92rem; line-height:1.6;"></textarea>
+        <p class="small text-muted mb-2">{{ _('Corrige el titular, la autoría y el texto original. Al guardar, los resaltados se vuelven a aplicar sobre el texto corregido.') }}</p>
+        <div class="mb-2">
+          <label class="form-label" for="edit-title">{{ _('Titular') }}</label>
+          <input type="text" class="form-control" id="edit-title">
+        </div>
+        <div class="mb-2">
+          <label class="form-label" for="edit-authors">{{ _('Autoría') }}</label>
+          <input type="text" class="form-control" id="edit-authors">
+        </div>
+        <label class="form-label" for="edit-text-area">{{ _('Texto') }}</label>
+        <textarea class="form-control" id="edit-text-area" rows="12" style="font-size:.92rem; line-height:1.6;"></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ _('Cancelar') }}</button>

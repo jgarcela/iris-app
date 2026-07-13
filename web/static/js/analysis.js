@@ -2155,6 +2155,8 @@ async function saveAnalysisToDatabase() {
         // Prepare data to save
         const saveData = {
             doc_id: window.data._id,
+            title: window.data.title || '',
+            authors: window.data.authors || '',
             analysis: window.data.analysis.original,
             annotations: annotations,
             highlight_html: {

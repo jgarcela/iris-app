@@ -231,6 +231,8 @@ def save_annotations():
         annotations = data.get('annotations', [])
         highlight_html = data.get('highlight_html', {})
         review = data.get('review')
+        title = data.get('title')
+        authors = data.get('authors')
         timestamp = data.get('timestamp')
 
         # Parse the client timestamp (falls back to now). Used so the just-saved
@@ -268,6 +270,11 @@ def save_annotations():
         if user_id and user_id != 'anonymous':
             update_data['user_id'] = user_id
             update_data['user_email'] = user_email
+        # Edited title / authorship
+        if title is not None:
+            update_data['title'] = title
+        if authors is not None:
+            update_data['authors'] = authors
         # Merged-view review state (detections with accept/edit/reject + corrected text).
         # Also derive analysis.edited + highlight.edited so the report reflects it.
         if review is not None:
@@ -284,6 +291,8 @@ def save_annotations():
             new_doc = {
                 'user_id': user_id,
                 'user_email': user_email,
+                'title': title or '',
+                'authors': authors or '',
                 'analysis': {
                     'original': analysis,
                     'edited': new_an_edited

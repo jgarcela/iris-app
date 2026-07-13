@@ -304,9 +304,13 @@
   // Abre una modal con el texto plano; al guardar se re-fusionan las capas
   // sobre el texto corregido (las marcas cuyo texto siga existiendo se re-anclan).
   window.editArticleText = function () {
-    const ta = $('#edit-text-area');
     const modalEl = $('#editTextModal');
-    if (ta && window.data) ta.value = (window.data.text || '').replace(/\r/g, '');
+    if (window.data) {
+      const ta = $('#edit-text-area'); if (ta) ta.value = (window.data.text || '').replace(/\r/g, '');
+      const ti = $('#edit-title'); if (ti) ti.value = window.data.title || '';
+      const au = $('#edit-authors');
+      if (au) au.value = Array.isArray(window.data.authors) ? window.data.authors.join(', ') : (window.data.authors || '');
+    }
     if (modalEl && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modalEl).show();
   };
 
@@ -314,12 +318,39 @@
     const saveBtn = $('#edit-text-save');
     if (!saveBtn) return;
     saveBtn.addEventListener('click', () => {
-      const ta = $('#edit-text-area');
-      if (window.data && ta) window.data.text = ta.value;
+      if (window.data) {
+        const ta = $('#edit-text-area'); if (ta) window.data.text = ta.value;
+        const ti = $('#edit-title'); if (ti) window.data.title = ti.value.trim();
+        const au = $('#edit-authors'); if (au) window.data.authors = au.value.trim();
+        // Reflect title/authorship in the merged view header immediately
+        updateArticleMeta();
+      }
       const modalEl = $('#editTextModal');
       if (modalEl && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
       build(); // re-fusiona las capas sobre el texto corregido
     });
+  }
+
+  // Update the title/authorship shown above the merged text
+  function updateArticleMeta() {
+    const wrap = $('.mv-textwrap');
+    if (!wrap || !window.data) return;
+    const title = window.data.title || '';
+    const authors = Array.isArray(window.data.authors) ? window.data.authors.join(', ') : (window.data.authors || '');
+    let tEl = wrap.querySelector('.mv-title');
+    if (title) {
+      if (!tEl) { tEl = document.createElement('h2'); tEl.className = 'mv-title'; wrap.insertBefore(tEl, wrap.firstChild); }
+      tEl.textContent = title;
+    } else if (tEl) { tEl.remove(); }
+    let aEl = wrap.querySelector('.mv-author');
+    if (authors) {
+      if (!aEl) {
+        aEl = document.createElement('div'); aEl.className = 'mv-author';
+        const ref = wrap.querySelector('.mv-title');
+        if (ref && ref.nextSibling) wrap.insertBefore(aEl, ref.nextSibling); else wrap.insertBefore(aEl, wrap.firstChild);
+      }
+      aEl.innerHTML = '<i class="fas fa-user-pen me-1"></i>' + escapeHtml(authors);
+    } else if (aEl) { aEl.remove(); }
   }
 
   // ============================================================
