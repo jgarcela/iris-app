@@ -17,6 +17,7 @@
 
   const $  = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
+  let CANON = ''; // canonical article text
 
   function buildColorToVar() {
     const map = window.highlight_color_map || {};
@@ -92,10 +93,19 @@
     });
     window.__mergedSpans = spans;
 
+    CANON = canonical;
     renderText(canonical, spans);
     renderRegions(spans);
     wireLayers();
     updateCounts();
+  }
+
+  // Full re-render preserving span states (used after edits that move a span)
+  function rerender() {
+    renderText(CANON, window.__mergedSpans || []);
+    renderRegions(window.__mergedSpans || []);
+    updateCounts();
+    applyLayers();
   }
 
   function renderText(canonical, spans) {
@@ -116,7 +126,8 @@
       const primary = cats.slice().sort((x, y) => CAT_META[x].prio - CAT_META[y].prio)[0];
       const ids = covering.map(s => s.id).join(' ');
       const multi = cats.length > 1 ? ' multi' : '';
-      html += `<mark class="mv-mark${multi}" data-cat="${primary}" data-cats="${cats.join(',')}" data-spans="${ids}">${text}</mark>`;
+      const st = covering[0].state || 'suggested';
+      html += `<mark class="mv-mark${multi}" data-cat="${primary}" data-cats="${cats.join(',')}" data-spans="${ids}" data-state="${st}">${text}</mark>`;
     }
     // Split into paragraphs on newlines and justify (handled via CSS)
     html = '<p>' + html.replace(/\n+/g, '</p><p>') + '</p>';
@@ -128,11 +139,14 @@
       m.addEventListener('mouseleave', () => setActive(m.dataset.spans.split(' '), false));
       m.addEventListener('click', e => { openPopover(m); e.stopPropagation(); });
     });
-    document.addEventListener('click', e => {
-      const pop = $('#mv-pop');
-      if (pop && !pop.contains(e.target) && !e.target.closest('.mv-mark') && !e.target.closest('.mv-region'))
-        pop.classList.remove('show');
-    });
+    if (!renderText._boundClose) {
+      renderText._boundClose = true;
+      document.addEventListener('click', e => {
+        const pop = $('#mv-pop');
+        if (pop && !pop.contains(e.target) && !e.target.closest('.mv-mark') && !e.target.closest('.mv-region'))
+          pop.classList.remove('show');
+      });
+    }
   }
 
   function renderRegions(spans) {
@@ -146,11 +160,12 @@
       row.dataset.cat = s.category;
       row.dataset.span = s.id;
       const varLabel = s.variable ? s.variable.replace(/_/g, ' ') : meta.label;
+      if (s.state === 'rejected') row.classList.add('rejected');
       row.innerHTML =
         `<span class="mv-stripe" style="background:${meta.color}"></span>` +
         `<div class="mv-body"><div class="mv-txt">${escapeHtml(s.text)}</div>` +
         `<div class="mv-lbl">${escapeHtml(varLabel)}</div></div>` +
-        `<span class="mv-st" data-state="${s.state}">pendiente</span>`;
+        `<span class="mv-st" data-state="${s.state}">${STATE_LABEL[s.state] || 'pendiente'}</span>`;
       row.addEventListener('mouseenter', () => setActive([s.id], true));
       row.addEventListener('mouseleave', () => setActive([s.id], false));
       row.addEventListener('click', () => {
@@ -170,10 +185,12 @@
   }
 
   // ---- Popover ----
+  let currentPopoverMark = null;
   function openPopover(mark) {
     const pop = $('#mv-pop');
     const wrap = mark.closest('.mv-textwrap');
     if (!pop || !wrap) return;
+    currentPopoverMark = mark;
     const ids = mark.dataset.spans.split(' ');
     const spans = ids.map(id => (window.__mergedSpans || []).find(s => s.id === id)).filter(Boolean);
     pop.dataset.spans = mark.dataset.spans;
@@ -222,20 +239,8 @@
       applyState(pop.dataset.spans.split(' '), 'rejected'); pop.classList.remove('show');
     });
     pop.querySelector('#mv-edit-btn').addEventListener('click', () => {
-      const box = pop.querySelector('#mv-pop-edit');
-      box.style.display = 'block'; box.value = pop.querySelector('#mv-pop-txt').textContent; box.focus();
-    });
-    pop.querySelector('#mv-pop-edit').addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const val = e.target.value;
-        pop.dataset.spans.split(' ').forEach(id => {
-          $$(`.mv-mark[data-spans~="${id}"]`).forEach(m => { m.textContent = val; });
-          const r = $(`.mv-region[data-span="${id}"] .mv-txt`);
-          if (r) r.textContent = val;
-        });
-        applyState(pop.dataset.spans.split(' '), 'edited');
-        pop.classList.remove('show');
-      }
+      pop.classList.remove('show');
+      if (currentPopoverMark) openEditDetection(currentPopoverMark);
     });
   }
 
@@ -293,6 +298,143 @@
     });
   }
 
+  // ============================================================
+  //  Editar detección: reutiliza el MISMO panel que "Anotar"
+  //  (categoría → variable → etiqueta, con compuestos de fuentes,
+  //  parejas de género, etc.) y también permite editar el fragmento.
+  // ============================================================
+  const VAR_LABEL = {
+    personas_mencionadas: 'Personas mencionadas', genero_personas_mencionadas: 'Género personas mencionadas',
+    nombre_propio_titular: 'Nombre propio titular', genero_nombre_propio_titular: 'Género nombre propio titular',
+    cita_textual_titular: 'Cita textual titular', genero_periodista: 'Género periodista', tema: 'Tema',
+    nombre_fuente: 'Nombre fuente', declaracion_fuente: 'Declaración fuente', genero_fuente: 'Género fuente', tipo_fuente: 'Tipo fuente',
+    androcentrismo: 'Androcentrismo', asimetria: 'Asimetría', cargos_mujeres: 'Cargos mujeres',
+    comparacion_mujeres_hombres: 'Comparación mujeres/hombres', denominacion_dependiente: 'Denominación dependiente',
+    denominacion_redundante: 'Denominación redundante', denominacion_sexualizada: 'Denominación sexualizada',
+    dual_aparente: 'Dual aparente', excepcion_noticiabilidad: 'Excepción noticiabilidad', hombre_humanidad: 'Hombre humanidad',
+    infantilizacion: 'Infantilización', lenguaje_sexista: 'Lenguaje sexista', masculino_generico: 'Masculino genérico', sexismo_social: 'Sexismo social',
+  };
+
+  let editingSpanId = null;
+  function openEditDetection(mark) {
+    const id = mark.dataset.spans.split(' ')[0];
+    const s = (window.__mergedSpans || []).find(x => x.id === id);
+    if (!s) return;
+    editingSpanId = id;
+
+    // Open the shared annotation panel with a range around this mark
+    const range = document.createRange();
+    range.selectNodeContents(mark);
+    if (typeof window.showAnnotationPanelManual === 'function') {
+      window.showAnnotationPanelManual(mark.textContent, range);
+    }
+    // Preset category → variable → value using the panel's own helpers
+    const catSel = $('#annotation-category');
+    if (catSel && typeof window.updateVariableOptions === 'function') {
+      catSel.value = s.category;
+      window.updateVariableOptions(s.category);
+      const varSel = $('#annotation-variable');
+      if (varSel && s.variable) {
+        varSel.value = s.variable;
+        if (typeof window.updateValueOptions === 'function') window.updateValueOptions(s.category, s.variable);
+        if (s.value) { const vSel = $('#annotation-value'); if (vSel) vSel.value = s.value; }
+      }
+    }
+    // Fragment is changed by RE-SELECTING text in the article (not typing)
+    const prev = $('#selected-text-preview');
+    if (prev) { prev.removeAttribute('contenteditable'); prev.classList.remove('editable'); prev.classList.add('reselect'); }
+    showEditHint(true);
+    // Change the button label to reflect editing
+    const addBtn = $('#add-annotation');
+    if (addBtn) addBtn.innerHTML = '<i class="fas fa-check me-1"></i>Guardar cambios';
+    const panel = $('#annotation-panel');
+    if (panel) { panel.style.display = 'block'; panel.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+
+  // Hint shown under the fragment while editing (re-select mode)
+  function showEditHint(on) {
+    const prev = $('#selected-text-preview');
+    if (!prev) return;
+    let hint = document.getElementById('edit-reselect-hint');
+    if (on) {
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.id = 'edit-reselect-hint';
+        hint.className = 'edit-reselect-hint';
+        hint.innerHTML = '<i class="fas fa-i-cursor me-1"></i>Selecciona texto en el artículo para cambiar el fragmento';
+        prev.insertAdjacentElement('afterend', hint);
+      }
+    } else if (hint) {
+      hint.remove();
+    }
+  }
+
+  function endEditDetection() {
+    editingSpanId = null;
+    showEditHint(false);
+    const prev = $('#selected-text-preview');
+    if (prev) prev.classList.remove('reselect');
+    const addBtn = $('#add-annotation');
+    if (addBtn) addBtn.innerHTML = '<i class="fas fa-plus me-1"></i>Agregar';
+  }
+
+  // Apply an edit to a merged span (classification + fragment text).
+  // If the fragment text changed (re-selection), recompute its offsets in the
+  // canonical text and re-render so the new fragment gets highlighted.
+  function updateSpanClassification(id, cat, variable, value, text) {
+    const s = (window.__mergedSpans || []).find(x => x.id === id);
+    if (!s) return;
+    s.category = cat; s.variable = variable; s.value = value; s.state = 'edited';
+    let moved = false;
+    if (text != null && text !== s.text) {
+      let idx = CANON.indexOf(text, Math.max(0, s.start - 40));
+      if (idx < 0) idx = CANON.indexOf(text);
+      if (idx >= 0) { s.start = idx; s.end = idx + text.length; moved = true; }
+      s.text = text;
+    }
+    rerender(); // rebuild marks + regions from spans (preserves states)
+  }
+
+  function wireEditDetection() {
+    const addBtn = $('#add-annotation');
+    if (!addBtn) return;
+    // Re-select the fragment by selecting text in the article while editing
+    const area = $('#merged-text');
+    if (area) area.addEventListener('mouseup', function () {
+      if (!editingSpanId) return;
+      setTimeout(function () {
+        const sel = window.getSelection();
+        const t = sel ? sel.toString().trim() : '';
+        if (t && !sel.isCollapsed) {
+          const prev = $('#selected-text-preview');
+          if (prev) prev.textContent = t;
+        }
+      }, 10);
+    });
+    // Capture phase so we handle the edit and STOP the inline add-flow, which
+    // would otherwise insert its own (duplicate) highlight into the text.
+    addBtn.addEventListener('click', function (e) {
+      if (!editingSpanId) return;
+      const cat = ($('#annotation-category') || {}).value;
+      const variable = ($('#annotation-variable') || {}).value;
+      const value = ($('#annotation-value') || {}).value;
+      if (!cat || !variable || !value) return; // let the panel's own validation alert
+      e.stopImmediatePropagation();
+      const prev = $('#selected-text-preview');
+      const text = prev ? (prev.textContent || '').trim() : null;
+      updateSpanClassification(editingSpanId, cat, variable, value, text);
+      // Close the annotation panel (inline handler won't run now)
+      if (typeof window.hideAnnotationPanel === 'function') window.hideAnnotationPanel();
+      const panel = $('#annotation-panel'); if (panel) panel.style.display = 'none';
+      endEditDetection();
+    }, true);
+    // Reset editing state if the panel is cancelled/closed
+    ['cancel-annotation', 'close-annotation-panel'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) b.addEventListener('click', endEditDetection);
+    });
+  }
+
   // ---- Onboarding "Cómo funciona": first visit + help button ----
   function wireHowto() {
     const el = $('#howtoModal');
@@ -311,6 +453,7 @@
     if (!$('#merged-text')) return;
     wirePopoverButtons();
     wireEditTextModal();
+    wireEditDetection();
     wireHowto();
     build();
   });

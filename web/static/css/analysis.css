@@ -1938,13 +1938,15 @@ mark.mark-linked {
   overflow: hidden;
 }
 .mv-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--oat-border); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.mv-help-btn {
-  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 999px; cursor: pointer;
+.mv-head-actions { display: inline-flex; gap: 6px; }
+.mv-icon-btn {
+  flex: 0 0 auto; width: 28px; height: 28px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--oat-border); background: var(--clay-cream); color: var(--warm-charcoal);
-  font-size: .78rem; display: inline-flex; align-items: center; justify-content: center;
+  font-size: .8rem; display: inline-flex; align-items: center; justify-content: center;
   transition: background .12s, color .12s, border-color .12s;
 }
-.mv-help-btn:hover { background: var(--matcha-800, #078a52); border-color: var(--matcha-800, #078a52); color: #fff; }
+.mv-icon-btn:hover { background: var(--ube-800, #43089f); border-color: var(--ube-800, #43089f); color: #fff; }
+.mv-icon-btn.active { background: var(--matcha-600); border-color: var(--matcha-600); color: #fff; }
 /* Onboarding modal */
 #howtoModal .modal-content { width: auto; max-width: none; padding: 0; text-align: left; }
 .howto-grid { display: flex; flex-direction: column; gap: 14px; }
@@ -2070,9 +2072,9 @@ mark.mark-linked {
   color: var(--warm-charcoal); background: var(--clay-cream); border: 1px solid var(--oat-border);
   padding: 2px 9px; border-radius: var(--radius-pill); text-transform: capitalize; white-space: nowrap;
 }
-.tools-compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tools-compact-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
 .tools-compact-grid .btn-minimal {
-  display: inline-flex; align-items: center; justify-content: flex-start; gap: 7px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   width: 100%; margin: 0; padding: 7px 10px; font-size: .8rem; font-weight: 600;
   border-radius: var(--radius-std); white-space: nowrap;
 }
@@ -2120,3 +2122,7 @@ mark.mark-linked {
 .mini-code { font-size: .74rem; }
 /* tighter panels for these two mini cards */
 #topic-analysis, #protagonist-analysis { padding-top: .4rem !important; padding-bottom: .4rem !important; }
+
+/* Fragmento re-seleccionable al Editar una detección */
+.selected-text-preview.reselect { outline: 2px dashed var(--matcha-600); background: rgba(7,138,82,.05) !important; }
+.edit-reselect-hint { margin-top: 6px; font-size: .74rem; color: var(--matcha-800, #078a52); }

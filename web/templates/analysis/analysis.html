@@ -75,9 +75,6 @@
                     <span class="model-chip" title="{{ _('Modelo') }}"><i class="fas fa-microchip me-1"></i><span id="selected-model">{{ data.model }}</span></span>
                 </div>
                 <div class="tools-compact-grid">
-                    <button class="btn-minimal btn-edit-text" id="edit-text-btn" onclick="editArticleText()">
-                        <i class="fas fa-pen-to-square"></i><span>{{ _('Editar texto') }}</span>
-                    </button>
                     <button class="btn-minimal btn-edit-mode" id="edit-analysis-btn" onclick="editAnalysis()">
                         <i class="fas fa-edit"></i><span>{{ _('Editar análisis') }}</span>
                     </button>
@@ -98,24 +95,6 @@
                     <a class="btn-mini" href="{{ url_for('glossary.glossary_home') }}" target="_blank" rel="noopener" title="{{ _('Glosario de variables') }}">
                         <i class="fas fa-book"></i><span>{{ _('Glosario') }}</span>
                     </a>
-                </div>
-            </div>
-
-            <!-- Recomendaciones -->
-            <div class="analysis-tools-panel">
-                <div class="collapsible-header" data-target="recomendaciones-content">
-                    <h5 class="panel-title mb-0">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        {{ _('Recomendaciones') }}
-                    </h5>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                <div id="recomendaciones-content" class="collapsible-content">
-                    <ul class="list-unstyled">
-                        {% for recommendation in data.analysis.original.recommendations %}
-                        <li>{{ recommendation }}</li>
-                        {% endfor %}
-                    </ul>
                 </div>
             </div>
 
@@ -271,6 +250,24 @@
                 </div>
             </div>
 
+            <!-- Recomendaciones (after Puntuación) -->
+            <div class="analysis-tools-panel">
+                <div class="collapsible-header" data-target="recomendaciones-content">
+                    <h5 class="panel-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        {{ _('Recomendaciones') }}
+                    </h5>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div id="recomendaciones-content" class="collapsible-content">
+                    <ul class="list-unstyled">
+                        {% for recommendation in data.analysis.original.recommendations %}
+                        <li>{{ recommendation }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
         </div>
 
         <!-- Text column (moved to the left, main focus) -->
@@ -332,7 +329,10 @@
             <div id="merged-view" class="merged-view">
                 <div class="mv-head">
                     <div class="mv-kicker">{{ _('Análisis del Texto') }}</div>
-                    <button type="button" class="mv-help-btn" id="mv-help-btn" title="{{ _('Cómo funciona') }}" aria-label="{{ _('Cómo funciona') }}"><i class="fas fa-question"></i></button>
+                    <div class="mv-head-actions">
+                        <button type="button" class="mv-icon-btn" id="edit-text-btn" onclick="editArticleText()" title="{{ _('Editar texto del artículo') }}" aria-label="{{ _('Editar texto del artículo') }}"><i class="fas fa-pen-to-square"></i></button>
+                        <button type="button" class="mv-icon-btn" id="mv-help-btn" title="{{ _('Cómo funciona') }}" aria-label="{{ _('Cómo funciona') }}"><i class="fas fa-question"></i></button>
+                    </div>
                 </div>
 
                 <div class="mv-toolbar" role="toolbar" aria-label="{{ _('Capas y estado') }}">
@@ -762,7 +762,7 @@
         
         // Handle add annotation
         addBtn.addEventListener('click', function() {
-            saveAnnotation();
+            saveAnnotationManual();
         });
         
         // Handle cancel
@@ -1044,7 +1044,7 @@
         }
     }
     
-    function saveAnnotation() {
+    function saveAnnotationManual() {
         if (!currentAnnotationSelection) {
             alert('No hay texto seleccionado');
             return;
@@ -1357,9 +1357,8 @@
     function hide() { if (btn) btn.style.display = 'none'; }
     document.addEventListener('mouseup', function (e) {
       if (e.target.closest('.annotate-float-btn')) return;
-      // Only when analysis (edit) mode is active
-      if (!document.body.classList.contains('annotation-mode') &&
-          !document.body.classList.contains('edit-mode')) { hide(); return; }
+      // Only when analysis (annotation) mode is active
+      if (!document.body.classList.contains('annotation-mode')) { hide(); return; }
       const sel = window.getSelection();
       const text = sel ? sel.toString().trim() : '';
       const inText = e.target.closest && (e.target.closest('.markup-area') || e.target.closest('#merged-text'));
